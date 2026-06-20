@@ -1,6 +1,6 @@
 ﻿namespace HienMauNhanDao_DaNang.Models.Enums
 {
-    public class GioiTinh
+    public enum GioiTinh
     {
         Nam,
         Nu,
