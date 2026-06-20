@@ -6,7 +6,7 @@ namespace HienMauNhanDao_DaNang.Models.Entities
     [Table("VaiTro")]
     public class VaiTro
     {
-        [Key]
+        [Key]   //Đánh dấu khoá chính
         [Column("MaVaiTro")]
         [MaxLength(10)]
         public String maVaiTro { get; set; } = String.Empty;
