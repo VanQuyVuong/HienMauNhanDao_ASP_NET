@@ -25,6 +25,8 @@ namespace HienMauNhanDao_DaNang.Models.Entities
         [Column("loaiDiaDiem")]
         public LoaiDiaDiem? LoaiDiaDiem { set; get; }
 
+
+
         [Column("maPhuongXa")]
         [MaxLength(10)]
         public string? MaPhuongXa { set; get; }
