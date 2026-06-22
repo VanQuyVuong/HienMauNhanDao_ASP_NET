@@ -15,7 +15,7 @@
     }
 
     //Trạng thái chiến dịch
-    public enum TrangThaChienDich
+    public enum TrangThaiChienDich
     {
         ChuaBatDau,
         DangDienRa,
@@ -24,7 +24,7 @@
     }
 
     //trạng thái đơn đăng ký hiến máu
-    public enum TrangThaiDonDangKyHienMau
+    public enum TrangThaiDonDangKy
     {
         ChoDuyet,
         DaDuyet,
