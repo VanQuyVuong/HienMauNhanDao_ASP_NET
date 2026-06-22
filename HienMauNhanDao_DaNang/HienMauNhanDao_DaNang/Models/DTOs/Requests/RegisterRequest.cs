@@ -13,5 +13,10 @@ namespace HienMauNhanDao_DaNang.Models.DTOs.Requests
         [MinLength(6, ErrorMessage = "Mat khau phai tu 6 ky tu tro len")]
         [MaxLength(50, ErrorMessage = "Mat khau khong qua 50 ky tu")]
         public string MatKhau { set; get; } = string.Empty;
+
+        // THÊM VÀO để BE cũng kiểm tra lại mật khẩu confirm pasword
+
+        [Required(ErrorMessage = "Vui lòng nhập lại mật khẩu")]
+        public string XacNhanMatKhau { get; set; } = string.Empty;
     }
 }

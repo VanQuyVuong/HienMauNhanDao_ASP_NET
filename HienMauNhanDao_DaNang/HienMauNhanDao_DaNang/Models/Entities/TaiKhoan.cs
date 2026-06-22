@@ -10,7 +10,7 @@ namespace HienMauNhanDao_DaNang.Models.Entities
         [Key]
         [Column("maTaiKhoan")]
         [MaxLength(10)]
-        public string maTaiKhoan = string.Empty;
+        public string MaTaiKhoan = string.Empty;
 
         // --- KHÓA NGOẠI (Foreign Key) ---
         // Cột này lưu GIÁ TRỊ của maVaiTro trong bảng VAITRO
