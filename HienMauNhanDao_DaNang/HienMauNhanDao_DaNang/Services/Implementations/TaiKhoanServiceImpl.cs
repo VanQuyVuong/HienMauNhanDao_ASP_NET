@@ -4,7 +4,6 @@ using HienMauNhanDao_DaNang.Models.DTOs.Responses;
 using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Security;
 using HienMauNhanDao_DaNang.Services.Interfaces;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -36,11 +35,11 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
                 throw new UnauthorizedAccessException("Email hoac mat khau khong dung");
 
             //kiểm tra tài khoản có bị khoá không
-            if (taiKhoan.trangthai)
+            if (taiKhoan.TrangThai)
                 throw new UnauthorizedAccessException("Tai khoan da bi vo hieu hoa, Vui long lien he quan tri vien");
 
             //nếu mật khẩu chưa được hash thì hash lại 
-            if (!taiKhoan.Matkhau.StarsWith("$2a$"))
+            if (!taiKhoan.MatKhau.StartsWith("$2a$"))
             {
                 taiKhoan.MatKhau = BCrypt.Net.BCrypt.HashPassword(taiKhoan.MatKhau);
                 await _db.SaveChangesAsync();
@@ -57,10 +56,10 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
 
             //lay ma TNV neu co 
             var tinhNguyenVien = await _db.TinhNguyenViens
-                .FirstOrDefaultAsync(tnv => tnv.MaTaiKhoan == taiKhoan.maTaiKhoan);
+                .FirstOrDefaultAsync(tnv => tnv.MaTaiKhoan == taiKhoan.MaTaiKhoan);
 
             //tao JWT Token
-            var maVaiTro = taiKhoan.VaiTro?.MaVaiTro ?? "TNV";
+            var maVaiTro = taiKhoan.VaiTro?.maVaiTro ?? "TNV";
             var accessToken = _jwtHelper.GenerateAccessToken(
                 taiKhoan.Email, maVaiTro, taiKhoan.MaTaiKhoan);
             var refreshToken = _jwtHelper.GenerateRefreshToken(taiKhoan.Email);
@@ -84,7 +83,7 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
         public async Task RegisterAsync(RegisterRequest request)
         {
             var emailExist = await _db.TaiKhoans
-                .AnyAsync(tk => tk.Email == request.Emaill);
+                .AnyAsync(tk => tk.Email == request.Email);
 
             if (emailExist)
                 throw new InvalidOperationException("Email nay da duoc su dung");

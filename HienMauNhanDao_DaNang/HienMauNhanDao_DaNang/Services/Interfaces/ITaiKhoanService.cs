@@ -3,7 +3,7 @@ using HienMauNhanDao_DaNang.Models.DTOs.Responses;
 
 namespace HienMauNhanDao_DaNang.Services.Interfaces
 {
-    public class ITaiKhoanService
+    public interface ITaiKhoanService
     {
         // Task<T> = hàm bất đồng bộ (async), trả về T
         //=> khi hàm làm việc với database (chờ MySQL trả lời) → dùng async/await để không bị block.
