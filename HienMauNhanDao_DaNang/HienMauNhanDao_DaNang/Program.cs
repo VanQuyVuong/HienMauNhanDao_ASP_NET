@@ -29,11 +29,19 @@ namespace HienMauNhanDao_DaNang
                 });
             });
 
+
+            //
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
+
+
+            //Kết nối với Database
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            builder.Services.AddDbContext<AppDbContext>(options => 
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
         }
     }
 }
