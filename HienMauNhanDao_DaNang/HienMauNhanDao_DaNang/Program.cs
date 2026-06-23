@@ -1,3 +1,13 @@
+using HienMauNhanDao_DaNang.Data;
+using HienMauNhanDao_DaNang.Security;
+using HienMauNhanDao_DaNang.Services.Implementations;
+using HienMauNhanDao_DaNang.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
+using System.Text.Json.Serialization;
 
 namespace HienMauNhanDao_DaNang
 {
@@ -7,28 +17,19 @@ namespace HienMauNhanDao_DaNang
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
 
-            builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
 
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            builder.Services.AddCors(option =>
             {
-                app.MapOpenApi();
-            }
+                option.AddPolicy("AllowReactApp", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                });
+            });
 
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-
-            app.MapControllers();
-
-            app.Run();
+            
         }
     }
 }
