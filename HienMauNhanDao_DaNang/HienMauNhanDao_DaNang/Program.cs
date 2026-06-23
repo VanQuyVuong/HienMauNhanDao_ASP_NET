@@ -43,6 +43,8 @@ namespace HienMauNhanDao_DaNang
             builder.Services.AddDbContext<AppDbContext>(options => 
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
+
+            //4.Cấu hình JWT
             var jwtConfig = builder.Configuration.GetSection("Jwt");
             var secretKey = Encoding.UTF8.GetBytes(jwtConfig["Secret"]!);
 
@@ -68,6 +70,10 @@ namespace HienMauNhanDao_DaNang
 
             builder.Services.AddAuthorization();
 
+
+            //5.Swagger -test api
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
 
         }
