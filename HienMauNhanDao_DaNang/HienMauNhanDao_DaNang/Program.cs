@@ -5,7 +5,9 @@ using HienMauNhanDao_DaNang.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
+
+//Using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -72,9 +74,38 @@ namespace HienMauNhanDao_DaNang
 
 
             //5.Swagger -test api
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            //builder.Services.AddEndpointsApiExplorer();
+            //builder.Services.AddSwaggerGen();
 
+            //AddScoped: khi từ FE gửi 1 reqquerst cấp cho 1 sêvices riêng
+            builder.Services.AddScoped<ITaiKhoanService, TaiKhoanServiceImpl>();
+
+            // AddSingleton: Cả nhà hàng chỉ dùng chung 1 máy làm Token
+
+            builder.Services.AddSingleton<JwtHelper>();
+
+            builder.Services.AddOpenApi();
+
+            var app = builder.Build();
+
+            app.MapOpenApi();
+            app.MapScalarApiReference(options =>
+            {
+                // Bạn có thể đổi màu giao diện (Default, DeepSpace, Moon...)
+                options.WithTheme(ScalarTheme.DeepSpace);
+            });
+
+
+            //app.UseSwaggerUI();
+            //app.UseSwagger();
+
+            app.UseCors("AllowReactApp");
+
+            app.UseAuthentication();
+
+            app.MapControllers();
+
+            app.Run();
 
         }
     }
