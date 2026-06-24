@@ -3,15 +3,15 @@ import { useState } from "react";
 function App() {
   const [email, setEmail] = useState("");
   const [matKhau, setMatKhau] = useState("");
+  const [xacNhanMatKhau, setXacNhanMatKhau] = useState(""); // Thêm ô này
   const [ketQua, setKetQua] = useState("");
 
-  const handleLogin = async (e) => {
-    e.preventDefault(); // Ngăn trang web bị tải lại khi bấm nút
+  const handleRegister = async (e) => {
+    e.preventDefault();
 
     try {
-      // GỌI API SANG C#
-      // LƯU Ý: Chữ https://localhost:7142 bên dưới bạn phải ĐỔI thành cái link lúc bạn chạy dự án C# nhé!
-      const response = await fetch("https://localhost:7004/api/auth/login", {
+      // Đổi API sang /register
+      const response = await fetch("https://localhost:7004/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -19,27 +19,27 @@ function App() {
         body: JSON.stringify({
           Email: email,
           MatKhau: matKhau,
+          XacNhanMatKhau: xacNhanMatKhau, // Gửi thêm trường này cho C#
         }),
       });
 
       const data = await response.json();
 
-      // In kết quả C# trả về ra màn hình
       if (response.ok) {
-        setKetQua("✅ THÀNH CÔNG: " + JSON.stringify(data, null, 2));
+        setKetQua("✅ ĐĂNG KÝ THÀNH CÔNG: " + JSON.stringify(data, null, 2));
       } else {
-        setKetQua("❌ C# BÁO LỖI: " + JSON.stringify(data, null, 2));
+        setKetQua("❌ C# TỪ CHỐI: " + JSON.stringify(data, null, 2));
       }
     } catch (error) {
-      setKetQua("⚠️ KHÔNG KẾT NỐI ĐƯỢC BACKEND: " + error.message);
+      setKetQua("⚠️ LỖI MẠNG: " + error.message);
     }
   };
 
   return (
     <div style={{ padding: "50px", fontFamily: "sans-serif" }}>
-      <h2>Test Đăng Nhập: React nói chuyện với C# .NET</h2>
+      <h2>Test Đăng Ký: React tạo tài khoản C#</h2>
 
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleRegister}>
         <div style={{ marginBottom: "10px" }}>
           <label>Email: </label>
           <input
@@ -56,15 +56,27 @@ function App() {
             onChange={(e) => setMatKhau(e.target.value)}
           />
         </div>
+        <div style={{ marginBottom: "10px" }}>
+          <label>Xác nhận MK: </label>
+          <input
+            type="password"
+            value={xacNhanMatKhau}
+            onChange={(e) => setXacNhanMatKhau(e.target.value)}
+          />
+        </div>
         <button
           type="submit"
-          style={{ padding: "8px 16px", cursor: "pointer" }}
+          style={{
+            padding: "8px 16px",
+            cursor: "pointer",
+            backgroundColor: "green",
+            color: "white",
+          }}
         >
-          Gửi xuống .NET
+          Tạo tài khoản
         </button>
       </form>
 
-      {/* Khung hiển thị kết quả */}
       <div
         style={{
           marginTop: "30px",
@@ -74,7 +86,7 @@ function App() {
         }}
       >
         <p>
-          <strong>Kết quả từ .NET trả về:</strong>
+          <strong>Kết quả từ C# trả về:</strong>
         </p>
         <pre style={{ color: "blue" }}>{ketQua}</pre>
       </div>
