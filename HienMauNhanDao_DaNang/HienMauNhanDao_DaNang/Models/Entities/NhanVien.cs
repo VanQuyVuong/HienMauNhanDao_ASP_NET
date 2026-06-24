@@ -20,14 +20,14 @@ namespace HienMauNhanDao_DaNang.Models.Entities
         [MaxLength(10)]
         public string? MaTaiKhoan { set; get; }
 
-        [ForeignKey("maTaiKhoan")]
+        [ForeignKey("MaTaiKhoan")]
         public TaiKhoan? TaiKhoan { set; get; }
 
 
         [Column("maKhoa")]
         [MaxLength(10)] 
         public string? MaKhoa { get; set; }
-        [ForeignKey("maKhoa")]
+        [ForeignKey("MaKhoa")]
         public KhoaCongTac? KhoaCongTac { get; set; }
 
 
@@ -35,7 +35,7 @@ namespace HienMauNhanDao_DaNang.Models.Entities
         [Column("maDiaDiem")]
         [MaxLength(10)]
         public string? MaDiaDiem { set; get; }
-        [ForeignKey("maDiaDiem")]
+        [ForeignKey("MaDiaDiem")]
         public DiaDiem? DiaDiem { set; get; }
 
 

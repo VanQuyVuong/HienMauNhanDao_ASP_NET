@@ -21,7 +21,7 @@ namespace HienMauNhanDao_DaNang.Models.Entities
         [MaxLength(10)]
         public string? MaTaiKhoan { set; get; } = string.Empty;
 
-        [ForeignKey("maTaiKhoan")]
+        [ForeignKey("MaTaiKhoan")]
         public TaiKhoan? TaiKhoan { set; get; }
 
 
@@ -30,7 +30,7 @@ namespace HienMauNhanDao_DaNang.Models.Entities
         [MaxLength(10)]
         public string? MaPhuongXa { set; get; } = string.Empty;
 
-        [ForeignKey("maPhuongXa")]
+        [ForeignKey("MaPhuongXa")]
         public PhuongXa? PhuongXa { set; get; }
 
 

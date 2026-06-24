@@ -10,7 +10,7 @@ namespace HienMauNhanDao_DaNang.Models.Entities
         [Key]
         [Column("maTaiKhoan")]
         [MaxLength(10)]
-        public string MaTaiKhoan = string.Empty;
+        public string MaTaiKhoan { set; get; } = string.Empty;
 
         // --- KHÓA NGOẠI (Foreign Key) ---
         // Cột này lưu GIÁ TRỊ của maVaiTro trong bảng VAITRO
@@ -22,7 +22,7 @@ namespace HienMauNhanDao_DaNang.Models.Entities
         // --- NAVIGATION PROPERTY ---
         // KHÔNG phải cột trong DB
         // Dùng để truy cập object VaiTro từ TaiKhoan
-        [ForeignKey("maVaiTro")]
+        [ForeignKey("MaVaiTro")]
         public VaiTro? VaiTro { get; set; }
 
         [Required]
