@@ -68,6 +68,24 @@ export default function Login() {
             Đăng nhập
           </button>
         </form>
+
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <span style={{ fontSize: "13px", color: "#666" }}>
+            Chưa có tài khoản?{" "}
+          </span>
+          {/* Nhớ kéo lên đầu file thêm: import { Link } from 'react-router-dom'; */}
+          <Link
+            to="/register"
+            style={{
+              fontSize: "13px",
+              color: "#e63946",
+              fontWeight: "bold",
+              textDecoration: "none",
+            }}
+          >
+            Đăng ký ngay
+          </Link>
+        </div>
       </div>
     </div>
   );
