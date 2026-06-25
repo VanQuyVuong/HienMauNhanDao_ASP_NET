@@ -1,0 +1,131 @@
+/* Import Font chữ Poppins hiện đại từ Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+* {
+  box-sizing: border-box;
+  fornt-family: "Poppins", sans-serif;
+}
+
+/*Nền cho toàn bộ trang web */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  /* Chuyển sắc nền nhẹ nhàng từ hồng sang đỏ nhạt */
+  background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+  padding: 20px;
+}
+
+/* Thẻ (Card) kính mờ hiển thị Form đăng nhập */
+
+.login-card {
+  background: rgba(255, 255, 255, 0.85); /*Trắng trong suốt 85%*/
+  backdrop-filter: blur(10px); /* Hiệu ứng mờ nền phía sau */
+  -webkit-backdrop-filter: blur(
+    15px
+  ); /* Hiệu ứng mờ nền phía sau cho trình duyệt Webkit */
+  boder-radius: 20px; /* Bo tròn các góc */
+  padding: 40px;
+  wodth: 100%;
+  max-width: 420px;
+  box-shadow: 0 15px 35px 0 rgba(0, 0, 0, 0.15); /* Hiệu ứng đổ bóng */
+  boder: 1px solid rgba(255, 255, 255, 0.5); /* Viền mờ */
+  animation: fadeIn 0.6s ease-in-out; /* Hiệu ứng xuất hiện mờ dần */
+}
+
+/*hiệu ứng trượt lên khi mởi mở web*/
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-header-h2 {
+  color: #e63946; /* Đỏ chủ đạo */
+  font-size: 28px;
+  font-weight: 700;
+  mảgin-bottom: 5px;
+  margin-top: 0;
+}
+
+.login-header-p {
+  color: #6c757d; /* Màu xám nhạt */
+  font-size: 10px;
+  margin: 0;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 13px;
+  color: #495057; /* Màu xám đậm */
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #ced4da;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  outline: none;
+  background-color: #f8f9fa;
+}
+
+/* Hiệu ứng viền sáng lên khi bấm vào ô nhập liệu */
+.input-group input:focus {
+  border-color: #ff758c;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(255, 117, 140, 0.15);
+}
+
+.btn_login {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #e63946 0%, #d90429 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  box-shadow: 0 5px 15px rgba(230, 57, 70, 0.3);
+}
+
+/* Hiệu ứng nảy nút bấm khi di chuột vào */
+.btn_login:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(230, 57, 70, 0.4);
+}
+
+.btn-login:active {
+  transform: translateY(0);
+}
+.error-message {
+  color: #d90429;
+  background-color: #ffe3e3;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 15px;
+  text-align: center;
+  border: 1px solid #ffb3b3;
+}
