@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import "../css/Login.css";
+
 export default function Login() {
+  //Khai báo các biến để lưu dữ liệu
   const [email, setEmail] = useState("");
   const [matkhau, setMatKhau] = useState("");
   const [ketQuaLoi, setKetQuaLoi] = useState("");
