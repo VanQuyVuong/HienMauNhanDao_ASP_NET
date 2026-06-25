@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom"; // Thêm useNavigate vào đây
 import "../css/Login.css";
 
 export default function Login() {
@@ -6,6 +7,8 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [matkhau, setMatKhau] = useState("");
   const [ketQuaLoi, setKetQuaLoi] = useState("");
+
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,7 +26,13 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Đăng nhập thành công");
+        // 1. Lấy dữ liệu từ C# và cất vào kho của trình duyệt (localStorage)
+        localStorage.setItem("token", data.data.access_token);
+        localStorage.setItem("email", data.data.email);
+        localStorage.setItem("role", data.data.maVaiTro);
+
+        // 2. Tự động chuyển hướng sang trang chủ
+        navigate("/dashboard");
       } else {
         setKetQuaLoi(data.message || "Đăng nhập thất bại"); //Lấy đúng mesage lỗi từ API
       }
