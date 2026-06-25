@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login"; // Tí nữa mình sẽ code file này
 import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -12,8 +13,9 @@ function App() {
         {/* Đường dẫn cho trang đăng nhập */}
         <Route path="/login" element={<Login />} />
 
-        {/* Sau này mình sẽ thêm trang Đăng ký ở đây */}
-        {/* <Route path="/register" element={<Register />} /> */}
+        <Route path="/register" element={<Register />} />
+
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   );
