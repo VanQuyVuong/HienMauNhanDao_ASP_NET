@@ -1,0 +1,66 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 15px 40px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Đổ bóng nhẹ xuống dưới */
+  position: sticky; /* Cố định trên cùng khi cuộn chuột */
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-logo a {
+  font-size: 20px;
+  font-weight: 700;
+  color: #d90429; /* Màu đỏ chủ đạo */
+  text-decoration: none;
+}
+
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  gap: 25px;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-menu li a {
+  text-decoration: none;
+  color: #495057;
+  font-weight: 500;
+  font-size: 15px;
+  transition: color 0.2s ease;
+}
+
+.navbar-menu li a:hover {
+  color: #d90429; /* Khi di chuột vào sẽ đổi sang màu đỏ */
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-email {
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.btn-logout {
+  background-color: transparent;
+  border: 1px solid #d90429;
+  color: #d90429;
+  padding: 8px 15px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background-color: #d90429;
+  color: white;
+}
