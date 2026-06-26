@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../css/Register.css";
-import { Link, useNavigate } from "react-router-dom ";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -25,14 +25,14 @@ export default function Register() {
     try {
       //goij sang PI/Register
       const response = await fetch(
-        "https://localhost:7004/api/Users/Register",
+        "https://localhost:7004/api/auth/register",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            Emal: email,
+            Email: email,
             MatKhau: matKhau,
             XacNhanMatKhau: xacNhanMatKhau,
           }),
@@ -74,7 +74,7 @@ export default function Register() {
         )}
         <form onSubmit={handleRegister}>
           <div className="input-group">
-            <label>Email dang nhap</label>
+            <label>Email đăng nhập</label>
             <input
               type="email"
               value={email}
@@ -82,6 +82,19 @@ export default function Register() {
               required
             />
           </div>
+
+          {/* CHÍNH LÀ ĐOẠN NÀY BỊ BẠN XÓA MẤT NÈ 👇 */}
+          <div className="input-group">
+            <label>Mật khẩu mới</label>
+            <input
+              type="password"
+              value={matKhau}
+              onChange={(e) => setMatKhau(e.target.value)}
+              required
+            />
+          </div>
+          {/* ======================================= */}
+
           <div className="input-group">
             <label>Nhập lại mật khẩu</label>
             <input
@@ -91,8 +104,9 @@ export default function Register() {
               required
             />
           </div>
+
           <button type="submit" className="btn-login">
-            Xac nhan dang ky
+            Xác Nhận Đăng Ký
           </button>
         </form>
 

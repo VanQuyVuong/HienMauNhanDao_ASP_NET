@@ -16,12 +16,12 @@ export default function Login() {
 
     try {
       //Goi Api C#
-      const response = await fetch("https://localhost:7004/api/Users/Login", {
+      const response = await fetch("https://localhost:7004/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, matkhau }),
+        body: JSON.stringify({ Email: email, MatKhau: matkhau }),
       });
       const data = await response.json();
 
@@ -73,7 +73,7 @@ export default function Login() {
             />
           </div>
 
-          <button typye="submit" classname="btn-login">
+          <button type="submit" className="btn-login">
             Đăng nhập
           </button>
         </form>
