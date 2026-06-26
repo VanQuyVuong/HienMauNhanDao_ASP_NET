@@ -56,47 +56,39 @@ export default function Dashboard() {
   };
 
   return (
-    <div
-      style={{ padding: "50px", fontFamily: "sans-serif", textAlign: "center" }}
-    >
-      <h1 style={{ color: "#e63946" }}>Khu Vực Tuyệt Mật</h1>
-      <p>
-        Bạn đang đăng nhập với email: <strong>{email}</strong>
-      </p>
-
-      {/* Hiện kho báu ra đây */}
+    <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh", margin: 0 }}>
+      <Navbar />
       <div
         style={{
-          margin: "30px auto",
-          padding: "20px",
-          background: "#e3f2fd",
-          border: "2px dashed #1976d2",
-          borderRadius: "10px",
-          maxWidth: "500px",
+          padding: "50px",
+          fontFamily: "sans-serif",
+          textAlign: "center",
         }}
       >
-        <h3 style={{ color: "#1565c0", margin: "0 0 10px 0" }}>
-          Kết quả gọi API Bảo Mật:
-        </h3>
-        <p style={{ fontSize: "18px", fontWeight: "bold", color: "#d32f2f" }}>
-          {khoBau}
+        <h1 style={{ color: "#e63946" }}>Khu Vực Tuyệt Mật</h1>
+        <p>
+          Bạn đang đăng nhập với email: <strong>{email}</strong>
         </p>
-      </div>
 
-      <button
-        onClick={handleLogout}
-        style={{
-          marginTop: "20px",
-          padding: "10px 20px",
-          background: "#333",
-          color: "white",
-          borderRadius: "8px",
-          cursor: "pointer",
-          border: "none",
-        }}
-      >
-        Đăng Xuất
-      </button>
+        {/* Hiện kho báu ra đây */}
+        <div
+          style={{
+            margin: "30px auto",
+            padding: "20px",
+            background: "#e3f2fd",
+            border: "2px dashed #1976d2",
+            borderRadius: "10px",
+            maxWidth: "500px",
+          }}
+        >
+          <h3 style={{ color: "#1565c0", margin: "0 0 10px 0" }}>
+            Kết quả gọi API Bảo Mật:
+          </h3>
+          <p style={{ fontSize: "18px", fontWeight: "bold", color: "#d32f2f" }}>
+            {khoBau}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
