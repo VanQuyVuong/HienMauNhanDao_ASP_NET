@@ -1,0 +1,77 @@
+.dashboard-container {
+  padding: 40px;
+  max: width 1200px;
+  margin: 0 auto;
+}
+/*tiêu đề trang */
+.section-title {
+  color: #2b2d42;
+  font-size: 24px;
+  font: weight 700px;
+  margin-bottom: 25px;
+  border-left: 5px solid #d90429;
+  padding-left: 15px;
+}
+/* Khung chứa các chiến dịch (hiển thị dạng lưới grid) */
+.campaign-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(300px, 1fr)
+  ); /* Tự động co giãn số cột */
+  gap: 25px;
+}
+/* Thẻ (Card) từng chiến dịch */
+.campaign-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  padding: 25px;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  border: 1px solid #f1f3f5;
+  cursor: pointer;
+}
+/* Nảy lên khi di chuột vào */
+.campaign-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(217, 4, 41, 0.15);
+}
+.campaign-title {
+  color: #e63946;
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+.campaign-info {
+  font-size: 14px;
+  color: #495057;
+  margin-bottom: 10px;
+}
+.campaign-info strong {
+  color: #212529;
+}
+.badge-active {
+  display: inline-block;
+  background-color: #ffe3e3;
+  color: #d90429;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+/* Hiển thị khi Database chưa có gì */
+.empty-state {
+  text-align: center;
+  padding: 60px;
+  background: white;
+  border-radius: 12px;
+  color: #868e96;
+  font-size: 16px;
+  font-style: italic;
+  border: 2px dashed #dee2e6;
+}
