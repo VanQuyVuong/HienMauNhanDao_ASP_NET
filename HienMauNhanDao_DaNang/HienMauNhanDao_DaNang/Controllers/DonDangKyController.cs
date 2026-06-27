@@ -3,6 +3,7 @@ using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HienMauNhanDao_DaNang.Controllers
@@ -45,10 +46,10 @@ namespace HienMauNhanDao_DaNang.Controllers
             var donMoi = new DonDangKy
             {
                 MaDon = maDonMoi,
-                MaChienDich=request.MaChienDich,
-                ThoiGianDangKy=DateTime.Now,
-                TrangThai=TrangThaiDonDangKy.ChoDuyet,// Trạng thái mặc định: Chờ nhân viên y tế duyệt
-                TheTich= 250 // Mặc định đăng ký hiến 250ml
+                MaChienDich = request.MaChienDich,
+                ThoiGianDangKy = DateTime.Now,
+                TrangThai = TrangThaiDonDangKy.ChoDuyet,// Trạng thái mặc định: Chờ nhân viên y tế duyệt
+                TheTich = 250 // Mặc định đăng ký hiến 250ml
             };
 
             //4.Lưu vào Database
@@ -58,9 +59,20 @@ namespace HienMauNhanDao_DaNang.Controllers
             return Ok(new { success = true, message = "Bạn đã đăng ký hiến máu thành công " });
 
         }
-            
 
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> LayLichSuDangKy()
+        {
+            // Dùng Include(d => d.ChienDich) để C# tự động nối bảng, lấy luôn cái "Tên Chiến Dịch" cực xịn.
+            var danhSach = await _context.DonDangKys
+                .Include(d => d.ChienDich)
+                .OrderByDescending(d => d.ThoiGianDangKy)//Sắp xếp mới nhất lên trên đầu
+                .ToListAsync();
+
+            return Ok(new { success = true, message = danhSach });
         }
-
-    
+    }
 }
