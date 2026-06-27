@@ -33,6 +33,40 @@ export default function CampaignDetail() {
         Đang tải dữ liệu...
       </div>
     );
+  //Hàm xử lýkhi người dùng bấm nút đăng ký
+  const handleDangKy = async () => {
+    //Hỏi xác nhận
+    if (
+      !window.confirm(
+        "Bạn có chắc chắn muốn đăng ký hiến máu cho chiến dịch này ?",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      //gửi yêu cầu Post lên C# kèm theo mã chiến dịch
+      const response = await fetch("https://localhost:7004/api/dondangky", {
+        method: "POST",
+        headers: {
+          "Context-Type": "applicattion/json",
+        },
+        body: JSON.stringify({
+          maChienDich: chienDich.maChienDich,
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        alert("🎉 Chúc mừng!" + data.message); //hiện thông báo thành công
+      } else {
+        alert("❌ Lỗi:" + data.message);
+      }
+    } catch (error) {
+      console.error("Lỗi:", error);
+      alert("❌ Có lỗi xảy ra khi kết nối đến máy chủ C#.");
+    }
+  };
 
   return (
     <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh", margin: 0 }}>
@@ -85,7 +119,9 @@ export default function CampaignDetail() {
               </p>
             </div>
 
-            <button className="btn-donate">Đăng ký hiến máu ngay</button>
+            <button className="btn-donate" onClick={handleDangKy}>
+              Đăng ký hiến máu ngay
+            </button>
           </div>
         </div>
       </div>
