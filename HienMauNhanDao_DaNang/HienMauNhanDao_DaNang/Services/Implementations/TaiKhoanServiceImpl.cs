@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Data;
+using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Models.DTOs.Requests;
 using HienMauNhanDao_DaNang.Models.DTOs.Responses;
 using HienMauNhanDao_DaNang.Models.Entities;
@@ -35,7 +35,7 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
                 throw new UnauthorizedAccessException("Email hoac mat khau khong dung");
 
             //kiểm tra tài khoản có bị khoá không
-            if (taiKhoan.TrangThai)
+            if (!taiKhoan.TrangThai)
                 throw new UnauthorizedAccessException("Tai khoan da bi vo hieu hoa, Vui long lien he quan tri vien");
 
             //nếu mật khẩu chưa được hash thì hash lại 

@@ -3,9 +3,9 @@
 -- Đã được tinh chỉnh 100% để đồng bộ với Code C# (Mô hình Database-First)
 -- =============================================================
 
-DROP DATABASE IF EXISTS QuanLyHienMauDN;
-CREATE DATABASE QuanLyHienMauDN CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE QuanLyHienMauDN;
+DROP DATABASE IF EXISTS QuanLyHienMauNhanDaoTPDN;
+CREATE DATABASE QuanLyHienMauNhanDaoTPDN CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE QuanLyHienMauNhanDaoTPDN;
 
 -- -------------------------------------------------------------
 -- BƯỚC 1: TẠO BẢNG (Đã sửa lại kiểu CHAR -> VARCHAR cho linh hoạt)
