@@ -1,93 +1,70 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import "../css/Dashboard.css"; // Gọi file làm đẹp vừa tạo
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const [khoBau, setKhoBau] = useState("Đang mở két sắt..."); // Chỗ để lưu dữ liệu mật
+  // 1. Tạo "cái rổ" (mảng) để đựng danh sách chiến dịch lấy từ C#
+  const [danhSachChienDich, setDanhSachChienDich] = useState([]);
 
-  const email = localStorage.getItem("email");
-  const role = localStorage.getItem("role");
-
-  // useEffect giống như một người thợ: Nó sẽ TỰ ĐỘNG CHẠY ngay khi trang web vừa tải xong
+  // 2. Hàm chạy tự động ngay khi vừa mở trang web lên
   useEffect(() => {
-    const fetchKhoBau = async () => {
-      // 1. Móc túi lấy chìa khóa ra
-      const token = localStorage.getItem("token");
-
-      // Nếu không có chìa khóa thì đuổi về trang Login
-      if (!token) {
-        navigate("/login");
-        return;
-      }
-
+    const fetchChienDich = async () => {
       try {
-        // 2. Đi tới két sắt của C#
-        const response = await fetch(
-          "https://localhost:7004/api/auth/profile",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              // ĐÂY LÀ ĐOẠN QUAN TRỌNG NHẤT: Đưa chìa khóa cho C# kiểm tra
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        // Lấy xe đẩy chạy qua C# cổng 7004 lấy hàng
+        const response = await fetch("https://localhost:7004/api/chiendich");
 
         if (response.ok) {
           const data = await response.json();
-          setKhoBau(data.thongDiep); // Lấy kho báu show ra màn hình
-        } else {
-          // Nếu chìa khóa giả hoặc hết hạn
-          setKhoBau("Chìa khóa bị từ chối! Không thể xem dữ liệu mật.");
+          // C# trả về thành công -> Đổ mảng dữ liệu vào "rổ" của React
+          setDanhSachChienDich(data.data);
         }
       } catch (error) {
-        setKhoBau("Không thể kết nối đến máy chủ.");
+        console.error("Lỗi lấy dữ liệu từ C#:", error);
       }
     };
 
-    fetchKhoBau();
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
-  };
+    fetchChienDich(); // Gọi cái hàm vừa viết
+  }, []); // Ngoặc vuông rỗng [] nghĩa là: "Chỉ chạy 1 lần duy nhất lúc mở web thôi nhé"
 
   return (
     <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh", margin: 0 }}>
+      {/* 3. Lắp thanh Menu */}
       <Navbar />
-      <div
-        style={{
-          padding: "50px",
-          fontFamily: "sans-serif",
-          textAlign: "center",
-        }}
-      >
-        <h1 style={{ color: "#e63946" }}>Khu Vực Tuyệt Mật</h1>
-        <p>
-          Bạn đang đăng nhập với email: <strong>{email}</strong>
-        </p>
 
-        {/* Hiện kho báu ra đây */}
-        <div
-          style={{
-            margin: "30px auto",
-            padding: "20px",
-            background: "#e3f2fd",
-            border: "2px dashed #1976d2",
-            borderRadius: "10px",
-            maxWidth: "500px",
-          }}
-        >
-          <h3 style={{ color: "#1565c0", margin: "0 0 10px 0" }}>
-            Kết quả gọi API Bảo Mật:
-          </h3>
-          <p style={{ fontSize: "18px", fontWeight: "bold", color: "#d32f2f" }}>
-            {khoBau}
-          </p>
-        </div>
+      <div className="dashboard-container">
+        <h2 className="section-title">Chiến Dịch Hiến Máu Nổi Bật</h2>
+
+        {/* 4. Dùng lệnh IF rút gọn: 
+            Nếu rổ trống không (length == 0) thì in ra thông báo trống.
+            Nếu có dữ liệu thì hiện nó ra */}
+        {danhSachChienDich.length === 0 ? (
+          <div className="empty-state">
+            Thật trống trải... Hiện tại Database của bạn chưa có chiến dịch hiến
+            máu nào!
+          </div>
+        ) : (
+          <div className="campaign-grid">
+            {/* Lệnh 'map': Nó lặp qua từng phần tử trong C# và vẽ ra 1 cái thẻ */}
+            {danhSachChienDich.map((chienDich, index) => (
+              <div className="campaign-card" key={index}>
+                <span className="badge-active">Đang diễn ra</span>
+                <h3 className="campaign-title">{chienDich.tenChienDich}</h3>
+
+                <p className="campaign-info">
+                  <strong>Dự kiến:</strong> {chienDich.soLuongDuKien} người
+                </p>
+                <p className="campaign-info">
+                  {/* Hàm đổi định dạng ngày giờ của C# thành ngày giờ Việt Nam */}
+                  <strong>Bắt đầu:</strong>{" "}
+                  {new Date(chienDich.thoiGianBD).toLocaleDateString("vi-VN")}
+                </p>
+                <p className="campaign-info">
+                  <strong>Trạng thái:</strong> {chienDich.trangThai}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
