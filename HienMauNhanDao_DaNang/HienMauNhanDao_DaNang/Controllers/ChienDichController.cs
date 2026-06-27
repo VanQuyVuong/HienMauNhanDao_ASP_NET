@@ -42,5 +42,22 @@ namespace HienMauNhanDao_DaNang.Controllers
                 data = danhSach
             });
         }
+
+        //Tạo Api lấy chi tiết chiến dịch theo mã . 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetByID(string id)
+        {
+            // để lôi luôn cái tên Bệnh Viện và Địa chỉ chi tiết ra cho bạn, không cần viết SQL JOIN phức tạp!
+            var chienDich = await _context.ChienDichHienMaus
+                .Include(c => c.DiaDiem)
+            // Lệnh Include: Ma thuật của EF Core! Nó tự động chạy lệnh JOIN sang bảng DiaDiem 
+                .FirstOrDefaultAsync(c => c.MaChienDich == id);
+            // Lệnh FirstOrDefaultAsync: Tìm chiến dịch đầu tiên có MaChienDich khớp với id
+            if (chienDich == null)
+            {
+                return NotFound(new {success=false, mesage= "Không tìm thấy chiến dịch này "});
+            }
+            return Ok(new { success = true, data = chienDich });
+        }
     }
 }
