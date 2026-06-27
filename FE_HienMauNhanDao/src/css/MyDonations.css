@@ -1,0 +1,40 @@
+.history-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.history-title {
+  color: #d90429;
+  margin-bottom: 25px;
+  border-bottom: 3px solid #edf2f4;
+  padding-bottom: 10px;
+}
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.history-table th,
+.history-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #edf2f4;
+}
+.history-table th {
+  background-color: #f8f9fa;
+  color: #2b2d42;
+  font-weight: 600;
+}
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.status-badge.cho-duyet {
+  background-color: #fff3cd;
+  color: #856404;
+}
