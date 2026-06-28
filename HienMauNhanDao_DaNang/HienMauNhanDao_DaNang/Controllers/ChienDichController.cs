@@ -2,6 +2,10 @@
 using HienMauNhanDao_DaNang.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using HienMauNhanDao_DaNang.Models.Entities;
+using HienMauNhanDao_DaNang.Models.Enums;
 
 namespace HienMauNhanDao_DaNang.Controllers
 {
@@ -58,6 +62,55 @@ namespace HienMauNhanDao_DaNang.Controllers
                 return NotFound(new {success=false, mesage= "Không tìm thấy chiến dịch này "});
             }
             return Ok(new { success = true, data = chienDich });
+        }
+
+
+        //class hứng dữ liệu từ form react 
+        public class TaoChienDichRequest()
+        {
+            public string TenChienDich { set; get; }
+            public DateTime ThoiGianBD { set; get; }
+            public DateTime ThoiGianKT { set; get; }
+            public int SoLuongDuKien { set; get; }
+            public string MaDiaDiem { set; get; }
+            public string ImageUrl { set; get; }
+
+        }
+
+
+        // TẠO API TẠO CHIẾN DỊCH MỚI (CHỈ NVYT VÀ ADMIN ĐƯỢC PHÉP DÙNG )
+        [HttpPost]
+        [Authorize(Roles ="NVYT,AD")]
+        public async Task<IActionResult> TaoMoiChienDich([FromBody] TaoChienDichRequest request)
+        {
+            //1.trich xuat ma ngừuoi tạo để biết nvyt nào tạo 
+            var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value;
+            var nhanVien = await _context.NhanViens.FirstOrDefaultAsync(n => n.MaTaiKhoan == maTaiKhoan);
+
+            //2.sINH MÃ CHIẾN DỊCH NGẪU NHIÊN 
+            string maCD = "CD" + DateTime.Now.ToString("HHmmss");
+
+            //3.đóng gói dữ liệu 
+            var cd = new ChienDichHienMau
+            {
+                MaChienDich = maCD,
+                TenChienDich = request.TenChienDich,
+                ThoiGianBD = request.ThoiGianBD,
+                ThoiGianKT = request.ThoiGianKT,
+                SoLuongDuKien = request.SoLuongDuKien,
+                MaDiaDiem = request.MaDiaDiem,
+                ImageUrl = request.ImageUrl,
+                TrangThai = TrangThaiChienDich.ChuaBatDau,
+                MaNhanVien = nhanVien?.MaNhanVien
+
+
+            };
+
+            //4.lưu vào csdl
+            _context.ChienDichHienMaus.Add(cd);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Tao chien dich moi thanh cong" });
         }
     }
 }
