@@ -6,12 +6,20 @@ export default function MyDonations() {
   const [lichSu, setLichSu] = useState([]);
 
   useEffect(() => {
-    // Gọi API lấy lịch sử don dang ky
-    fetch("https://localhost:7004/api/dondangky")
+    // Lấy thẻ Token
+    const token = localStorage.getItem("token");
+
+    // Gọi API lấy lịch sử, kẹp thẻ vào
+    fetch("https://localhost:7004/api/dondangky", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setLichSu(data.data);
-      });
+      })
+      .catch((err) => console.error("Lỗi tải lịch sử:", err));
   }, []);
 
   return (

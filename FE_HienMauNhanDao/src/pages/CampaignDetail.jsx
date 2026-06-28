@@ -44,29 +44,33 @@ export default function CampaignDetail() {
       return;
     }
 
-    try {
-      //gửi yêu cầu Post lên C# kèm theo mã chiến dịch
+        try {
+      // 1. Lấy thẻ Token đang cất trong kho của trình duyệt ra
+      const token = localStorage.getItem("token");
+
       const response = await fetch("https://localhost:7004/api/dondangky", {
         method: "POST",
         headers: {
-          "Context-Type": "applicattion/json",
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // 2. Kẹp thẻ vào phong bì gửi đi!
         },
         body: JSON.stringify({
-          maChienDich: chienDich.maChienDich,
-        }),
+          maChienDich: chienDich.maChienDich
+        })
       });
-      const data = await response.json();
 
-      if (data.success) {
-        alert("🎉 Chúc mừng!" + data.message); //hiện thông báo thành công
+      const data = await response.json();
+      
+      if (response.ok) { // Kiểm tra response.ok thay vì data.success cho chắc ăn
+        alert("🎉 Chúc mừng! " + data.message);
       } else {
-        alert("❌ Lỗi:" + data.message);
+        alert("❌ Lỗi: " + (data.message || "Bạn chưa đăng nhập hoặc thẻ đã hết hạn!"));
       }
     } catch (error) {
       console.error("Lỗi:", error);
-      alert("❌ Có lỗi xảy ra khi kết nối đến máy chủ C#.");
+      alert("❌ Có lỗi xảy ra khi kết nối đến máy chủ.");
     }
-  };
+
 
   return (
     <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh", margin: 0 }}>
