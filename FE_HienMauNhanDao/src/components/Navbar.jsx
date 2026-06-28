@@ -70,6 +70,16 @@ export default function Navbar() {
                 textDecoration: "none",
               }}
             >
+              <Link
+                to="/admin-tao-cd"
+                style={{
+                  color: "#d90429",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                }}
+              >
+                ➕ Tạo Chiến Dịch
+              </Link>
               🛡️ Quản lý Đơn
             </Link>
           ) : (

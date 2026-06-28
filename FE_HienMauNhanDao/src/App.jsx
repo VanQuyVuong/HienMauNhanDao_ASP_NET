@@ -3,6 +3,7 @@ import Login from "./pages/Login"; // Tí nữa mình sẽ code file này
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AdminDonDangKy from "./pages/AdminDonDangKy";
+<Route path="/admin-tao-cd" element={<AdminCreateCampaign />} />;
 
 function App() {
   return (
