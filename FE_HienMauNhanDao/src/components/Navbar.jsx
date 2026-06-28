@@ -57,19 +57,8 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
-          {/* ĐÂY LÀ PHÉP THUẬT PHÂN QUYỀN: 
-              Nếu Role là Nhân viên y tế (NVYT) hoặc Admin (AD) thì hiện nút "Quản lý Đơn".
-              Ngược lại (Người dùng thường/TNV) thì hiện nút "Lịch sử của tôi" */}
-
           {role === "NVYT" || role === "AD" ? (
-            <Link
-              to="/admin-don"
-              style={{
-                color: "#d90429",
-                fontWeight: "bold",
-                textDecoration: "none",
-              }}
-            >
+            <div style={{ display: "flex", gap: "15px" }}>
               <Link
                 to="/admin-tao-cd"
                 style={{
@@ -80,8 +69,17 @@ export default function Navbar() {
               >
                 ➕ Tạo Chiến Dịch
               </Link>
-              🛡️ Quản lý Đơn
-            </Link>
+              <Link
+                to="/admin-don"
+                style={{
+                  color: "#d90429",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                }}
+              >
+                🛡️ Quản lý Đơn
+              </Link>
+            </div>
           ) : (
             <Link
               to="/lich-su"
