@@ -81,5 +81,56 @@ namespace HienMauNhanDao_DaNang.Controllers
 
             return Ok(new { success = true, data = danhSach });
         }
+
+
+        //API 3 :Dành cho nhân viên y tế xem toàn bộ danh sách đơn 
+        [HttpGet("tat-ca")]
+        [Authorize(Roles ="NVYT, AD")]  //đây là ổ  khóa kép: Vừa phải có Thẻ, vừa phải có quyền NVYT hoặc Admin
+        public async Task<IActionResult> LayTatCaDon()
+        {
+            //Lấy tất cả mọi tờ đơn trong cơ sở dữ liệu 
+            var danhSach = await _context.DonDangKys
+                .Include(d => d.ChienDich) //LẤY TÊN CHIẾN DỊCH
+                .Include(D => D.TinhNguyenVien)   //lấy thông tin Tình nguyện viên nộp đơn
+                .OrderByDescending(d => d.ThoiGianDangKy)
+                .ToListAsync();
+
+            return Ok(new { success = true, data = danhSach });
+
+        }
+
+
+        //class này để hứng các trạng thái phê duyệt và từ chối từ React gửi lên 
+        public class DuyetDonRequest()
+        {
+            public TrangThaiDonDangKy TrangThaiMoi { set; get; }
+        }
+
+
+        //API 4 :DÙNG CHO NHÂN VIÊN Y TẾ THAY ĐỔI TRẠNG THÁI ĐƠN 
+        [HttpPut("{maDon}/duyet")]
+        [Authorize(Roles ="NVYT, AD")]
+
+        public async Task<IActionResult> DuyetDon(string maDon, [FromBody] DuyetDonRequest request)
+        {
+            var don = await _context.DonDangKys.FindAsync(maDon);
+            if (don == null) return NotFound(new { success = false, message = "Khong tim thay don!" });
+
+
+            //1.Cập nhật trạng thái mới
+            don.TrangThai = request.TrangThaiMoi;
+
+            //2.Ghi nhận dấu ấn : lấy mã nvyt đang đăng nhập để điền vào cột người phụ trách
+            var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value;
+            var nhanVien = await _context.NhanViens.FirstOrDefaultAsync(n => n.MaTaiKhoan == maTaiKhoan);
+
+            if (nhanVien != null)
+            {
+                don.MaNhanVien = nhanVien.MaNhanVien;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Da cap nhat trang thai dơn thanh cong !" });
+        }
     }
 }
