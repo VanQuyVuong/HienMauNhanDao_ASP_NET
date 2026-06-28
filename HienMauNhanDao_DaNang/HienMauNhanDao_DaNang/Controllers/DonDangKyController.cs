@@ -1,18 +1,17 @@
 ﻿using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Models.Enums;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HienMauNhanDao_DaNang.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Ổ KHÓA CHÍNH: Phải có Thẻ (Token) mới được vào các hàm bên dưới!
     public class DonDangKyController : ControllerBase
     {
-
         private readonly AppDbContext _context;
 
         public DonDangKyController(AppDbContext context)
@@ -20,59 +19,73 @@ namespace HienMauNhanDao_DaNang.Controllers
             _context = context;
         }
 
-        //Tạo 1 class nhỏ (DTO) để hứng dữ liệu từ React gửi lên 
         public class DangKyRequest
         {
             public string MaChienDich { get; set; }
         }
 
-
-        //API nhận yêu cầu đăng ký
         [HttpPost]
         public async Task<IActionResult> DangKyHienMau([FromBody] DangKyRequest request)
         {
-            //1.KIỂM TRA XEM CHIẾN DỊCH NÀY CÓ THÂT KHÔNG 
-            var chienDich = await _context.ChienDichHienMaus.FindAsync(request.MaChienDich);
-            if (chienDich == null)
+            // 1. TRÍCH XUẤT THẺ: Nhờ có [Authorize], C# tự động đọc Token và lấy ra Mã Tài Khoản
+            var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value;
+
+            // 2. Tự động tìm Hồ sơ Tình nguyện viên của người này
+            var tnv = await _context.TinhNguyenViens.FirstOrDefaultAsync(t => t.MaTaiKhoan == maTaiKhoan);
+
+            // (Tuyệt chiêu): Nếu họ mới đăng ký tài khoản, chưa có hồ sơ, ta tự động tạo cho họ 1 hồ sơ tạm!
+            if (tnv == null)
             {
-                return NotFound(new { success = false, message = "Chiến dịch không tồn tại" });
+                tnv = new TinhNguyenVien
+                {
+                    MaTNV = "TNV" + DateTime.Now.ToString("HHmmss"),
+                    MaTaiKhoan = maTaiKhoan,
+                    HoTen = "TNV Mới",
+                    CCCD = "000000000000",
+                    NgaySinh = new DateTime(2000, 1, 1),
+                    SoDienThoai = "0000000000"
+                };
+                _context.TinhNguyenViens.Add(tnv);
+                await _context.SaveChangesAsync();
             }
 
-            //2.tự động sinh mã đơn dựa vào Giờ_Phút_Giây để KHông bị trùng lăoj
-            string maDonMoi = "Don" + DateTime.Now.ToString("HHmmss");
+            var chienDich = await _context.ChienDichHienMaus.FindAsync(request.MaChienDich);
+            if (chienDich == null) return NotFound(new { success = false, message = "Chiến dịch không tồn tại!" });
 
-            //3.tạo tờ đơn đang ký mới 
-
+            // 3. Nạp đơn với đầy đủ "Danh tính"
             var donMoi = new DonDangKy
             {
-                MaDon = maDonMoi,
+                MaDon = "DON" + DateTime.Now.ToString("HHmmss"),
                 MaChienDich = request.MaChienDich,
                 ThoiGianDangKy = DateTime.Now,
-                TrangThai = TrangThaiDonDangKy.ChoDuyet,// Trạng thái mặc định: Chờ nhân viên y tế duyệt
-                TheTich = 250 // Mặc định đăng ký hiến 250ml
+                TrangThai = TrangThaiDonDangKy.ChoDuyet,
+                TheTich = 250,
+                MaTNV = tnv.MaTNV // Bây giờ C# đã ghi nhận chính xác Ai là người đăng ký!
             };
 
-            //4.Lưu vào Database
             _context.DonDangKys.Add(donMoi);
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true, message = "Bạn đã đăng ký hiến máu thành công " });
-
+            return Ok(new { success = true, message = "Đăng ký hiến máu thành công!" });
         }
 
-
-
-
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> LayLichSuDangKy()
         {
-            // Dùng Include(d => d.ChienDich) để C# tự động nối bảng, lấy luôn cái "Tên Chiến Dịch" cực xịn.
-            var danhSach = await _context.DonDangKys
-                .Include(d => d.ChienDich)
-                .OrderByDescending(d => d.ThoiGianDangKy)//Sắp xếp mới nhất lên trên đầu
-                .ToListAsync();
+            // Trích xuất mã người dùng từ vé Token
+            var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value;
+            var tnv = await _context.TinhNguyenViens.FirstOrDefaultAsync(t => t.MaTaiKhoan == maTaiKhoan);
 
-            return Ok(new { success = true, message = danhSach });
+            if (tnv == null) return Ok(new { success = true, data = new List<DonDangKy>() });
+
+            // CỰC KỲ QUAN TRỌNG: Lọc (Where) để chỉ lấy đúng những tờ đơn của riêng người này thôi!
+            var danhSach = await _context.DonDangKys
+                                         .Include(d => d.ChienDich)
+                                         .Where(d => d.MaTNV == tnv.MaTNV)
+                                         .OrderByDescending(d => d.ThoiGianDangKy)
+                                         .ToListAsync();
+
+            return Ok(new { success = true, data = danhSach });
         }
     }
 }
