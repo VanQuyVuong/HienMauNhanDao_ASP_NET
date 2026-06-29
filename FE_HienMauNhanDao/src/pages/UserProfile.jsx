@@ -44,13 +44,7 @@ export default function UserProfile() {
                   ? "Khac"
                   : "Nam",
             nhomMau:
-              data.data.nhomMau === 1
-                ? "B"
-                : data.data.nhomMau === 2
-                  ? "AB"
-                  : data.data.nhomMau === 3
-                    ? "O"
-                    : "A",
+              data.data.nhomMau !== null ? data.data.nhomMau.toString() : "0",
           });
         }
       } catch (error) {
@@ -152,12 +146,17 @@ export default function UserProfile() {
               value={formData.nhomMau}
               onChange={handleChange}
             >
-              <option value="A">Nhóm A</option>
-              <option value="B">Nhóm B</option>
-              <option value="AB">Nhóm AB</option>
-              <option value="O">Nhóm O</option>
+              <option value="0">A+ (A_positive)</option>
+              <option value="1">A- (A_negative)</option>
+              <option value="2">B+ (B_positive)</option>
+              <option value="3">B- (B_negative)</option>
+              <option value="4">AB+ (AB_positive)</option>
+              <option value="5">AB- (AB_negative)</option>
+              <option value="6">O+ (O_positive)</option>
+              <option value="7">O- (O_negative)</option>
             </select>
           </div>
+
           <div className="form-group">
             <label>Số điện thoại</label>
             <input
