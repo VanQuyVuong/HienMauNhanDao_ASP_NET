@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using HienMauNhanDao_DaNang.Models.Enums;
 
 namespace HienMauNhanDao_DaNang.Controllers
 {
@@ -26,7 +27,8 @@ namespace HienMauNhanDao_DaNang.Controllers
             var tongNguoiDung = await _context.TinhNguyenViens.CountAsync();
             // Lấy TẤT CẢ tờ đơn ra, nếu có ghi thể tích thì đem cộng lại hết
             // (ĐÂY LÀ ĐOẠN CODE CỐ TÌNH CHỨA BUG LOGIC)
-            var tongTheTichMau = await _context.DonDangKys.SumAsync(d => d.TheTich ?? 0);
+            var tongTheTichMau = await _context.DonDangKys.Where(d => d.TrangThai == TrangThaiDonDangKy.DaHoanThanh)
+                .SumAsync(d => d.TheTich ?? 0);
             // Trả về dữ liệu đóng gói
             return Ok(new
             {
