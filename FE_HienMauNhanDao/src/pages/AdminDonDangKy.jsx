@@ -5,7 +5,6 @@ import "../css/MyDonations.css";
 export default function AdminDonDangKy() {
   const [danhSach, setDanhSach] = useState([]);
 
-  // Hàm gọi API lấy TẤT CẢ đơn (Chỉ NVYT mới gọi được thành công)
   const fetchDanhSach = () => {
     const token = localStorage.getItem("token");
     fetch("https://localhost:7004/api/dondangky/tat-ca", {
@@ -21,11 +20,10 @@ export default function AdminDonDangKy() {
     fetchDanhSach();
   }, []);
 
-  // Hàm xử lý khi Nhân viên y tế bấm nút Duyệt hoặc Từ chối
   const handleDuyet = async (maDon, trangThaiMoi) => {
     if (
       !window.confirm(
-        `Bạn có chắc chắn muốn chuyển đơn này sang trạng thái: ${trangThaiMoi === "DaDuyet" ? "Phê duyệt" : "Từ chối"}?`,
+        `Bạn có chắc muốn chuyển sang trạng thái: ${trangThaiMoi}?`,
       )
     )
       return;
@@ -46,10 +44,45 @@ export default function AdminDonDangKy() {
     const data = await response.json();
     if (data.success) {
       alert("✅ " + data.message);
-      fetchDanhSach(); // Gọi lại API tải lại danh sách mới
-    } else {
-      alert("❌ Lỗi: " + data.message);
+      fetchDanhSach();
+    } else alert("❌ Lỗi: " + data.message);
+  };
+
+  // HÀM MỚI: Xử lý khi bấm nút "Xác nhận Lấy máu"
+  const handleXacNhan = async (maDon) => {
+    // Hiển thị cửa sổ nhỏ (prompt) để NVYT gõ số ml máu vào
+    const theTich = window.prompt(
+      "Nhập thể tích máu đã lấy (Ví dụ: 250, 350, hoặc 450):",
+      "350",
+    );
+    if (!theTich) return; // NVYT bấm Cancel thì hủy
+
+    // Bắt buộc NVYT phải gõ đúng 3 chuẩn này
+    if (!["250", "350", "450"].includes(theTich)) {
+      alert(
+        "Thể tích máu không hợp lệ! Vui lòng nhập đúng số 250, 350 hoặc 450.",
+      );
+      return;
     }
+
+    const token = localStorage.getItem("token");
+    const response = await fetch(
+      `https://localhost:7004/api/dondangky/${maDon}/xac-nhan`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ theTich: parseInt(theTich) }),
+      },
+    );
+
+    const data = await response.json();
+    if (data.success) {
+      alert("🩸 " + data.message);
+      fetchDanhSach(); // Tải lại bảng để thấy nó chuyển sang Đã Hoàn Thành
+    } else alert("❌ Lỗi: " + data.message);
   };
 
   return (
@@ -66,6 +99,7 @@ export default function AdminDonDangKy() {
               <th>Mã Đơn</th>
               <th>Người nộp</th>
               <th>Chiến Dịch</th>
+              <th>Thể tích</th>
               <th>Trạng thái</th>
               <th>Hành động</th>
             </tr>
@@ -76,13 +110,24 @@ export default function AdminDonDangKy() {
                 <td>
                   <strong>{don.maDon}</strong>
                 </td>
-                {/* Lôi tên người nộp ra hiển thị nhờ lệnh Include bên C# */}
                 <td>
                   {don.tinhNguyenVien
                     ? don.tinhNguyenVien.hoTen
                     : "Chưa cập nhật"}
                 </td>
                 <td>{don.chienDich ? don.chienDich.tenChienDich : "N/A"}</td>
+
+                {/* Hiển thị số ml máu nếu đã hiến xong */}
+                <td>
+                  {don.theTich ? (
+                    <span style={{ color: "#e63946", fontWeight: "bold" }}>
+                      {don.theTich} ml
+                    </span>
+                  ) : (
+                    "---"
+                  )}
+                </td>
+
                 <td>
                   <span
                     className={`status-badge ${don.trangThai === "ChoDuyet" ? "cho-duyet" : ""}`}
@@ -90,8 +135,9 @@ export default function AdminDonDangKy() {
                     {don.trangThai === "ChoDuyet" ? "Chờ duyệt" : don.trangThai}
                   </span>
                 </td>
+
                 <td>
-                  {/* Nếu đơn đang Chờ duyệt thì mới hiện 2 nút bấm lên */}
+                  {/* Nếu đang Chờ duyệt thì hiện nút Duyệt / Từ chối */}
                   {don.trangThai === "ChoDuyet" && (
                     <>
                       <button
@@ -110,7 +156,7 @@ export default function AdminDonDangKy() {
                         Duyệt
                       </button>
                       <button
-                        onClick={() => handleDuyet(don.maDon, "TuChoi")}
+                        onClick={() => handleDuyet(don.maDon, "DaTuChoi")}
                         style={{
                           background: "#e76f51",
                           color: "white",
@@ -124,6 +170,24 @@ export default function AdminDonDangKy() {
                         Từ chối
                       </button>
                     </>
+                  )}
+
+                  {/* NẾU ĐÃ DUYỆT RỒI THÌ HIỆN NÚT LẤY MÁU! */}
+                  {don.trangThai === "DaDuyet" && (
+                    <button
+                      onClick={() => handleXacNhan(don.maDon)}
+                      style={{
+                        background: "#d90429",
+                        color: "white",
+                        border: "none",
+                        padding: "8px 12px",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      🩸 Xác nhận Lấy máu
+                    </button>
                   )}
                 </td>
               </tr>
