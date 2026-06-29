@@ -57,8 +57,9 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
+          {/* NẾU LÀ ADMIN THÌ HIỆN CÁI HỘP NÀY */}
           {role === "NVYT" || role === "AD" ? (
-            // Gom chung 3 cái Link vào 1 cái thẻ div này (React quy định vậy)
+            // Lưu ý: TẤT CẢ nút của Admin phải nằm trong cái thẻ div này!
             <div style={{ display: "flex", gap: "15px" }}>
               <Link
                 to="/admin-tao-cd"
@@ -90,8 +91,20 @@ export default function Navbar() {
               >
                 📊 Thống Kê
               </Link>
+              {/* Đã dán nút Kho Máu vào đúng vị trí */}
+              <Link
+                to="/admin-kho-mau"
+                style={{
+                  color: "#d90429",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                }}
+              >
+                🏥 Kho Máu
+              </Link>
             </div>
           ) : (
+            /* NẾU LÀ NGƯỜI DÙNG THƯỜNG THÌ HIỆN NÚT NÀY */
             <Link
               to="/lich-su"
               style={{
