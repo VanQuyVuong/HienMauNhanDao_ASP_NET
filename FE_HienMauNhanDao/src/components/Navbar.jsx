@@ -96,29 +96,17 @@ export default function Navbar() {
       </ul>
 
       {/* Cột 3 : Tên người dùng và nút đăng xuất */}
-      <div className="navbar-user">
-        <span
-          className="user-email"
-          style={{ marginRight: "15px", color: "#6c757d" }}
-        >
-          Xin chào, {email}
-        </span>
-        <button
-          onClick={handleLogout}
-          className="btn-logout"
-          style={{
-            padding: "8px 15px",
-            backgroundColor: "#e9ecef",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            color: "#495057",
-          }}
-        >
-          Đăng xuất
-        </button>
-      </div>
+      <Link
+        to="/profile"
+        style={{
+          marginRight: "15px",
+          color: "#d90429",
+          fontWeight: "bold",
+          textDecoration: "none",
+        }}
+      >
+        👤 Xin chào, {email}
+      </Link>
     </nav>
   );
 }

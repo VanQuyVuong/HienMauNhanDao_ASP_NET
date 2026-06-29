@@ -4,7 +4,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AdminDonDangKy from "./pages/AdminDonDangKy";
 import AdminCreateCampaign from "./pages/AdminCreateCampaign"; // Phải import nó vào đây
-
+import UserProfile from ".page/UserProfile";
 function App() {
   return (
     <BrowserRouter>
@@ -18,6 +18,7 @@ function App() {
         {/* Các Route của tính năng Admin phải nằm TRONG NÀY */}
         <Route path="/admin-don" element={<AdminDonDangKy />} />
         <Route path="/admin-tao-cd" element={<AdminCreateCampaign />} />
+        <Route path="/profile" element={<UserProfile />} />
       </Routes>
     </BrowserRouter>
   );
