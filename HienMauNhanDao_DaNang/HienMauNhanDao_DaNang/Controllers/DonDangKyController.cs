@@ -85,7 +85,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         //API 3 :Dành cho nhân viên y tế xem toàn bộ danh sách đơn 
         [HttpGet("tat-ca")]
-        [Authorize(Roles ="NVYT, AD")]  //đây là ổ  khóa kép: Vừa phải có Thẻ, vừa phải có quyền NVYT hoặc Admin
+        [Authorize(Roles = "NVYT, AD")]  //đây là ổ  khóa kép: Vừa phải có Thẻ, vừa phải có quyền NVYT hoặc Admin
         public async Task<IActionResult> LayTatCaDon()
         {
             //Lấy tất cả mọi tờ đơn trong cơ sở dữ liệu 
@@ -109,7 +109,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         //API 4 :DÙNG CHO NHÂN VIÊN Y TẾ THAY ĐỔI TRẠNG THÁI ĐƠN 
         [HttpPut("{maDon}/duyet")]
-        [Authorize(Roles ="NVYT, AD")]
+        [Authorize(Roles = "NVYT, AD")]
 
         public async Task<IActionResult> DuyetDon(string maDon, [FromBody] DuyetDonRequest request)
         {
@@ -139,31 +139,72 @@ namespace HienMauNhanDao_DaNang.Controllers
             public int TheTich { set; get; }
         }
 
-        //API 5. Dành cho nhân viên y tế xác nhận đã lấy máu xong 
-        [HttpPut("{maDon}/xac_nhan")]
-        [Authorize(Roles ="NVYT,AD")]
+        // API 5: Dành cho NHÂN VIÊN Y TẾ xác nhận lấy máu (PHIÊN BẢN TỰ ĐỘNG NHẬP KHO)
+        [HttpPut("{maDon}/xac-nhan")]
+        [Authorize(Roles = "NVYT, AD")]
         public async Task<IActionResult> XacNhanHienMau(string maDon, [FromBody] XacNhanHienMauRequest request)
         {
-            var don = await _context.DonDangKys.FindAsync();
-            if (don == null) return NotFound(new { success = false, message = "Không tìm thấy đơn !" });
+            // 1. Lấy đơn ra, KÈM THEO thông tin của Tình nguyện viên (Để soi xem họ nhóm máu gì)
+            var don = await _context.DonDangKys
+                                    .Include(d => d.TinhNguyenVien)
+                                    .FirstOrDefaultAsync(d => d.MaDon == maDon);
 
+            if (don == null) return NotFound(new { success = false, message = "Không tìm thấy đơn!" });
 
-            //Kiẻm tra bảo mật : chỉ những đơn nào ở trạng thái đã duyệt thì mới cho phép lấy máu 
-
-            if(don.TrangThai != TrangThaiDonDangKy.DaDuyet)
+            if (don.TrangThai != TrangThaiDonDangKy.DaDuyet)
             {
-                return BadRequest(new { success = false, message = " Đơn chưa được duyêt hoặc đã xử lý, không thể lấy máu !" });
+                return BadRequest(new { success = false, message = "Đơn chưa được duyệt, không thể lấy máu!" });
             }
 
-            //1. chuyển trạng thái sang Đá hiến máu 
+            // 2. Chốt sổ tờ đơn
             don.TrangThai = TrangThaiDonDangKy.DaHoanThanh;
-
-            //2. ghi nhận thể tích ml máu thu được thưucj tế 
             don.TheTich = request.TheTich;
 
+            // --- BẮT ĐẦU DÂY CHUYỀN TỰ ĐỘNG ---
+
+            // Chặn ngay lập tức nếu Y tá đi lấy máu một người chưa điền Nhóm máu!
+            if (don.TinhNguyenVien.NhomMau == null)
+            {
+                return BadRequest(new { success = false, message = "Người này chưa cập nhật Nhóm máu trong Hồ sơ! Hãy yêu cầu họ cập nhật trên Web trước." });
+            }
+
+            // 3. Tìm cái Kho Máu tương ứng với nhóm máu của người này
+            var kho = await _context.KhoMaus.FirstOrDefaultAsync(k => k.NhomMau == don.TinhNguyenVien.NhomMau);
+
+            // Nếu bệnh viện chưa từng có Kho cho nhóm máu này, Tự động xây một cái Kho mới luôn!
+            if (kho == null)
+            {
+                kho = new KhoMau
+                {
+                    MaKho = "K_" + (int)don.TinhNguyenVien.NhomMau,
+                    TenKho = "Kho máu " + don.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-"),
+                    NhomMau = don.TinhNguyenVien.NhomMau,
+                    SoLuongTon = 0,
+                    NguongAnToan = 1000 // Gán mặc định 1 lít máu là ranh giới đỏ
+                };
+                _context.KhoMaus.Add(kho);
+            }
+
+            // 4. Bơm máu vừa lấy vào Kho
+            kho.SoLuongTon += request.TheTich;
+
+            // 5. Đóng gói 1 Bịch Máu (TuiMau) dán mã vạch cất vào CSDL
+            var tuiMau = new HienMauNhanDao_DaNang.Models.Entities.TuiMau
+            {
+                MaTuiMau = "TM" + DateTime.Now.ToString("HHmmssfff"), // Sinh mã vạch tự động theo giờ
+                MaDon = don.MaDon,
+                MaKho = kho.MaKho,
+                MaNhanVien = User.FindFirst("maTaiKhoan")?.Value, // Lưu tên Y tá thao tác để truy cứu trách nhiệm
+                TheTich = request.TheTich,
+                ThoiGianLayMau = DateTime.Now,
+                TrangThai = TrangThaiTuiMau.DaLuuKho
+            };
+            _context.TuiMaus.Add(tuiMau);
+
+            // LƯU TẤT CẢ 3 BẢNG (ĐƠN, KHO, TÚI) XUỐNG CSDL CÙNG 1 LÚC!
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true, message = $"Xác nhận thu thập {request.TheTich}ml máu thành công" });
+            return Ok(new { success = true, message = $"Lấy {request.TheTich}ml thành công! Đã tự đóng gói và nhập vào {kho.TenKho}." });
         }
     }
 }

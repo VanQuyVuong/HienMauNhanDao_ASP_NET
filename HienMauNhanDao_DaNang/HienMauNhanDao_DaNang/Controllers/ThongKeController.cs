@@ -40,3 +40,5 @@ namespace HienMauNhanDao_DaNang.Controllers
                 }
             });
         }
+    }
+}
