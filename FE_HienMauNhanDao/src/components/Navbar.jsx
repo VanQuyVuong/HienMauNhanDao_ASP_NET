@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "../css/Navbar.css";
 
 export default function Navbar() {
-  const role = localStorage.getItem("role"); // Lấy cái chức vụ đang cất trong kho
+  const role = localStorage.getItem("role"); // Lấy chức vụ đang cất trong kho
   const email = localStorage.getItem("email"); // Lấy email ra để chào hỏi
   const navigate = useNavigate();
 
@@ -58,6 +58,7 @@ export default function Navbar() {
         </li>
         <li>
           {role === "NVYT" || role === "AD" ? (
+            // Gom chung 3 cái Link vào 1 cái thẻ div này (React quy định vậy)
             <div style={{ display: "flex", gap: "15px" }}>
               <Link
                 to="/admin-tao-cd"
@@ -79,6 +80,16 @@ export default function Navbar() {
               >
                 🛡️ Quản lý Đơn
               </Link>
+              <Link
+                to="/admin-thong-ke"
+                style={{
+                  color: "#d90429",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                }}
+              >
+                📊 Thống Kê
+              </Link>
             </div>
           ) : (
             <Link
@@ -96,17 +107,34 @@ export default function Navbar() {
       </ul>
 
       {/* Cột 3 : Tên người dùng và nút đăng xuất */}
-      <Link
-        to="/profile"
-        style={{
-          marginRight: "15px",
-          color: "#d90429",
-          fontWeight: "bold",
-          textDecoration: "none",
-        }}
-      >
-        👤 Xin chào, {email}
-      </Link>
+      <div className="navbar-user">
+        <Link
+          to="/profile"
+          style={{
+            marginRight: "15px",
+            color: "#d90429",
+            fontWeight: "bold",
+            textDecoration: "none",
+          }}
+        >
+          👤 Xin chào, {email}
+        </Link>
+        <button
+          onClick={handleLogout}
+          className="btn-logout"
+          style={{
+            padding: "8px 15px",
+            backgroundColor: "#e9ecef",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            color: "#495057",
+          }}
+        >
+          Đăng xuất
+        </button>
+      </div>
     </nav>
   );
 }

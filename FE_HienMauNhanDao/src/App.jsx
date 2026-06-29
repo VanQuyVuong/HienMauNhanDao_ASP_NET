@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import AdminDonDangKy from "./pages/AdminDonDangKy";
 import AdminCreateCampaign from "./pages/AdminCreateCampaign"; // Phải import nó vào đây
 import UserProfile from ".page/UserProfile";
+import AdminDashboard from "./pages/AdminDashboard";
 function App() {
   return (
     <BrowserRouter>
@@ -19,6 +20,7 @@ function App() {
         <Route path="/admin-don" element={<AdminDonDangKy />} />
         <Route path="/admin-tao-cd" element={<AdminCreateCampaign />} />
         <Route path="/profile" element={<UserProfile />} />
+        <Route path="/admin-thong-ke" element={<AdminDashboard />} />
       </Routes>
     </BrowserRouter>
   );
