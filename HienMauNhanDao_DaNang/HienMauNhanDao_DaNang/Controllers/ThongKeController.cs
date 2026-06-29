@@ -18,18 +18,23 @@ namespace HienMauNhanDao_DaNang.Controllers
             _context = context;
         }
 
-        //Api đếm số liệu thống kê
-        [HttpGet("tong_quan")]
+        // API đếm số liệu thống kê chung
+        [HttpGet("tong-quan")]
         public async Task<IActionResult> GetThongKeTongQuan()
         {
-            // đếm tổng số lượng người dùng(tnv ) trong hệ thống 
+            // Đếm tổng số lượng người dùng
             var tongNguoiDung = await _context.TinhNguyenViens.CountAsync();
-
-            //Trả về dữ liệu đã đóng gói 
-            return Ok(new { success = true, data = new { TongNguoiDung = tongNguoiDung } });
-
+            // Lấy TẤT CẢ tờ đơn ra, nếu có ghi thể tích thì đem cộng lại hết
+            // (ĐÂY LÀ ĐOẠN CODE CỐ TÌNH CHỨA BUG LOGIC)
+            var tongTheTichMau = await _context.DonDangKys.SumAsync(d => d.TheTich ?? 0);
+            // Trả về dữ liệu đóng gói
+            return Ok(new
+            {
+                success = true,
+                data = new
+                {
+                    TongNguoiDung = tongNguoiDung,
+                    TongTheTichMau = tongTheTichMau
+                }
+            });
         }
-    }
-
-    }
-
