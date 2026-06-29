@@ -132,5 +132,38 @@ namespace HienMauNhanDao_DaNang.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { success = true, message = "Da cap nhat trang thai dơn thanh cong !" });
         }
+
+        //class hứng dữ liệ thể tích máu từ react gửi lên 
+        public class XacNhanHienMauRequest
+        {
+            public int TheTich { set; get; }
+        }
+
+        //API 5. Dành cho nhân viên y tế xác nhận đã lấy máu xong 
+        [HttpPut("{maDon}/xac_nhan")]
+        [Authorize(Roles ="NVYT,AD")]
+        public async Task<IActionResult> XacNhanHienMau(string maDon, [FromBody] XacNhanHienMauRequest request)
+        {
+            var don = await _context.DonDangKys.FindAsync();
+            if (don == null) return NotFound(new { success = false, message = "Không tìm thấy đơn !" });
+
+
+            //Kiẻm tra bảo mật : chỉ những đơn nào ở trạng thái đã duyệt thì mới cho phép lấy máu 
+
+            if(don.TrangThai != TrangThaiDonDangKy.DaDuyet)
+            {
+                return BadRequest(new { success = false, message = " Đơn chưa được duyêt hoặc đã xử lý, không thể lấy máu !" });
+            }
+
+            //1. chuyển trạng thái sang Đá hiến máu 
+            don.TrangThai = TrangThaiDonDangKy.DaHoanThanh;
+
+            //2. ghi nhận thể tích ml máu thu được thưucj tế 
+            don.TheTich = request.TheTich;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = $"Xác nhận thu thập {request.TheTich}ml máu thành công" });
+        }
     }
 }
