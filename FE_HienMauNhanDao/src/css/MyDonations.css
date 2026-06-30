@@ -38,3 +38,31 @@
   background-color: #fff3cd;
   color: #856404;
 }
+
+/* Style làm đẹp nút xem chứng nhận */
+.btn-xem-chungnhan {
+  background: linear-gradient(
+    135deg,
+    #10b981,
+    #059669
+  ); /* Màu xanh ngọc lục bảo */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-xem-chungnhan:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+  filter: brightness(1.05);
+}
+
+.btn-xem-chungnhan:active {
+  transform: translateY(0);
+}
