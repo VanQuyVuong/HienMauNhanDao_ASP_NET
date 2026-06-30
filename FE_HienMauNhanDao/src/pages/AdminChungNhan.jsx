@@ -11,6 +11,7 @@ export default function AdminChungNhan() {
   const [filterStatus, setFilterStatus] = useState("");
   const [selected, setSelected] = useState(null);
 
+  // 1. Hàm load danh sách ứng viên (Dùng phương thức GET mặc định)
   const loadData = async () => {
     setLoading(true);
     const token = localStorage.getItem("token");
@@ -55,16 +56,17 @@ export default function AdminChungNhan() {
     });
   }, [candidates, search, filterStatus]);
 
-  // HÀM GỌI API PHÁT HÀNH CHỨNG NHẬN
+  // 2. Hàm gọi API cấp phát chứng nhận (Bắt buộc dùng POST)
   const handleIssue = async (maDon, name) => {
     if (!window.confirm(`Bạn có chắc muốn cấp chứng nhận cho ${name}?`)) return;
 
     const token = localStorage.getItem("token");
     try {
-      // LỖI CỐ TÌNH: Quên thêm thuộc tính method: "POST"
+      // ĐÃ SỬA: Thêm method: "POST" và cấu hình đúng địa chỉ API
       const res = await fetch(
         `https://localhost:7004/api/chungnhan/issue/${maDon}`,
         {
+          method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         },
       );
@@ -152,7 +154,7 @@ export default function AdminChungNhan() {
                     <th>Tên Tình Nguyện Viên</th>
                     <th>Nhóm Máu</th>
                     <th>Thể Tích</th>
-                    <th>Trạng Tải</th>
+                    <th>Trạng Thái</th>
                     <th style={{ textAlign: "center" }}>Thao Tác</th>
                   </tr>
                 </thead>
