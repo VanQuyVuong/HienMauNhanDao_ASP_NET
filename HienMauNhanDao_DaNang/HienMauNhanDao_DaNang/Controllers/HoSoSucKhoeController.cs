@@ -32,7 +32,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
 
         //Api 1 tạo hồ sơ khai báo sức khoẻ mới 
-        public async Task<IActionResult> CreateHoSo(HoSoRequest request)
+        public async Task<IActionResult> CreateHoSo([FromBody] HoSoRequest request)
         {
             //kiểm tra đơn hiến máu có tồn tại không
             var don = await _context.DonDangKys.FindAsync(request.MaDon);
