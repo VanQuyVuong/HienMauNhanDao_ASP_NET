@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import thêm điều hướng
 import Navbar from "../components/Navbar";
 import "../css/MyDonations.css";
 
 export default function MyDonations() {
   const [lichSu, setLichSu] = useState([]);
+  const navigate = useNavigate(); // Hook chuyển trang
 
   useEffect(() => {
-    // Lấy thẻ Token
     const token = localStorage.getItem("token");
-
-    // Gọi API lấy lịch sử, kẹp thẻ vào
     fetch("https://localhost:7004/api/dondangky", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -36,6 +33,7 @@ export default function MyDonations() {
               <th>Thời gian nộp</th>
               <th>Thể tích</th>
               <th>Trạng thái</th>
+              <th>Chứng nhận</th> {/* THÊM TIÊU ĐỀ CỘT */}
             </tr>
           </thead>
           <tbody>
@@ -55,6 +53,20 @@ export default function MyDonations() {
                   >
                     {don.trangThai === "ChoDuyet" ? "Chờ duyệt" : don.trangThai}
                   </span>
+                </td>
+
+                {/* THÊM NÚT XEM CHỨNG NHẬN (chỉ hiện khi DaHoanThanh) */}
+                <td>
+                  {don.trangThai === "DaHoanThanh" ? (
+                    <button
+                      onClick={() => navigate(`/chung-nhan/${don.maDon}`)}
+                      className="btn-xem-chungnhan"
+                    >
+                      🎖️ Xem GCN
+                    </button>
+                  ) : (
+                    <span style={{ color: "#aaa" }}>Chưa khả dụng</span>
+                  )}
                 </td>
               </tr>
             ))}
