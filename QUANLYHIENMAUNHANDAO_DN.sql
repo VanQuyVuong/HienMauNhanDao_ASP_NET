@@ -1,6 +1,8 @@
 -- =============================================================
--- ĐỒ ÁN: HỆ THỐNG QUẢN LÝ HIẾN MÁU NHÂN ĐẠO ĐÀ NẴNG (BẢN CHUẨN)
--- Đã được tinh chỉnh 100% để đồng bộ với Code C# (Mô hình Database-First)
+-- ĐỒ ÁN: HỆ THỐNG QUẢN LÝ HIẾN MÁU NHÂN ĐẠO ĐÀ NẴNG
+-- Phiên bản: SẠCH - Không có tài khoản sẵn
+-- Người dùng tự đăng ký từ đầu để học cách hoạt động của BCrypt
+-- Cập nhật: 2026-06-30
 -- =============================================================
 
 DROP DATABASE IF EXISTS QuanLyHienMauNhanDaoTPDN;
@@ -8,7 +10,7 @@ CREATE DATABASE QuanLyHienMauNhanDaoTPDN CHARACTER SET utf8mb4 COLLATE utf8mb4_u
 USE QuanLyHienMauNhanDaoTPDN;
 
 -- -------------------------------------------------------------
--- BƯỚC 1: TẠO BẢNG (Đã sửa lại kiểu CHAR -> VARCHAR cho linh hoạt)
+-- BƯỚC 1: TẠO BẢNG
 -- -------------------------------------------------------------
 
 CREATE TABLE VAITRO (
@@ -26,7 +28,8 @@ CREATE TABLE DIADIEM (
     tenDiaDiem VARCHAR(150) NOT NULL,
     diaChiChiTiet VARCHAR(255) NOT NULL,
     maPhuongXa VARCHAR(10),
-    loaiDiaDiem VARCHAR(50) -- Khớp Enum: BenhVien, TrungTamYTe, TruongHoc, CoQuan, ĐiaiemCoDinh
+    loaiDiaDiem VARCHAR(50)
+    -- Giá trị Enum: BenhVien, TrungTamYTe, TruongHoc, CoQuan, DiaDiemCoDinh
 );
 
 CREATE TABLE KHOACONGTAC (
@@ -39,7 +42,7 @@ CREATE TABLE TAIKHOAN (
     maVaiTro VARCHAR(10),
     email VARCHAR(100) NOT NULL,
     matKhau VARCHAR(255) NOT NULL,
-    trangThai BOOLEAN DEFAULT TRUE 
+    trangThai BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE NHANVIEN (
@@ -62,9 +65,12 @@ CREATE TABLE TINHNGUYENVIEN (
     ngaySinh DATE NOT NULL,
     gioiTinh VARCHAR(10),
     soDienThoai VARCHAR(10) NOT NULL,
-    nhomMau VARCHAR(50), -- Khớp Enum: A_positive, O_negative...
+    nhomMau VARCHAR(50),
+    -- Giá trị Enum: A_positive, A_negative, B_positive, B_negative,
+    --               AB_positive, AB_negative, O_positive, O_negative
     diaChi VARCHAR(255),
-    maNhanVien VARCHAR(10) DEFAULT NULL
+    maNhanVien VARCHAR(10) DEFAULT NULL,
+    trangThai BOOLEAN DEFAULT TRUE  -- Khớp với C# entity: TinhNguyenVien.TrangThai
 );
 
 CREATE TABLE CHIENDICHHIENMAU (
@@ -75,9 +81,10 @@ CREATE TABLE CHIENDICHHIENMAU (
     thoiGianBD DATETIME NOT NULL,
     thoiGianKT DATETIME NOT NULL,
     soLuongDuKien INT,
-    trangThai VARCHAR(50) NOT NULL, -- Khớp Enum: ChuaBatDau, DangDienRa, DaKetThuc, DaHuy
+    trangThai VARCHAR(50) NOT NULL,
+    -- Giá trị Enum: ChuaBatDau, DangDienRa, DaKetThuc, DaHuy
     maQR VARCHAR(255),
-    imageUrl VARCHAR(255) 
+    imageUrl VARCHAR(255)
 );
 
 CREATE TABLE DONDANGKY (
@@ -87,19 +94,20 @@ CREATE TABLE DONDANGKY (
     maNhanVien VARCHAR(10) DEFAULT NULL,
     maQR VARCHAR(255),
     thoiGianDangKy DATETIME DEFAULT CURRENT_TIMESTAMP,
-    trangThai VARCHAR(50) NOT NULL, -- Khớp Enum: ChoDuyet, DaDuyet, DaTuChoi, DaHoanThanh
+    trangThai VARCHAR(50) NOT NULL,
+    -- Giá trị Enum: ChoDuyet, DaDuyet, DaTuChoi, DaHoanThanh
     theTich INT
 );
 
 CREATE TABLE HOSOSUCKHOE (
-     maHoSo VARCHAR(10) PRIMARY KEY,
-     maDon VARCHAR(10),
-     khangSinh BOOLEAN DEFAULT FALSE,
-     truyenNhiem BOOLEAN DEFAULT FALSE,
-     dauHong BOOLEAN DEFAULT FALSE,
-     coThai BOOLEAN DEFAULT FALSE,
-     moTaKhac VARCHAR(255) CHARACTER SET utf8mb4 ,
-     maNhanVien VARCHAR(10) DEFAULT NULL
+    maHoSo VARCHAR(10) PRIMARY KEY,
+    maDon VARCHAR(10),
+    khangSinh BOOLEAN DEFAULT FALSE,
+    truyenNhiem BOOLEAN DEFAULT FALSE,
+    dauHong BOOLEAN DEFAULT FALSE,
+    coThai BOOLEAN DEFAULT FALSE,
+    moTaKhac VARCHAR(255) CHARACTER SET utf8mb4,
+    maNhanVien VARCHAR(10) DEFAULT NULL
 );
 
 CREATE TABLE KETQUALAMSANG (
@@ -116,44 +124,47 @@ CREATE TABLE KETQUALAMSANG (
 
 CREATE TABLE KHOMAU (
     maKho VARCHAR(10) PRIMARY KEY,
-    tenKho NVARCHAR(50),
+    tenKho VARCHAR(50),
     nhomMau VARCHAR(50),
     soLuongTon INT DEFAULT 0,
-    nguongAnToan INT DEFAULT 10,
-    moTa NVARCHAR(255)
+    nguongAnToan INT DEFAULT 1000,
+    moTa VARCHAR(255)
 );
 
 CREATE TABLE TUIMAU (
-    maTuiMau VARCHAR(10) PRIMARY KEY,
+    maTuiMau VARCHAR(15) PRIMARY KEY,
+    -- VARCHAR(15) vì C# sinh mã: "TM" + timestamp 13 ký tự = 15 ký tự
     maDon VARCHAR(10),
     maNhanVien VARCHAR(10),
     maKho VARCHAR(10),
     theTich INT,
     thoiGianLayMau DATETIME,
-    trangThai VARCHAR(50) NOT NULL, -- Khớp Enum: ChuaXuLy, DaXetNghiem...
+    trangThai VARCHAR(50) NOT NULL,
+    -- Giá trị Enum: DaLuuKho, DaXuatKho, DaHuy
     nhietDoVanChuyen DOUBLE
 );
 
 CREATE TABLE KETQUAXETNGHIEM (
     maKQ VARCHAR(10) PRIMARY KEY,
-    maTuiMau VARCHAR(10),
+    maTuiMau VARCHAR(15),
     maNhanVien VARCHAR(10),
     nhomMau VARCHAR(50),
-    soLanXetNghiem int,
-    ketQua boolean,
+    soLanXetNghiem INT,
+    ketQua BOOLEAN,
     moTa VARCHAR(255)
 );
 
 CREATE TABLE PHIEUNHAPXUAT (
     maPhieu VARCHAR(10) PRIMARY KEY,
     maNhanVien VARCHAR(10),
-    loaiPhieu VARCHAR(50) NOT NULL, -- Khớp Enum: Nhap, Xuat
+    loaiPhieu VARCHAR(50) NOT NULL,
+    -- Giá trị Enum: Nhap, Xuat
     ngayNhapXuat DATE
 );
 
 CREATE TABLE CHITIETNHAPXUAT (
     maPhieu VARCHAR(10),
-    maTuiMau VARCHAR(10),
+    maTuiMau VARCHAR(15),
     PRIMARY KEY (maPhieu, maTuiMau)
 );
 
@@ -172,7 +183,8 @@ CREATE TABLE TINTUC (
     noiDung TEXT,
     hinhAnh VARCHAR(255),
     ngayDang DATETIME DEFAULT CURRENT_TIMESTAMP,
-    trangThai VARCHAR(50) -- Khớp Enum: NhapLieu, DanDang, DaAn
+    trangThai VARCHAR(50)
+    -- Giá trị Enum: NhapLieu, DanDang, DaAn
 );
 
 CREATE TABLE THONGBAO (
@@ -181,7 +193,8 @@ CREATE TABLE THONGBAO (
     maTaiKhoanNhan VARCHAR(10),
     noiDung TEXT,
     thoiGianGui DATETIME DEFAULT CURRENT_TIMESTAMP,
-    trangThai VARCHAR(50) -- Khớp Enum: ChuaDoc, DaDoc
+    trangThai VARCHAR(50)
+    -- Giá trị Enum: ChuaDoc, DaDoc
 );
 
 CREATE TABLE TINNHAN (
@@ -190,11 +203,17 @@ CREATE TABLE TINNHAN (
     maTaiKhoanNhan VARCHAR(10),
     noiDung TEXT,
     thoiGian DATETIME DEFAULT CURRENT_TIMESTAMP,
-    trangThai BOOLEAN DEFAULT FALSE 
+    trangThai BOOLEAN DEFAULT FALSE
+);
+
+-- Bảng lưu JWT Token đã bị thu hồi (dùng cho Logout)
+CREATE TABLE INVALIDATED_TOKEN (
+    id VARCHAR(512) PRIMARY KEY,
+    expiry_time DATETIME NOT NULL
 );
 
 -- -------------------------------------------------------------
--- BƯỚC 2: THIẾT LẬP KHÓA NGOẠI (FOREIGN KEYS)
+-- BƯỚC 2: THIẾT LẬP KHÓA NGOẠI
 -- -------------------------------------------------------------
 ALTER TABLE DIADIEM ADD FOREIGN KEY (maPhuongXa) REFERENCES PHUONGXA(maPhuongXa);
 ALTER TABLE TAIKHOAN ADD FOREIGN KEY (maVaiTro) REFERENCES VAITRO(maVaiTro);
@@ -229,33 +248,92 @@ ALTER TABLE THONGBAO ADD FOREIGN KEY (maTaiKhoanNhan) REFERENCES TAIKHOAN(maTaiK
 ALTER TABLE TINNHAN ADD FOREIGN KEY (maTaiKhoanGui) REFERENCES TAIKHOAN(maTaiKhoan);
 ALTER TABLE TINNHAN ADD FOREIGN KEY (maTaiKhoanNhan) REFERENCES TAIKHOAN(maTaiKhoan);
 
--- -------------------------------------------------------------
--- BƯỚC 3: DỮ LIỆU MẪU CƠ BẢN ĐỂ REACT HIỂN THỊ ĐƯỢC NGAY
--- -------------------------------------------------------------
+-- =============================================================
+-- BƯỚC 3: DỮ LIỆU NỀN (Không có tài khoản - Bạn tự đăng ký!)
+-- =============================================================
 
-INSERT INTO VAITRO VALUES 
-('AD','Quản trị hệ thống'), 
-('NVYT','Nhân viên y tế'), 
-('TNV','Tình nguyện viên');
+-- 3.1 VAI TRÒ
+INSERT INTO VAITRO VALUES
+('AD',   'Quản trị hệ thống'),
+('NVYT', 'Nhân viên y tế'),
+('TNV',  'Tình nguyện viên');
 
-INSERT INTO PHUONGXA VALUES ('PX00001','Phường Thạch Thang, Hải Châu');
+-- 3.2 PHƯỜNG XÃ
+INSERT INTO PHUONGXA VALUES
+('PX00001', 'Phường Thạch Thang, Hải Châu'),
+('PX00002', 'Phường Hòa Cường Bắc, Hải Châu'),
+('PX00003', 'Phường Mỹ An, Ngũ Hành Sơn'),
+('PX00004', 'Phường Hòa Minh, Liên Chiểu');
 
--- Chú ý cột Enum loaiDiaDiem: BenhVien
-INSERT INTO DIADIEM VALUES 
-('DD00001','Bệnh viện Đà Nẵng','124 Hải Phòng','PX00001','BenhVien');
+-- 3.3 ĐỊA ĐIỂM
+INSERT INTO DIADIEM VALUES
+('DD00001', 'Bệnh viện Đà Nẵng',            '124 Hải Phòng, Hải Châu',        'PX00001', 'BenhVien'),
+('DD00002', 'Bệnh viện C Đà Nẵng',           '122 Hải Phòng, Hải Châu',        'PX00001', 'BenhVien'),
+('DD00003', 'Trung tâm Y tế Ngũ Hành Sơn',   '231 Trần Đại Nghĩa',             'PX00003', 'TrungTamYTe'),
+('DD00004', 'Trường Đại học UTE Đà Nẵng',    '48 Cao Thắng, Hải Châu',         'PX00002', 'TruongHoc'),
+('DD00005', 'Trường Đại học Đông Á',          '33 Xô Viết Nghệ Tĩnh, Hải Châu', 'PX00002', 'TruongHoc');
 
-INSERT INTO KHOACONGTAC VALUES ('KC00001','Khoa Huyết học - BV Đà Nẵng');
+-- 3.4 KHOA CÔNG TÁC
+INSERT INTO KHOACONGTAC VALUES
+('KC00001', 'Khoa Huyết học - BV Đà Nẵng'),
+('KC00002', 'Khoa Xét nghiệm - BV Đà Nẵng'),
+('KC00003', 'Khoa Nội - BV C Đà Nẵng'),
+('KC00004', 'Phòng Hành chính - Quản trị');
 
--- Tài khoản mật khẩu là 123 (nếu bạn đã mã hóa bằng BCrypt thì dùng Hash của 123)
--- Tạm thời tôi để mật khẩu là chuỗi hash bcrypt của chữ "123" để bạn đăng nhập được.
-INSERT INTO TAIKHOAN VALUES 
-('TK00001','NVYT','admin@bvdn.vn','$2a$11$w8/QvP6b2e1B2m8t9Qv5kOiT9D3q6v.H4B7v7M/1A6X9vD6D3A0qO',1);
+-- 3.5 CHIẾN DỊCH (maNhanVien = NULL vì chưa có NVYT, sẽ cập nhật sau)
+INSERT INTO CHIENDICHHIENMAU
+    (maChienDich, maDiaDiem, maNhanVien, tenChienDich, thoiGianBD, thoiGianKT, soLuongDuKien, trangThai, maQR, imageUrl)
+VALUES
+('CD00001', 'DD00004', NULL, 'Lễ hội Xuân Hồng UTE 2026',          '2026-02-10 07:00', '2026-02-12 17:00', 500, 'DaKetThuc',  'QR_XH26', 'https://images.unsplash.com/photo-1615461066841-6116e61058f4?q=80&w=600'),
+('CD00002', 'DD00005', NULL, 'Chủ Nhật Đỏ - Đại học Đông Á 2026',  '2026-03-15 07:00', '2026-03-15 11:30', 300, 'DaKetThuc',  'QR_CN26', 'https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=600'),
+('CD00003', 'DD00001', NULL, 'Hiến Máu Thường Xuyên Tháng 7/2026', '2026-07-01 07:00', '2026-07-31 17:00', 200, 'DangDienRa', 'QR_TX26', 'https://images.unsplash.com/photo-1536856136534-bb679c52a9aa?q=80&w=600'),
+('CD00004', 'DD00001', NULL, 'Ngày Hiến Máu Nhân Đạo T8/2026',     '2026-08-15 07:00', '2026-08-15 17:00', 400, 'ChuaBatDau', 'QR_T826', 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=600'),
+('CD00005', 'DD00003', NULL, 'Chiến Dịch Hè Xanh - Ngũ Hành Sơn', '2026-08-01 07:00', '2026-08-03 17:00', 150, 'ChuaBatDau', 'QR_HX26', 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?q=80&w=600');
 
-INSERT INTO NHANVIEN VALUES 
-('NV00001','TK00001','KC00001','DD00001','Admin Hệ Thống','048075000001','Nam','0905123456');
+-- 3.6 KHO MÁU - 8 nhóm máu, tồn kho = 0 (chờ hiến máu thực tế)
+INSERT INTO KHOMAU VALUES
+('K_1', 'Kho máu A+',  'A_positive',  0, 1000, 'Nhóm máu A Rh dương'),
+('K_2', 'Kho máu B+',  'B_positive',  0, 1000, 'Nhóm máu B Rh dương'),
+('K_3', 'Kho máu AB+', 'AB_positive', 0, 1000, 'Nhóm máu AB Rh dương - hiếm'),
+('K_4', 'Kho máu O+',  'O_positive',  0, 1000, 'Nhóm máu O Rh dương - phổ biến nhất'),
+('K_5', 'Kho máu A-',  'A_negative',  0,  500, 'Nhóm máu A Rh âm - hiếm'),
+('K_6', 'Kho máu B-',  'B_negative',  0,  500, 'Nhóm máu B Rh âm - hiếm'),
+('K_7', 'Kho máu AB-', 'AB_negative', 0,  500, 'Nhóm máu AB Rh âm - cực hiếm'),
+('K_8', 'Kho máu O-',  'O_negative',  0,  500, 'Nhóm máu O Rh âm - cho được tất cả');
 
--- Chú ý cột Enum trangThai: DangDienRa, DaKetThuc...
-INSERT INTO CHIENDICHHIENMAU VALUES 
-('CD00001','DD00001','NV00001','Lễ hội Xuân Hồng UTE 2026','2026-02-10 07:00','2026-02-12 17:00',500,'DangDienRa','QR_XH26','https://images.unsplash.com/photo-1615461066841-6116e61058f4?q=80&w=600'),
-('CD00002','DD00001','NV00001','Chủ Nhật Đỏ Đại học Đông Á','2026-03-15 07:00','2026-03-15 11:30',300,'ChuaBatDau','QR_CN26','https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=600'),
-('CD00003','DD00001','NV00001','Hiến máu thường xuyên','2026-05-01 07:00','2026-05-31 17:00',200,'DaKetThuc','QR_TX26','https://images.unsplash.com/photo-1536856136534-bb679c52a9aa?q=80&w=600');
+-- =============================================================
+-- ✅ XONG! DB SẴN SÀNG - KHÔNG CÓ TÀI KHOẢN NÀO
+--
+-- ═══════════════════════════════════════════════════════════
+-- HƯỚNG DẪN TẠO TÀI KHOẢN THEO TỪNG VAI TRÒ
+-- ═══════════════════════════════════════════════════════════
+--
+-- ── BƯỚC 1: Đăng ký tài khoản qua Web ──────────────────────
+--   Vào localhost:5173/register
+--   Đăng ký bình thường → C# tự hash BCrypt → Lưu vào DB
+--   Mặc định tất cả tài khoản đăng ký qua web đều là TNV
+--
+-- ── BƯỚC 2: Nâng quyền lên NVYT trong MySQL Workbench ──────
+--   UPDATE TAIKHOAN
+--   SET maVaiTro = 'NVYT'
+--   WHERE email = 'email_ban_vua_dang_ky@gmail.com';
+--
+-- ── BƯỚC 3: Thêm hồ sơ Nhân viên (bắt buộc!) ──────────────
+--   INSERT INTO NHANVIEN VALUES (
+--     'NV00001',
+--     (SELECT maTaiKhoan FROM TAIKHOAN
+--      WHERE email = 'email_ban_vua_dang_ky@gmail.com'),
+--     'KC00001', 'DD00001',
+--     'Tên Nhân Viên Của Bạn', '000000000000', 'Nam', '0900000000'
+--   );
+--
+-- ── BƯỚC 4: Đăng nhập lại ───────────────────────────────────
+--   Token mới sẽ tự động có quyền NVYT ✅
+--
+-- ── LƯU Ý VỀ BCrypt ─────────────────────────────────────────
+--   BCrypt là mã hóa 1 chiều - không giải mã ngược được.
+--   Mỗi lần hash cùng 1 mật khẩu sẽ ra kết quả KHÁC NHAU,
+--   nhưng BCrypt.Verify("123", hash) luôn trả về TRUE.
+--   Đây là lý do hệ thống an toàn - dù lộ DB cũng không
+--   ai biết được mật khẩu gốc của bạn!
+-- =============================================================
