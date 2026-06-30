@@ -80,9 +80,8 @@ export default function GiayChungNhan() {
             <div className="cert-detail-row">
               <span className="detail-label">Ngày sinh:</span>
               <span className="detail-val">
-                {/* LỖI CỐ TÌNH: Gọi hàm .format() không tồn tại trên đối tượng Date trong Vanilla JS */}
                 {tnv?.ngaySinh
-                  ? new Date(tnv.ngaySinh).format("dd/MM/yyyy")
+                  ? new Date(tnv.ngaySinh).toLocaleDateString("vi-VN")
                   : "N/A"}
               </span>
             </div>
