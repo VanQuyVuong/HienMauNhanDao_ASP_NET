@@ -68,5 +68,20 @@ namespace HienMauNhanDao_DaNang.Controllers
 
             return Ok(new { success = true, message = "Lưu hồ sơ khai báo y tế thành công !", data = hoSo });
         }
+
+        //API 2 . LẤY THÔNG TIN HÒ SƠ SỨC KHOẺ Y TẾ CỦA MỘT ĐƠN ĐĂNG KÝ HIẾN MÁU CỤ THỂ 
+        [HttpGet("don")]
+        public async Task<IActionResult>  GetHoSoByMaDon(string maDon)
+        {
+            var hoSo = await _context.HoSoSucKhoes.FirstOrDefaultAsync(h => h.maDon);
+
+
+        if(hoSo == null)
+            {
+                return NotFound(new { success = false, message = "Đơn đăng ký này chưa được khai báo y tế" });
+            }
+            return Ok(new { succcess = true, data = hoSo });
+        }
+
     }
 }
