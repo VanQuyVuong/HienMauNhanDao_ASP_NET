@@ -70,10 +70,10 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
         //API 2 . LẤY THÔNG TIN HÒ SƠ SỨC KHOẺ Y TẾ CỦA MỘT ĐƠN ĐĂNG KÝ HIẾN MÁU CỤ THỂ 
-        [HttpGet("don")]
+        [HttpGet("don/{maDon}")]
         public async Task<IActionResult>  GetHoSoByMaDon(string maDon)
         {
-            var hoSo = await _context.HoSoSucKhoes.FirstOrDefaultAsync(h => h.maDon);
+            var hoSo = await _context.HoSoSucKhoes.FirstOrDefaultAsync(h => h.MaDon == maDon);
 
 
         if(hoSo == null)
