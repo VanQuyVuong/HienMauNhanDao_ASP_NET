@@ -83,5 +83,20 @@ namespace HienMauNhanDao_DaNang.Controllers
             return Ok(new { succcess = true, data = hoSo });
         }
 
+
+        //API 3 .Lấy toàn bộ danh sách hồ sơ sức khoẻ chỉ dành cho NVYT và AD
+        [HttpGet("tat-ca")]
+        [Authorize(Roles ="NVYT,AD")]
+        public async Task<IActionResult> GetTatCaHoSo()
+        {
+            var danhSach =await _context.HoSoSucKhoes
+                .Include(h => h.DonDangKy)
+                .ThenInclude(d => d.TinhNguyenVien)
+                .OrderByDescending(h => h.MaHoSo)
+                .ToListAsync();
+
+            return Ok(new { success = true, data = danhSach });
+        }
+
     }
 }
