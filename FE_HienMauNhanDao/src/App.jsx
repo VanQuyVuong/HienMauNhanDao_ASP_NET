@@ -3,26 +3,38 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AdminDonDangKy from "./pages/AdminDonDangKy";
-import AdminCreateCampaign from "./pages/AdminCreateCampaign"; // Phải import nó vào đây
+import AdminCreateCampaign from "./pages/AdminCreateCampaign";
 import UserProfile from "./pages/UserProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminKhoMau from "./pages/AdminKhoMau";
+import AdminChungNhan from "./pages/AdminChungNhan";
+import GiayChungNhan from "./pages/GiayChungNhan";
+
+// IMPORT TRANG KHAI BÁO Y TẾ MỚI:
+import KhaiBaoYTe from "./pages/KhaiBaoYTe";
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Mặc định vào web sẽ chuyển hướng sang trang Login */}
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* Các Route của tính năng Admin phải nằm TRONG NÀY */}
+        {/* Các Route của tính năng Admin */}
         <Route path="/admin-don" element={<AdminDonDangKy />} />
         <Route path="/admin-tao-cd" element={<AdminCreateCampaign />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/admin-thong-ke" element={<AdminDashboard />} />
         <Route path="/admin-kho-mau" element={<AdminKhoMau />} />
+        <Route path="/admin-chung-nhan" element={<AdminChungNhan />} />
+
+        {/* Xem chứng nhận */}
+        <Route path="/chung-nhan/:maDon" element={<GiayChungNhan />} />
+
+        {/* ROUTE MỚI (Lỗi cố ý: viết sai /khaibaoyte/:maDon) */}
+        <Route path="/khaibaoyte/:maDon" element={<KhaiBaoYTe />} />
       </Routes>
     </BrowserRouter>
   );
