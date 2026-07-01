@@ -31,8 +31,7 @@ function App() {
 
         <Route path="/chung-nhan/:maDon" element={<GiayChungNhan />} />
 
-        <Route path="/khaibaoyte/:maDon" element={<KhaiBaoYTe />} />
-
+        <Route path="/khai-bao-y-te/:maDon" element={<KhaiBaoYTe />} />
         <Route path="/admin-ho-so-yte" element={<AdminKhaiBaoYTe />} />
       </Routes>
     </BrowserRouter>
