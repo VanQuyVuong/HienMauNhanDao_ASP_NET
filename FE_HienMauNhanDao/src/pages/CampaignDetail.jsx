@@ -44,7 +44,7 @@ export default function CampaignDetail() {
       return;
     }
 
-        try {
+    try {
       // 1. Lấy thẻ Token đang cất trong kho của trình duyệt ra
       const token = localStorage.getItem("token");
 
@@ -52,25 +52,30 @@ export default function CampaignDetail() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` // 2. Kẹp thẻ vào phong bì gửi đi!
+          Authorization: `Bearer ${token}`, // 2. Kẹp thẻ vào phong bì gửi đi!
         },
         body: JSON.stringify({
-          maChienDich: chienDich.maChienDich
-        })
+          maChienDich: chienDich.maChienDich,
+        }),
       });
 
       const data = await response.json();
-      
-      if (response.ok) { // Kiểm tra response.ok thay vì data.success cho chắc ăn
+
+      if (response.ok) {
         alert("🎉 Chúc mừng! " + data.message);
+        // SỬA: Thêm dòng điều hướng sang trang khai báo y tế kèm mã đơn
+        navigate(`/khai-bao-y-te/${data.maDon}`);
       } else {
-        alert("❌ Lỗi: " + (data.message || "Bạn chưa đăng nhập hoặc thẻ đã hết hạn!"));
+        alert(
+          "❌ Lỗi: " +
+            (data.message || "Bạn chưa đăng nhập hoặc thẻ đã hết hạn!"),
+        );
       }
     } catch (error) {
       console.error("Lỗi:", error);
       alert("❌ Có lỗi xảy ra khi kết nối đến máy chủ.");
     }
-
+  };
 
   return (
     <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh", margin: 0 }}>
