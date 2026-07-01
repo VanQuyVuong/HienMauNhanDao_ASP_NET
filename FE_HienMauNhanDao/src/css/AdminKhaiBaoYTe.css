@@ -1,0 +1,185 @@
+.kbt-container {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+.kbt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.kbt-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #2b2d42;
+  margin: 0;
+}
+
+.kbt-subtitle {
+  font-size: 13px;
+  color: #718096;
+  margin: 5px 0 0 0;
+}
+
+.kbt-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.kbt-stat-card {
+  background: white;
+  border-radius: 10px;
+  padding: 14px 20px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  min-width: 90px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.kbt-stat-number {
+  font-size: 28px;
+  font-weight: 800;
+  color: #2b2d42;
+}
+
+.kbt-stat-card.kbt-stat-risk .kbt-stat-number {
+  color: #dc2626;
+}
+
+.kbt-stat-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.kbt-search-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.kbt-search-input {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.kbt-search-input:focus {
+  border-color: #f87171;
+}
+
+.btn-reload {
+  padding: 10px 18px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 13px;
+  color: #475569;
+}
+
+.btn-reload:hover {
+  background: #f8fafc;
+}
+
+.kbt-table-wrapper {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.kbt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.kbt-table thead tr {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.kbt-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.kbt-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.kbt-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.kbt-table tbody tr.row-risk {
+  background-color: #fff5f5;
+}
+
+.kbt-table tbody tr.row-risk:hover {
+  background-color: #fee2e2;
+}
+
+.badge-yn {
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.badge-yn-yes {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.badge-yn-no {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.text-primary {
+  color: #d90429;
+}
+
+.font-mono {
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.col-motakhac {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.kbt-loading {
+  text-align: center;
+  padding: 50px;
+  color: #94a3b8;
+}

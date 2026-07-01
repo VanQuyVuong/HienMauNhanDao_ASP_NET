@@ -9,8 +9,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminKhoMau from "./pages/AdminKhoMau";
 import AdminChungNhan from "./pages/AdminChungNhan";
 import GiayChungNhan from "./pages/GiayChungNhan";
-
-// IMPORT TRANG KHAI BÁO Y TẾ MỚI:
+import AdminKhaiBaoYTe from "./pages/AdminKhaiBaoYTe";
 import KhaiBaoYTe from "./pages/KhaiBaoYTe";
 
 function App() {
@@ -30,11 +29,11 @@ function App() {
         <Route path="/admin-kho-mau" element={<AdminKhoMau />} />
         <Route path="/admin-chung-nhan" element={<AdminChungNhan />} />
 
-        {/* Xem chứng nhận */}
         <Route path="/chung-nhan/:maDon" element={<GiayChungNhan />} />
 
-        {/* ROUTE MỚI (Lỗi cố ý: viết sai /khaibaoyte/:maDon) */}
         <Route path="/khaibaoyte/:maDon" element={<KhaiBaoYTe />} />
+
+        <Route path="/admin-ho-so-yte" element={<AdminKhaiBaoYTe />} />
       </Routes>
     </BrowserRouter>
   );

@@ -61,6 +61,8 @@ export default function Navbar() {
           {role === "NVYT" || role === "AD" ? (
             // Lưu ý: TẤT CẢ nút của Admin phải nằm trong cái thẻ div này!
             <div style={{ display: "flex", gap: "15px" }}>
+              <Link to="/admin-ho-so-yte">📋 Hồ sơ y tế</Link>
+
               <Link
                 to="/admin-tao-cd"
                 style={{
@@ -101,6 +103,16 @@ export default function Navbar() {
                 }}
               >
                 🏥 Kho Máu
+              </Link>
+              <Link
+                to="/admin-chung-nhan"
+                style={{
+                  color: "#d90429",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                }}
+              >
+                🎖️ Cấp Chứng Nhận
               </Link>
             </div>
           ) : (
