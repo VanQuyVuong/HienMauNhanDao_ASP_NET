@@ -62,7 +62,7 @@ namespace HienMauNhanDao_DaNang.Controllers
             _context.DonDangKys.Add(donMoi);
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true, message = "Đăng ký hiến máu thành công!" });
+            return Ok(new { success = true, message = "Đăng ký hiến máu thành công!", maDon=donMoi.MaDon });
         }
 
         [HttpGet]
