@@ -11,6 +11,7 @@ import AdminChungNhan from "./pages/AdminChungNhan";
 import GiayChungNhan from "./pages/GiayChungNhan";
 import AdminKhaiBaoYTe from "./pages/AdminKhaiBaoYTe";
 import KhaiBaoYTe from "./pages/KhaiBaoYTe";
+import QuanLyHanDung from "./pages/QuanLyHanDung";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
 
         <Route path="/khai-bao-y-te/:maDon" element={<KhaiBaoYTe />} />
         <Route path="/admin-ho-so-yte" element={<AdminKhaiBaoYTe />} />
+        <Route path="/admin-han-dung" element={<QuanLyHanDung />} />
       </Routes>
     </BrowserRouter>
   );

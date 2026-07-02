@@ -56,64 +56,34 @@ export default function Navbar() {
             Chiến dịch
           </Link>
         </li>
-        <li>
-          {/* NẾU LÀ ADMIN THÌ HIỆN CÁI HỘP NÀY */}
-          {role === "NVYT" || role === "AD" ? (
-            // Lưu ý: TẤT CẢ nút của Admin phải nằm trong cái thẻ div này!
+                <li>
+          {/* NẾU LÀ NHÂN VIÊN NỘI BỘ (AD, NVYT, QLK, BS) THÌ HIỆN CÁC MENU NÀY */}
+          {role === "AD" || role === "NVYT" || role === "QLK" || role === "BS" ? (
             <div style={{ display: "flex", gap: "15px" }}>
-              <Link to="/admin-ho-so-yte">📋 Hồ sơ y tế</Link>
+              
+              {/* Menu của Nhân viên y tế và Admin */}
+              {(role === "NVYT" || role === "AD") && (
+                <>
+                  <Link to="/admin-ho-so-yte" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>📋 Hồ sơ y tế</Link>
+                  <Link to="/admin-tao-cd" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>➕ Tạo Chiến Dịch</Link>
+                  <Link to="/admin-don" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>🛡️ Quản lý Đơn</Link>
+                  <Link to="/admin-chung-nhan" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>🎖️ Cấp Chứng Nhận</Link>
+                </>
+              )}
 
-              <Link
-                to="/admin-tao-cd"
-                style={{
-                  color: "#d90429",
-                  fontWeight: "bold",
-                  textDecoration: "none",
-                }}
-              >
-                ➕ Tạo Chiến Dịch
-              </Link>
-              <Link
-                to="/admin-don"
-                style={{
-                  color: "#d90429",
-                  fontWeight: "bold",
-                  textDecoration: "none",
-                }}
-              >
-                🛡️ Quản lý Đơn
-              </Link>
-              <Link
-                to="/admin-thong-ke"
-                style={{
-                  color: "#d90429",
-                  fontWeight: "bold",
-                  textDecoration: "none",
-                }}
-              >
-                📊 Thống Kê
-              </Link>
-              {/* Đã dán nút Kho Máu vào đúng vị trí */}
-              <Link
-                to="/admin-kho-mau"
-                style={{
-                  color: "#d90429",
-                  fontWeight: "bold",
-                  textDecoration: "none",
-                }}
-              >
-                🏥 Kho Máu
-              </Link>
-              <Link
-                to="/admin-chung-nhan"
-                style={{
-                  color: "#d90429",
-                  fontWeight: "bold",
-                  textDecoration: "none",
-                }}
-              >
-                🎖️ Cấp Chứng Nhận
-              </Link>
+              {/* Menu của Thủ kho và Admin */}
+              {(role === "QLK" || role === "AD") && (
+                <>
+                  <Link to="/admin-kho-mau" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>🏥 Kho Máu</Link>
+                  <Link to="/admin-han-dung" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>⏳ Hạn Dùng</Link>
+                </>
+              )}
+
+              {/* Menu Thống kê chung của Admin */}
+              {role === "AD" && (
+                <Link to="/admin-thong-ke" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>📊 Thống Kê</Link>
+              )}
+
             </div>
           ) : (
             /* NẾU LÀ NGƯỜI DÙNG THƯỜNG THÌ HIỆN NÚT NÀY */
