@@ -95,6 +95,123 @@ namespace HienMauNhanDao_DaNang.Controllers
             });
         }
 
+        // 4. API lưu kết quả khám lâm sàng & TỰ ĐỘNG sinh túi máu nếu kết quả ĐẠT
+        // POST /api/khamlamsang/luu
+        [HttpPost("luu")]
+        public async Task<IActionResult> LuuKetQua([FromBody] KhamLamSangRequest request)
+        {
+            var don = await _context.DonDangKys.FirstOrDefaultAsync(d => d.MaDon == request.MaDon);
+            if (don == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy đơn đăng ký này." });
+            }
+            // A. Sinh mã khám sàng lọc tự động (Dạng: KS00001)
+            var maxKQ = await _context.KetQuaLamSangs.OrderByDescending(k => k.MaKQ).FirstOrDefaultAsync();
+            int nextKQId = 1;
 
+            if(maxKQ != null && maxKQ.MaKQ.StartsWith("KS"))
+            {
+                int.TryParse(maxKQ.MaKQ.Substring(2), out int currentKQId);
+                nextKQId = currentKQId + 1;
+            }
+            string newMaKQ = "KS" + nextKQId.ToString("D5");
+
+            //B.Tạo thực thể kết quả khám sàn lọc 
+            var kqls= new.KetQuaLamSang 
+                {
+                MaKQ = newMaKQ,
+                MaDon = request.MaDon,
+                MaNhanVien = request.MaNhanVien,
+                HuyetAp = request.HuyetAp,
+                NhipTim = request.NhipTim,
+                CanNang = request.CanNang,
+                NhietDo = request.NhietDo,
+                KetQua = request.KetQua,
+                LyDoTuChoi = request.KetQua ? "" : request.LyDoTuChoi
+            };
+            _context.KetQuaLamSangs.Add(kqls);
+
+
+            //c.xử lý logic Đạt/KHông đạt  và tự động tạo túi máu 
+            if (request.KetQua)
+            {
+                don.TrangThai = TrangThaiDonDangKy.DaHoanThanh;
+                don.TheTich = request.TheTichHien;
+
+
+                var maxTM = await _context.TuiMaus.OrderByDescending(t => t.MaTuiMau).FirstOrDefaultAsync();
+                int nextTMId = 1;
+
+                if(maxTM !=null && maxTM.MaTuiMau.StartsWith("TM"))
+                {
+                    int.TryParse(maxTM.MaTuiMau.Substring(2), out int currentTMId);
+                    nextTMId = currentTMId + 1;
+                }
+                string newMaTM = "TM" + nextTMId.ToString("D5");
+
+                var tuiMau = new TuiMau
+                {
+                    MaTuiMau = newMaTM,
+                    MaDon = request.MaDon,
+                    MaNhanVien = request.MaNhanVien,
+                    TheTich = request.TheTichHien,
+                    ThoiGianLayMau = DateTime.Now,
+                    TrangThai = TrangThaiTuiMau.ChuaXuLy,
+                    NhietDoVanChuyen = 4.0
+                };
+                _context.TuiMaus.Add(tuiMau);
+            }
+            else
+            {
+                don.TrangThai = TrangThaiDonDangKy.DaTuChoi;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Lưu kết quả khám và xử lý tứi máu thành công" });
+
+
+        }
+
+        //5. API xoá ca khám sàng lọc (để sửa sai )
+        [HttpDelete("xoa/{id")]
+        public async Task<IActionResult> XoaCaKham(string id)
+        {
+            var caKham = await _context.KetQuaLamSangs.FirstOrDefaultAsync(k => k.MaKQ == id);
+
+            if(caKham == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy ca khám" });
+
+            }
+            var tuiMau = await _context.TuiMaus.FirstOrDefaultAsync(t => t.MaDon == caKham.MaDon);
+
+            if(tuiMau!= null)
+            {
+                _context.TuiMaus.Remove(tuiMau);
+            }
+
+            var don = await _context.DonDangKys.FirstOrDefaultAsync(d => d.Madon == caKham.MaDon);
+            if (don != null)
+            {
+                don.TrangThai = TrangThaiDonDangKy.DaDuyet;
+                don.TheTich = null;
+            }
+            _context.KetQuaLamSangs.Remove(caKham);
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Đã xóa ca khám và khôi phục đơn đăng ký." });
+        }
+    }
+    // Lớp DTO hứng dữ liệu gửi lên từ React
+    public class KhamLamSangRequest
+    {
+        public string MaDon { get; set; } = string.Empty;
+        public string MaNhanVien { get; set; } = string.Empty;
+        public string HuyetAp { get; set; } = string.Empty;
+        public int NhipTim { get; set; }
+        public double CanNang { get; set; }
+        public double NhietDo { get; set; }
+        public bool KetQua { get; set; }
+        public string? LyDoTuChoi { get; set; }
+        public int TheTichHien { get; set; }
     }
 }
