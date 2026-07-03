@@ -5,28 +5,26 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace HienMauNhanDao_DaNang.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles ="BS,AD")]
+    [Authorize(Roles = "BS,AD")]
     public class KhamLamSangController : ControllerBase
     {
-
         private readonly AppDbContext _context;
 
-        public KhamLamSangController (AppDbContext context)
+        public KhamLamSangController(AppDbContext context)
         {
             _context = context;
         }
 
-
-        //API 1 Lấy ra danh sách các đơn đang chờ khám sàn lọc 
+        // 1. API Lấy ra danh sách các đơn đang chờ khám sàng lọc 
+        // GET /api/khamlamsang/cho-kham
         [HttpGet("cho-kham")]
         public async Task<IActionResult> GetDanhSachChoKham()
         {
-            //loc ra nhung don Da duyet, khai bao y te (HoSoYTe != null ), va chua tung duoc kham lam san 
+            // Lọc ra những đơn Đã duyệt, đã khai báo y tế và chưa từng được khám lâm sàng 
             var choKham = await _context.DonDangKys
                 .Include(d => d.TinhNguyenVien)
                 .Where(d => d.TrangThai == TrangThaiDonDangKy.DaDuyet)
@@ -35,16 +33,16 @@ namespace HienMauNhanDao_DaNang.Controllers
                 .Select(d => new
                 {
                     maDon = d.MaDon,
-                    tenTinhNguyenVien = d.TinhNguyenVien != null ? d.TinhNguyenVien.HoTen : "An danh".
-                    ngaySinh = d.TinhNguyenVien != null && d.TinhNguyenVien.ngaySinh != null ? d.TinhNguyenVien.ngaySinh.Value.ToString("dd/MM/yyyy") : "---",
+                    tenTinhNguyenVien = d.TinhNguyenVien != null ? d.TinhNguyenVien.HoTen : "Ẩn danh",
+                    ngaySinh = d.TinhNguyenVien != null && d.TinhNguyenVien.NgaySinh != null ? d.TinhNguyenVien.NgaySinh.Value.ToString("dd/MM/yyyy") : "---",
                     gioiTinh = d.TinhNguyenVien != null ? d.TinhNguyenVien.GioiTinh.ToString().Replace("Nu", "Nữ").Replace("Nam", "Nam") : "---",
                     nhomMau = d.TinhNguyenVien != null && d.TinhNguyenVien.NhomMau != null ?
-                    d.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ"
+                        d.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ"
                 })
                 .ToListAsync();
-            return Ok(choKham);
-         }
 
+            return Ok(choKham);
+        }
 
         // 2. API lấy danh sách lịch sử tất cả các ca khám sàng lọc đã thực hiện
         // GET /api/khamlamsang/danh-sach
@@ -62,7 +60,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 {
                     maKQ = k.MaKQ,
                     maDon = k.MaDon,
-                    tenTinhNguyenVien = k.DonDangKy != null && k.DonDangKy.TinhNguyenVien != null ? k.DonDangKy.TinhNguyenVien.hoTen : "Ẩn danh",
+                    tenTinhNguyenVien = k.DonDangKy != null && k.DonDangKy.TinhNguyenVien != null ? k.DonDangKy.TinhNguyenVien.HoTen : "Ẩn danh",
                     tenChienDich = k.DonDangKy != null && k.DonDangKy.ChienDich != null ? k.DonDangKy.ChienDich.TenChienDich : "N/A",
                     huyetAp = k.HuyetAp,
                     nhipTim = k.NhipTim,
@@ -105,20 +103,20 @@ namespace HienMauNhanDao_DaNang.Controllers
             {
                 return NotFound(new { success = false, message = "Không tìm thấy đơn đăng ký này." });
             }
+
             // A. Sinh mã khám sàng lọc tự động (Dạng: KS00001)
             var maxKQ = await _context.KetQuaLamSangs.OrderByDescending(k => k.MaKQ).FirstOrDefaultAsync();
             int nextKQId = 1;
-
-            if(maxKQ != null && maxKQ.MaKQ.StartsWith("KS"))
+            if (maxKQ != null && maxKQ.MaKQ.StartsWith("KS"))
             {
                 int.TryParse(maxKQ.MaKQ.Substring(2), out int currentKQId);
                 nextKQId = currentKQId + 1;
             }
             string newMaKQ = "KS" + nextKQId.ToString("D5");
 
-            //B.Tạo thực thể kết quả khám sàn lọc 
-            var kqls= new.KetQuaLamSang 
-                {
+            // B. Tạo thực thể kết quả khám sàng lọc 
+            var kqls = new KetQuaLamSang
+            {
                 MaKQ = newMaKQ,
                 MaDon = request.MaDon,
                 MaNhanVien = request.MaNhanVien,
@@ -131,18 +129,15 @@ namespace HienMauNhanDao_DaNang.Controllers
             };
             _context.KetQuaLamSangs.Add(kqls);
 
-
-            //c.xử lý logic Đạt/KHông đạt  và tự động tạo túi máu 
+            // C. Xử lý logic Đạt/Không đạt và tự động tạo túi máu 
             if (request.KetQua)
             {
                 don.TrangThai = TrangThaiDonDangKy.DaHoanThanh;
                 don.TheTich = request.TheTichHien;
 
-
                 var maxTM = await _context.TuiMaus.OrderByDescending(t => t.MaTuiMau).FirstOrDefaultAsync();
                 int nextTMId = 1;
-
-                if(maxTM !=null && maxTM.MaTuiMau.StartsWith("TM"))
+                if (maxTM != null && maxTM.MaTuiMau.StartsWith("TM"))
                 {
                     int.TryParse(maxTM.MaTuiMau.Substring(2), out int currentTMId);
                     nextTMId = currentTMId + 1;
@@ -167,40 +162,40 @@ namespace HienMauNhanDao_DaNang.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return Ok(new { success = true, message = "Lưu kết quả khám và xử lý tứi máu thành công" });
-
-
+            return Ok(new { success = true, message = "Lưu kết quả khám và xử lý túi máu thành công." });
         }
 
-        //5. API xoá ca khám sàng lọc (để sửa sai )
-        [HttpDelete("xoa/{id")]
+        // 5. API xóa ca khám sàng lọc (Để sửa sai)
+        // DELETE /api/khamlamsang/xoa/{id}
+        [HttpDelete("xoa/{id}")]
         public async Task<IActionResult> XoaCaKham(string id)
         {
             var caKham = await _context.KetQuaLamSangs.FirstOrDefaultAsync(k => k.MaKQ == id);
-
-            if(caKham == null)
+            if (caKham == null)
             {
                 return NotFound(new { success = false, message = "Không tìm thấy ca khám" });
-
             }
-            var tuiMau = await _context.TuiMaus.FirstOrDefaultAsync(t => t.MaDon == caKham.MaDon);
 
-            if(tuiMau!= null)
+            var tuiMau = await _context.TuiMaus.FirstOrDefaultAsync(t => t.MaDon == caKham.MaDon);
+            if (tuiMau != null)
             {
                 _context.TuiMaus.Remove(tuiMau);
             }
 
-            var don = await _context.DonDangKys.FirstOrDefaultAsync(d => d.Madon == caKham.MaDon);
+            var don = await _context.DonDangKys.FirstOrDefaultAsync(d => d.MaDon == caKham.MaDon);
             if (don != null)
             {
                 don.TrangThai = TrangThaiDonDangKy.DaDuyet;
                 don.TheTich = null;
             }
+
             _context.KetQuaLamSangs.Remove(caKham);
             await _context.SaveChangesAsync();
+
             return Ok(new { success = true, message = "Đã xóa ca khám và khôi phục đơn đăng ký." });
         }
     }
+
     // Lớp DTO hứng dữ liệu gửi lên từ React
     public class KhamLamSangRequest
     {

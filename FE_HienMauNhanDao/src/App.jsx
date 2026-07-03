@@ -12,6 +12,7 @@ import GiayChungNhan from "./pages/GiayChungNhan";
 import AdminKhaiBaoYTe from "./pages/AdminKhaiBaoYTe";
 import KhaiBaoYTe from "./pages/KhaiBaoYTe";
 import QuanLyHanDung from "./pages/QuanLyHanDung";
+import KhamLamSang from "./pages/KhamLamSang";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/khai-bao-y-te/:maDon" element={<KhaiBaoYTe />} />
         <Route path="/admin-ho-so-yte" element={<AdminKhaiBaoYTe />} />
         <Route path="/admin-han-dung" element={<QuanLyHanDung />} />
+        <Route path="/admin-kham-sang-loc" element={<KhamLamSang />} />
       </Routes>
     </BrowserRouter>
   );
