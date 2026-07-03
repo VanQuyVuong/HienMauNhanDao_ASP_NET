@@ -79,6 +79,11 @@ export default function Navbar() {
                 </>
               )}
 
+              {/* Menu của Bác sĩ và Admin */}
+              {(role === "BS" || role === "AD") && (
+                <Link to="/admin-kham-sang-loc" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>🩺 Khám sàng lọc</Link>
+              )}
+
               {/* Menu Thống kê chung của Admin */}
               {role === "AD" && (
                 <Link to="/admin-thong-ke" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>📊 Thống Kê</Link>
