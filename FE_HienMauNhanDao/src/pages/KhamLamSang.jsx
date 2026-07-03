@@ -211,6 +211,15 @@ export default function KhamLamSang() {
                     onChange={e => setForm(p => ({ ...p, huyetAp: e.target.value }))}
                     placeholder="VD: 120/80" 
                   />
+                  {form.huyetAp && form.huyetAp.includes("/") && (
+                    (() => {
+                      const sys = parseInt(form.huyetAp.split("/")[0]);
+                      if (!isNaN(sys) && (sys > 140 || sys < 90)) {
+                        return <span className="warning-note-text">⚠️ Huyết áp bất thường (90-140)</span>;
+                      }
+                      return null;
+                    })()
+                  )}
                 </div>
 
                 <div className="form-group">
@@ -220,6 +229,15 @@ export default function KhamLamSang() {
                     value={form.nhipTim} 
                     onChange={e => setForm(p => ({ ...p, nhipTim: e.target.value }))}
                   />
+                  {form.nhipTim && (
+                    (() => {
+                      const hr = parseInt(form.nhipTim);
+                      if (!isNaN(hr) && (hr > 100 || hr < 60)) {
+                        return <span className="warning-note-text">⚠️ Nhịp tim bất thường (60-100)</span>;
+                      }
+                      return null;
+                    })()
+                  )}
                 </div>
 
                 <div className="form-group">
@@ -229,6 +247,15 @@ export default function KhamLamSang() {
                     value={form.canNang} 
                     onChange={e => setForm(p => ({ ...p, canNang: e.target.value }))}
                   />
+                  {form.canNang && (
+                    (() => {
+                      const w = parseFloat(form.canNang);
+                      if (!isNaN(w) && w < 45) {
+                        return <span className="warning-note-text">⚠️ Cân nặng &lt; 45kg (Chỉ hiến 250ml)</span>;
+                      }
+                      return null;
+                    })()
+                  )}
                 </div>
 
                 <div className="form-group">
@@ -239,6 +266,15 @@ export default function KhamLamSang() {
                     value={form.nhietDo} 
                     onChange={e => setForm(p => ({ ...p, nhietDo: e.target.value }))}
                   />
+                  {form.nhietDo && (
+                    (() => {
+                      const t = parseFloat(form.nhietDo);
+                      if (!isNaN(t) && (t > 37.8 || t < 36.0)) {
+                        return <span className="warning-note-text">⚠️ Thân nhiệt bất thường (36-37.8)</span>;
+                      }
+                      return null;
+                    })()
+                  )}
                 </div>
               </div>
 

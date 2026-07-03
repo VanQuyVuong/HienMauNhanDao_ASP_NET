@@ -302,6 +302,13 @@
 .badge-success { background: #dcfce7; color: #16a34a; }
 .badge-danger { background: #fee2e2; color: #dc2626; }
 
+.warning-note-text {
+  font-size: 10px;
+  color: #dc2626;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
 .col-campaign {
   max-width: 150px;
   overflow: hidden;
