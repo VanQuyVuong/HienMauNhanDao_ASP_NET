@@ -55,7 +55,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                     maKQ = item.MaKQ,
                     maTuiMau = item.MaTuiMau,
                     maNhanVien = item.MaNhanVien,
-                    nhomMau = item.NhomMau != null > item.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ",
+                    nhomMau = item.NhomMau != null ? item.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ",
                     soLanXetNghiem = item.SoLanXetNghiem ?? 1,
                     ketQua = item.KetQua,
                     moTa = item.MoTa,
@@ -103,18 +103,18 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         //API 3. lưu hoặc cập nhật kết quả  xét nghiệm túi máu 
         [HttpPost("luu")]
-        public async Task<IActionResult> LuuXetNghiem([FromBody]  LuuXetNghiemRequets requets)
+        public async Task<IActionResult> LuuXetNghiem([FromBody] LuuXetNghiemRequest request)
         {
             //1.tìm túi máu cần xét nghiêmh xem có thực sự tồn tạo hay không 
 
-            var TuiMau = await _context.TuiMaus.FirstOrDefaultAsync(t => t.MaTuiMau == requets.MaTuiMau);
-            if(TuiMau == null)
+            var tuiMau = await _context.TuiMaus.FirstOrDefaultAsync(t => t.MaTuiMau == request.MaTuiMau);
+            if(tuiMau == null)
             {
                 return NotFound(new { success = false, message = "Không tìm thấy túi máu cần xét nghiệm" });
             }
 
             //2.tìm xem đã có bản ghi xét nghiệm nào cho túi máu này chưa 
-            var xetNghiem = await _context.KetQuaXetNghiems.FirstOrDefaultAsync(k => k.MaTuiMau == requets.MaTuiMau);
+            var xetNghiem = await _context.KetQuaXetNghiems.FirstOrDefaultAsync(k => k.MaTuiMau == request.MaTuiMau);
 
             //Dịch chuỗi nhóm máu từ FrontEnd sáng enum 
             var parsedNhomMau = ParseNhomMau(request.NhomMau);
