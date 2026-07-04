@@ -7,6 +7,9 @@ import AdminCreateCampaign from "./pages/AdminCreateCampaign"; // Phải import 
 import UserProfile from ".page/UserProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminKhoMau from "./pages/AdminKhoMau";
+import KetQuaXetNghiem from "./pages/KetQuaXetNghiem";
+import QuanLyNhapKho from "./pages/QuanLyNhapKho";
+
 function App() {
   return (
     <BrowserRouter>
@@ -23,6 +26,8 @@ function App() {
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/admin-thong-ke" element={<AdminDashboard />} />
         <Route path="/admin-kho-mau" element={<AdminKhoMau />} />
+        <Route path="/admin-xet-nghiem" element={<KetQuaXetNghiem />} />
+        <Route path="/admin-nhap-kho" element={<QuanLyNhapKho />} />
       </Routes>
     </BrowserRouter>
   );

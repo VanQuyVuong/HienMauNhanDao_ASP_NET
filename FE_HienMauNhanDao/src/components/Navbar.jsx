@@ -56,50 +56,135 @@ export default function Navbar() {
             Chiến dịch
           </Link>
         </li>
-                <li>
+        <li>
           {/* NẾU LÀ NHÂN VIÊN NỘI BỘ (AD, NVYT, QLK, BS) THÌ HIỆN CÁC MENU NÀY */}
-          {role === "AD" || role === "NVYT" || role === "QLK" || role === "BS" ? (
+          {role === "AD" ||
+          role === "NVYT" ||
+          role === "QLK" ||
+          role === "BS" ? (
             <div style={{ display: "flex", gap: "15px" }}>
-              
               {/* Menu của Nhân viên y tế và Admin */}
               {(role === "NVYT" || role === "AD") && (
                 <>
-                  <Link to="/admin-ho-so-yte" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>📋 Hồ sơ y tế</Link>
-                  <Link to="/admin-tao-cd" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>➕ Tạo Chiến Dịch</Link>
-                  <Link to="/admin-don" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>🛡️ Quản lý Đơn</Link>
-                  <Link to="/admin-chung-nhan" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>🎖️ Cấp Chứng Nhận</Link>
+                  <Link
+                    to="/admin-ho-so-yte"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    📋 Hồ sơ y tế
+                  </Link>
+                  <Link
+                    to="/admin-tao-cd"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    ➕ Tạo Chiến Dịch
+                  </Link>
+                  <Link
+                    to="/admin-don"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    🛡️ Quản lý Đơn
+                  </Link>
+                  <Link
+                    to="/admin-chung-nhan"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    🎖️ Cấp Chứng Nhận
+                  </Link>
                 </>
               )}
 
               {/* Menu của Thủ kho và Admin */}
               {(role === "QLK" || role === "AD") && (
                 <>
-                  <Link to="/admin-kho-mau" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>🏥 Kho Máu</Link>
-                  <Link to="/admin-han-dung" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>⏳ Hạn Dùng</Link>
+                  <Link
+                    to="/admin-kho-mau"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    🏥 Kho Máu
+                  </Link>
+                  <Link
+                    to="/admin-han-dung"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    ⏳ Hạn Dùng
+                  </Link>
+                  <Link
+                    to="/admin-nhap-kho"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    📥 Nhập kho
+                  </Link>
+                </>
+              )}
+
+              {/* Menu của Bác sĩ và Admin */}
+              {(role === "BS" || role === "AD") && (
+                <>
+                  <Link
+                    to="/admin-kham-sang-loc"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    🩺 Khám sàng lọc
+                  </Link>
+                  <Link
+                    to="/admin-xet-nghiem"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    🧪 Xét nghiệm máu
+                  </Link>
                 </>
               )}
 
               {/* Menu Thống kê chung của Admin */}
               {role === "AD" && (
-                <Link to="/admin-thong-ke" style={{ color: "#d90429", fontWeight: "bold", textDecoration: "none" }}>📊 Thống Kê</Link>
+                <Link
+                  to="/admin-thong-ke"
+                  style={{
+                    color: "#d90429",
+                    fontWeight: "bold",
+                    textDecoration: "none",
+                  }}
+                >
+                  📊 Thống Kê
+                </Link>
               )}
-
             </div>
-          ) : (
-            /* NẾU LÀ NGƯỜI DÙNG THƯỜNG THÌ HIỆN NÚT NÀY */
-            <Link
-              to="/lich-su"
-              style={{
-                textDecoration: "none",
-                color: "#2b2d42",
-                fontWeight: "500",
-              }}
-            >
-              Lịch sử của tôi
-            </Link>
-          )}
-        </li>
-
           ) : (
             /* NẾU LÀ NGƯỜI DÙNG THƯỜNG THÌ HIỆN NÚT NÀY */
             <Link
