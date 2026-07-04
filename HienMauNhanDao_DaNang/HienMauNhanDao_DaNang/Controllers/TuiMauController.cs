@@ -65,7 +65,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 soLuongAnToan = anToan,
                 coCanhBaoNguyCap = canBaoDong
             });
-        } // ✅ Đã đóng hàm GetThongKeHanDung ở đây
+        } //  Đã đóng hàm GetThongKeHanDung ở đây
 
         // 2. API lấy chi tiết các túi máu để hiển thị lên bảng
         // Đường dẫn: GET /api/tuimau/danh-sach-han-dung?viewMode=all
@@ -174,6 +174,68 @@ namespace HienMauNhanDao_DaNang.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { success = true, message = "Đã tiêu huỷ máu thành công" });
+        }
+
+
+        //AI 5 . Lấy danh sách tất cả các túi máu phục vụ nghiệp vụ nhập kho (QLK)
+        [HttpGet]
+        public async Task<IActionResult> GetDanhSachTuiMauChoQLK()
+        {
+            var danhSach = await _context.TuiMaus
+                .Include(t => t.DonDangKy)
+                    .ThenInclude(d => d.TinhNguyenVien)
+                .Include(t => t.DonDangKy)
+                    .ThenInclude(d => d.ChienDich)
+                .ToListAsync();
+            var ketQua = danhSach.Select(t =>
+            {
+                string trangThaiString = "Chờ xét nghiệm";
+                if (t.TrangThai == TrangThaiTuiMau.DaXetNghiem)
+                    trangThaiString = "Yêu cầu nhập kho";
+                else if (t.TrangThai == TrangThaiTuiMau.DaLuuKho)
+                    trangThaiString = "Nhập kho";
+                else if (t.TrangThai == TrangThaiTuiMau.DaHuy)
+                    trangThaiString = "Đã hủy";
+                return new
+                {
+                    maTuiMau = t.MaTuiMau,
+                    maDon = t.MaDon,
+                    tenTinhNguyenVien = t.DonDangKy?.TinhNguyenVien?.HoTen ?? "Ẩn danh",
+                    tenChienDich = t.DonDangKy?.ChienDich?.TenChienDich ?? "N/A",
+                    theTich = t.TheTich ?? 0,
+                    thoiGianLayMau = t.ThoiGianLayMau,
+                    trangThai = trangThaiString,
+                    nhomMau = t.DonDangKy?.TinhNguyenVien?.NhomMau != null
+                        ? t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-")
+                        : "Chưa rõ"
+                };
+            }).ToList();
+            return Ok(ketQua);
+        }
+        // API 6: Thay đổi trạng thái túi máu (QLK trả túi máu về để kiểm tra lại)
+        // PUT /api/tuimau/{id}/status?status=Chờ xét nghiệm
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateStatus(string id, [FromQuery] string status)
+        {
+            var tuiMau = await _context.TuiMaus.FirstOrDefaultAsync(t => t.MaTuiMau == id);
+            if (tuiMau == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy túi máu" });
+            }
+            if (status == "Chờ xét nghiệm")
+            {
+                // Reset trạng thái về Chưa xử lý và rút khỏi kho tạm thời
+                tuiMau.TrangThai = TrangThaiTuiMau.ChuaXuLy;
+                tuiMau.MaKho = null;
+                // Xóa kết quả xét nghiệm cũ trong DB để bác sĩ làm lại từ đầu
+                var xetNghiem = await _context.KetQuaXetNghiems.FirstOrDefaultAsync(k => k.MaTuiMau == id);
+                if (xetNghiem != null)
+                {
+                    _context.KetQuaXetNghiems.Remove(xetNghiem);
+                }
+            }
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Cập nhật trạng thái túi máu thành công." });
         }
     }
 }
