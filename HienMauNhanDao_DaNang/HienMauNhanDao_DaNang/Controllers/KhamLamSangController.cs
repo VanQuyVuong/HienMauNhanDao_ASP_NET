@@ -67,7 +67,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                     canNang = k.CanNang,
                     nhietDo = k.NhietDo,
                     ketQua = k.KetQua,
-                    tenBacSi = k.BacSiKham != null ? k.BacSiKham.hoTen : "Hệ thống",
+                    tenBacSi = k.BacSiKham != null ? k.BacSiKham.HoTen : "Hệ thống",
                     maBacSi = k.MaNhanVien,
                     lyDoTuChoi = k.LyDoTuChoi
                 })
