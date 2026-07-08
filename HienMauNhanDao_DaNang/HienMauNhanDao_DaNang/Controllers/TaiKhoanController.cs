@@ -141,5 +141,55 @@ namespace HienMauNhanDao_DaNang.Controllers
             public bool TrangThai { get; set; }
         }
 
+        //4 API patch cập nhật trạng thái tài khoản 
+        [HttpPatch("{maTaiKhoan}/trang-thai")]
+        public async Task<IActionResult> UpdateStatus(string maTaiKhoan, [FromBody] UpdateStatusRequest request)
+        {
+            try
+            {
+                var taiKhoan = await _context.TaiKhoans.FirstOrDefaultAsync(t => t.MaTaiKhoan == maTaiKhoan);
+                if (taiKhoan == null)
+                {
+                    return NotFound(new { success = false, message = "Không tìm tài khoản" });
+                }
+
+                taiKhoan.TrangThai = request.TrangThai;
+                await _context.SaveChangesAsync();
+
+                string msg = request.TrangThai ? "Kích hoạt tài khoản thành công!" : "Vô hiệu tài khoản thành công!";
+                return Ok(new { success = true, message = msg });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống :" + ex.Message });
+
+            }
+        }
+
+        //5. api delete xoá tài khoản
+        [HttpDelete("{maTaiKhoan}")]
+        public async Task<IActionResult> Delete(string maTaiKhoan)
+        {
+            try
+            {
+                var taiKhoan = await _context.TaiKhoans.FirstOrDefaultAsync(t => t.MaTaiKhoan == maTaiKhoan);
+
+                if (taiKhoan == null)
+                {
+                    return NotFound(new { success = false, message = "Không tìm thấy tài khoản." });
+
+                }
+
+                _context.TaiKhoans.Remove(taiKhoan);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Xoá tài khảon thành công." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+
+            }
+        }
     }
 }
