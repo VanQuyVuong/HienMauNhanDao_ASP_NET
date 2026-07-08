@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import "../css/Navbar.css";
 
 export default function Navbar() {
-  const role = localStorage.getItem("role"); // Lấy chức vụ đang cất trong kho
-  const email = localStorage.getItem("email"); // Lấy email ra để chào hỏi
+  const role = localStorage.getItem("role"); // Lấy vai trò từ localStorage
+  const email = localStorage.getItem("email"); // Lấy email người dùng đăng nhập
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -62,8 +62,8 @@ export default function Navbar() {
           role === "NVYT" ||
           role === "QLK" ||
           role === "BS" ? (
-            <div style={{ display: "flex", gap: "15px" }}>
-              {/* Menu của Nhân viên y tế và Admin */}
+            <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
+              {/* === MENU DÀNH CHO NHÂN VIÊN Y TẾ HOẶC ADMIN === */}
               {(role === "NVYT" || role === "AD") && (
                 <>
                   <Link
@@ -106,10 +106,21 @@ export default function Navbar() {
                   >
                     🎖️ Cấp Chứng Nhận
                   </Link>
+                  {/* Link mới: Quản lý Tình nguyện viên (Bài 30) */}
+                  <Link
+                    to="/admin-volunteers"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    🩸 Quản lý TNV
+                  </Link>
                 </>
               )}
 
-              {/* Menu của Thủ kho và Admin */}
+              {/* === MENU DÀNH CHO THỦ KHO MÁU (QLK) HOẶC ADMIN === */}
               {(role === "QLK" || role === "AD") && (
                 <>
                   <Link
@@ -142,10 +153,32 @@ export default function Navbar() {
                   >
                     📥 Nhập kho
                   </Link>
+                  {/* Link mới: Nhận yêu cầu nhập kho (Bài 31) */}
+                  <Link
+                    to="/qlk-nhan-yeu-cau"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    📦 Yêu cầu nhập
+                  </Link>
+                  {/* Link mới: Nhập kho theo chiến dịch (Bài 31) */}
+                  <Link
+                    to="/qlk-nhap-theo-chien-dich"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    📊 Nhập sự kiện
+                  </Link>
                 </>
               )}
 
-              {/* Menu của Bác sĩ và Admin */}
+              {/* === MENU DÀNH CHO BÁC SĨ HOẶC ADMIN === */}
               {(role === "BS" || role === "AD") && (
                 <>
                   <Link
@@ -171,18 +204,31 @@ export default function Navbar() {
                 </>
               )}
 
-              {/* Menu Thống kê chung của Admin */}
+              {/* === MENU THỐNG KÊ VÀ TÀI KHOẢN CHỈ DÀNH CHO ADMIN === */}
               {role === "AD" && (
-                <Link
-                  to="/admin-thong-ke"
-                  style={{
-                    color: "#d90429",
-                    fontWeight: "bold",
-                    textDecoration: "none",
-                  }}
-                >
-                  📊 Thống Kê
-                </Link>
+                <>
+                  <Link
+                    to="/admin-thong-ke"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    📊 Thống Kê
+                  </Link>
+                  {/* Link mới: Quản lý Người dùng (Bài 29) */}
+                  <Link
+                    to="/admin-users"
+                    style={{
+                      color: "#d90429",
+                      fontWeight: "bold",
+                      textDecoration: "none",
+                    }}
+                  >
+                    👥 Tài Khoản
+                  </Link>
+                </>
               )}
             </div>
           ) : (
