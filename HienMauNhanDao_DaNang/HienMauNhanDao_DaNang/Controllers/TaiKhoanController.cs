@@ -18,7 +18,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         private readonly AppDbContext _context;
 
-        public TaiKhoanController (AppDbContext context)
+        public TaiKhoanController(AppDbContext context)
         {
             _context = context;
         }
@@ -81,6 +81,65 @@ namespace HienMauNhanDao_DaNang.Controllers
             public string MaVaiTro { get; set; } = string.Empty;
         }
 
+
+        //3 api post tạo tài khoản mới 
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateAccountRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.MatKhau) || string.IsNullOrEmpty(request.MaVaiTro))
+                {
+                    return BadRequest(new { success = false, message = "Vui lòng nhập đầy đủ thông tin !" });
+                }
+
+                //kiểm tra email trùng hợp
+                var exist = await _context.TaiKhoans.AnyAsync(t => t.Email == request.Email);
+                if (exist)
+                {
+                    return BadRequest(new { success = false, message = " Email này đã được sử dụng." });
+                }
+
+                var vaiTro = await _context.VaiTros.FirstOrDefaultAsync(v => v.maVaiTro == request.MaVaiTro);
+                if (vaiTro == null)
+                {
+                    return BadRequest(new { success = false, message = "Vai trò không hợp lệ." });
+                }
+
+                //Tự động sinh mã tài khoản 
+                var allTKs = await _context.TaiKhoans.ToListAsync();
+                int nextId = allTKs.Count + 1;
+                while (allTKs.Any(t => t.MaTaiKhoan == $"TK{nextId:DS}"))
+                {
+                    nextId++;
+                }
+
+                var maTaiKhoan = $"{nextId:DS}";
+
+                var taiKhoan = new TaiKhoan
+                {
+                    MaTaiKhoan = maTaiKhoan,
+                    Email = request.Email.Trim(),
+                    MatKhau = BCrypt.Net.BCrypt.HashPassword(request.MatKhau), // Băm mật khẩu bằng BCrypt
+                    MaVaiTro = request.MaVaiTro,
+                    TrangThai = true
+                };
+                _context.TaiKhoans.Add(taiKhoan);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Tạo tài khoản thành công." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+
+
+        public class UpdateStatusRequest
+        {
+            public bool TrangThai { get; set; }
+        }
 
     }
 }
