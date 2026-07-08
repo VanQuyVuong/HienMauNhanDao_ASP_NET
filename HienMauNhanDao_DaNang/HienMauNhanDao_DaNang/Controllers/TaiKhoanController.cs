@@ -53,6 +53,34 @@ namespace HienMauNhanDao_DaNang.Controllers
             }
         }
 
-        
+        //2. api get lấy danh sách các vai trò 
+        [HttpGet("vaitro")]
+        public async Task<IActionResult> GetRoles()
+        {
+            try
+            {
+                var roles = await _context.VaiTros.ToListAsync();
+                var result = roles.Select(r => new
+                {
+                    maVaiTro = r.maVaiTro,
+                    tenVaiTro = r.tenVaiTro
+                }).ToList();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống !!! :" + ex.Message });
+            }
+        }
+
+
+        public class CreateAccountRequest
+        {
+            public string Email { get; set; } = string.Empty;
+            public string MatKhau { get; set; } = string.Empty;
+            public string MaVaiTro { get; set; } = string.Empty;
+        }
+
+
     }
 }
