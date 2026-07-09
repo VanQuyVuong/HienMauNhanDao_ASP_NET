@@ -10,6 +10,7 @@ import AdminKhoMau from "./pages/AdminKhoMau";
 import KetQuaXetNghiem from "./pages/KetQuaXetNghiem";
 import QuanLyNhapKho from "./pages/QuanLyNhapKho";
 import AdminQuanLyNguoiDung from "./pages/AdminQuanLyNguoiDung";
+import AdminQuanLyTNV from "./pages/AdminQuanLyTNV";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/admin-xet-nghiem" element={<KetQuaXetNghiem />} />
         <Route path="/admin-nhap-kho" element={<QuanLyNhapKho />} />
         <Route path="/admin-users" element={<AdminQuanLyNguoiDung />} />
+        <Route path="/admin-volunteers" element={<AdminQuanLyTNV />} />
       </Routes>
     </BrowserRouter>
   );
