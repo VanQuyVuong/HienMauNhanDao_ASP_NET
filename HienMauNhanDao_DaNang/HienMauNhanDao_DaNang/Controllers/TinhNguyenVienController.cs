@@ -101,6 +101,23 @@ namespace HienMauNhanDao_DaNang.Controllers
 
 
         }
+
+
+
+    //API GET Lấy danh sách toàn bộ tình nguyện viên (NVYT, AD)
+    [HttpGet]
+    [Authorize( Roles = "AD,NVYT")]//Chỉ có NVYT và AD mới được xem danh sách tình nguyện viên
+        public async Task<IActionResult> GetAllTinhNguyenVien()
+        {
+            try
+            {
+                var list = await _context.TinhNguyenViens.ToListAsync();
+                return Ok(new { success = true, data = list });
+            }catch(Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
     }
 
 
