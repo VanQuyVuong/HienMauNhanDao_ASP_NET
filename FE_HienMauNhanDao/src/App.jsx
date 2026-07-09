@@ -11,6 +11,8 @@ import KetQuaXetNghiem from "./pages/KetQuaXetNghiem";
 import QuanLyNhapKho from "./pages/QuanLyNhapKho";
 import AdminQuanLyNguoiDung from "./pages/AdminQuanLyNguoiDung";
 import AdminQuanLyTNV from "./pages/AdminQuanLyTNV";
+import NhanYeuCauNhapKho from "./pages/NhanYeuCauNhapKho";
+import QuanLyNhapKhoTheoChienDich from "./pages/QuanLyNhapKhoTheoChienDich";
 
 function App() {
   return (
@@ -32,6 +34,11 @@ function App() {
         <Route path="/admin-nhap-kho" element={<QuanLyNhapKho />} />
         <Route path="/admin-users" element={<AdminQuanLyNguoiDung />} />
         <Route path="/admin-volunteers" element={<AdminQuanLyTNV />} />
+        <Route path="/qlk-nhan-yeu-cau" element={<NhanYeuCauNhapKho />} />
+        <Route
+          path="/qlk-nhap-theo-chien-dich"
+          element={<QuanLyNhapKhoTheoChienDich />}
+        />
       </Routes>
     </BrowserRouter>
   );

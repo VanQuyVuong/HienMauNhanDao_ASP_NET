@@ -237,5 +237,47 @@ namespace HienMauNhanDao_DaNang.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { success = true, message = "Cập nhật trạng thái túi máu thành công." });
         }
+
+        //api get lấy danh sách các túi máu theo chiến dịch phục vụ thống kê (Danh cho QLK)
+        [HttpGet("blood-units")]
+        public async Task<IActionResult> GetBloodUnitsByCampaign([FromBody] string maChienDich)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(maChienDich))
+                {
+                    return BadRequest(new { success = false, message = "Mã chiến dịch không được để trống." });
+                }
+                //query lấy danh sách túi máu join với đơn đăng ký và tình nguyện viên 
+                var list = await _context.TuiMaus
+                    .Include(t => t.DonDangKy)
+                    .ThenInclude(d => d.TinhNguyenVien)
+                    .Where(t => t.DonDangKy != null && t.DonDangKy.MaChienDich == maChienDich)
+                    .ToArrayAsync();
+
+                //chuyển đổi dữ liệu sang định dạng DTO cho FE
+                var result = list.Select(t => new
+                {
+                    maTuiMau = t.MaTuiMau,
+                    maDon = t.MaDon,
+                    nhomMau = t.DonDangKy?.TinhNguyenVien?.NhomMau != null
+                    ? t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "chưa rõ",
+                    theTich = t.TheTich,
+                    ngayThuNhan = t.ThoiGianLayMau,
+                    thoiGianLayMau = t.ThoiGianLayMau,
+                    nhietDoVanChuyen = t.NhietDoVanChuyen,
+                    trangThai = t.TrangThai == TrangThaiTuiMau.DaLuuKho ? "Nhập kho" :
+                    t.TrangThai == TrangThaiTuiMau.DaXetNghiem ? "Yêu cầu nhập kho" :
+                    t.TrangThai = TrangThaiTuiMau.DaHuy ? "Đã huỷ" : "Chờ xét nghiệm"
+
+                }).ToList();
+
+                //Bọc trong đối tượng có trường   'Content' để khớp với FE mẫu
+                return Ok(new { content = result });
+            }catch(Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
     }
 }
