@@ -14,18 +14,18 @@ export default function Register() {
     e.preventDefault();
     setThongBao({ type: "", text: "" });
 
-    //kiem tra 2 o mat khau co giong nhau hay khong
+    // kiem tra 2 o mat khau co giong nhau hay khong
     if (matKhau !== xacNhanMatKhau) {
       setThongBao({
         type: "error",
         text: "Mật khẩu và xác nhận mật khẩu không khớp",
       });
-      return; //dung lai, khong goi api nua
+      return; // dung lai, khong goi api nua
     }
     try {
-      //goij sang PI/Register
+      // Goi API gui OTP thay vi goi truc tiep API dang ky
       const response = await fetch(
-        "https://localhost:7004/api/auth/register",
+        "https://localhost:7004/api/auth/send-otp",
         {
           method: "POST",
           headers: {
@@ -33,8 +33,6 @@ export default function Register() {
           },
           body: JSON.stringify({
             Email: email,
-            MatKhau: matKhau,
-            XacNhanMatKhau: xacNhanMatKhau,
           }),
         },
       );
@@ -44,20 +42,21 @@ export default function Register() {
       if (response.ok) {
         setThongBao({
           type: "success",
-          text: "Đăng ký thành công! Vui lòng đăng nhập.",
+          text: "Mã OTP đã được gửi về email của bạn! Đang chuyển hướng...",
         });
 
+        // Chuyen huong sang trang OTP kem theo thong tin dang ky trong route state
         setTimeout(() => {
-          navigate("/login");
-        }, 2000);
+          navigate("/otp", { state: { formData: { email, matKhau } } });
+        }, 1500);
       } else {
         setThongBao({
           type: "error",
-          text: data.message || "Loi tao tai khoan",
+          text: data.message || "Không thể gửi OTP. Vui lòng kiểm tra lại email.",
         });
       }
     } catch (error) {
-      setThongBao({ type: "error", text: "Khong the ket noi den may chu." });
+      setThongBao({ type: "error", text: "Không thể kết nối đến máy chủ." });
     }
   };
   return (
@@ -68,7 +67,7 @@ export default function Register() {
           <p>Tham gia vao cong dong hien mau ngay hom nay </p>
         </div>
         {thongBao.text && (
-          <div className="{thongBao.type === 'error' ?'error-message':'success-message'}">
+          <div className={thongBao.type === 'error' ? 'error-message' : 'success-message'}>
             {thongBao.text}
           </div>
         )}
