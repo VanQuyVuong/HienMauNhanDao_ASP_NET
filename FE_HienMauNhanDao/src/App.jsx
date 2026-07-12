@@ -4,7 +4,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AdminDonDangKy from "./pages/AdminDonDangKy";
 import AdminCreateCampaign from "./pages/AdminCreateCampaign"; // Phải import nó vào đây
-import UserProfile from ".page/UserProfile";
+import UserProfile from "./pages/UserProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminKhoMau from "./pages/AdminKhoMau";
 import KetQuaXetNghiem from "./pages/KetQuaXetNghiem";
