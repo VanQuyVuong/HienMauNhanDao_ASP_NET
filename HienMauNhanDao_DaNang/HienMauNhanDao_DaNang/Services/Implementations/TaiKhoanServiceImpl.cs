@@ -138,5 +138,13 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
         }
 
 
+        public async Task<bool> CheckEmailExistAsync(string email)
+        {
+
+            //kiểm tra xem trong bảng tài khoản có dòng nào chứa email trùng khớp không 
+            return await _db.TaiKhoans.AnyAsync(tk => tk.Email == email);
+        }
+
+
     }
 }

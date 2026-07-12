@@ -301,8 +301,44 @@ INSERT INTO KHOMAU VALUES
 ('K_7', 'Kho máu AB-', 'AB_negative', 0,  500, 'Nhóm máu AB Rh âm - cực hiếm'),
 ('K_8', 'Kho máu O-',  'O_negative',  0,  500, 'Nhóm máu O Rh âm - cho được tất cả');
 
+-- 3.7 TÀI KHOẢN NỘI BỘ (Mật khẩu mặc định là '123' - C# tự động băm khi đăng nhập lần đầu)
+INSERT INTO TAIKHOAN VALUES 
+('TK00001', 'BS',   'lequoctuan.bs@bvdn.vn',    '123', 1), 
+('TK00002', 'BS',   'phamhongngoc.bs@bvdn.vn',  '123', 1), 
+('TK00003', 'NVYT', 'nguyenthilan.sl@bvdn.vn',  '123', 1),
+('TK00004', 'NVYT', 'trinhdieuthuy.sl@bvdn.vn', '123', 1), 
+('TK00005', 'NVYT', 'dolanphuong.sl@bvc.vn',    '123', 1), 
+('TK00006', 'NVYT', 'dangvanmanh.lm@bvdn.vn',   '123', 1), 
+('TK00007', 'NVYT', 'levanhoang.lm@bvdn.vn',    '123', 1), 
+('TK00008', 'NVYT', 'vubaoquynh.lm@bvc.vn',     '123', 1), 
+('TK00009', 'NVYT', 'hoangthihuy.xn@bvdn.vn',    '123', 1),
+('TK00010', 'NVYT', 'nguyentuyetmai.xn@bvdn.vn', '123', 1), 
+('TK00011', 'NVYT', 'trandinhnam.xn@bvub.vn',    '123', 1), 
+('TK00012', 'QLK',  'tranminhhung.kho@bvdn.vn',  '123', 1),
+('TK00013', 'QLK',  'lamtandat.kho@bvc.vn',      '123', 1), 
+('TK00014', 'AD',   'admin.system@redcross.dn.vn','123', 1), 
+('TK00015', 'BS',   'vunhatminh.bs@bvc.vn',      '123', 1);
+
+-- 3.8 NHÂN VIÊN Y TẾ / BÁC SĨ / THỦ KHO TƯƠNG ỨNG
+INSERT INTO NHANVIEN VALUES 
+('NV00001', 'TK00001', 'KC00001', 'DD00001', 'Lê Quốc Tuấn',       '048075000001', 'Nam', '0905111222'),
+('NV00002', 'TK00002', 'KC00001', 'DD00001', 'Phạm Hồng Ngọc',     '048075000002', 'Nữ',  '0905111333'),
+('NV00003', 'TK00003', 'KC00001', 'DD00001', 'Nguyễn Thị Lan',     '048075000003', 'Nữ',  '0905111444'),
+('NV00004', 'TK00004', 'KC00001', 'DD00001', 'Trịnh Diệu Thúy',    '048075000004', 'Nữ',  '0905111555'),
+('NV00005', 'TK00005', 'KC00001', 'DD00002', 'Đỗ Lan Phương',      '048075000005', 'Nữ',  '0905111666'),
+('NV00006', 'TK00006', 'KC00001', 'DD00001', 'Đặng Văn Mạnh',      '048075000006', 'Nam', '0905111777'),
+('NV00007', 'TK00007', 'KC00001', 'DD00001', 'Lê Văn Hoàng',       '048075000007', 'Nam', '0905111888'),
+('NV00008', 'TK00008', 'KC00001', 'DD00002', 'Vũ Bảo Quỳnh',       '048075000008', 'Nữ',  '0905111999'),
+('NV00009', 'TK00009', 'KC00001', 'DD00001', 'Hoàng Thị Huy',       '048075000009', 'Nữ',  '0905222111'),
+('NV00010', 'TK00010', 'KC00001', 'DD00001', 'Nguyễn Tuyết Mai',   '048075000010', 'Nữ',  '0905222222'),
+('NV00011', 'TK00011', 'KC00001', 'DD00003', 'Trần Đình Nam',      '048075000011', 'Nam', '0905222333'),
+('NV00012', 'TK00012', 'KC00001', 'DD00001', 'Trần Minh Hưng',     '048075000012', 'Nam', '0905222444'),
+('NV00013', 'TK00013', 'KC00001', 'DD00002', 'Lâm Tấn Đạt',        '048075000013', 'Nam', '0905222555'),
+('NV00014', 'TK00014', 'KC00004', 'DD00001', 'Hệ Thống Admin',     '048075000014', 'Nam', '0905333333'),
+('NV00015', 'TK00015', 'KC00001', 'DD00002', 'Vũ Nhật Minh',       '048075000015', 'Nam', '0905222666');
+
 -- =============================================================
--- ✅ XONG! DB SẴN SÀNG - KHÔNG CÓ TÀI KHOẢN NÀO
+-- ✅ XONG! DB SẴN SÀNG - ĐÃ CÓ 15 TÀI KHOẢN NỘI BỘ
 --
 -- ═══════════════════════════════════════════════════════════
 -- HƯỚNG DẪN TẠO TÀI KHOẢN THEO TỪNG VAI TRÒ

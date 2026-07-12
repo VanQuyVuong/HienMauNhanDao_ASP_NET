@@ -19,14 +19,16 @@ namespace HienMauNhanDao_DaNang.Controllers
 
     public class AuthController : ControllerBase
     {
-        // Khai báo (Controller) cần gọi đến (Service)
+        
         private readonly ITaiKhoanService _taiKhoanService;
+        private readonly IOtpService _otpService;
+        private readonly IEmailService _emailService;
 
-
-        public AuthController(ITaiKhoanService taiKhoanService)
+        public AuthController(ITaiKhoanService taiKhoanService, IOtpService otpService, IEmailService emailService)
         {
             _taiKhoanService = taiKhoanService;
-
+            _otpService = otpService;
+            _emailService = emailService;
         }
 
 
@@ -98,6 +100,79 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         }
 
+        //DTO CHỨA DỮ LIỆU YÊU CẦU GỬI OTP
+        public class OtpRequest
+        {
+            public string Email { set; get; } = string.Empty;
+        }
+
+        //DTO CHƯA DỮ LIỆU YÊU CẦU XÁC THỰC otp 
+        public class VerifyOtpRequest
+        {
+            public string Emai { set; get; } = string.Empty;
+            public string Otp { set; get; } = string.Empty;
+        }
+
+
+
+        //API GỬI OTP QUA EMAIL     
+        [HttpPost("send-otp")]
+        public async Task<IActionResult> SendOtp([FromBody] OtpRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.Email))
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Bắt buộc nhập Emial"));
+
+                }
+
+                //1. Kiểm tra email đã được đăng ký tài khoản chưa 
+                var emailExist = await _taiKhoanService.CheckEmailExistAsync(request.Email);
+                if (emailExist)
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Email này đã được xử dụng"));
+                }
+
+
+                // 2.tạo mã otp và gửi qua email bất đồng bộ 
+                var otp = _otpService.GenerateOtp(request.Email);
+                await _emailService.SendOtpEmailAsync(request.Email, otp);
+
+                return Ok(ApiResponse<object>.Ok("Gửi OTP thành công"));
+            }catch(Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        //API XÁC THỰC MÃ OTP
+        [HttpPost("verify-otp")]
+        public IActionResult VerifyOtp([FromBody] VerifyOtpRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.Emai) || string.IsNullOrEmpty(request.Otp))
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Email và mã OTP không được để trống"));
+
+                }
+
+                //GỌI DỊCH VỤ SO SÁNH Ã OTP
+                var isValid = _otpService.ValidateOtp(request.Emai, request.Otp);
+                if (isValid)
+                {
+                    return Ok(ApiResponse<object>.Ok("Xác thực OTP hợp lệ"));
+                }
+                else
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Mã OTP không hợp lệ hoặc đẵ hết hạn"));
+                }
+            }catch(Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.Fail(ex.Message));
+            }
+        }
     }
 }
 
