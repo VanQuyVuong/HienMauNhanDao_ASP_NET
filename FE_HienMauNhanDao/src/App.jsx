@@ -13,6 +13,7 @@ import AdminQuanLyNguoiDung from "./pages/AdminQuanLyNguoiDung";
 import AdminQuanLyTNV from "./pages/AdminQuanLyTNV";
 import NhanYeuCauNhapKho from "./pages/NhanYeuCauNhapKho";
 import QuanLyNhapKhoTheoChienDich from "./pages/QuanLyNhapKhoTheoChienDich";
+import OtpVerification from "./pages/OtpVerification";
 
 function App() {
   return (
