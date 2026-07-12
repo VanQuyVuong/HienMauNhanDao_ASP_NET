@@ -6,8 +6,18 @@ export default function OtpVerification() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [thongBao, setThongBao] = useState({ type: "", text: "" });
+  const [countdown, setCountdown] = useState(60); // Đếm ngược 60 giây khi vừa vào trang
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Tự động đếm ngược mỗi giây
+  React.useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [countdown]);
 
   // Nhận thông tin formData từ trang Register chuyển sang qua route state
   const formData = location.state?.formData;
@@ -40,6 +50,7 @@ export default function OtpVerification() {
           type: "success",
           text: "Mã OTP mới đã được gửi lại vào email của bạn!",
         });
+        setCountdown(60); // Thiết lập lại đếm ngược 60 giây
       } else {
         setThongBao({
           type: "error",
@@ -66,15 +77,13 @@ export default function OtpVerification() {
 
     try {
       // 1. Gọi API xác thực OTP
-      // Chú ý: DTO VerifyOtpRequest ở Backend C# viết nhầm trường 'Email' thành 'Emai'
-      // Nên ở đây chúng ta truyền key là 'Emai' để khớp chính xác với C# Backend.
       const verifyResponse = await fetch("https://localhost:7004/api/auth/verify-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          Emai: formData.email, 
+          Email: formData.email, 
           Otp: otp,
         }),
       });
@@ -161,23 +170,29 @@ export default function OtpVerification() {
 
         <div style={{ textAlign: "center", marginTop: "24px" }}>
           <span style={{ fontSize: "13px", color: "#666" }}>Không nhận được mã?</span>
-          <button
-            type="button"
-            onClick={handleSendOtp}
-            disabled={loading}
-            style={{
-              background: "none",
-              border: "none",
-              fontSize: "13px",
-              color: "#e63946",
-              fontWeight: "bold",
-              cursor: "pointer",
-              marginLeft: "5px",
-              textDecoration: "underline",
-            }}
-          >
-            Gửi lại OTP
-          </button>
+          {countdown > 0 ? (
+            <span style={{ fontSize: "13px", color: "#999", marginLeft: "5px", fontWeight: "bold" }}>
+              Gửi lại sau {countdown}s
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSendOtp}
+              disabled={loading}
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "13px",
+                color: "#e63946",
+                fontWeight: "bold",
+                cursor: "pointer",
+                marginLeft: "5px",
+                textDecoration: "underline",
+              }}
+            >
+              Gửi lại OTP
+            </button>
+          )}
         </div>
 
         <div style={{ textAlign: "center", marginTop: "16px" }}>

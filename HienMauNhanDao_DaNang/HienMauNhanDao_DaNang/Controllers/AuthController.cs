@@ -116,10 +116,10 @@ namespace HienMauNhanDao_DaNang.Controllers
             public string Email { set; get; } = string.Empty;
         }
 
-        //DTO CHƯA DỮ LIỆU YÊU CẦU XÁC THỰC otp 
+        //DTO CHỨA DỮ LIỆU YÊU CẦU XÁC THỰC otp 
         public class VerifyOtpRequest
         {
-            public string Emai { set; get; } = string.Empty;
+            public string Email { set; get; } = string.Empty;
             public string Otp { set; get; } = string.Empty;
         }
 
@@ -162,14 +162,14 @@ namespace HienMauNhanDao_DaNang.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(request.Emai) || string.IsNullOrEmpty(request.Otp))
+                if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Otp))
                 {
                     return BadRequest(ApiResponse<object>.Fail("Email và mã OTP không được để trống"));
 
                 }
 
                 //GỌI DỊCH VỤ SO SÁNH Ã OTP
-                var isValid = _otpService.ValidateOtp(request.Emai, request.Otp);
+                var isValid = _otpService.ValidateOtp(request.Email, request.Otp);
                 if (isValid)
                 {
                     return Ok(ApiResponse<object>.Ok("Xác thực OTP hợp lệ"));
