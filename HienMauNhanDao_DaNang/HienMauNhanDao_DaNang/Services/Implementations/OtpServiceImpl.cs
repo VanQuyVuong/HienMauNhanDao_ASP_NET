@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Services.Interfaces;
+using HienMauNhanDao_DaNang.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace HienMauNhanDao_DaNang.Services.Implementations
@@ -46,12 +46,27 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
                 {
                     //nếu khớp , xoá ngay mã otp trong cache để tránh việc tái xử dụng 
                     _cache.Remove(email);
+                    
+                    // Lưu cờ xác thực thành công vào bộ nhớ cache trong vòng 5 phút
+                    _cache.Set($"verified_{email}", true, TimeSpan.FromMinutes(5));
                     return true;
                 }
             }
 
             //trả về false nếu không tìm thấy email trong cache , hoặc mã nhập vào không chíng xác , mã hết hạn 
             return false;
+        }
+
+        public bool IsEmailVerified(string email)
+        {
+            email = email.Trim().ToLower();
+            return _cache.TryGetValue($"verified_{email}", out bool verified) && verified;
+        }
+
+        public void ClearVerification(string email)
+        {
+            email = email.Trim().ToLower();
+            _cache.Remove($"verified_{email}");
         }
     }
 }

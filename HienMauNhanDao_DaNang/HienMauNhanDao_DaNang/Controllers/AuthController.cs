@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Common;
+using HienMauNhanDao_DaNang.Common;
 using HienMauNhanDao_DaNang.Models.DTOs.Requests;
 using HienMauNhanDao_DaNang.Models.DTOs.Responses;
 using HienMauNhanDao_DaNang.Services.Interfaces;
@@ -65,7 +65,17 @@ namespace HienMauNhanDao_DaNang.Controllers
         {
             try
             {
+                // Kiểm tra xem Email đã xác thực OTP thành công trước đó chưa
+                var isVerified = _otpService.IsEmailVerified(request.Email);
+                if (!isVerified)
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Email chưa được xác thực OTP hoặc mã OTP đã hết hạn. Vui lòng xác thực lại."));
+                }
+
                 await _taiKhoanService.RegisterAsync(request);
+
+                // Đăng ký thành công, xóa cờ xác thực OTP trong cache để tránh tái sử dụng
+                _otpService.ClearVerification(request.Email);
 
                 // Đăng ký không trả về dữ liệu (chỉ cần báo thành công)
 
