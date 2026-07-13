@@ -224,5 +224,25 @@ namespace HienMauNhanDao_DaNang.Controllers
             }
             return Ok(new { success = true, data = don });
         }
+
+        // API hủy đơn hiến máu của TNV
+        [HttpPut("{maDon}/huy")]
+        public async Task<IActionResult> HuyDonDangKy(string maDon)
+        {
+            var don = await _context.DonDangKys.FindAsync(maDon)
+                if(don == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy đơn đăng ký !" });
+            }
+                //ràng buộc bảo mật :đã hoàn thành hiến máu thì không cho huỷ
+                if(don.TrangThai == TrangThaiDonDangKy.DaHoanThanh)
+            {
+                return BadRequest(new { success = false, message = "Đơn đăng ký đã hoàn thành hiến máu, không thể huỷ!" });
+            }
+            don.TrangThai = TrangThaiDonDangKy.DaTuChoi;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Huỷ đơn đăng ký hiến máu thành công!" });
+        }
     }
 }
