@@ -74,4 +74,14 @@
         DanDang,
         DaAn
     }
+
+    //trạng thái đơn đăng ký hiến máu 
+    public enum TrangThaiDonDangKy
+    {
+        ChoDuyet,
+        DaDuyet,
+        DaTuChoi,
+        DaHoanThanh,
+        DaHuy
+    }
 }

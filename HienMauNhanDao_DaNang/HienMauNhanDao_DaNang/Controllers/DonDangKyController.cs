@@ -206,5 +206,23 @@ namespace HienMauNhanDao_DaNang.Controllers
 
             return Ok(new { success = true, message = $"Lấy {request.TheTich}ml thành công! Đã tự đóng gói và nhập vào {kho.TenKho}." });
         }
+
+        //API lấy chi tiết đơn hiến máu theo mã đơn
+        [HttpGet("{maDon}")]
+        public async Task<IActionResult> LayChiTietDon(string maDon)
+        {
+            //  Dùng include và theninclude để lấy thông tin từ các bảng liên kết 
+            var don = await _context.DonDangKys
+                .Include(d => d.TinhNguyenVien)
+                .Include(d => d.ChienDich)
+                .ThenInclude(c => c.DiaDiem) // lấy thông tin địa điểm của chiến dịch
+                .FirstOrDefaultAsync(d => d.MaDon == maDon);
+
+            if(don == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy đơn đăng ký" });
+            }
+            return Ok(new { success = true, data = don });
+        }
     }
 }
