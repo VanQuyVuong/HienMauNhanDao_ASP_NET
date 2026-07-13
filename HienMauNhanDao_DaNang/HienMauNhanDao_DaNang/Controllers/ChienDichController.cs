@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using HienMauNhanDao_DaNang.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -35,14 +35,17 @@ namespace HienMauNhanDao_DaNang.Controllers
 
             // Bảo Entity Framework chạy xuống MySQL, mở bảng CHIENDICHHIENMAU và lấy hết lên
 
-            var danhSach = await _context.ChienDichHienMaus.ToListAsync();
+                       var danhSach = await _context.ChienDichHienMaus
+                .Include(c => c.DiaDiem)
+                .Include(c => c.NhanVienPhuTrach) // <-- Dùng NhanVienPhuTrach cho đúng tên thuộc tính trong thực thể
+                .ToListAsync();
 
             // Trả về cho React dưới định dạng JSON
 
             return Ok(new
             {
                 success = true,
-                message = "Lấy danh sách chiến dịch thành cồn",
+                message = "Lấy danh sách chiến dịch thành công",
                 data = danhSach
             });
         }
