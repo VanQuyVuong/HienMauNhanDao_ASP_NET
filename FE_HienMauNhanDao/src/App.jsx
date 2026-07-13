@@ -14,6 +14,7 @@ import AdminQuanLyTNV from "./pages/AdminQuanLyTNV";
 import NhanYeuCauNhapKho from "./pages/NhanYeuCauNhapKho";
 import QuanLyNhapKhoTheoChienDich from "./pages/QuanLyNhapKhoTheoChienDich";
 import OtpVerification from "./pages/OtpVerification";
+import XacNhanDangKy from "./pages/XacNhanDangKy";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/otp" element={<OtpVerification />} />
+        <Route path="/xac-nhan-dang-ky/:maDon" element={<XacNhanDangKy />} />
         <Route path="/dashboard" element={<Dashboard />} />
 
         {/* Các Route của tính năng Admin phải nằm TRONG NÀY */}

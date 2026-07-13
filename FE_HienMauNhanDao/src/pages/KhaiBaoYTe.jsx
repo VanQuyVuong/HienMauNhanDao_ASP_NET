@@ -81,7 +81,7 @@ export default function KhaiBaoYTe() {
       const resJson = await response.json();
       if (response.ok) {
         alert("✅ Khai báo y tế thành công! Đơn của bạn đang chờ phê duyệt.");
-        navigate("/lich-su"); // Chuyển về trang lịch sử
+        navigate('/xac-nhan-dang-ky/' + maDon);
       } else {
         alert("❌ Lỗi: " + resJson.message);
       }
