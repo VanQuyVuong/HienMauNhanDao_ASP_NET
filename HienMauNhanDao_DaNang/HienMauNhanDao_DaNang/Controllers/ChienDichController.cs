@@ -153,5 +153,28 @@ namespace HienMauNhanDao_DaNang.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { success = true, message = "Cập nhật chiến dịch thành công!" });
         }
+
+        // api xóa chiến dịch
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "AD")]
+        public async Task<IActionResult> XoaChienDich(string id)
+        {
+            var cd = await _context.ChienDichHienMaus.FindAsync(id); // Đã thêm id vào đây
+            if (cd == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy chiến dịch!" });
+            }
+
+            // Ràng buộc bảo mật: Nếu đã có đơn hiến máu đăng ký tham gia chiến dịch này thì cấm xóa
+            var daCoDon = await _context.DonDangKys.AnyAsync(d => d.MaChienDich == id);
+            if (daCoDon)
+            {
+                return BadRequest(new { success = false, message = "Không thể xóa chiến dịch đã có người đăng ký hiến máu!" });
+            }
+
+            _context.ChienDichHienMaus.Remove(cd);
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Xóa chiến dịch thành công!" });
+        }
     }
 }
