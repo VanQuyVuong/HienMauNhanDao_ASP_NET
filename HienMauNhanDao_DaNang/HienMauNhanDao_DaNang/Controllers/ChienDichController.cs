@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using HienMauNhanDao_DaNang.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -35,14 +35,17 @@ namespace HienMauNhanDao_DaNang.Controllers
 
             // Bảo Entity Framework chạy xuống MySQL, mở bảng CHIENDICHHIENMAU và lấy hết lên
 
-            var danhSach = await _context.ChienDichHienMaus.ToListAsync();
+                       var danhSach = await _context.ChienDichHienMaus
+                .Include(c => c.DiaDiem)
+                .Include(c => c.NhanVienPhuTrach) // <-- Dùng NhanVienPhuTrach cho đúng tên thuộc tính trong thực thể
+                .ToListAsync();
 
             // Trả về cho React dưới định dạng JSON
 
             return Ok(new
             {
                 success = true,
-                message = "Lấy danh sách chiến dịch thành cồn",
+                message = "Lấy danh sách chiến dịch thành công",
                 data = danhSach
             });
         }
@@ -111,6 +114,67 @@ namespace HienMauNhanDao_DaNang.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { success = true, message = "Tao chien dich moi thanh cong" });
+        }
+
+        // Class này để hứng dữ liệu cập nhật từ React gửi lên
+        public class CapNhatChienDichRequest
+        {
+            public string TenChienDich { get; set; } = string.Empty;
+            public DateTime ThoiGianBD { get; set; }
+            public DateTime ThoiGianKT { get; set; }
+            public int SoLuongDuKien { get; set; }
+            public string? MaDiaDiem { get; set; }
+            public string? ImageUrl { get; set; }
+            public TrangThaiChienDich TrangThai { get; set; }
+        }
+
+        // api cập nhật chiến dịch
+        [HttpPut("{id}")]
+        [Authorize(Roles = "NVYT,AD")]
+        public async Task<IActionResult> CapNhatChienDich(string id, [FromBody] CapNhatChienDichRequest request)
+        {
+            //1. tìm chiến dịch trong csdl theo id truyền từ đường dẫn URL
+            var cd = await _context.ChienDichHienMaus.FindAsync(id);
+            if (cd == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy chiến dịch này!" });
+            }
+
+            //2. gán dữ liệu mới nhận từ react vào thực tế chiến dịch
+            cd.TenChienDich = request.TenChienDich;
+            cd.ThoiGianBD = request.ThoiGianBD;
+            cd.ThoiGianKT = request.ThoiGianKT;
+            cd.SoLuongDuKien = request.SoLuongDuKien;
+            cd.MaDiaDiem = request.MaDiaDiem;
+            cd.ImageUrl = request.ImageUrl;
+            cd.TrangThai = request.TrangThai;
+
+            //3. LƯU TẤT CẢ THAY ĐỔI XUỐNG CSDL MYSQL
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Cập nhật chiến dịch thành công!" });
+        }
+
+        // api xóa chiến dịch
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "AD")]
+        public async Task<IActionResult> XoaChienDich(string id)
+        {
+            var cd = await _context.ChienDichHienMaus.FindAsync(id); // Đã thêm id vào đây
+            if (cd == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy chiến dịch!" });
+            }
+
+            // Ràng buộc bảo mật: Nếu đã có đơn hiến máu đăng ký tham gia chiến dịch này thì cấm xóa
+            var daCoDon = await _context.DonDangKys.AnyAsync(d => d.MaChienDich == id);
+            if (daCoDon)
+            {
+                return BadRequest(new { success = false, message = "Không thể xóa chiến dịch đã có người đăng ký hiến máu!" });
+            }
+
+            _context.ChienDichHienMaus.Remove(cd);
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Xóa chiến dịch thành công!" });
         }
     }
 }
