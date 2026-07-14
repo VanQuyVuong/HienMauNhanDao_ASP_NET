@@ -239,46 +239,109 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
         //api get lấy danh sách các túi máu theo chiến dịch phục vụ thống kê (Danh cho QLK)
+        // API 8: Lấy danh sách túi máu trong kho (phục vụ quản lý kho)
         [HttpGet("blood-units")]
-        public async Task<IActionResult> GetBloodUnitsByCampaign([FromBody] string maChienDich)
+        public async Task<IActionResult> GetBloodUnits(
+            [FromQuery] int page = 0 ,
+            [FromQuery] int size = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? status = null
+            )
         {
-            try
-            {
-                if (string.IsNullOrEmpty(maChienDich))
-                {
-                    return BadRequest(new { success = false, message = "Mã chiến dịch không được để trống." });
-                }
-                //query lấy danh sách túi máu join với đơn đăng ký và tình nguyện viên 
-                var list = await _context.TuiMaus
-                    .Include(t => t.DonDangKy)
-                    .ThenInclude(d => d.TinhNguyenVien)
-                    .Where(t => t.DonDangKy != null && t.DonDangKy.MaChienDich == maChienDich)
-                    .ToArrayAsync();
+            var query = _context.TuiMaus
+                .Include(t => t.DonDangKy)
+                .ThenInclude(d => d.TinhNguyenVien)
+                .Include(t => t.DonDangKy)
+                .ThenInclude(d => d.ChienDich)
+                .AsQueryable();
 
-                //chuyển đổi dữ liệu sang định dạng DTO cho FE
-                var result = list.Select(t => new
+            //LỌC TRẠNG THÁI 
+            if(!string.IsNullOrEmpty(status) && status == "Nhập kho")
+            {
+                query = query.Where(t => t.TrangThai == TrangThaiTuiMau.DaLuuKho);
+            }
+
+            //tìm kiếm theo mã túi hoặc nhóm máu
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(t => t.MaTuiMau.Contains(search) ||
+                t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Contains(search));
+            }
+            var totalItems = await query.CountAsync();
+            var totaklPages = (int)Math.Ceiling((double)totalItems / size);
+
+            var list = await query
+                .OrderByDescending(t => t.ThoiGianLayMau)
+                .Skip(page * size)
+                .Take(size)
+                .ToListAsync();
+
+            var homNay = DateTime.Now;
+            var result = list.Select(t =>
+            {
+                var ngayHetHan = t.ThoiGianLayMau?.AddDays(365) ?? homNay;
+                var soNgayConLai = (ngayHetHan - homNay).Days;
+                var tinhTrangSD = soNgayConLai < 0 ? "Hết hạn" : (soNgayConLai <= 30 ? "Sắp hết hạn" : "Còn hạn");
+
+                return new
                 {
                     maTuiMau = t.MaTuiMau,
-                    maDon = t.MaDon,
-                    nhomMau = t.DonDangKy?.TinhNguyenVien?.NhomMau != null
-                    ? t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "chưa rõ",
+                    maChienDich = t.DonDangKy?.ChienDich?.MaChienDich ?? "N/A",
+                    nhomMau = t.DonDangKy?.TinhNguyenVien?.NhomMau != null ? t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-")
+                    : "Chưa rõ",
                     theTich = t.TheTich,
                     ngayThuNhan = t.ThoiGianLayMau,
-                    thoiGianLayMau = t.ThoiGianLayMau,
-                    nhietDoVanChuyen = t.NhietDoVanChuyen,
-                    trangThai = t.TrangThai == TrangThaiTuiMau.DaLuuKho ? "Nhập kho" :
-                    t.TrangThai == TrangThaiTuiMau.DaXetNghiem ? "Yêu cầu nhập kho" :
-                    t.TrangThai = TrangThaiTuiMau.DaHuy ? "Đã huỷ" : "Chờ xét nghiệm"
-
-                }).ToList();
-
-                //Bọc trong đối tượng có trường   'Content' để khớp với FE mẫu
-                return Ok(new { content = result });
-            }catch(Exception ex)
+                    ngayHetHan = ngayHetHan,
+                    trangThai = "Nhập kho",
+                    tinhTrangHSD = tinhTrangHSD
+                };
+            }).ToList();
+            return Ok(new
             {
-                return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
-            }
+                content = result,
+                totalPages = totalPages,
+                totalElements = totalItems
+            });
         }
+        //{
+        //    try
+        //    {
+        //        if (string.IsNullOrEmpty(maChienDich))
+        //        {
+        //            return BadRequest(new { success = false, message = "Mã chiến dịch không được để trống." });
+        //        }
+        //        //query lấy danh sách túi máu join với đơn đăng ký và tình nguyện viên 
+        //        var list = await _context.TuiMaus
+        //            .Include(t => t.DonDangKy)
+        //            .ThenInclude(d => d.TinhNguyenVien)
+        //            .Where(t => t.DonDangKy != null && t.DonDangKy.MaChienDich == maChienDich)
+        //            .ToArrayAsync();
+
+        //        //chuyển đổi dữ liệu sang định dạng DTO cho FE
+        //        var result = list.Select(t => new
+        //        {
+        //            maTuiMau = t.MaTuiMau,
+        //            maDon = t.MaDon,
+        //            nhomMau = t.DonDangKy?.TinhNguyenVien?.NhomMau != null
+        //            ? t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "chưa rõ",
+        //            theTich = t.TheTich,
+        //            ngayThuNhan = t.ThoiGianLayMau,
+        //            thoiGianLayMau = t.ThoiGianLayMau,
+        //            nhietDoVanChuyen = t.NhietDoVanChuyen,
+        //            trangThai = t.TrangThai == TrangThaiTuiMau.DaLuuKho ? "Nhập kho" :
+        //            t.TrangThai == TrangThaiTuiMau.DaXetNghiem ? "Yêu cầu nhập kho" :
+        //            t.TrangThai = TrangThaiTuiMau.DaHuy ? "Đã huỷ" : "Chờ xét nghiệm"
+
+        //        }).ToList();
+
+        //        //Bọc trong đối tượng có trường   'Content' để khớp với FE mẫu
+        //        return Ok(new { content = result });
+        //    }catch(Exception ex)
+        //    {
+        //        return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+        //    }
+        //}
 
 
         //API 7 . Quét mã túi maus để chuẩn bị nhập kho
