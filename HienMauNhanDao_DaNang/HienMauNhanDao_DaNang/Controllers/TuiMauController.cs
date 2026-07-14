@@ -239,45 +239,244 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
         //api get lấy danh sách các túi máu theo chiến dịch phục vụ thống kê (Danh cho QLK)
+        // API 8: Lấy danh sách túi máu trong kho (phục vụ quản lý kho)
         [HttpGet("blood-units")]
-        public async Task<IActionResult> GetBloodUnitsByCampaign([FromBody] string maChienDich)
+        public async Task<IActionResult> GetBloodUnits(
+            [FromQuery] int page = 0 ,
+            [FromQuery] int size = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? status = null
+            )
         {
-            try
-            {
-                if (string.IsNullOrEmpty(maChienDich))
-                {
-                    return BadRequest(new { success = false, message = "Mã chiến dịch không được để trống." });
-                }
-                //query lấy danh sách túi máu join với đơn đăng ký và tình nguyện viên 
-                var list = await _context.TuiMaus
-                    .Include(t => t.DonDangKy)
-                    .ThenInclude(d => d.TinhNguyenVien)
-                    .Where(t => t.DonDangKy != null && t.DonDangKy.MaChienDich == maChienDich)
-                    .ToArrayAsync();
+            var query = _context.TuiMaus
+                .Include(t => t.DonDangKy)
+                .ThenInclude(d => d.TinhNguyenVien)
+                .Include(t => t.DonDangKy)
+                .ThenInclude(d => d.ChienDich)
+                .AsQueryable();
 
-                //chuyển đổi dữ liệu sang định dạng DTO cho FE
-                var result = list.Select(t => new
+            //LỌC TRẠNG THÁI 
+            if(!string.IsNullOrEmpty(status) && status == "Nhập kho")
+            {
+                query = query.Where(t => t.TrangThai == TrangThaiTuiMau.DaLuuKho);
+            }
+
+            //tìm kiếm theo mã túi hoặc nhóm máu
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(t => t.MaTuiMau.Contains(search) ||
+                t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Contains(search));
+            }
+            var totalItems = await query.CountAsync();
+            var totaklPages = (int)Math.Ceiling((double)totalItems / size);
+
+            var list = await query
+                .OrderByDescending(t => t.ThoiGianLayMau)
+                .Skip(page * size)
+                .Take(size)
+                .ToListAsync();
+
+            var homNay = DateTime.Now;
+            var result = list.Select(t =>
+            {
+                var ngayHetHan = t.ThoiGianLayMau?.AddDays(365) ?? homNay;
+                var soNgayConLai = (ngayHetHan - homNay).Days;
+                var tinhTrangSD = soNgayConLai < 0 ? "Hết hạn" : (soNgayConLai <= 30 ? "Sắp hết hạn" : "Còn hạn");
+
+                return new
                 {
                     maTuiMau = t.MaTuiMau,
-                    maDon = t.MaDon,
-                    nhomMau = t.DonDangKy?.TinhNguyenVien?.NhomMau != null
-                    ? t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "chưa rõ",
+                    maChienDich = t.DonDangKy?.ChienDich?.MaChienDich ?? "N/A",
+                    nhomMau = t.DonDangKy?.TinhNguyenVien?.NhomMau != null ? t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-")
+                    : "Chưa rõ",
                     theTich = t.TheTich,
                     ngayThuNhan = t.ThoiGianLayMau,
-                    thoiGianLayMau = t.ThoiGianLayMau,
-                    nhietDoVanChuyen = t.NhietDoVanChuyen,
-                    trangThai = t.TrangThai == TrangThaiTuiMau.DaLuuKho ? "Nhập kho" :
-                    t.TrangThai == TrangThaiTuiMau.DaXetNghiem ? "Yêu cầu nhập kho" :
-                    t.TrangThai = TrangThaiTuiMau.DaHuy ? "Đã huỷ" : "Chờ xét nghiệm"
-
-                }).ToList();
-
-                //Bọc trong đối tượng có trường   'Content' để khớp với FE mẫu
-                return Ok(new { content = result });
-            }catch(Exception ex)
+                    ngayHetHan = ngayHetHan,
+                    trangThai = "Nhập kho",
+                    tinhTrangHSD = tinhTrangHSD
+                };
+            }).ToList();
+            return Ok(new
             {
-                return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+                content = result,
+                totalPages = totalPages,
+                totalElements = totalItems
+            });
+        }
+        //{
+        //    try
+        //    {
+        //        if (string.IsNullOrEmpty(maChienDich))
+        //        {
+        //            return BadRequest(new { success = false, message = "Mã chiến dịch không được để trống." });
+        //        }
+        //        //query lấy danh sách túi máu join với đơn đăng ký và tình nguyện viên 
+        //        var list = await _context.TuiMaus
+        //            .Include(t => t.DonDangKy)
+        //            .ThenInclude(d => d.TinhNguyenVien)
+        //            .Where(t => t.DonDangKy != null && t.DonDangKy.MaChienDich == maChienDich)
+        //            .ToArrayAsync();
+
+        //        //chuyển đổi dữ liệu sang định dạng DTO cho FE
+        //        var result = list.Select(t => new
+        //        {
+        //            maTuiMau = t.MaTuiMau,
+        //            maDon = t.MaDon,
+        //            nhomMau = t.DonDangKy?.TinhNguyenVien?.NhomMau != null
+        //            ? t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "chưa rõ",
+        //            theTich = t.TheTich,
+        //            ngayThuNhan = t.ThoiGianLayMau,
+        //            thoiGianLayMau = t.ThoiGianLayMau,
+        //            nhietDoVanChuyen = t.NhietDoVanChuyen,
+        //            trangThai = t.TrangThai == TrangThaiTuiMau.DaLuuKho ? "Nhập kho" :
+        //            t.TrangThai == TrangThaiTuiMau.DaXetNghiem ? "Yêu cầu nhập kho" :
+        //            t.TrangThai = TrangThaiTuiMau.DaHuy ? "Đã huỷ" : "Chờ xét nghiệm"
+
+        //        }).ToList();
+
+        //        //Bọc trong đối tượng có trường   'Content' để khớp với FE mẫu
+        //        return Ok(new { content = result });
+        //    }catch(Exception ex)
+        //    {
+        //        return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+        //    }
+        //}
+
+
+        //API 7 . Quét mã túi maus để chuẩn bị nhập kho
+        [HttpGet("scan/{barcode}")]
+        public  async Task<IActionResult> ScanTuiMau(string barcode)
+        {
+            var tui = await _context.TuiMaus
+                .Include(t => t.DonDangKy)
+                .ThenInclude(d => d.TinhNguyenVien)
+                .Include(t => t.DonDangKy)
+                .ThenInclude(d => d.ChienDich)
+                .FirstOrDefaultAsync(t => t.MaTuiMau == barcode);
+
+            if(tui== null)
+            {
+                return NotFound(new { success = false, message = $"Không tìm thấy túi máu với mã vạch'{barcode}'." });
             }
+
+            //Ràng buộc bảo mật : chỉ cho phép nhập kho túi máu đã có kwts quả xét nghiệm an toàn (DaXetNghiem)
+            if (tui.TrangThai != TrangThaiTuiMau.DaXetNghiem)
+            {
+                if(tui.TrangThai == TrangThaiTuiMau.DaLuuKho)
+                {
+                    return BadRequest(new { success = false, message = $"Túi máu '{barcode}' đã được nhập khi từ trươc !" });
+                }
+
+                return BadRequest(new { success = false, message = $"Túi máu '{barcode}' chưa sẵn sàn nhập kho (trạng thái : {tui.TrangThai})." });
+            }
+
+            var homNay = DateTime.Now;
+            var ngayHetHan = tui.ThoiGianLayMau?.AddDays(365) ?? homNay.AddDays(365);
+            var soNgayConLai = (ngayHetHan - homNay).Days;
+            var tinhTrangSd = soNgayConLai < 0 ? "Hết hạn" : (soNgayConLai <= 30 ? "Sắp hết hạn" : "Còn hạn");
+
+            return Ok(new
+            {
+                maTuiMau = tui.MaTuiMau,
+                maChienDich = tui.DonDangKy?.ChienDich?.MaChienDich ?? "N/A",
+                nhomMau = tui.DonDangKy?.TinhNguyenVien?.NhomMau != null ? tui.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-")
+                :"Chưa rõ",
+                theTich = tui.TheTich,
+                ngayThuNhan = tui.ThoiGianLayMau,
+                ngayHetHan = ngayHetHan,
+                tinhTrangSd = tinhTrangSd
+            });
+
+
+        }
+
+
+        // Class DTO để hứng dữ liệu cập nhật từ React
+        public class CapNhatTuiMauRequest
+        {
+            public string NhomMau { get; set; } = string.Empty;
+            public int? TheTich { get; set; }
+            public DateTime? NgayHetHan { get; set; }
+        }
+
+
+        //API 9 cập nhật thông tin túi máu (nhóm máu , thể tích , ngày hết hạn)
+        [HttpPut("{maTuiMau}")]
+        public async Task<IActionResult> CapNhatTuiMau(string maTuiMau, [FromBody] CapNhatTuiMauRequest request) {
+            var tui = await _context.TuiMaus
+                    .Include(t => t.DonDangKy)
+                    .ThenInclude(d => d.TinhNguyenVien)
+                    .FirstOrDefaultAsync(t => t.MaTuiMau == maTuiMau);
+
+            if(tui == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy túi máu !" });
+
+            }
+
+            //cập nhật thể tích 
+            if (request.TheTich.HasValue)
+            {
+                tui.TheTich = request.TheTich.Value;
+
+            }
+
+            //Cập nhật nhóm máu của tình nguyện viên 
+            if (!string.IsNullOrEmpty(request.NhomMau) && tui.DonDangKy?.TinhNguyenVien != null)
+            {
+                string enumStr = request.NhomMau.Replace("+", "_positive").Replace("-", "_negative");
+                if(Enum.TryParse<NhomMau>(enumStr, out var parsedEnum))
+                {
+                    tui.DonDangKy.TinhNguyenVien.NhomMau == parsedEnum;
+                }
+            }
+
+            //cập nhật ngày hết hạn 
+            if (request.NgayHetHan.HasValue)
+            {
+                tui.ThoiGianLayMau = request.NgayHetHan.Value.AddDays(365);
+
+            }
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Vập nhật thông tin túi máu thành công!" });
+        }
+
+
+        //API 10 .xoá túi máu khỏi kho lưu trữ
+        [HttpDelete("blood-units/{maTuiMau}")]
+        public async Task<IActionResult> XoaTuiMauKhoiKho(string maTuiMau)
+        {
+            var tui = await _context.TuiMaus.FirstOrDefaultAsync(t => t.MaTuiMau == maTuiMau);
+            if(tui == null)
+            {
+                return NotFound(new { success = false, message = "không tìm thấy túi máu" });
+
+            }
+
+            //1. xoá các chi tiết phiêys nhập / xuất liên quan trước để tránh lỗi khoá ngoại 
+            var chiTiets = await
+                _context.ChiTietNhapXuats.Where(c => c.MaTuiMau == maTuiMau).ToListAsync();
+            if (chiTiets.Ant())
+            {
+                _context.ChiTietNhapXuats.RemoveRanger(chiTiets);
+
+            }
+            //2. trừ tồn kho máu của nhóm máu tương ứng đi 1 dvi
+            if (!string.IsNullOrEmpty(tui.MaKho))
+            {
+                var kho = await _context.KhoMaus.FirstOrDefaultAsync(K => K.MaKho == tui.MaKho);
+                if (kho != null)
+                {
+                    kho.SoLuongTon = Math.Max(0, (kho.SoLuongTon ?? 0) - 1);
+                }
+            }
+
+            //3.Xáo túi máu khỏi csdl
+            _context.TuiMaus.Remove(tui);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { succcess = true, message = "Xoá túi máu khỏi kho thành công!" });
         }
     }
 }
