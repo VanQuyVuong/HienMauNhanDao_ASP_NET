@@ -279,5 +279,53 @@ namespace HienMauNhanDao_DaNang.Controllers
                 return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }
+
+
+        //API 7 . Quét mã túi maus để chuẩn bị nhập kho
+        [HttpGet("scan/{barcode}")]
+        public  async Task<IActionResult> ScanTuiMau(string barcode)
+        {
+            var tui = await _context.TuiMaus
+                .Include(t => t.DonDangKy)
+                .ThenInclude(d => d.TinhNguyenVien)
+                .Include(t => t.DonDangKy)
+                .ThenInclude(d => d.ChienDich)
+                .FirstOrDefaultAsync(t => t.MaTuiMau == barcode);
+
+            if(tui== null)
+            {
+                return NotFound(new { success = false, message = $"Không tìm thấy túi máu với mã vạch'{barcode}'." });
+            }
+
+            //Ràng buộc bảo mật : chỉ cho phép nhập kho túi máu đã có kwts quả xét nghiệm an toàn (DaXetNghiem)
+            if (tui.TrangThai != TrangThaiTuiMau.DaXetNghiem)
+            {
+                if(tui.TrangThai == TrangThaiTuiMau.DaLuuKho)
+                {
+                    return BadRequest(new { success = false, message = $"Túi máu '{barcode}' đã được nhập khi từ trươc !" });
+                }
+
+                return BadRequest(new { success = false, message = $"Túi máu '{barcode}' chưa sẵn sàn nhập kho (trạng thái : {tui.TrangThai})." });
+            }
+
+            var homNay = DateTime.Now;
+            var ngayHetHan = tui.ThoiGianLayMau?.AddDays(365) ?? homNay.AddDays(365);
+            var soNgayConLai = (ngayHetHan - homNay).Days;
+            var tinhTrangSd = soNgayConLai < 0 ? "Hết hạn" : (soNgayConLai <= 30 ? "Sắp hết hạn" : "Còn hạn");
+
+            return Ok(new
+            {
+                maTuiMau = tui.MaTuiMau,
+                maChienDich = tui.DonDangKy?.ChienDich?.MaChienDich ?? "N/A",
+                nhomMau = tui.DonDangKy?.TinhNguyenVien?.NhomMau != null ? tui.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-")
+                :"Chưa rõ",
+                theTich = tui.TheTich,
+                ngayThuNhan = tui.ThoiGianLayMau,
+                ngayHetHan = ngayHetHan,
+                tinhTrangSd = tinhTrangSd
+            });
+
+
+        }
     }
 }

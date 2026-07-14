@@ -229,7 +229,7 @@ namespace HienMauNhanDao_DaNang.Controllers
         [HttpPut("{maDon}/huy")]
         public async Task<IActionResult> HuyDonDangKy(string maDon)
         {
-            var don = await _context.DonDangKys.FindAsync(maDon)
+            var don = await _context.DonDangKys.FindAsync(maDon);
                 if(don == null)
             {
                 return NotFound(new { success = false, message = "Không tìm thấy đơn đăng ký !" });
