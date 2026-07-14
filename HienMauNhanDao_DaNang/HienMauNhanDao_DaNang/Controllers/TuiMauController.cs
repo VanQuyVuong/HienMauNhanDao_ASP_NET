@@ -390,5 +390,56 @@ namespace HienMauNhanDao_DaNang.Controllers
 
 
         }
+
+
+        // Class DTO để hứng dữ liệu cập nhật từ React
+        public class CapNhatTuiMauRequest
+        {
+            public string NhomMau { get; set; } = string.Empty;
+            public int? TheTich { get; set; }
+            public DateTime? NgayHetHan { get; set; }
+        }
+
+
+        //API 9 cập nhật thông tin túi máu (nhóm máu , thể tích , ngày hết hạn)
+        [HttpPut("{maTuiMau}")]
+        public async Task<IActionResult> CapNhatTuiMau(string maTuiMau, [FromBody] CapNhatTuiMauRequest request) {
+            var tui = await _context.TuiMaus
+                    .Include(t => t.DonDangKy)
+                    .ThenInclude(d => d.TinhNguyenVien)
+                    .FirstOrDefaultAsync(t => t.MaTuiMau == maTuiMau);
+
+            if(tui == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy túi máu !" });
+
+            }
+
+            //cập nhật thể tích 
+            if (request.TheTich.HasValue)
+            {
+                tui.TheTich = request.TheTich.Value;
+
+            }
+
+            //Cập nhật nhóm máu của tình nguyện viên 
+            if (!string.IsNullOrEmpty(request.NhomMau) && tui.DonDangKy?.TinhNguyenVien != null)
+            {
+                string enumStr = request.NhomMau.Replace("+", "_positive").Replace("-", "_negative");
+                if(Enum.TryParse<NhomMau>(enumStr, out var parsedEnum))
+                {
+                    tui.DonDangKy.TinhNguyenVien.NhomMau == parsedEnum;
+                }
+            }
+
+            //cập nhật ngày hết hạn 
+            if (request.NgayHetHan.HasValue)
+            {
+                tui.ThoiGianLayMau = request.NgayHetHan.Value.AddDays(365);
+
+            }
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Vập nhật thông tin túi máu thành công!" });
+        }
     }
 }
