@@ -441,5 +441,42 @@ namespace HienMauNhanDao_DaNang.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { success = true, message = "Vập nhật thông tin túi máu thành công!" });
         }
+
+
+        //API 10 .xoá túi máu khỏi kho lưu trữ
+        [HttpDelete("blood-units/{maTuiMau}")]
+        public async Task<IActionResult> XoaTuiMauKhoiKho(string maTuiMau)
+        {
+            var tui = await _context.TuiMaus.FirstOrDefaultAsync(t => t.MaTuiMau == maTuiMau);
+            if(tui == null)
+            {
+                return NotFound(new { success = false, message = "không tìm thấy túi máu" });
+
+            }
+
+            //1. xoá các chi tiết phiêys nhập / xuất liên quan trước để tránh lỗi khoá ngoại 
+            var chiTiets = await
+                _context.ChiTietNhapXuats.Where(c => c.MaTuiMau == maTuiMau).ToListAsync();
+            if (chiTiets.Ant())
+            {
+                _context.ChiTietNhapXuats.RemoveRanger(chiTiets);
+
+            }
+            //2. trừ tồn kho máu của nhóm máu tương ứng đi 1 dvi
+            if (!string.IsNullOrEmpty(tui.MaKho))
+            {
+                var kho = await _context.KhoMaus.FirstOrDefaultAsync(K => K.MaKho == tui.MaKho);
+                if (kho != null)
+                {
+                    kho.SoLuongTon = Math.Max(0, (kho.SoLuongTon ?? 0) - 1);
+                }
+            }
+
+            //3.Xáo túi máu khỏi csdl
+            _context.TuiMaus.Remove(tui);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { succcess = true, message = "Xoá túi máu khỏi kho thành công!" });
+        }
     }
 }
