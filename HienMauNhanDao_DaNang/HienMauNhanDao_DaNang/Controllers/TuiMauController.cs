@@ -428,7 +428,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 string enumStr = request.NhomMau.Replace("+", "_positive").Replace("-", "_negative");
                 if(Enum.TryParse<NhomMau>(enumStr, out var parsedEnum))
                 {
-                    tui.DonDangKy.TinhNguyenVien.NhomMau == parsedEnum;
+                    tui.DonDangKy.TinhNguyenVien.NhomMau = parsedEnum;
                 }
             }
 
