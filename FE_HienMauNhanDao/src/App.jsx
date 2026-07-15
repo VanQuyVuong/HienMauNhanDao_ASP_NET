@@ -20,6 +20,7 @@ import QuanLyNhapKhoQuetMa from "./pages/QuanLyNhapKhoQuetMa";
 import ThongKeTonKho from "./pages/ThongKeTonKho";
 import QuanLyHanDung from "./pages/QuanLyHanDung";
 import KhamLamSang from "./pages/KhamLamSang";
+import ThuNhanMau from "./pages/ThuNhanMau";
 
 function App() {
   return (
@@ -58,7 +59,8 @@ function App() {
           element={<QuanLyHanDung />}
         />{" "}
         <Route path="/admin-quan-ly-han-dung" element={<QuanLyHanDung />} />
-        <Route path="/admin-kham-lam-sang" element={<KhamLamSang />} />{" "}
+        <Route path="/admin-kham-lam-sang" element={<KhamLamSang />} />
+        <Route path="/admin-thu-nhan-mau" element={<ThuNhanMau />} />
       </Routes>
     </BrowserRouter>
   );
