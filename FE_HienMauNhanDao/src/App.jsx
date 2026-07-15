@@ -18,7 +18,8 @@ import XacNhanDangKy from "./pages/XacNhanDangKy";
 import QuanLyChienDich from "./pages/QuanLyChienDich";
 import QuanLyNhapKhoQuetMa from "./pages/QuanLyNhapKhoQuetMa";
 import ThongKeTonKho from "./pages/ThongKeTonKho";
-import QuanLyHanDung from "./pages/QuanLyHanDung"; // <-- BƯỚC 1: Import trang mới vào đây
+import QuanLyHanDung from "./pages/QuanLyHanDung";
+import KhamLamSang from "./pages/KhamLamSang";
 
 function App() {
   return (
@@ -46,7 +47,6 @@ function App() {
           path="/qlk-nhap-theo-chien-dich"
           element={<QuanLyNhapKhoTheoChienDich />}
         />
-        {/* BƯỚC 2: ĐƯA CÁC ROUTE NÀY VÀO TRONG THẺ ROUTES */}
         <Route path="/admin-quan-ly-chien-dich" element={<QuanLyChienDich />} />
         <Route
           path="/admin-nhap-kho-quet-ma"
@@ -57,7 +57,8 @@ function App() {
           path="/admin-quan-ly-han-dung"
           element={<QuanLyHanDung />}
         />{" "}
-        {/* Thêm Route của Bài 38 */}
+        <Route path="/admin-quan-ly-han-dung" element={<QuanLyHanDung />} />
+        <Route path="/admin-kham-lam-sang" element={<KhamLamSang />} />{" "}
       </Routes>
     </BrowserRouter>
   );
