@@ -1,0 +1,33 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 36 - QUẢN LÝ NHẬP KHO BẰNG QUÉT MÃ VẠCH (QuanLyNhapKhoQuetMa)
+
+I. MỤC TIÊU THIẾT KẾ
+Xây dựng tính năng nhập kho bằng quét mã vạch chuyên nghiệp dành cho Thủ kho (QLK) để đưa các túi máu đã xét nghiệm an toàn vào kho lưu trữ:
+1. Cho phép quét/nhập mã vạch túi máu dạng TMxxxxx. Hệ thống kiểm tra điều kiện xét nghiệm đạt chuẩn trước khi cho vào hàng đợi.
+2. Quản lý danh sách hàng đợi tạm thời và tiến hành lưu phiếu nhập kho hàng loạt.
+3. Hiển thị danh sách các túi máu hiện có trong kho, cho phép sửa nhanh thông tin hoặc xóa túi máu (tự động cập nhật số lượng tồn kho máu của từng nhóm máu).
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C#
+* API quét mã túi máu:
+  - Endpoint: GET /api/tuimau/scan/{barcode}
+  - Logic: Tìm kiếm túi máu. Chỉ cho phép nhập kho nếu trạng thái của túi máu là DaXetNghiem (Yêu cầu nhập kho).
+* API lấy danh sách túi máu trong kho (Nâng cấp):
+  - Endpoint: GET /api/tuimau/blood-units
+  - Logic: Thay đổi nhận dữ liệu từ body sang Query parameters, hỗ trợ phân trang (page, size) và tìm kiếm theo mã túi hoặc nhóm máu.
+* API cập nhật túi máu:
+  - Endpoint: PUT /api/tuimau/{maTuiMau}
+  - DTO: CapNhatTuiMauRequest (Nhóm máu, thể tích, ngày hết hạn).
+* API xóa túi máu khỏi kho:
+  - Endpoint: DELETE /api/tuimau/blood-units/{maTuiMau}
+  - Logic: Xóa chi tiết nhập xuất liên quan trong bảng ChiTietNhapXuat, trừ số lượng tồn kho của ngăn tương ứng trong bảng KhoMau và xóa thực thể túi máu khỏi CSDL.
+* API duyệt nhập kho hàng loạt (Đã có sẵn):
+  - Endpoint: POST /api/phieunhapxuat/import
+
+2. Phân hệ Frontend React
+* Định tuyến Route: Đăng ký route /admin-nhap-kho-quet-ma trong App.jsx.
+* Component giao diện:
+  - Tạo mới file QuanLyNhapKhoQuetMa.jsx và CSS QuanLyNhapKhoQuetMa.css.
+  - Giao diện form quét mã vạch tự động bắt sự kiện submit và thông báo lỗi/thành công trực quan.
+  - Hàng đợi hiển thị danh sách chờ nhập kho tạm thời có nút Hủy từng mục và nút Xác nhận lưu phiếu nhập kho hàng loạt.
+  - Bảng danh sách tồn kho hiển thị hạn sử dụng (Còn hạn, Sắp hết hạn, Hết hạn), tích hợp phân trang và modal sửa nhanh.

@@ -61,7 +61,30 @@ namespace HienMauNhanDao_DaNang.Controllers
                 .ToList();
 
 
-            // Trả về dữ liệu đóng gói
+            //// Trả về dữ liệu đóng gói
+            //return Ok(new
+            //{
+            //    success = true,
+            //    data = new
+            //    {
+            //        TongNguoiDung = tongNguoiDung,
+            //        TongTheTichMau = tongTheTichMau,
+            //        TongTuiMau= tongTuiMau,
+            //        TheoNhomMau= theoNhomMau,
+            //        TheoThang= theoThang
+            //    }
+            //});
+
+
+            //6 . tổng số chiến dịch đã tổ chức 
+            var tongChienDich = await _context.ChienDichHienMaus.CountAsync();
+
+            //7. tỷ lệ khám sàng lọc lâm sáng đạt yêu cầu 
+            var tongKham = await _context.KetQuaLamSangs.CountAsync();
+            var daKham = await _context.KetQuaLamSangs.CountAsync(K => K.KetQua == true);
+            var tyLeDatSangLoc = tongKham > 0 ? Math.Round((double)daKham / tongKham * 100, 1) : 0;
+
+            //trả về dữ liệu đóng gói 
             return Ok(new
             {
                 success = true,
@@ -69,10 +92,13 @@ namespace HienMauNhanDao_DaNang.Controllers
                 {
                     TongNguoiDung = tongNguoiDung,
                     TongTheTichMau = tongTheTichMau,
-                    TongTuiMau= tongTuiMau,
-                    TheoNhomMau= theoNhomMau,
-                    TheoThang= theoThang
+                    TongTuiMau = tongTuiMau,
+                    TheoNhomMau = theoNhomMau,
+                    TheoThang = theoThang,
+                    TongChienDich = tongChienDich,
+                    TyLeDatSangLoc = tyLeDatSangLoc
                 }
+
             });
         }
     }

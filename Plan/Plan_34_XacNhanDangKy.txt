@@ -1,0 +1,26 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 34 - TRANG XÁC NHẬN ĐĂNG KÝ HIẾN MÁU (XacNhanDangKy)
+
+I. MỤC TIÊU THIẾT KẾ
+Hoàn thiện luồng đăng ký hiến máu của Tình nguyện viên (TNV) bằng cách tạo trang hiển thị phiếu xác nhận đăng ký hiến máu thành công, hỗ trợ các tính năng:
+1. Hiển thị thông tin chi tiết đơn đăng ký, thông tin cá nhân của TNV và thông tin chiến dịch/địa điểm.
+2. Hỗ trợ in phiếu xác nhận trực tiếp từ trình duyệt (window.print()) để xuất trình khi đến điểm hiến máu.
+3. Hỗ trợ TNV tự hủy đơn đăng ký hiến máu trực tuyến nếu thay đổi kế hoạch.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C#
+* Cập nhật Enums: Thêm trạng thái DaHuy vào enum TrangThaiDonDangKy trong file CacEnum.cs.
+* API lấy chi tiết đơn đăng ký:
+  - Endpoint: GET /api/dondangky/{maDon}
+  - Logic: Tìm đơn đăng ký theo mã đơn, nạp kèm thông tin TNV, Chiến dịch và Địa điểm để hiển thị.
+* API hủy đơn đăng ký:
+  - Endpoint: PUT /api/dondangky/{maDon}/huy
+  - Logic: Cập nhật trạng thái đơn thành DaHuy nếu đơn chưa hoàn thành.
+
+2. Phân hệ Frontend React
+* Định tuyến Route: Cấu hình route /xac-nhan-dang-ky/:maDon trong file App.jsx.
+* Chuyển hướng: Cập nhật trang KhaiBaoYTe.jsx để chuyển hướng TNV về trang xác nhận sau khi khai báo y tế thành công.
+* Component giao diện:
+  - Tạo mới file XacNhanDangKy.jsx và CSS XacNhanDangKy.css.
+  - Thiết kế phiếu xác nhận dạng tối giản, tinh tế, hỗ trợ responsive.
+  - Tách biệt CSS khi in (@media print) để ẩn các nút điều hướng khi người dùng in phiếu.
