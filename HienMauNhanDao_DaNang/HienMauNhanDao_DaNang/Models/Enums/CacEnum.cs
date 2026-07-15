@@ -1,4 +1,4 @@
-﻿namespace HienMauNhanDao_DaNang.Models.Enums
+namespace HienMauNhanDao_DaNang.Models.Enums
 {
 
     //Nhóm máu
@@ -29,7 +29,8 @@
         ChoDuyet,
         DaDuyet,
         DaTuChoi,
-        DaHoanThanh
+        DaHoanThanh,
+        DaHuy
     }
 
     //Trạng thái túi máu
@@ -73,15 +74,5 @@
         NhapLieu,
         DanDang,
         DaAn
-    }
-
-    //trạng thái đơn đăng ký hiến máu 
-    public enum TrangThaiDonDangKy
-    {
-        ChoDuyet,
-        DaDuyet,
-        DaTuChoi,
-        DaHoanThanh,
-        DaHuy
     }
 }
