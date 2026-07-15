@@ -1,0 +1,27 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 35 - QUẢN LÝ CHIẾN DỊCH DÀH CHO ADMIN (QuanLyChienDich)
+
+I. MỤC TIÊU THIẾT KẾ
+Xây dựng tính năng quản lý chiến dịch hiến máu toàn diện dành cho Quản trị viên (Admin) và Nhân viên y tế (NVYT):
+1. Theo dõi các chỉ số KPI chiến dịch (Tổng số chiến dịch, chiến dịch đang diễn ra, sắp diễn ra).
+2. Tạo mới, chỉnh sửa thông tin chi tiết của chiến dịch hiến máu.
+3. Xóa các chiến dịch rác hoặc chưa phát sinh hoạt động (ràng buộc bảo mật không cho phép xóa nếu đã có đơn đăng ký).
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C#
+* API lấy danh sách chiến dịch (Nâng cấp):
+  - Endpoint: GET /api/chiendich
+  - Logic: Thêm .Include(c => c.DiaDiem) và .Include(c => c.NhanVienPhuTrach) để lấy thông tin địa điểm và nhân viên điều phối trực tiếp, không cần truy vấn rời rạc.
+* API cập nhật chiến dịch:
+  - Endpoint: PUT /api/chiendich/{id}
+  - DTO: CapNhatChienDichRequest (Tên chiến dịch, thời gian bắt đầu/kết thúc, chỉ tiêu, trạng thái, ảnh bìa).
+* API xóa chiến dịch:
+  - Endpoint: DELETE /api/chiendich/{id}
+  - Ràng buộc bảo mật: Kiểm tra xem chiến dịch đã có bất kỳ đơn đăng ký hiến máu nào chưa. Nếu đã có (_context.DonDangKys.AnyAsync), chặn không cho xóa để bảo vệ toàn vẹn dữ liệu.
+
+2. Phân hệ Frontend React
+* Định tuyến Route: Đăng ký route /admin-quan-ly-chien-dich trong App.jsx.
+* Component giao diện:
+  - Tạo mới file QuanLyChienDich.jsx và CSS QuanLyChienDich.css.
+  - Hiển thị bảng danh sách chiến dịch, bộ lọc tìm kiếm theo từ khóa và trạng thái chiến dịch.
+  - Modal chỉnh sửa thông tin chiến dịch có tích hợp các trường lịch và danh sách lựa chọn địa điểm lấy từ API /api/diadiem.

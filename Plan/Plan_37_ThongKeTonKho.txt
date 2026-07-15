@@ -1,0 +1,28 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 37 - THỐNG KÊ & TỒN KHO MÁU (ThongKeTonKho)
+
+I. MỤC TIÊU THIẾT KẾ
+Xây dựng màn hình Dashboard báo cáo và thống kê tồn kho máu toàn diện dành cho Thủ kho và Ban quản trị để theo dõi sức khỏe kho máu:
+1. Hiển thị 4 thẻ KPI chỉ số quan trọng (Tổng số túi máu, Số TNV, Số chiến dịch, Tỷ lệ sàng lọc lâm sàng đạt chuẩn).
+2. Vẽ biểu đồ tròn thể hiện cơ cấu tồn kho máu theo 4 nhóm chính (A, B, O, AB) bằng thư viện recharts.
+3. Vẽ biểu đồ cột thể hiện xu hướng lượng túi máu thu nhận được theo 12 tháng của năm hiện tại.
+4. Bảng tổng hợp chi tiết so sánh số lượng của 8 nhóm máu thực tế so với ngưỡng an toàn quy định.
+5. Xuất báo cáo thống kê chính thức ra định dạng file Word (.docx) chuyên nghiệp có đầy đủ tiêu đề Quốc hiệu và khung chữ ký xác nhận của Thủ kho.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C#
+* API thống kê tổng quan (Nâng cấp):
+  - Endpoint: GET /api/thongke/tong-quan
+  - Logic bổ sung:
+    * Đếm số chiến dịch: await _context.ChienDichHienMaus.CountAsync()
+    * Tính tỷ lệ đạt sàng lọc: Lấy tổng số ca khám lâm sàng có kết quả Đạt chia cho tổng số ca khám trong bảng KetQuaLamSangs nhân cho 100.
+    * Đóng gói toàn bộ chỉ số này và gửi về trong 1 kết quả JSON thống nhất.
+
+2. Phân hệ Frontend React
+* Thư viện cài đặt: Cài đặt thêm recharts, docx và file-saver.
+* Định tuyến Route: Đăng ký route /admin-thong-ke-ton-kho trong App.jsx.
+* Component giao diện:
+  - Tạo mới file ThongKeTonKho.jsx và CSS ThongKeTonKho.css.
+  - Tích hợp các thẻ thống kê KPI nổi bật.
+  - Tích hợp Chart Component (ResponsiveContainer, BarChart, PieChart, Cell, Legend) để hiển thị dữ liệu trực quan sinh động.
+  - Xây dựng hàm handleExportExcel (thực chất là xuất file Word .docx) sử dụng thư viện docx để tạo bảng biểu và các đoạn văn bản chuẩn mẫu báo cáo hành chính.
