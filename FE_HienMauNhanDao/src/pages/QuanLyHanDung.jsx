@@ -40,14 +40,22 @@ const QuanLyHanDung = () => {
       );
       const listJson = await listRes.json();
 
-      setStats(
-        statsJson || {
+      if (statsJson) {
+        setStats({
+          expiredCount: statsJson.soLuongHetHan ?? 0,
+          nearExpiryCount: statsJson.soLuongSapHetHan ?? 0,
+          safeCount: statsJson.soLuongAnToan ?? 0,
+          hasCritical: statsJson.coCanhBaoNguyCap ?? false,
+        });
+      } else {
+        setStats({
           expiredCount: 0,
           nearExpiryCount: 0,
           safeCount: 0,
           hasCritical: false,
-        },
-      );
+        });
+      }
+
       setBloodUnits(Array.isArray(listJson) ? listJson : []);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu hạn dùng:", error);
