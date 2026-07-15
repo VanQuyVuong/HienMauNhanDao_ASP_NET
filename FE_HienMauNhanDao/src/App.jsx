@@ -17,6 +17,7 @@ import OtpVerification from "./pages/OtpVerification";
 import XacNhanDangKy from "./pages/XacNhanDangKy";
 import QuanLyChienDich from "./pages/QuanLyChienDich";
 import QuanLyNhapKhoQuetMa from "./pages/QuanLyNhapKhoQuetMa";
+import ThongKeTonKho from "./pages/ThongKeTonKho";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
       </Routes>
       <Route path="/admin-quan-ly-chien-dich" element={<QuanLyChienDich />} />
       <Route path="/admin-nhap-kho-quet-ma" element={<QuanLyNhapKhoQuetMa />} />
+      <Route path="/admin-thong-ke-ton-kho" element={<ThongKeTonKho />} />
     </BrowserRouter>
   );
 }
