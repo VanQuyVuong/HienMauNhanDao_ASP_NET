@@ -194,7 +194,8 @@
 
 .hd-table-header {
   padding: 16px 20px;
-  border-b: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
