@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Models.DTOs.Requests;
+using HienMauNhanDao_DaNang.Models.DTOs.Requests;
 using HienMauNhanDao_DaNang.Models.DTOs.Responses;
 
 namespace HienMauNhanDao_DaNang.Services.Interfaces
@@ -14,5 +14,7 @@ namespace HienMauNhanDao_DaNang.Services.Interfaces
         Task RegisterAsync(RegisterRequest request);
         // Đăng xuất → vô hiệu hóa token
         Task LogoutAsync(string token);
+        // Kiểm tra Email tồn tại
+        Task<bool> CheckEmailExistAsync(string email);
     }
 }

@@ -1,0 +1,17 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 41 - DANH SÁCH KHAI BÁO Y TẾ DÀNH CHO NVYT (AdminKhaiBaoYTe)
+
+I. MỤC TIÊU THIẾT KẾ
+Hoàn thiện giao diện xem và theo dõi Hồ sơ khai báo y tế của Tình nguyện viên dành cho Nhân viên y tế (NVYT):
+1. Thống kê số lượng hồ sơ khai báo và số lượng ca cần chú ý (TNV khai báo có triệu chứng bất thường như sốt, đau họng, dùng kháng sinh, thai sản).
+2. Tra cứu tìm kiếm hồ sơ y tế theo mã đơn, mã hồ sơ hoặc tên Tình nguyện viên trực quan.
+3. Tô màu cảnh báo màu đỏ (row-risk) đối với các hàng chứa hồ sơ khai báo sức khỏe không đạt tiêu chuẩn lâm sàng để NVYT và bác sĩ dễ dàng phát hiện khi TNV đến điểm hiến máu.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C#
+* File cần chỉnh sửa: HoSoSucKhoeController.cs
+* Nhiệm vụ: Bổ sung attribute [HttpPost] phía trên hàm CreateHoSo (dòng 34) để chỉ định rõ phương thức nhận request POST gửi lên từ client, tránh lỗi Ambiguous HTTP Method của IIS/Kestrel.
+
+2. Phân hệ Frontend React
+* File cần chỉnh sửa: AdminKhaiBaoYTe.jsx
+* Nhiệm vụ: Bổ sung import file CSS AdminKhaiBaoYTe.css vào đầu trang để giao diện hiển thị đúng style định dạng thiết kế của phân hệ NVYT.

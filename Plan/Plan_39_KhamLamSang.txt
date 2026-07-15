@@ -1,0 +1,23 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 39 - KHÁM LÂM SÀNG DÀNH CHO BÁC SĨ (KhamLamSang)
+
+I. MỤC TIÊU THIẾT KẾ
+Xây dựng phân hệ Khám lâm sàng dành cho Bác sĩ để kiểm tra sức khỏe của Tình nguyện viên (TNV) trước khi hiến máu:
+1. Thực hiện Check-in tìm kiếm mã đơn đăng ký của TNV trong hàng chờ khám (đã duyệt đơn và đã khai báo y tế).
+2. Nhập các chỉ số sinh tồn của TNV: Huyết áp, Nhịp tim, Cân nặng, Nhiệt độ và chọn Thể tích hiến máu (250ml/350ml/450ml).
+3. Tự động sinh mã túi máu (dạng TMxxxxx) trong CSDL và tạo bản ghi túi máu mới với trạng thái "ChuaXuLy" nếu bác sĩ khám kết luận Đạt yêu cầu.
+4. Xem danh sách lịch sử các ca khám lâm sàng đã thực hiện, cho phép xóa kết quả khám cũ để khám lại nếu có sai sót.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C# (Đã có sẵn 100%, không cần viết thêm)
+* API lấy danh sách hàng chờ khám: GET /api/khamlamsang/cho-kham
+* API lấy lịch sử khám lâm sàng: GET /api/khamlamsang/danh-sach
+* API lấy thống kê số ca khám: GET /api/khamlamsang/thong-ke
+* API lưu kết quả khám: POST /api/khamlamsang/luu
+* API xóa kết quả khám: DELETE /api/khamlamsang/xoa/{id}
+
+2. Phân hệ Frontend React
+* Định tuyến Route: Đăng ký route /admin-kham-lam-sang trong App.jsx.
+* Component giao diện (Đã có sẵn file KhamLamSang.jsx và KhamLamSang.css):
+  - Kiểm tra, tinh chỉnh và kết nối thành công với 5 API Backend.
+  - Sửa các lỗi CSS hoặc logic nếu phát hiện trong quá trình chạy thử.

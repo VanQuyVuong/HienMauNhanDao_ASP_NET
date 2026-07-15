@@ -1,0 +1,23 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 40 - QUẢN LÝ XÉT NGHIỆM TÚI MÁU (KetQuaXetNghiem)
+
+I. MỤC TIÊU THIẾT KẾ
+Xây dựng phân hệ Quản lý Xét nghiệm dành cho Nhân viên y tế (NVYT) phòng xét nghiệm để kiểm tra an toàn sinh học của các túi máu vừa thu hoạch:
+1. Hiển thị banner cảnh báo khẩn cấp màu đỏ nổi bật nhấp nháy nếu phát hiện có túi máu mới thu nhận chưa được xét nghiệm virus truyền nhiễm (HIV, viêm gan B, viêm gan C, giang mai...).
+2. Bảng danh sách các túi máu đã hoặc đang chờ xét nghiệm. Hiển thị trạng thái "Chờ xét nghiệm" (tô màu vàng nhạt) và các ca đã hoàn thành test.
+3. Popup Modal nhập liệu kết quả test (Chọn nhóm máu xác nhận, chọn số lần test, nhập mô tả bệnh/chỉ số lâm sàng và quyết định Đạt/Không đạt).
+4. Cho phép Nhân viên y tế thực hiện Xóa kết quả xét nghiệm sai lệch để đưa túi máu về trạng thái chờ test lại từ đầu.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C# (Đã có sẵn 100%, không cần viết thêm)
+* API lấy danh sách xét nghiệm và hàng chờ test: GET /api/ketquaxetnghiem/danh-sach
+* API lấy số liệu thống kê: GET /api/ketquaxetnghiem/thong-ke
+* API lưu kết quả xét nghiệm: POST /api/ketquaxetnghiem/luu
+* API xóa kết quả xét nghiệm: DELETE /api/ketquaxetnghiem/xoa/{id}
+
+2. Phân hệ Frontend React (Đã có sẵn file KetQuaXetNghiem.jsx và KetQuaXetNghiem.css)
+* Định tuyến Route: Đã đăng ký route /admin-xet-nghiem trong App.jsx.
+* Nhiệm vụ kiểm thử và sửa lỗi:
+  - Khởi tạo nhánh Git mới feature/NVYT_ketQuaXetNghiem.
+  - Sửa lỗi viết tắt CSS max-w thành max-width ở dòng 213 của file KetQuaXetNghiem.css để modal không bị vỡ bố cục trên trình duyệt.
+  - Chạy thử và xác nhận hoạt động lưu kết quả xét nghiệm thành công.

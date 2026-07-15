@@ -1,0 +1,23 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 38 - QUẢN LÝ HẠN DÙNG TÚI MÁU (QuanLyHanDung)
+
+I. MỤC TIÊU THIẾT KẾ
+Xây dựng giao diện Quản lý hạn dùng túi máu dành cho Thủ kho để giám sát chất lượng máu lưu trữ:
+1. Hiển thị thống kê nhanh hạn dùng (Số túi máu an toàn, sắp hết hạn, đã hết hạn và cảnh báo nguy cấp nếu hết hạn quá lâu).
+2. Danh sách túi máu chi tiết phân chia theo các Tab bộ lọc: Tất cả, An toàn, Sắp hết hạn, Đã hết hạn.
+3. Cho phép Thủ kho thực hiện Tiêu hủy đơn lẻ từng túi máu quá hạn hoặc Tiêu hủy hàng loạt tất cả túi máu đã quá hạn trong kho để giải phóng không gian lưu trữ.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C# (Đã có sẵn 100%, không cần viết thêm)
+* API lấy số liệu thống kê hạn dùng: GET /api/tuimau/thong-ke-han-dung
+* API lấy danh sách hạn dùng chi tiết: GET /api/tuimau/danh-sach-han-dung?viewMode={mode}&search={keyword}
+* API tiêu hủy đơn lẻ: DELETE /api/tuimau/tieu-huy-don-le/{id}
+* API tiêu hủy hàng loạt: DELETE /api/tuimau/tieu-huy-hang-loat
+
+2. Phân hệ Frontend React
+* Định tuyến Route: Đăng ký route /admin-quan-ly-han-dung trong App.jsx.
+* Component giao diện:
+  - Tạo mới file QuanLyHanDung.jsx và CSS QuanLyHanDung.css.
+  - Tích hợp gọi 4 API Backend có sẵn bằng fetch (có kẹp token Authorization).
+  - Thiết kế giao diện Dashboard hạn dùng gồm 3 thẻ thống kê màu sắc cảnh báo, thanh tìm kiếm, các tab chuyển đổi bộ lọc.
+  - Nút bấm Tiêu hủy hàng loạt (chỉ hiển thị khi có túi máu hết hạn và yêu cầu xác nhận xác thực bằng hộp thoại Confirm bảo mật).
