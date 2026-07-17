@@ -1,0 +1,20 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 42 - TIẾP NHẬN & THU NHẬN TÚI MÁU DÀNH CHO NVYT (ThuNhanMau)
+
+I. MỤC TIÊU THIẾT KẾ
+Xây dựng giao diện Quản lý Thu nhận máu dành cho Nhân viên y tế (NVYT) tại khu vực lấy máu để tiến hành lưu trữ và kiểm soát nhiệt độ vận chuyển của túi máu:
+1. Hiển thị danh sách các túi máu đã khám lâm sàng đạt chuẩn và vừa được thu hoạch (trạng thái "ChuaXuLy").
+2. Cho phép NVYT cập nhật các thông tin vận chuyển và lưu trữ như: Nhiệt độ bảo quản vận chuyển (độ C) và thay đổi trạng thái sang "Yêu cầu xét nghiệm" sau khi đóng gói.
+3. Hỗ trợ in nhãn dán mã vạch (Barcode) trực tiếp từ giao diện để dán lên túi máu thật phục vụ quét mã sau này.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C#
+* File cần chỉnh sửa: TuiMauController.cs (dòng 431)
+* Lỗi logic compile: Sửa lỗi dùng sai toán tử so sánh "==" thành toán tử gán "=" tại dòng cập nhật nhóm máu:
+  tui.DonDangKy.TinhNguyenVien.NhomMau = parsedEnum;
+
+2. Phân hệ Frontend React
+* Định tuyến Route: Đăng ký route /admin-thu-nhan-mau trong App.jsx.
+* Component giao diện (Tạo mới):
+  - Tạo mới file ThuNhanMau.jsx và CSS ThuNhanMau.css dựa trên mẫu nghiệp vụ chuẩn của hệ thống hiến máu.
+  - Tích hợp gọi các API Backend để hiển thị danh sách túi máu thu hoạch và cập nhật nhiệt độ vận chuyển.
