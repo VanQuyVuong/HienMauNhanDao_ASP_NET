@@ -34,14 +34,14 @@ export default function Navbar() {
       >
         <li>
           <Link
-            to="/dashboard"
+            to="/"
             style={{
               textDecoration: "none",
               color: "#2b2d42",
               fontWeight: "500",
             }}
           >
-            Trang chủ
+            🏠 Trang chủ
           </Link>
         </li>
         <li>

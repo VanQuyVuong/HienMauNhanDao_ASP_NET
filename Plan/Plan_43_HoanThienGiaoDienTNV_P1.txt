@@ -1,0 +1,29 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 43 - HOÀN THIỆN GIAO DIỆN TÌNH NGUYỆN VIÊN PHẦN 1 (HomePage & Footer)
+
+I. MỤC TIÊU THIẾT KẾ
+Xây dựng trang chủ công khai (Landing Page) và Footer chân trang cho hệ thống Hiến Máu Nhân Đạo:
+1. Trang chủ (HomePage.jsx) hiển thị banner hero với slogan kêu gọi, thống kê ấn tượng (Tổng TNV, Tổng túi máu, Số chiến dịch), danh sách chiến dịch nổi bật, hướng dẫn quy trình hiến máu 4 bước.
+2. Footer (Footer.jsx) hiển thị thông tin liên hệ, liên kết nhanh, form đăng ký nhận tin, bản quyền hệ thống.
+3. Cải tiến so với đàn anh: Dùng CSS thuần thay TailwindCSS, thêm hiệu ứng animation cuộn trang, gradient hiện đại hơn.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C# (Không cần chỉnh sửa)
+* Sử dụng API có sẵn:
+  - GET /api/thongke/tong-quan: Lấy số liệu thống kê tổng quan.
+  - GET /api/chiendich: Lấy danh sách chiến dịch hiến máu.
+
+2. Phân hệ Frontend React
+* Tạo mới file:
+  - components/Footer.jsx: Component chân trang chung cho toàn bộ website.
+  - components/Footer.css: CSS trang trí cho Footer.
+  - pages/HomePage.jsx: Trang chủ landing page công khai.
+  - css/HomePage.css: CSS trang trí cho HomePage.
+* Chỉnh sửa file:
+  - App.jsx: Đăng ký route "/" trỏ về HomePage thay vì redirect sang Login.
+  - components/Navbar.jsx: Bổ sung các menu link Trang chủ, Giới thiệu, Chiến dịch cho TNV.
+
+III. GIT COMMIT (Dự kiến)
+1. feat(frontend): tao component Footer va css trang tri (#37)
+2. feat(frontend): xay dung trang chu HomePage voi banner hero va thong ke (#37)
+3. feat(frontend): cap nhat App.jsx va Navbar tich hop trang chu va footer - Close #37

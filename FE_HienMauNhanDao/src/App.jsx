@@ -21,6 +21,7 @@ import ThongKeTonKho from "./pages/ThongKeTonKho";
 import QuanLyHanDung from "./pages/QuanLyHanDung";
 import KhamLamSang from "./pages/KhamLamSang";
 import ThuNhanMau from "./pages/ThuNhanMau";
+import HomePage from "./pages/HomePage";
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
       <Routes>
         {/* Mặc định vào web sẽ chuyển hướng sang trang Login */}
         <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/otp" element={<OtpVerification />} />
         <Route path="/xac-nhan-dang-ky/:maDon" element={<XacNhanDangKy />} />
