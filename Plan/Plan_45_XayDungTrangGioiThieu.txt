@@ -1,0 +1,30 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 45 - XÂY DỰNG TRANG GIỚI THIỆU (AboutPage) VÀ HỎI ĐÁP (FAQ)
+
+I. MỤC TIÊU THIẾT KẾ
+Xây dựng trang Giới thiệu (AboutPage) và Hỏi đáp (FAQ) dành cho Tình nguyện viên (TNV) tìm hiểu thông tin và thắc mắc thường gặp:
+1. Giao diện trang giới thiệu (AboutPage.jsx) được tối ưu hóa đẹp mắt bằng CSS thuần:
+   - Banner Hero với hiệu ứng parallax nhẹ và slogan truyền cảm hứng.
+   - Section "Chặng đường phát triển" (Timeline) thể hiện các cột mốc lịch sử dự án.
+   - Section "Đội ngũ chuyên gia" hiển thị hình ảnh và thông tin của bác sĩ, quản trị viên.
+   - Section "Giải đáp thắc mắc (FAQ)" dùng các thẻ accordion (<details> và <summary>) giúp TNV xem nhanh câu hỏi và câu trả lời mà không bị vỡ giao diện.
+2. Tích hợp định tuyến route `/about` trong App.jsx để liên kết với menu "Giới thiệu" trên Navbar.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C# (Không thay đổi)
+
+2. Phân hệ Frontend React
+* Tạo mới các file:
+  - FE_HienMauNhanDao/src/pages/AboutPage.jsx: Component trang giới thiệu và FAQ.
+  - FE_HienMauNhanDao/src/css/AboutPage.css: CSS thuần trang trí chi tiết cho AboutPage.
+* Chỉnh sửa file:
+  - FE_HienMauNhanDao/src/App.jsx:
+    * Import component AboutPage từ "./pages/AboutPage"
+    * Khai báo route <Route path="/about" element={<AboutPage />} />
+
+III. TIẾN TRÌNH GIT VÀ ISSUE
+1. Tạo Issue #41 trên GitHub: "Bài 45: Xây dựng trang Giới thiệu (AboutPage) và Hỏi đáp (FAQ)"
+2. Tách nhánh mới từ master: feature/TNV_aboutPage_faq
+3. Commit dự kiến:
+   - feat(frontend): tao trang AboutPage va css trang tri tich hop FAQ (#41)
+   - feat(frontend): dang ky route about trong App.jsx - Close #41

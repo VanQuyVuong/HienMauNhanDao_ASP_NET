@@ -1,0 +1,744 @@
+/* ==========================================================================
+   AboutPage.css - Style Trang Giới Thiệu & Hỏi Đáp (FAQ)
+   ========================================================================== */
+
+.about-main {
+  width: 100%;
+  background-color: #fffcfb;
+  font-family: "Inter", sans-serif;
+  color: #334155;
+  overflow-x: hidden;
+}
+
+/* === Section 1: Hero Banner === */
+.about-hero {
+  position: relative;
+  min-height: 600px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.about-hero-img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  object-cover: cover;
+  transform: scale(1.03);
+  transition: transform 1s ease;
+  z-index: 1;
+}
+
+.about-hero:hover .about-hero-img {
+  transform: scale(1);
+}
+
+.about-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.4) 60%,
+    transparent 100%
+  );
+  z-index: 2;
+}
+
+.about-hero-container {
+  position: relative;
+  z-index: 3;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 24px;
+  width: 100%;
+}
+
+.about-hero-content {
+  max-width: 800px;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+}
+
+.hero-tag-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #dc2626;
+  border-radius: 50%;
+  animation: ping-animation 1.5s infinite;
+}
+
+.hero-heading {
+  font-size: 52px;
+  font-weight: 900;
+  color: white;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.hero-heading-gradient {
+  background: linear-gradient(to right, #ef4444, #fda4af, #f43f5e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-desc {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 300;
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+.hero-btn {
+  padding: 16px 36px;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-btn:hover {
+  background-color: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+}
+
+/* === Section 2: Sứ mệnh & Tầm nhìn === */
+.about-vision {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 24px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 80px;
+  align-items: center;
+}
+
+.vision-images {
+  grid-column: span 6;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.vision-img-1 {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 32px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.vision-img-2 {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 32px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  margin-top: 50px;
+}
+
+.vision-quote {
+  position: absolute;
+  bottom: -40px;
+  right: -20px;
+  background: white;
+  padding: 30px;
+  border-radius: 28px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  border: 1px solid #f1f5f9;
+  max-width: 260px;
+  z-index: 10;
+}
+
+.quote-stars {
+  color: #dc2626;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.quote-text {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+  color: #0f172a;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+.quote-author {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #94a3b8;
+  font-weight: 800;
+}
+
+.vision-info {
+  grid-column: span 6;
+}
+
+.section-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #dc2626;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 24px;
+}
+
+.subtitle-line {
+  width: 40px;
+  height: 2px;
+  background-color: #dc2626;
+}
+
+.vision-heading {
+  font-size: 40px;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+
+.text-red {
+  color: #dc2626;
+}
+
+.vision-desc {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #64748b;
+  margin-bottom: 36px;
+}
+
+.vision-features {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.feature-item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.feature-icon-box {
+  width: 56px;
+  height: 56px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #475569;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.feature-item:hover .feature-icon-box {
+  background-color: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+
+.feature-text h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.feature-text p {
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* === Section 3: Chặng đường phát triển (Timeline) === */
+.about-timeline-section {
+  background-color: #0f172a;
+  padding: 100px 24px;
+}
+
+.timeline-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 80px;
+}
+
+.timeline-header span {
+  color: #dc2626;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+
+.timeline-header h3 {
+  font-size: 40px;
+  font-weight: 900;
+  color: white;
+  margin: 12px 0;
+}
+
+.timeline-header p {
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+.timeline-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.timeline-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(-50%);
+}
+
+.timeline-item {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 50px;
+  position: relative;
+}
+
+.timeline-item:nth-child(even) {
+  flex-direction: row-reverse;
+}
+
+.timeline-content-box {
+  width: 44%;
+}
+
+.timeline-item:nth-child(odd) .timeline-content-box {
+  text-align: right;
+}
+
+.timeline-date {
+  font-size: 24px;
+  font-weight: 900;
+  color: #dc2626;
+  margin-bottom: 8px;
+}
+
+.timeline-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.timeline-desc {
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.timeline-node {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  background-color: #dc2626;
+  border: 6px solid #0f172a;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+/* === Section 4: Đội ngũ chuyên gia === */
+.about-team-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 24px;
+}
+
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 60px;
+}
+
+.team-header-text h3 {
+  font-size: 40px;
+  font-weight: 900;
+  color: #0f172a;
+  margin-top: 10px;
+}
+
+.team-header-text p {
+  color: #64748b;
+  font-size: 16px;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+}
+
+.team-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.team-img-wrapper {
+  position: relative;
+  height: 380px;
+  border-radius: 28px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.team-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.team-card:hover .team-img {
+  transform: scale(1.08);
+}
+
+.team-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(220, 38, 38, 0.9), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 30px;
+}
+
+.team-card:hover .team-hover-overlay {
+  opacity: 1;
+}
+
+.team-social-links {
+  display: flex;
+  gap: 15px;
+}
+
+.team-social-link {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  transition: all 0.3s;
+}
+
+.team-social-link:hover {
+  background: white;
+  color: #dc2626;
+  transform: translateY(-2px);
+}
+
+.team-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.team-role {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* === Section 5: Accordion Giải đáp thắc mắc (FAQ) === */
+.about-faq-section {
+  background-color: white;
+  border-top: 1px solid #f1f5f9;
+  padding: 100px 24px;
+}
+
+.faq-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 80px;
+}
+
+.faq-info {
+  grid-column: span 5;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.faq-contact-card {
+  padding: 40px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.faq-contact-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.faq-contact-icon {
+  width: 48px;
+  height: 48px;
+  background-color: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.faq-contact-phone {
+  font-size: 28px;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 10px 0 0;
+}
+
+.faq-contact-btn {
+  padding: 14px 20px;
+  background-color: white;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.faq-contact-btn:hover {
+  background-color: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+
+.faq-list {
+  grid-column: span 7;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Custom Accordion Details/Summary */
+.faq-item {
+  border: 1px solid #f1f5f9;
+  border-radius: 24px;
+  padding: 24px 30px;
+  background-color: white;
+  transition: all 0.3s;
+}
+
+.faq-item:hover {
+  border-color: rgba(220, 38, 38, 0.2);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.02);
+}
+
+.faq-item summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  outline: none;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-icon-arrow {
+  font-size: 24px;
+  color: #94a3b8;
+  transition: transform 0.3s ease;
+}
+
+.faq-item[open] .faq-icon-arrow {
+  transform: rotate(180deg);
+  color: #dc2626;
+}
+
+.faq-item[open] summary {
+  color: #dc2626;
+}
+
+.faq-answer {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f8fafc;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #64748b;
+  font-weight: 300;
+}
+
+/* === Section 6: Đối tác chiến lược === */
+.about-partners-section {
+  background-color: #f8fafc;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.about-partners-section p {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: #94a3b8;
+  margin-bottom: 40px;
+}
+
+.partners-logos-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+  opacity: 0.4;
+  transition: opacity 0.5s;
+}
+
+.partners-logos-container:hover {
+  opacity: 0.8;
+}
+
+.partner-text {
+  font-size: 20px;
+  font-weight: 900;
+  color: #0f172a;
+  font-style: italic;
+}
+
+/* === Animations === */
+@keyframes ping-animation {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* === Responsive === */
+@media (max-width: 1024px) {
+  .about-vision,
+  .faq-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .vision-images,
+  .vision-info,
+  .faq-info,
+  .faq-list {
+    grid-column: span 12;
+  }
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-heading {
+    font-size: 36px;
+  }
+  .hero-desc {
+    font-size: 16px;
+  }
+  .timeline-line {
+    left: 20px;
+  }
+  .timeline-node {
+    left: 20px;
+  }
+  .timeline-item {
+    flex-direction: column !important;
+    padding-left: 50px;
+  }
+  .timeline-content-box {
+    width: 100% !important;
+    text-align: left !important;
+  }
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+  .team-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .partners-logos-container {
+    justify-content: center;
+  }
+}

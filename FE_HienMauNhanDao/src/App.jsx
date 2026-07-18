@@ -24,6 +24,7 @@ import ThuNhanMau from "./pages/ThuNhanMau";
 import HomePage from "./pages/HomePage";
 import MyDonations from "./pages/MyDonations";
 import GiayChungNhan from "./pages/GiayChungNhan";
+import AboutPage from "./pages/AboutPage";
 
 function App() {
   return (
@@ -65,6 +66,7 @@ function App() {
       </Routes>
       <Route path="/lich-su" element={<MyDonations />} />
       <Route path="/chung-nhan/:maDon" element={<GiayChungNhan />} />
+      <Route path="/about" element={<AboutPage />} />
     </BrowserRouter>
   );
 }
