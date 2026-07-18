@@ -1,0 +1,27 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 44 - ĐĂNG KÝ ROUTE CHO LỊCH SỬ HIẾN MÁU & CHỨNG NHẬN ĐIỆN TỬ
+
+I. MỤC TIÊU THIẾT KẾ
+Đăng ký các route còn thiếu trong file App.jsx để Tình nguyện viên (TNV) có thể truy cập các tính năng cốt lõi:
+1. Route "/lich-su" dẫn tới trang MyDonations.jsx để xem danh sách đơn đăng ký hiến máu và trạng thái xử lý.
+2. Route "/chung-nhan/:maDon" dẫn tới trang GiayChungNhan.jsx để xem và in Giấy chứng nhận điện tử sau khi hiến máu thành công.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C# (Không thay đổi)
+* Các API đã sẵn sàng:
+  - GET /api/dondangky (Lấy lịch sử đơn đăng ký của TNV)
+  - GET /api/dondangky/{maDon} (Lấy chi tiết đơn đăng ký kèm thông tin chứng nhận)
+
+2. Phân hệ Frontend React
+* File cần chỉnh sửa:
+  - FE_HienMauNhanDao/src/App.jsx:
+    * Import component MyDonations từ "./pages/MyDonations"
+    * Import component GiayChungNhan từ "./pages/GiayChungNhan"
+    * Khai báo route <Route path="/lich-su" element={<MyDonations />} />
+    * Khai báo route <Route path="/chung-nhan/:maDon" element={<GiayChungNhan />} />
+
+III. TIẾN TRÌNH GIT VÀ ISSUE
+1. Tạo Issue #39 trên GitHub: "Bài 44: Đăng ký Route cho Lịch sử hiến máu & Chứng nhận điện tử"
+2. Tách nhánh mới từ master: feature/TNV_route_lichSu_chungNhan
+3. Commit dự kiến:
+   - feat(frontend): dang ky route lich su dang ky va giay chung nhan trong App.jsx - Close #39
