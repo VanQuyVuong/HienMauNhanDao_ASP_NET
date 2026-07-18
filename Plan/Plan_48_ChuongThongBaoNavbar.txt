@@ -1,0 +1,30 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 48 - NÂNG CẤP THANH MENU NAVBAR & TÍCH HỢP CHUÔNG THÔNG BÁO
+
+I. MỤC TIÊU THIẾT KẾ
+Nâng cấp thanh Menu Navbar phía trên cùng của website để hiển thị chuông thông báo thời gian thực về trạng thái đơn đăng ký hiến máu dành cho Tình nguyện viên:
+1. Thiết kế chuông thông báo (Bell Icon) kèm số đếm màu đỏ hiển thị lượng thông báo chưa đọc.
+2. Thống kê thông báo từ danh sách đơn đăng ký lấy từ API C# (GET /api/dondangky).
+3. Lọc danh sách thông báo: Chỉ hiển thị khi đơn đã được duyệt (DaDuyet), hoàn thành (DaHoanThanh), hoặc bị từ chối (DaTuChoi).
+4. Thiết lập tính năng đánh dấu đã đọc (lưu mã đơn vào localStorage) và click chuyển tiếp nhanh tới trang tương ứng (xem chứng nhận đối với đơn đã hiến, hoặc xem phiếu đăng ký đối với đơn đã duyệt).
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C# (Không thay đổi)
+
+2. Phân hệ Frontend React
+* File cần chỉnh sửa:
+  - FE_HienMauNhanDao/src/css/Navbar.css:
+    * Thêm style cho icon chuông, badge số đếm chưa đọc, khung dropdown danh sách thông báo.
+  - FE_HienMauNhanDao/src/components/Navbar.jsx:
+    * Import useState, useEffect từ React.
+    * Khai báo các state: thongBaoList, hienThiDropdown, soChuaDoc.
+    * Gọi API lấy danh sách đơn, lọc trạng thái khác "ChoDuyet".
+    * Đồng bộ danh sách thông báo đã xem bằng mảng "donDaXem" trong localStorage.
+    * Gắn sự kiện click vào thông báo (clickThongBao) để chuyển trang.
+
+III. TIẾN TRÌNH GIT VÀ ISSUE
+1. Tạo Issue #47 trên GitHub: "Bài 48: Nâng cấp thanh Menu Navbar và Tích hợp Chuông thông báo"
+2. Tách nhánh mới từ master: feature/TNV_chuongThongBaoNavbar
+3. Commit dự kiến:
+   - feat(frontend): bo sung style chuong thong bao trong Navbar.css (#47)
+   - feat(frontend): tich hop chuong thong bao dong bo don dang ky trong Navbar.jsx - Close #47
