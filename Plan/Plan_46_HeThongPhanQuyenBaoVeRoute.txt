@@ -1,0 +1,30 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 46 - XÂY DỰNG HỆ THỐNG ROUTE GUARD & BẢO VỆ PHÂN QUYỀN
+
+I. MỤC TIÊU THIẾT KẾ
+Thiết lập hệ thống Route Guard (Bảo vệ tuyến đường) bằng tiếng Việt camelCase để ngăn chặn truy cập trái phép vào các phân hệ nghiệp vụ nhạy cảm:
+1. Sửa lỗi cú pháp React Router v6 trong App.jsx (các route /lich-su, /chung-nhan, /about đang nằm ngoài thẻ <Routes>).
+2. Xây dựng các hàm bảo vệ (Guards) kiểm tra Token và Vai trò (Role) của người dùng:
+   - baoVeDangNhap: Chỉ cho phép người dùng đã đăng nhập (có token).
+   - baoVeAdmin: Chỉ cho phép tài khoản Admin (role === "AD").
+   - baoVeNhanVienYTe: Chỉ cho phép NVYT hoặc Admin (role === "NVYT" || "AD").
+   - baoVeBacSi: Chỉ cho phép Bác sĩ hoặc Admin (role === "BS" || "AD").
+   - baoVeThuKho: Chỉ cho phép Thủ kho hoặc Admin (role === "QLK" || "AD").
+3. Bọc tất cả các Route nhạy cảm trong App.jsx bằng các Guard tương ứng.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C# (Không thay đổi)
+
+2. Phân hệ Frontend React
+* File cần chỉnh sửa:
+  - FE_HienMauNhanDao/src/App.jsx:
+    * Định nghĩa 5 hàm Route Guard ở trên đầu component App.
+    * Đưa các route /lich-su, /chung-nhan, /about vào bên trong thẻ <Routes> để tránh lỗi crash React.
+    * Bọc các thẻ <Route> bằng các Guard tương ứng (ví dụ: element={<baoVeAdmin><AdminQuanLyNguoiDung /></baoVeAdmin>}).
+
+III. TIẾN TRÌNH GIT VÀ ISSUE
+1. Tạo Issue #43 trên GitHub: "Bài 46: Xây dựng hệ thống Route Guard và Phân quyền truy cập"
+2. Tách nhánh mới từ master: feature/TNV_heThongBaoVeRoute
+3. Commit dự kiến:
+   - fix(frontend): sua loi cu phap dat sai vi tri route trong App.jsx (#43)
+   - feat(frontend): viet he thong Route Guard va bọc bao ve phan quyen - Close #43
