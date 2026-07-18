@@ -20,7 +20,7 @@ export default function HomePage() {
     const fetchStats = async () => {
       try {
         // fetch() gọi API Backend C# - không cần token vì đây là trang công khai
-        const res = await fetch("https://localhost:7127/api/thongke/tong-quan");
+        const res = await fetch("https://localhost:7004/api/thongke/tong-quan");
 
         // res.ok = true nếu HTTP status 200-299
         if (res.ok) {

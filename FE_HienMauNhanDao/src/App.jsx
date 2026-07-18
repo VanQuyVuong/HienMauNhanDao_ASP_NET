@@ -22,13 +22,13 @@ import QuanLyHanDung from "./pages/QuanLyHanDung";
 import KhamLamSang from "./pages/KhamLamSang";
 import ThuNhanMau from "./pages/ThuNhanMau";
 import HomePage from "./pages/HomePage";
+import MyDonations from "./pages/MyDonations";
+import GiayChungNhan from "./pages/GiayChungNhan";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Mặc định vào web sẽ chuyển hướng sang trang Login */}
-        <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/otp" element={<OtpVerification />} />
@@ -63,6 +63,8 @@ function App() {
         <Route path="/admin-kham-lam-sang" element={<KhamLamSang />} />
         <Route path="/admin-thu-nhan-mau" element={<ThuNhanMau />} />
       </Routes>
+      <Route path="/lich-su" element={<MyDonations />} />
+      <Route path="/chung-nhan/:maDon" element={<GiayChungNhan />} />
     </BrowserRouter>
   );
 }
