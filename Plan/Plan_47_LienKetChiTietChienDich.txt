@@ -1,0 +1,28 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 47 - LIÊN KẾT CHI TIẾT CHIẾN DỊCH & ĐĂNG KÝ ROUTE
+
+I. MỤC TIÊU THIẾT KẾ
+Kết nối luồng đăng ký hiến máu bằng cách liên kết danh sách chiến dịch tại Dashboard với trang chi tiết chiến dịch:
+1. Đăng ký route "/campaign-detail/:id" trong App.jsx để hiển thị trang CampaignDetail.jsx.
+2. Nâng cấp Dashboard.jsx: Thêm sự kiện click chuyển trang (chuyenSangChiTiet) cho từng thẻ chiến dịch (campaign-card).
+3. Đảm bảo toàn bộ luồng hoạt động: Dashboard -> Click thẻ chiến dịch -> Xem chi tiết chiến dịch -> Click đăng ký -> Khai báo y tế.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C# (Không thay đổi)
+
+2. Phân hệ Frontend React
+* File cần chỉnh sửa:
+  - FE_HienMauNhanDao/src/App.jsx:
+    * Import component CampaignDetail từ "./pages/CampaignDetail"
+    * Khai báo route <Route path="/campaign-detail/:id" element={baoVeDangNhap({ children: <CampaignDetail /> })} />
+  - FE_HienMauNhanDao/src/pages/Dashboard.jsx:
+    * Import useNavigate từ "react-router-dom"
+    * Thêm hàm chuyển trang: const chuyenSangChiTiet = (maChienDich) => { navigate(`/campaign-detail/${maChienDich}`); };
+    * Thêm sự kiện onClick={chuyenSangChiTiet} vào thẻ <div className="campaign-card">.
+
+III. TI TIẾN TRÌNH GIT VÀ ISSUE
+1. Tạo Issue #45 trên GitHub: "Bài 47: Liên kết Chi tiết Chiến dịch (CampaignDetail) và Đăng ký Route"
+2. Tách nhánh mới từ master: feature/TNV_chiTietChienDich
+3. Commit dự kiến:
+   - feat(frontend): dang ky route chi tiet chien dich trong App.jsx (#45)
+   - feat(frontend): tich hop su kien click chuyen sang trang chi tiet tren Dashboard - Close #45

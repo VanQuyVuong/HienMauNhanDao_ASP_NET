@@ -23,6 +23,7 @@ import KhamLamSang from "./pages/KhamLamSang";
 import ThuNhanMau from "./pages/ThuNhanMau";
 import HomePage from "./pages/HomePage";
 import MyDonations from "./pages/MyDonations";
+import CampaignDetail from "./pages/CampaignDetail";
 import GiayChungNhan from "./pages/GiayChungNhan";
 import AboutPage from "./pages/AboutPage";
 // === CÁC HÀM BẢO VỆ ROUTE (ROUTE GUARDS) ===
@@ -107,6 +108,10 @@ function App() {
         <Route
           path="/chung-nhan/:maDon"
           element={baoVeDangNhap({ children: <GiayChungNhan /> })}
+        />
+        <Route
+          path="/campaign-detail/:id"
+          element={baoVeDangNhap({ children: <CampaignDetail /> })}
         />
 
         {/* === CÁC ROUTE DÀNH CHO ADMIN === */}

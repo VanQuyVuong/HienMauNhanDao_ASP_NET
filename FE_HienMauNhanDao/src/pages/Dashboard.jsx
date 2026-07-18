@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import "../css/Dashboard.css"; // Gọi file làm đẹp vừa tạo
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
+  // Hàm chuyển trang chi tiết chiến dịch
+  const chuyenSangChiTiet = (maChienDich) => {
+    navigate(`/campaign-detail/${maChienDich}`);
+  };
+
   // 1. Tạo "cái rổ" (mảng) để đựng danh sách chiến dịch lấy từ C#
   const [danhSachChienDich, setDanhSachChienDich] = useState([]);
 
@@ -46,7 +54,7 @@ export default function Dashboard() {
           <div className="campaign-grid">
             {/* Lệnh 'map': Nó lặp qua từng phần tử trong C# và vẽ ra 1 cái thẻ */}
             {danhSachChienDich.map((chienDich, index) => (
-              <div className="campaign-card" key={index}>
+              <div className="campaign-card" key={index} onClick={() => chuyenSangChiTiet(chienDich.maChienDich)}>
                 <span className="badge-active">Đang diễn ra</span>
                 <h3 className="campaign-title">{chienDich.tenChienDich}</h3>
 
