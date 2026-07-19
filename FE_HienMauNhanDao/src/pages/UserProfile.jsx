@@ -11,8 +11,10 @@ export default function UserProfile() {
     diaChi: "",
     gioiTinh: "Nam",
     nhomMau: "A",
+    maPhuongXa: "",
   });
 
+  const [phuongXaList, setPhuongXaList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -45,6 +47,7 @@ export default function UserProfile() {
                   : "Nam",
             nhomMau:
               data.data.nhomMau !== null ? data.data.nhomMau.toString() : "0",
+            maPhuongXa: data.data.maPhuongXa || "",
           });
         }
       } catch (error) {
@@ -56,11 +59,41 @@ export default function UserProfile() {
     fetchProfile();
   }, []);
 
+  useEffect(() => {
+    const taiPhuongXa = async () => {
+      try {
+        const response = await fetch("https://localhost:7004/api/phuongxa");
+        if (response.ok) {
+          const json = await response.json();
+          setPhuongXaList(json.data);
+        }
+      } catch (error) {
+        console.error("Lỗi:", error);
+      }
+    };
+    taiPhuongXa();
+  }, []);
+
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Xác thực định dạng SĐT (10 số, bắt đầu bằng 0)
+    const regexSoDienThoai = /^0\d{9}$/;
+    if (!regexSoDienThoai.test(formData.soDienThoai)) {
+      alert("❌ Số điện thoại phải gồm đúng 10 số và bắt đầu bằng số 0!");
+      return;
+    }
+
+    // Xác thực định dạng CCCD (12 số)
+    const regexCccd = /^\d{12}$/;
+    if (!regexCccd.test(formData.cccd)) {
+      alert("❌ Số CCCD phải gồm đúng 12 số!");
+      return;
+    }
+
     const token = localStorage.getItem("token");
     try {
       const response = await fetch(
@@ -154,6 +187,23 @@ export default function UserProfile() {
               <option value="5">AB- (AB_negative)</option>
               <option value="6">O+ (O_positive)</option>
               <option value="7">O- (O_negative)</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Phường / Xã</label>
+            <select
+              name="maPhuongXa"
+              value={formData.maPhuongXa}
+              onChange={handleChange}
+              required
+            >
+              <option value="">-- Chọn Phường / Xã --</option>
+              {phuongXaList.map((px) => (
+                <option key={px.maPhuongXa} value={px.maPhuongXa}>
+                  {px.tenPhuongXa}
+                </option>
+              ))}
             </select>
           </div>
 

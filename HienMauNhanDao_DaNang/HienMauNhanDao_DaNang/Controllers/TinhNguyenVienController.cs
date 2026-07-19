@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Data;
+using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -51,6 +51,7 @@ namespace HienMauNhanDao_DaNang.Controllers
             public string DiaChi { set; get; }
             public string GioiTinh { set; get; }
             public string NhomMau { set; get; }
+            public string? MaPhuongXa { set; get; }
         }
         //2.Api put :cập nhật thông tin hồ sơ
         [HttpPut("me")]
@@ -76,6 +77,7 @@ namespace HienMauNhanDao_DaNang.Controllers
             tnv.Cccd = request.Cccd;
             tnv.SoDienThoai = request.SoDienThoai;
             tnv.DiaChi = request.DiaChi;
+            tnv.MaPhuongXa = request.MaPhuongXa;
 
             //Xử lý chuyển đổi chuỗi  sáng DateOnly 
             if (DateOnly.TryParse(request.NgaySinh, out var parsedDate))
