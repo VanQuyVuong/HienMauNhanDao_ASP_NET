@@ -1,0 +1,20 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 50 - CHUẨN HÓA CSDL & KIỂM THỬ E2E HỆ THỐNG
+
+I. MỤC TIÊU THIẾT KẾ
+Tiến hành chuẩn hóa toàn bộ cấu trúc Cơ sở dữ liệu và xây dựng kịch bản kiểm thử tích hợp đầu cuối (End-to-End Testing) để bàn giao dự án hoàn thiện:
+1. Chuẩn hóa CSDL: Kiểm tra tính toàn vẹn của các bảng, khóa ngoại (Foreign Keys), mối liên kết thực thể (Entities Relationship) trong DbContext C# so với tệp tin SQL gốc.
+2. Kiểm thử E2E: Xây dựng kịch bản kiểm thử toàn bộ 8 bước nghiệp vụ liên hoàn từ lúc đăng ký đến lúc nhận chứng nhận:
+   - Bước 1: Đăng ký tài khoản (xác thực mã OTP gửi qua Email SMTP).
+   - Bước 2: Điền thông tin hồ sơ cá nhân (xác thực số điện thoại 10 số, CCCD 12 số, chọn Phường/Xã động từ Database).
+   - Bước 3: Đăng ký tham gia một chiến dịch hiến máu nổi bật từ Dashboard.
+   - Bước 4: Khai báo y tế trực tuyến cho phiếu đăng ký.
+   - Bước 5: Bác sĩ tiến hành khám lâm sàng và đánh giá sức khỏe của TNV.
+   - Bước 6: Nhân viên y tế thu nhận máu và quét/in mã vạch barcode tương ứng.
+   - Bước 7: Bác sĩ cập nhật kết quả xét nghiệm túi máu; Thủ kho nhập kho máu an toàn.
+   - Bước 8: Hệ thống tự động cấp giấy chứng nhận điện tử và gửi thông báo tới TNV.
+
+II. TIẾN TRÌNH GIT VÀ ISSUE
+1. Tạo Issue #51 trên GitHub: "Bài 50: Chuẩn hóa CSDL và Kiểm thử tích hợp E2E toàn bộ hệ thống"
+2. Tách nhánh mới từ master: feature/TNV_chuanHoaCSDLKiemThuE2E
+3. Commit dự kiến:
+   - test(e2e): viet kịch bản kiem thu toan bo luong nghiep vu he thong - Close #51

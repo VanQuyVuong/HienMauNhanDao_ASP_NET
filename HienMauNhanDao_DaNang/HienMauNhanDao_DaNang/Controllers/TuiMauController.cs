@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Data;
+using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -269,7 +269,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Contains(search));
             }
             var totalItems = await query.CountAsync();
-            var totaklPages = (int)Math.Ceiling((double)totalItems / size);
+            var totalPages = (int)Math.Ceiling((double)totalItems / size);
 
             var list = await query
                 .OrderByDescending(t => t.ThoiGianLayMau)
@@ -294,7 +294,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                     ngayThuNhan = t.ThoiGianLayMau,
                     ngayHetHan = ngayHetHan,
                     trangThai = "Nhập kho",
-                    tinhTrangHSD = tinhTrangHSD
+                    tinhTrangHSD = tinhTrangSD
                 };
             }).ToList();
             return Ok(new
@@ -457,9 +457,9 @@ namespace HienMauNhanDao_DaNang.Controllers
             //1. xoá các chi tiết phiêys nhập / xuất liên quan trước để tránh lỗi khoá ngoại 
             var chiTiets = await
                 _context.ChiTietNhapXuats.Where(c => c.MaTuiMau == maTuiMau).ToListAsync();
-            if (chiTiets.Ant())
+            if (chiTiets.Any())
             {
-                _context.ChiTietNhapXuats.RemoveRanger(chiTiets);
+                _context.ChiTietNhapXuats.RemoveRange(chiTiets);
 
             }
             //2. trừ tồn kho máu của nhóm máu tương ứng đi 1 dvi
