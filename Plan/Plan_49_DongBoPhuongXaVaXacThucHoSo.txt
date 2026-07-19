@@ -1,0 +1,35 @@
+KẾ HOẠCH TRIỂN KHAI: BÀI 49 - ĐỒNG BỘ PHƯỜNG XÃ VÀ XÁC THỰC HỒ SƠ
+
+I. MỤC TIÊU THIẾT KẾ
+Nâng cấp và đồng bộ tính năng cập nhật thông tin cá nhân của Tình nguyện viên, tích hợp danh sách Phường/Xã từ Database và xác thực CCCD/SĐT chặt chẽ:
+1. Phân hệ Backend C#:
+   - Tạo mới PhuongXaController.cs cung cấp API (GET /api/phuongxa) lấy toàn bộ danh sách Phường/Xã.
+   - Sửa TinhNguyenVienController.cs: Cập nhật class UpdateProfileRequest và hàm UpdateProfile để nhận và lưu thêm trường MaPhuongXa.
+2. Phân hệ Frontend React:
+   - Sửa UserProfile.jsx:
+     * Gọi API lấy danh sách Phường/Xã (taiPhuongXa) hiển thị dưới dạng dropdown select.
+     * Xác thực (validate) dữ liệu trước khi gửi: CCCD phải đủ 12 số, Số điện thoại phải đủ 10 số và bắt đầu bằng số 0.
+     * Cập nhật gửi và nhận thêm trường maPhuongXa.
+
+II. THIẾT KẾ CHI TIẾT HỆ THỐNG
+
+1. Phân hệ Backend C#
+* Tạo mới Controllers/PhuongXaController.cs
+* Sửa DTO UpdateProfileRequest và hàm UpdateProfile trong Controllers/TinhNguyenVienController.cs:
+  - Bổ sung: public string? MaPhuongXa { get; set; }
+  - Bổ sung: tnv.MaPhuongXa = request.MaPhuongXa;
+
+2. Phân hệ Frontend React
+* Sửa pages/UserProfile.jsx:
+  - Khai báo state: const [phuongXaList, setPhuongXaList] = useState([]);
+  - Viết hàm taiPhuongXa gọi API /api/phuongxa khi component mount.
+  - Bổ sung maPhuongXa vào state formData.
+  - Thêm thẻ select chọn Phường/Xã trong form HTML.
+  - Viết regex xác thực CCCD (/^\d{12}$/) và SĐT (/^0\d{9}$/) trước khi gọi API cập nhật.
+
+III. TIẾN TRÌNH GIT VÀ ISSUE
+1. Tạo Issue #49 trên GitHub: "Bài 49: Đồng bộ Phường/Xã và Xác thực Hồ sơ Tình nguyện viên"
+2. Tách nhánh mới từ master: feature/TNV_dongBoPhuongXaXacThucHoSo
+3. Commit dự kiến:
+   - feat(backend): tao PhuongXaController va cap nhat TinhNguyenVienController nhan MaPhuongXa (#49)
+   - feat(frontend): bo sung dropdown PhuongXa va validate CCCD SĐT chat che tren UserProfile - Close #49
