@@ -1,31 +1,36 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import AdminDonDangKy from "./pages/AdminDonDangKy";
-import AdminCreateCampaign from "./pages/AdminCreateCampaign";
-import UserProfile from "./pages/UserProfile";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminKhoMau from "./pages/AdminKhoMau";
-import KetQuaXetNghiem from "./pages/KetQuaXetNghiem";
-import QuanLyNhapKho from "./pages/QuanLyNhapKho";
-import AdminQuanLyNguoiDung from "./pages/AdminQuanLyNguoiDung";
-import AdminQuanLyTNV from "./pages/AdminQuanLyTNV";
-import NhanYeuCauNhapKho from "./pages/NhanYeuCauNhapKho";
-import QuanLyNhapKhoTheoChienDich from "./pages/QuanLyNhapKhoTheoChienDich";
+import RegisterVolunteer from "./pages/RegisterVolunteer";
+import ChienDichPage from "./pages/tnv/ChienDichPage";
+import DonDangKy from "./pages/nvyt/DonDangKy";
+import AdminCreateCampaign from "./pages/admin/AdminCreateCampaign";
+import HoSoCaNhan from "./pages/tnv/HoSoCaNhan";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminKhoMau from "./pages/qlk/AdminKhoMau";
+import KetQuaXetNghiem from "./pages/bacsi/KetQuaXetNghiem";
+import QuanLyNhapKho from "./pages/qlk/QuanLyNhapKho";
+import QuanLyNguoiDung from "./pages/admin/QuanLyNguoiDung";
+import TinhNguyenVien from "./pages/nvyt/TinhNguyenVien";
+import NhanYeuCauNhapKho from "./pages/qlk/NhanYeuCauNhapKho";
+import QuanLyNhapKhoTheoChienDich from "./pages/qlk/QuanLyNhapKhoTheoChienDich";
 import OtpVerification from "./pages/OtpVerification";
-import XacNhanDangKy from "./pages/XacNhanDangKy";
-import QuanLyChienDich from "./pages/QuanLyChienDich";
-import QuanLyNhapKhoQuetMa from "./pages/QuanLyNhapKhoQuetMa";
-import ThongKeTonKho from "./pages/ThongKeTonKho";
-import QuanLyHanDung from "./pages/QuanLyHanDung";
-import KhamLamSang from "./pages/KhamLamSang";
-import ThuNhanMau from "./pages/ThuNhanMau";
+import XacNhanDangKy from "./pages/tnv/XacNhanDangKy";
+import QuanLyChienDich from "./pages/admin/QuanLyChienDich";
+import QuanLyNhapKhoQuetMa from "./pages/qlk/QuanLyNhapKhoQuetMa";
+import ThongKeTonKho from "./pages/qlk/ThongKeTonKho";
+import QuanLyHanDung from "./pages/qlk/QuanLyHanDung";
+import KhamLamSang from "./pages/bacsi/KhamLamSang";
+import DanhSachChoKham from "./pages/bacsi/DanhSachChoKham";
+import ThuNhanMau from "./pages/nvyt/ThuNhanMau";
 import HomePage from "./pages/HomePage";
-import MyDonations from "./pages/MyDonations";
-import CampaignDetail from "./pages/CampaignDetail";
-import GiayChungNhan from "./pages/GiayChungNhan";
+import DanhSachDonDangKy from "./pages/tnv/DanhSachDonDangKy";
+import CampaignDetail from "./pages/tnv/CampaignDetail";
+import GiayChungNhanPage from "./pages/tnv/GiayChungNhanPage";
 import AboutPage from "./pages/AboutPage";
+import KhaiBaoYTe from "./pages/tnv/KhaiBaoYTe";
+import ThongTinCaNhan from "./pages/tnv/ThongTinCaNhan";
+import DebugLogin from "./pages/qlk/DebugLogin";
+import CapNhatXetNghiem from "./pages/nvyt/CapNhatXetNghiem";
 // === CÁC HÀM BẢO VỆ ROUTE (ROUTE GUARDS) ===
 
 // 1. Bảo vệ đăng nhập: Yêu cầu phải có token
@@ -84,18 +89,19 @@ function App() {
         {/* === CÁC ROUTE CÔNG KHAI (AI CŨNG XEM ĐƯỢC) === */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<RegisterVolunteer />} />
         <Route path="/otp" element={<OtpVerification />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/debug-login" element={<DebugLogin />} />
 
         {/* === CÁC ROUTE CỦA TÌNH NGUYỆN VIÊN (YÊU CẦU ĐĂNG NHẬP) === */}
         <Route
           path="/dashboard"
-          element={baoVeDangNhap({ children: <Dashboard /> })}
+          element={baoVeDangNhap({ children: <ChienDichPage /> })}
         />
         <Route
           path="/profile"
-          element={baoVeDangNhap({ children: <UserProfile /> })}
+          element={baoVeDangNhap({ children: <HoSoCaNhan /> })}
         />
         <Route
           path="/xac-nhan-dang-ky/:maDon"
@@ -103,21 +109,29 @@ function App() {
         />
         <Route
           path="/lich-su"
-          element={baoVeDangNhap({ children: <MyDonations /> })}
+          element={baoVeDangNhap({ children: <DanhSachDonDangKy /> })}
         />
         <Route
           path="/chung-nhan/:maDon"
-          element={baoVeDangNhap({ children: <GiayChungNhan /> })}
+          element={baoVeDangNhap({ children: <GiayChungNhanPage /> })}
         />
         <Route
           path="/campaign-detail/:id"
           element={baoVeDangNhap({ children: <CampaignDetail /> })}
         />
+        <Route
+          path="/khai-bao-y-te/:maDon"
+          element={baoVeDangNhap({ children: <KhaiBaoYTe /> })}
+        />
+        <Route
+          path="/khai-bao-thong-tin-ca-nhan"
+          element={baoVeDangNhap({ children: <ThongTinCaNhan /> })}
+        />
 
         {/* === CÁC ROUTE DÀNH CHO ADMIN === */}
         <Route
           path="/admin-users"
-          element={baoVeAdmin({ children: <AdminQuanLyNguoiDung /> })}
+          element={baoVeAdmin({ children: <QuanLyNguoiDung /> })}
         />
         <Route
           path="/admin-quan-ly-chien-dich"
@@ -129,7 +143,7 @@ function App() {
         />
         <Route
           path="/admin-volunteers"
-          element={baoVeAdmin({ children: <AdminQuanLyTNV /> })}
+          element={baoVeAdmin({ children: <TinhNguyenVien /> })}
         />
         <Route
           path="/admin-thong-ke"
@@ -139,14 +153,21 @@ function App() {
         {/* === CÁC ROUTE DÀNH CHO NHÂN VIÊN Y TẾ (NVYT) === */}
         <Route
           path="/admin-don"
-          element={baoVeNhanVienYTe({ children: <AdminDonDangKy /> })}
+          element={baoVeNhanVienYTe({ children: <DonDangKy /> })}
         />
         <Route
           path="/admin-thu-nhan-mau"
           element={baoVeNhanVienYTe({ children: <ThuNhanMau /> })}
         />
+        <Route
+          path="/admin-cap-nhat-xet-nghiem"
+          element={baoVeNhanVienYTe({ children: <CapNhatXetNghiem /> })}
+        />
 
-        {/* === CÁC ROUTE DÀNH CHO BÁC SĨ (BS) === */}
+        <Route
+          path="/admin-cho-kham"
+          element={baoVeBacSi({ children: <DanhSachChoKham /> })}
+        />
         <Route
           path="/admin-kham-lam-sang"
           element={baoVeBacSi({ children: <KhamLamSang /> })}
@@ -189,3 +210,6 @@ function App() {
     </BrowserRouter>
   );
 }
+
+export default App;
+

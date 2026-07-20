@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Data;
+using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -22,6 +22,7 @@ namespace HienMauNhanDao_DaNang.Controllers
         public class DangKyRequest
         {
             public string MaChienDich { get; set; }
+            public int? TheTich { get; set; }
         }
 
         [HttpPost]
@@ -55,7 +56,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 MaChienDich = request.MaChienDich,
                 ThoiGianDangKy = DateTime.Now,
                 TrangThai = TrangThaiDonDangKy.ChoDuyet,
-                TheTich = 250,
+                TheTich = request.TheTich ?? 250,
                 MaTNV = tnv.maTNV // Đã sửa maTNV
             };
 
