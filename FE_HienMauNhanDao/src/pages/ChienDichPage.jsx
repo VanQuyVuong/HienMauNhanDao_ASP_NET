@@ -183,8 +183,8 @@ export default function ChienDichPage() {
 
     if (loading) {
         return (
-            <div className="w-full flex justify-center items-center py-20">
-                <div className="text-slate-500">Đang tải chiến dịch...</div>
+        <div className="flex-1 w-full bg-[#fdf8f9] min-h-[calc(100vh-100px)] py-8 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-[1280px] mx-auto">Đang tải chiến dịch...</div>
             </div>
         );
     }
