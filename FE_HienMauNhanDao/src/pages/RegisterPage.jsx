@@ -80,8 +80,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex-1 p-8 flex items-center justify-center bg-[#F3F4F6] min-h-[calc(100vh-100px)]">
-        <div className="w-full max-w-[1024px] bg-white border border-slate-200 rounded-lg overflow-hidden flex shadow-sm">
+    <div className="flex-1 p-4 sm:p-8 flex items-center justify-center bg-[#fdf8f9] min-h-[calc(100vh-100px)]">
+      <div className="w-full max-w-[960px] glass-panel border border-rose-100 rounded-3xl overflow-hidden flex shadow-2xl">
             <div className="w-[420px] relative flex items-end p-12 shrink-0">
                 <div className="absolute inset-0 z-0">
                     <img alt="Blood Donation" className="w-full h-full object-cover opacity-30 mix-blend-overlay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDueaJAaTz0RjLbygBiVaKlLkFa-k5bSzh3hFB8rOEZTroPIavRCetrAXDv-_TSrjqBNwOmHaIjyqdkEZ8AjEpfikCmXmBCK0KXBQhlLR8Ol5Zw9MUnv74Jylcc41QYB6mFMcjnx4m6d8a3WnxZcdCPkxFWhxCi_4Cfxrq8U-m9ENBUTgvwqsNv_hmwBkTnL-4O8qAmZQTOYVe93SOUpTKuXqPXaQSnhULQandiA53FjSrpsyB6dqv2wxg1y4H-eCXtdDfi39hCAVvd"/>
