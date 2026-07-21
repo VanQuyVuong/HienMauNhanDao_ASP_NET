@@ -41,26 +41,21 @@ export default function RegisterVolunteer() {
   };
 
   return (
-    <div className="flex-1 p-4 sm:p-8 flex items-center justify-center bg-[#F3F4F6] min-h-[calc(100vh-100px)]">
-        <div className="w-full max-w-[1024px] bg-white border border-slate-200 rounded-2xl overflow-hidden flex shadow-sm">
-            <div className="w-[420px] relative hidden md:flex items-end p-12 shrink-0">
-                <div className="absolute inset-0 z-0">
-                    <img alt="Blood Donation" className="w-full h-full object-cover opacity-30 mix-blend-overlay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDueaJAaTz0RjLbygBiVaKlLkFa-k5bSzh3hFB8rOEZTroPIavRCetrAXDv-_TSrjqBNwOmHaIjyqdkEZ8AjEpfikCmXmBCK0KXBQhlLR8Ol5Zw9MUnv74Jylcc41QYB6mFMcjnx4m6d8a3WnxZcdCPkxFWhxCi_4Cfxrq8U-m9ENBUTgvwqsNv_hmwBkTnL-4O8qAmZQTOYVe93SOUpTKuXqPXaQSnhULQandiA53FjSrpsyB6dqv2wxg1y4H-eCXtdDfi39hCAVvd"/>
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
-                </div>
-                <div className="relative z-10 text-white w-full">
-                    <h1 className="text-3xl font-bold leading-tight mb-4">Hệ thống Quản lý Hiến máu Nhân đạo TP. Đà Nẵng</h1>
-                    <p className="text-primary-fixed-dim text-sm leading-relaxed mb-8">Hành trình của mỗi giọt máu bắt đầu từ sự tự nguyện của bạn. Tham gia cộng đồng tình nguyện viên để cứu sống hàng ngàn người bệnh.</p>
-                    <div className="flex gap-4 items-center">
-                        <div className="flex -space-x-3">
-                            <img alt="Avatar 1" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhekJIdPkF-QyoAl_qtcuNI3ofx8UcU-Wjx1kkojZVLuvHxNUBvL829pAsO3Z6dPOYCiY978fmgTJf81AlorlhA8ZB07UItddOy27nZFOQ78oUyq4NFdlDB-uMIf1ByiWkdXDfYCDi0D8iGLYR0N6IOJdHIavoBQjtyLGARMiL9eGObl1DnpwtWUbjNPQzG7dduIpCG19AA29I0KWGwy3UMquRndqqHs758gJbl-YBSVPrU8gmUFqkOu753j4JUxMWSqjqc5M4Um6q"/>
-                            <img alt="Avatar 2" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYs2c1u9I4LLYj0PwXno--xuejWcbyhwRjVoAI0flhk7hVjh5RmY0WQAOIDvQH6ulkxY6OUI7xQunKQtve9939ii_AeoNMX3l3xu4pCfRZa94VU5_gk3pdF_4MtjLYVI4m4GgmQTW84FxIJz6TZ7nl1jfaXqmxC71ZEhVqhxFEA5yBgyorwzGWgUVf9KlzVWE_mFGnol9gheykM7vEQ-4Z27spZIKt23b2RydbokGE4BXPgipv6MX9Pjs_u2X_x9wiBMlfw05TwO14"/>
-                            <img alt="Avatar 3" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACTIM9Xq4ZtI3pQefWqFM51fQYkjfY7WvbMCEzN-Cn1OEsMx3MD3DGpf27RW15Fl9hoHntk2N4MmZvM6ycrZvPRfu4mKNP8eViDJMuFeA_UHcLFu94VVrviNXzL2KC0DzrfNWHiQUpPexH8MhwdmUPDmeUvA1nIFiwhPV9WPDmTIyA1x0PlU6rkzeD_kNkafaH-OMzK-RhWQgg5erWKBJZfD0c6ajRtm7MtwD1jvAsVxahIzLxNo1EiSH0Z7wZDn5Mkk9N9Qm7K-Yu"/>
-                        </div>
-                        <span className="text-xs font-medium">+5,000 tình nguyện viên</span>
-                    </div>
-                </div>
-            </div>
+    <div className="flex-1 p-4 sm:p-8 flex items-center justify-center bg-[#fdf8f9] min-h-[calc(100vh-100px)]">
+      <div className="w-full max-w-[960px] glass-panel border border-rose-100 rounded-3xl overflow-hidden flex shadow-2xl">
+        <div className="w-[400px] relative hidden md:flex flex-col justify-between p-10 bg-slate-900 text-white shrink-0">
+          <div className="relative z-10 space-y-4">
+            <span className="px-3 py-1 bg-[#e62e43] text-white text-[10px] font-black uppercase tracking-widest rounded-full">Đăng Ký Tình Nguyện</span>
+            <h2 className="text-3xl font-black leading-tight text-white">Trở Thành Một Phần Của Hành Trình Nhân Ái</h2>
+            <p className="text-slate-300 text-xs font-light leading-relaxed">Đăng ký tài khoản tình nguyện viên ngay hôm nay để nhận thông báo chiến dịch hiến máu mới nhất tại Đà Nẵng.</p>
+          </div>
+          <div className="relative z-10 pt-6 border-t border-white/10 text-xs font-semibold text-slate-400">
+            <p className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#e62e43] text-base">verified</span>
+              <span>Bảo mật dữ liệu chuẩn Y Tế Quốc Gia</span>
+            </p>
+          </div>
+        </div>
             <div className="flex-1 p-6 sm:p-12 flex flex-col justify-center">
                 <div className="mb-8">
                     <h2 className="text-2xl font-extrabold text-on-surface mb-2 tracking-tight">Đăng ký Tài khoản</h2>
