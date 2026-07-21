@@ -122,6 +122,18 @@ namespace HienMauNhanDao_DaNang.Controllers
                 return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }
+
+        [HttpGet("cccd/{soCCCD}")]
+        [Authorize(Roles = "AD,NVYT")]
+        public async Task<IActionResult> GetByCCCD(string soCCCD)
+        {
+            var tnv = await _context.TinhNguyenViens.FirstOrDefaultAsync(t => t.Cccd == soCCCD);
+            if (tnv == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy tình nguyện viên" });
+            }
+            return Ok(new { success = true, data = tnv });
+        }
     }
 }
 

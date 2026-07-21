@@ -1,0 +1,10 @@
+﻿body {
+  font-family: 'Inter', sans-serif;
+}
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+/* Animations */
+@keyframes pulse-ring { 0%{transform:scale(1);opacity:1}100%{transform:scale(1.4);opacity:0} }
+.pulse-ring::after { content:''; position:absolute; inset:0; border-radius:9999px; border:2px solid currentColor; animation: pulse-ring 1.5s ease-out infinite; }
+@keyframes slideUp { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }

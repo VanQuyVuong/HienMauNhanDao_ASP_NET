@@ -66,7 +66,8 @@ namespace HienMauNhanDao_DaNang
                         ValidateAudience = true,
                         ValidAudience = jwtConfig["Audience"],
                         ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero
+                        ClockSkew = TimeSpan.Zero,
+                        RoleClaimType = System.Security.Claims.ClaimTypes.Role
                     };
                 });
 
@@ -78,15 +79,43 @@ namespace HienMauNhanDao_DaNang
             //builder.Services.AddSwaggerGen();
 
             //AddScoped: khi từ FE gửi 1 reqquerst cấp cho 1 sêvices riêng
+            builder.Services.AddMemoryCache(); // Cần cho OtpServiceImpl
             builder.Services.AddScoped<ITaiKhoanService, TaiKhoanServiceImpl>();
+            builder.Services.AddScoped<IOtpService, OtpServiceImpl>();
+            builder.Services.AddScoped<IEmailService, EmailServiceImpl>();
 
             // AddSingleton: Cả nhà hàng chỉ dùng chung 1 máy làm Token
-
             builder.Services.AddSingleton<JwtHelper>();
 
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                try
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    dbContext.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Lưu ý: Không thể chạy tự động Migration (có thể do DB đã tồn tại cấu trúc): " + ex.Message);
+                    try
+                    {
+                        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                        // Tự động thêm cột diaChi dự phòng nếu DB cũ bị thiếu cột
+                        dbContext.Database.ExecuteSqlRaw("ALTER TABLE DIADIEM ADD COLUMN diaChi VARCHAR(255) NULL;");
+                    }
+                    catch {}
+                    try
+                    {
+                        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                        dbContext.Database.ExecuteSqlRaw("ALTER TABLE TINHNGUYENVIEN ADD COLUMN diaChi VARCHAR(255) NULL;");
+                    }
+                    catch {}
+                }
+            }
 
             app.MapOpenApi();
             app.MapScalarApiReference(options =>
@@ -102,6 +131,7 @@ namespace HienMauNhanDao_DaNang
             app.UseCors("AllowReactApp");
 
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllers();
 

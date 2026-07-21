@@ -1,213 +1,127 @@
-import React, { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import "../css/OtpVerification.css";
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import { AUTH_URL } from '../constants/api';
 
 export default function OtpVerification() {
-  const [otp, setOtp] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [thongBao, setThongBao] = useState({ type: "", text: "" });
-  const [countdown, setCountdown] = useState(60); // Đếm ngược 60 giây khi vừa vào trang
-  const navigate = useNavigate();
-  const location = useLocation();
+    const [otp, setOtp] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+    const location = useLocation();
 
-  // Tự động đếm ngược mỗi giây
-  React.useEffect(() => {
-    let timer;
-    if (countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [countdown]);
+    const formData = location.state?.formData;
 
-  // Nhận thông tin formData từ trang Register chuyển sang qua route state
-  const formData = location.state?.formData;
-
-  // Nếu không có thông tin đăng ký (truy cập lậu), quay lại trang đăng ký ngay
-  if (!formData) {
-    setTimeout(() => {
-      navigate("/register");
-    }, 0);
-    return null;
-  }
-
-  // Hàm xử lý gửi lại mã OTP
-  const handleSendOtp = async () => {
-    setLoading(true);
-    setThongBao({ type: "", text: "" });
-    try {
-      const response = await fetch("https://localhost:7004/api/auth/send-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ Email: formData.email }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setThongBao({
-          type: "success",
-          text: "Mã OTP mới đã được gửi lại vào email của bạn!",
-        });
-        setCountdown(60); // Thiết lập lại đếm ngược 60 giây
-      } else {
-        setThongBao({
-          type: "error",
-          text: data.message || "Gửi lại OTP thất bại.",
-        });
-      }
-    } catch (error) {
-      setThongBao({ type: "error", text: "Không thể kết nối đến máy chủ." });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Hàm xác thực OTP và hoàn tất đăng ký tài khoản
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    if (!otp) {
-      setThongBao({ type: "error", text: "Vui lòng nhập mã OTP!" });
-      return;
+    if (!formData) {
+        navigate('/register');
+        return null;
     }
 
-    setLoading(true);
-    setThongBao({ type: "", text: "" });
+    const handleSendOtp = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            await axios.post(`${AUTH_URL}/send-otp`, { Email: formData.email });
+            setError('Mã OTP đã được gửi lại thành công!');
+        } catch (err) {
+            if (err.response && err.response.data) {
+                setError(typeof err.response.data === 'string' ? err.response.data : 'Lỗi kết nối. Vui lòng thử lại.');
+            } else {
+                setError('Lỗi kết nối server. Vui lòng kiểm tra backend.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    try {
-      // 1. Gọi API xác thực OTP
-      const verifyResponse = await fetch("https://localhost:7004/api/auth/verify-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          Email: formData.email, 
-          Otp: otp,
-        }),
-      });
+    const handleVerifyOtp = async (e) => {
+        e.preventDefault();
+        if (!otp) {
+            setError('Vui lòng nhập mã OTP!');
+            return;
+        }
+        setLoading(true);
+        setError('');
+        try {
+            // Verify OTP
+            await axios.post(`${AUTH_URL}/verify-otp`, { Email: formData.email, Otp: otp });
 
-      const verifyData = await verifyResponse.json();
+            // Register user
+            const registerPayload = {
+                Email: formData.email,
+                MatKhau: formData.matKhau,
+                XacNhanMatKhau: formData.matKhau
+            };
+            await axios.post(`${AUTH_URL}/register`, registerPayload);
 
-      if (!verifyResponse.ok) {
-        setThongBao({
-          type: "error",
-          text: verifyData.message || "Mã OTP không hợp lệ hoặc đã hết hạn!",
-        });
-        setLoading(false);
-        return;
-      }
 
-      // 2. Nếu OTP hợp lệ, tiến hành gọi API Register để tạo tài khoản
-      const registerResponse = await fetch("https://localhost:7004/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          Email: formData.email,
-          MatKhau: formData.matKhau,
-          XacNhanMatKhau: formData.matKhau,
-        }),
-      });
+            // Redirect to login
+            navigate('/login');
+        } catch (err) {
+            if (err.response && err.response.status === 400) {
+                setError('Mã OTP không hợp lệ hoặc đã hết hạn!');
+            } else if (err.response && err.response.data) {
+                setError(typeof err.response.data === 'string' ? err.response.data : 'Xác thực thất bại!');
+            } else {
+                setError('Lỗi kết nối. Vui lòng thử lại.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      const registerData = await registerResponse.json();
-
-      if (registerResponse.ok) {
-        setThongBao({
-          type: "success",
-          text: "Xác thực thành công và đã tạo tài khoản! Đang chuyển về trang Đăng nhập...",
-        });
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      } else {
-        setThongBao({
-          type: "error",
-          text: registerData.message || "Đăng ký tài khoản thất bại.",
-        });
-      }
-    } catch (error) {
-      setThongBao({ type: "error", text: "Đã xảy ra lỗi kết nối đến máy chủ." });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <h2 className="login-header-h2">Xác Thực OTP</h2>
-          <p className="login-header-p">Mã xác thực đã được gửi đến email:</p>
-          <strong style={{ color: "#e63946", fontSize: "14px" }}>{formData.email}</strong>
+    return (
+        <div className="flex-1 p-4 sm:p-8 flex items-center justify-center bg-[#F3F4F6] min-h-[calc(100vh-100px)]">
+            <div className="w-full max-w-[1024px] bg-white border border-slate-200 rounded-2xl overflow-hidden flex shadow-sm">
+                <div className="w-[420px] relative hidden md:flex items-end p-12 shrink-0">
+                    <div className="absolute inset-0 z-0">
+                        <img alt="Blood Donation" className="w-full h-full object-cover opacity-30 mix-blend-overlay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDueaJAaTz0RjLbygBiVaKlLkFa-k5bSzh3hFB8rOEZTroPIavRCetrAXDv-_TSrjqBNwOmHaIjyqdkEZ8AjEpfikCmXmBCK0KXBQhlLR8Ol5Zw9MUnv74Jylcc41QYB6mFMcjnx4m6d8a3WnxZcdCPkxFWhxCi_4Cfxrq8U-m9ENBUTgvwqsNv_hmwBkTnL-4O8qAmZQTOYVe93SOUpTKuXqPXaQSnhULQandiA53FjSrpsyB6dqv2wxg1y4H-eCXtdDfi39hCAVvd" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
+                    </div>
+                    <div className="relative z-10 text-white w-full">
+                        <h1 className="text-3xl font-bold leading-tight mb-4">Hệ thống Quản lý Hiến máu Nhân đạo TP. Đà Nẵng</h1>
+                        <p className="text-primary-fixed-dim text-sm leading-relaxed mb-8">Hành trình của mỗi giọt máu bắt đầu từ sự tự nguyện của bạn. Tham gia cộng đồng tình nguyện viên để cứu sống hàng ngàn người bệnh.</p>
+                        <div className="flex gap-4 items-center">
+                            <div className="flex -space-x-3">
+                                <img alt="Avatar 1" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhekJIdPkF-QyoAl_qtcuNI3ofx8UcU-Wjx1kkojZVLuvHxNUBvL829pAsO3Z6dPOYCiY978fmgTJf81AlorlhA8ZB07UItddOy27nZFOQ78oUyq4NFdlDB-uMIf1ByiWkdXDfYCDi0D8iGLYR0N6IOJdHIavoBQjtyLGARMiL9eGObl1DnpwtWUbjNPQzG7dduIpCG19AA29I0KWGwy3UMquRndqqHs758gJbl-YBSVPrU8gmUFqkOu753j4JUxMWSqjqc5M4Um6q" />
+                                <img alt="Avatar 2" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYs2c1u9I4LLYj0PwXno--xuejWcbyhwRjVoAI0flhk7hVjh5RmY0WQAOIDvQH6ulkxY6OUI7xQunKQtve9939ii_AeoNMX3l3xu4pCfRZa94VU5_gk3pdF_4MtjLYVI4m4GgmQTW84FxIJz6TZ7nl1jfaXqmxC71ZEhVqhxFEA5yBgyorwzGWgUVf9KlzVWE_mFGnol9gheykM7vEQ-4Z27spZIKt23b2RydbokGE4BXPgipv6MX9Pjs_u2X_x9wiBMlfw05TwO14" />
+                                <img alt="Avatar 3" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACTIM9Xq4ZtI3pQefWqFM51fQYkjfY7WvbMCEzN-Cn1OEsMx3MD3DGpf27RW15Fl9hoHntk2N4MmZvM6ycrZvPRfu4mKNP8eViDJMuFeA_UHcLFu94VVrviNXzL2KC0DzrfNWHiQUpPexH8MhwdmUPDmeUvA1nIFiwhPV9WPDmTIyA1x0PlU6rkzeD_kNkafaH-OMzK-RhWQgg5erWKBJZfD0c6ajRtm7MtwD1jvAsVxahIzLxNo1EiSH0Z7wZDn5Mkk9N9Qm7K-Yu" />
+                            </div>
+                            <span className="text-xs font-medium">+5,000 tình nguyện viên</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex-1 p-6 sm:p-12 flex flex-col justify-center">
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-extrabold text-on-surface mb-2 tracking-tight">Xác thực Email</h2>
+                        <p className="text-slate-500 text-sm">Vui lòng nhập mã OTP được gửi đến {formData.email}</p>
+                    </div>
+                    {error && <div className={`mb-4 text-sm font-bold ${error.includes('thành công') ? 'text-green-600' : 'text-red-600'}`}>{error}</div>}
+                    <form onSubmit={handleVerifyOtp} className="space-y-6">
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-semibold text-on-surface-variant">Mã xác thực OTP</label>
+                            <input name="otp" value={otp} onChange={(e) => setOtp(e.target.value)} required className="w-full h-12 px-4 border border-slate-300 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-center text-xl tracking-[0.5em] font-bold transition-all" placeholder="------" type="text" maxLength={6} />
+                        </div>
+                        <button disabled={loading} className="w-full h-12 bg-primary-container text-white font-bold rounded-md hover:bg-red-800 transition-all shadow-sm active:opacity-90 flex items-center justify-center gap-2" type="submit">
+                            <span className="text-base">{loading ? 'Đang xác thực...' : 'Xác thực & Hoàn tất'}</span>
+                            <span className="material-symbols-outlined text-xl">verified</span>
+                        </button>
+                        <div className="text-center pt-2">
+                            <p className="text-sm text-slate-500">
+                                Chưa nhận được mã?
+                                <button type="button" onClick={handleSendOtp} disabled={loading} className="text-primary font-bold hover:underline underline-offset-4 ml-1">
+                                    Gửi lại OTP
+                                </button>
+                            </p>
+                        </div>
+                        <div className="text-center pt-2">
+                            <button type="button" onClick={() => navigate('/register')} className="text-slate-500 hover:text-slate-700 text-sm font-medium underline underline-offset-4">
+                                Quay lại chỉnh sửa thông tin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        {thongBao.text && (
-          <div className={thongBao.type === "error" ? "error-message" : "success-message"}>
-            {thongBao.text}
-          </div>
-        )}
-
-        <form onSubmit={handleVerifyOtp}>
-          <div className="input-group">
-            <label style={{ textAlign: "center", display: "block" }}>Nhập mã OTP (6 chữ số)</label>
-            <input
-              type="text"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              required
-              maxLength={6}
-              placeholder="------"
-            />
-          </div>
-
-          <button type="submit" className="btn_login" disabled={loading}>
-            {loading ? "Đang xác thực..." : "Xác Thực & Hoàn Tất"}
-          </button>
-        </form>
-
-        <div style={{ textAlign: "center", marginTop: "24px" }}>
-          <span style={{ fontSize: "13px", color: "#666" }}>Không nhận được mã?</span>
-          {countdown > 0 ? (
-            <span style={{ fontSize: "13px", color: "#999", marginLeft: "5px", fontWeight: "bold" }}>
-              Gửi lại sau {countdown}s
-            </span>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSendOtp}
-              disabled={loading}
-              style={{
-                background: "none",
-                border: "none",
-                fontSize: "13px",
-                color: "#e63946",
-                fontWeight: "bold",
-                cursor: "pointer",
-                marginLeft: "5px",
-                textDecoration: "underline",
-              }}
-            >
-              Gửi lại OTP
-            </button>
-          )}
-        </div>
-
-        <div style={{ textAlign: "center", marginTop: "16px" }}>
-          <Link
-            to="/register"
-            style={{
-              fontSize: "13px",
-              color: "#666",
-              textDecoration: "none",
-            }}
-          >
-            Quay lại chỉnh sửa email
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }

@@ -1,215 +1,145 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import UserLayout from "./layouts/UserLayout";
+import QuanLyKhoLayout from "./layouts/QuanLyKhoLayout";
+import NVYTLayout from "./layouts/NVYTLayout";
+import BacSiLayout from "./layouts/BacSiLayout";
+import HomePage from "./pages/HomePage";
 import Login from "./pages/Login";
 import RegisterVolunteer from "./pages/RegisterVolunteer";
-import ChienDichPage from "./pages/tnv/ChienDichPage";
-import DonDangKy from "./pages/nvyt/DonDangKy";
-import AdminCreateCampaign from "./pages/admin/AdminCreateCampaign";
-import HoSoCaNhan from "./pages/tnv/HoSoCaNhan";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminKhoMau from "./pages/qlk/AdminKhoMau";
-import KetQuaXetNghiem from "./pages/bacsi/KetQuaXetNghiem";
-import QuanLyNhapKho from "./pages/qlk/QuanLyNhapKho";
-import QuanLyNguoiDung from "./pages/admin/QuanLyNguoiDung";
-import TinhNguyenVien from "./pages/nvyt/TinhNguyenVien";
-import NhanYeuCauNhapKho from "./pages/qlk/NhanYeuCauNhapKho";
-import QuanLyNhapKhoTheoChienDich from "./pages/qlk/QuanLyNhapKhoTheoChienDich";
 import OtpVerification from "./pages/OtpVerification";
-import XacNhanDangKy from "./pages/tnv/XacNhanDangKy";
-import QuanLyChienDich from "./pages/admin/QuanLyChienDich";
-import QuanLyNhapKhoQuetMa from "./pages/qlk/QuanLyNhapKhoQuetMa";
+import AboutPage from "./pages/AboutPage";
+import ChienDichPage from "./pages/ChienDichPage";
+import ThongTinCaNhan from "./pages/ThongTinCaNhan";
+import KhaiBaoYTe from "./pages/KhaiBaoYTe";
+import XacNhanDangKy from "./pages/XacNhanDangKy";
+import GiayChungNhanPage from "./pages/GiayChungNhanPage";
+import HoSoCaNhan from "./pages/HoSoCaNhan";
 import ThongKeTonKho from "./pages/qlk/ThongKeTonKho";
-import QuanLyHanDung from "./pages/qlk/QuanLyHanDung";
+import QuanLyNhapKho from "./pages/qlk/QuanLyNhapKho";
+import DanhSachDonDangKy from "./pages/DanhSachDonDangKy";
+import DebugLogin from "./pages/qlk/DebugLogin";
+
+// NVYT pages
+import DonDangKy from "./pages/nvyt/DonDangKy";
+import TinhNguyenVien from "./pages/nvyt/TinhNguyenVien";
+import KhaiBaoYTeNVYT from "./pages/nvyt/KhaiBaoYTeNVYT";
 import KhamLamSang from "./pages/bacsi/KhamLamSang";
 import DanhSachChoKham from "./pages/bacsi/DanhSachChoKham";
-import ThuNhanMau from "./pages/nvyt/ThuNhanMau";
-import HomePage from "./pages/HomePage";
-import DanhSachDonDangKy from "./pages/tnv/DanhSachDonDangKy";
-import CampaignDetail from "./pages/tnv/CampaignDetail";
-import GiayChungNhanPage from "./pages/tnv/GiayChungNhanPage";
-import AboutPage from "./pages/AboutPage";
-import KhaiBaoYTe from "./pages/tnv/KhaiBaoYTe";
-import ThongTinCaNhan from "./pages/tnv/ThongTinCaNhan";
-import DebugLogin from "./pages/qlk/DebugLogin";
+import KetQuaXetNghiem from "./pages/bacsi/KetQuaXetNghiem";
 import CapNhatXetNghiem from "./pages/nvyt/CapNhatXetNghiem";
-// === CÁC HÀM BẢO VỆ ROUTE (ROUTE GUARDS) ===
+import ThuNhanMau from "./pages/nvyt/ThuNhanMau"; // Trigger Vite reload
+import QuanLyHanDung from "./pages/qlk/QuanLyHanDung";
+import AdminLayout from "./layouts/AdminLayout";
+import QuanLyNguoiDung from "./pages/admin/QuanLyNguoiDung";
+import QuanLyChienDich from "./pages/admin/QuanLyChienDich";
+import CapGiayChungNhan from "./pages/admin/CapGiayChungNhan";
 
-// 1. Bảo vệ đăng nhập: Yêu cầu phải có token
-function baoVeDangNhap({ children }) {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+const queryClient = new QueryClient();
+
+// Guard: chỉ cho phép role NVYT truy cập
+function NvytGuard({ children }) {
+  const role = localStorage.getItem("role");
+  if (role !== "NVYT") return <Navigate to="/login" replace />;
   return children;
 }
 
-// 2. Bảo vệ Admin: Chỉ cho phép role AD
-function baoVeAdmin({ children }) {
-  const token = localStorage.getItem("token");
-  const vaiTro = localStorage.getItem("role");
-  if (!token || vaiTro !== "AD") {
-    return <Navigate to="/login" replace />;
-  }
+function BacSiGuard({ children }) {
+  const role = localStorage.getItem("role");
+  if (role !== "BS") return <Navigate to="/login" replace />;
   return children;
 }
 
-// 3. Bảo vệ Nhân viên y tế: Cho phép NVYT hoặc AD
-function baoVeNhanVienYTe({ children }) {
-  const token = localStorage.getItem("token");
-  const vaiTro = localStorage.getItem("role");
-  if (!token || (vaiTro !== "NVYT" && vaiTro !== "AD")) {
-    return <Navigate to="/login" replace />;
-  }
+// Guard: chỉ cho phép role QLK (Quản lý kho) truy cập
+function QlkGuard({ children }) {
+  const role = localStorage.getItem("role");
+  if (role !== "QLK") return <Navigate to="/login" replace />;
   return children;
 }
 
-// 4. Bảo vệ Bác sĩ: Cho phép BS hoặc AD
-function baoVeBacSi({ children }) {
-  const token = localStorage.getItem("token");
-  const vaiTro = localStorage.getItem("role");
-  if (!token || (vaiTro !== "BS" && vaiTro !== "AD")) {
-    return <Navigate to="/login" replace />;
-  }
-  return children;
-}
-
-// 5. Bảo vệ Thủ kho: Cho phép QLK hoặc AD
-function baoVeThuKho({ children }) {
-  const token = localStorage.getItem("token");
-  const vaiTro = localStorage.getItem("role");
-  if (!token || (vaiTro !== "QLK" && vaiTro !== "AD")) {
-    return <Navigate to="/login" replace />;
-  }
+function AdminGuard({ children }) {
+  const role = localStorage.getItem("role");
+  if (role !== "AD") return <Navigate to="/login" replace />;
   return children;
 }
 
 function App() {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("app") === "maui") {
+      localStorage.setItem("isMobileApp", "true");
+    }
+  }, []);
+
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* === CÁC ROUTE CÔNG KHAI (AI CŨNG XEM ĐƯỢC) === */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<RegisterVolunteer />} />
-        <Route path="/otp" element={<OtpVerification />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/debug-login" element={<DebugLogin />} />
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <ToastContainer />
+        <Routes>
+          {/* ── Trang người dùng / tình nguyện viên ── */}
+          <Route path="/" element={<UserLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<RegisterVolunteer />} />
+            <Route path="otp" element={<OtpVerification />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="chiendich" element={<ChienDichPage />} />
+            <Route path="don-dang-ky" element={<DanhSachDonDangKy />} />
+            <Route path="don-dang-ky-detail/:maDon" element={<XacNhanDangKy />}/>
+            <Route path="khai-bao-thong-tin-ca-nhan"element={<ThongTinCaNhan />}/>
+            <Route path="khai-bao-y-te" element={<KhaiBaoYTe />} />
+            <Route path="xac-nhan-dang-ky" element={<XacNhanDangKy />} />
+            <Route path="xac-nhan-dang-ky/:maDon" element={<XacNhanDangKy />} />
+            <Route path="chung-nhan/:maDon" element={<GiayChungNhanPage />} />
+            <Route path="ho-so" element={<HoSoCaNhan />} />
+            <Route path="debug-login" element={<DebugLogin />} />
+          </Route>
+          {/* Quản Lý Kho Routes */}
+          <Route path="/quan-ly-kho" element={<QlkGuard><QuanLyKhoLayout /></QlkGuard>}>
+            <Route path="thong-ke" element={<ThongKeTonKho />} />
+            <Route path="nhap-kho" element={<QuanLyNhapKho />} />
+            <Route path="nhap-kho-chien-dich" element={<Navigate to="/quan-ly-kho/nhap-kho?tab=chien-dich" replace />} />
+            <Route path="nhan-yeu-cau" element={<Navigate to="/quan-ly-kho/nhap-kho?tab=nhan-yeu-cau" replace />} />
+            <Route path="quan-ly-han-dung" element={<QuanLyHanDung />} />
+          </Route>
 
-        {/* === CÁC ROUTE CỦA TÌNH NGUYỆN VIÊN (YÊU CẦU ĐĂNG NHẬP) === */}
-        <Route
-          path="/dashboard"
-          element={baoVeDangNhap({ children: <ChienDichPage /> })}
-        />
-        <Route
-          path="/profile"
-          element={baoVeDangNhap({ children: <HoSoCaNhan /> })}
-        />
-        <Route
-          path="/xac-nhan-dang-ky/:maDon"
-          element={baoVeDangNhap({ children: <XacNhanDangKy /> })}
-        />
-        <Route
-          path="/lich-su"
-          element={baoVeDangNhap({ children: <DanhSachDonDangKy /> })}
-        />
-        <Route
-          path="/chung-nhan/:maDon"
-          element={baoVeDangNhap({ children: <GiayChungNhanPage /> })}
-        />
-        <Route
-          path="/campaign-detail/:id"
-          element={baoVeDangNhap({ children: <CampaignDetail /> })}
-        />
-        <Route
-          path="/khai-bao-y-te/:maDon"
-          element={baoVeDangNhap({ children: <KhaiBaoYTe /> })}
-        />
-        <Route
-          path="/khai-bao-thong-tin-ca-nhan"
-          element={baoVeDangNhap({ children: <ThongTinCaNhan /> })}
-        />
+          {/* ── Trang bác sĩ (maVaiTro = BS trong TAIKHOAN) ── */}
+          <Route path="/bac-si" element={<BacSiGuard><BacSiLayout /></BacSiGuard>}>
+            <Route index element={<Navigate to="danh-sach-cho-kham" replace />}/>
+            <Route path="danh-sach-cho-kham" element={<DanhSachChoKham />} />
+            <Route path="kham-lam-sang" element={<KhamLamSang />} />
+            <Route path="ket-qua-xet-nghiem" element={<KetQuaXetNghiem />} />
+          </Route>
 
-        {/* === CÁC ROUTE DÀNH CHO ADMIN === */}
-        <Route
-          path="/admin-users"
-          element={baoVeAdmin({ children: <QuanLyNguoiDung /> })}
-        />
-        <Route
-          path="/admin-quan-ly-chien-dich"
-          element={baoVeAdmin({ children: <QuanLyChienDich /> })}
-        />
-        <Route
-          path="/admin-tao-cd"
-          element={baoVeAdmin({ children: <AdminCreateCampaign /> })}
-        />
-        <Route
-          path="/admin-volunteers"
-          element={baoVeAdmin({ children: <TinhNguyenVien /> })}
-        />
-        <Route
-          path="/admin-thong-ke"
-          element={baoVeAdmin({ children: <AdminDashboard /> })}
-        />
+          {/* ── Trang quản trị (Admin) ── */}
+          <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
+            <Route index element={<Navigate to="nguoi-dung" replace />} />
+            <Route path="nguoi-dung" element={<QuanLyNguoiDung />} />
+            <Route path="chien-dich" element={<QuanLyChienDich />} />
+            <Route path="chung-nhan" element={<CapGiayChungNhan />} />
+          </Route>
 
-        {/* === CÁC ROUTE DÀNH CHO NHÂN VIÊN Y TẾ (NVYT) === */}
-        <Route
-          path="/admin-don"
-          element={baoVeNhanVienYTe({ children: <DonDangKy /> })}
-        />
-        <Route
-          path="/admin-thu-nhan-mau"
-          element={baoVeNhanVienYTe({ children: <ThuNhanMau /> })}
-        />
-        <Route
-          path="/admin-cap-nhat-xet-nghiem"
-          element={baoVeNhanVienYTe({ children: <CapNhatXetNghiem /> })}
-        />
-
-        <Route
-          path="/admin-cho-kham"
-          element={baoVeBacSi({ children: <DanhSachChoKham /> })}
-        />
-        <Route
-          path="/admin-kham-lam-sang"
-          element={baoVeBacSi({ children: <KhamLamSang /> })}
-        />
-        <Route
-          path="/admin-xet-nghiem"
-          element={baoVeBacSi({ children: <KetQuaXetNghiem /> })}
-        />
-
-        {/* === CÁC ROUTE DÀNH CHO THỦ KHO MÁU (QLK) === */}
-        <Route
-          path="/admin-kho-mau"
-          element={baoVeThuKho({ children: <AdminKhoMau /> })}
-        />
-        <Route
-          path="/admin-nhap-kho"
-          element={baoVeThuKho({ children: <QuanLyNhapKho /> })}
-        />
-        <Route
-          path="/qlk-nhan-yeu-cau"
-          element={baoVeThuKho({ children: <NhanYeuCauNhapKho /> })}
-        />
-        <Route
-          path="/qlk-nhap-theo-chien-dich"
-          element={baoVeThuKho({ children: <QuanLyNhapKhoTheoChienDich /> })}
-        />
-        <Route
-          path="/admin-nhap-kho-quet-ma"
-          element={baoVeThuKho({ children: <QuanLyNhapKhoQuetMa /> })}
-        />
-        <Route
-          path="/admin-thong-ke-ton-kho"
-          element={baoVeThuKho({ children: <ThongKeTonKho /> })}
-        />
-        <Route
-          path="/admin-quan-ly-han-dung"
-          element={baoVeThuKho({ children: <QuanLyHanDung /> })}
-        />
-      </Routes>
-    </BrowserRouter>
+          {/* ── Trang nhân viên y tế ── */}
+          <Route path="/nvyt" element={<NvytGuard><NVYTLayout /></NvytGuard>}>
+            <Route index element={<Navigate to="don-dang-ky" replace />} />
+            <Route path="don-dang-ky" element={<DonDangKy />} />
+            <Route path="tinh-nguyen-vien" element={<TinhNguyenVien />} />
+            <Route path="khai-bao-y-te" element={<KhaiBaoYTeNVYT />} />
+            <Route path="cap-nhat-xet-nghiem" element={<CapNhatXetNghiem />} />
+            <Route path="thu-nhan-mau" element={<ThuNhanMau />} />
+          </Route>
+        </Routes>
+      </Router>
+    </QueryClientProvider>
   );
 }
 
 export default App;
-

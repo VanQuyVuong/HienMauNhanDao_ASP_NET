@@ -1,668 +1,379 @@
-﻿import React, { useState, useEffect } from "react";
-import Navbar from "../../components/Navbar";
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import userService from '../../services/userService';
+import { getApiError } from '../../utils/apiHelper';
 
-const ROLE_LABELS = {
-  AD: "Quáº£n trá»‹ viÃªn",
-  BS: "BÃ¡c sÄ©",
-  NVYT: "NhÃ¢n viÃªn Y táº¿",
-  QLK: "Quáº£n lÃ½ kho",
-  TNV: "TÃ¬nh nguyá»‡n viÃªn",
+const PRIMARY_COLOR = '#af101a';
+
+const ROLE_COLORS = {
+  AD: 'bg-red-100 text-red-700',
+  BS: 'bg-emerald-100 text-emerald-700',
+  NVYT: 'bg-cyan-100 text-cyan-700',
+  QLK: 'bg-amber-100 text-amber-700',
+  TNV: 'bg-slate-100 text-slate-700',
 };
 
+const ROLE_LABELS = {
+  AD: 'Quản trị viên',
+  BS: 'Bác sĩ',
+  NVYT: 'Nhân viên Y tế',
+  QLK: 'Quản lý kho',
+  TNV: 'Tình nguyện viên',
+};
+
+const emptyForm = { email: '', matKhau: '', maVaiTro: '' };
+
 export default function QuanLyNguoiDung() {
-  // 1. Khai bÃ¡o cÃ¡c State quáº£n lÃ½ dá»¯ liá»‡u
+  const { searchQuery: headerSearch = '' } = useOutletContext() || {};
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [filterRole, setFilterRole] = useState("");
+  const [search, setSearch] = useState('');
+  const [filterRole, setFilterRole] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ email: "", matKhau: "", maVaiTro: "" });
+  const [form, setForm] = useState(emptyForm);
+  const [submitting, setSubmitting] = useState(false);
 
-  // 2. HÃ m gá»i API táº£i danh sÃ¡ch tÃ i khoáº£n & vai trÃ² tá»« Backend
-  const loadData = async () => {
+  const currentUserId = localStorage.getItem('userId');
+
+  const loadData = useCallback(async () => {
     setLoading(true);
-    const token = localStorage.getItem("token");
     try {
-      // Gá»i API láº¥y danh sÃ¡ch tÃ i khoáº£n
-      const resUsers = await fetch("https://localhost:7004/api/taikhoan", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const dataUsers = await resUsers.json();
-
-      // Gá»i API láº¥y danh sÃ¡ch vai trÃ² Ä‘á»ƒ phá»¥c vá»¥ Dropdown Form
-      const resRoles = await fetch(
-        "https://localhost:7004/api/taikhoan/vaitro",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      const dataRoles = await resRoles.json();
-
-      if (resUsers.ok) setUsers(dataUsers);
-      if (resRoles.ok) setRoles(dataRoles);
+      const [userList, roleList] = await Promise.all([
+        userService.getAll(),
+        userService.getVaiTroList(),
+      ]);
+      setUsers(Array.isArray(userList) ? userList : []);
+      setRoles(Array.isArray(roleList) ? roleList : []);
     } catch (err) {
-      alert("âŒ Lá»—i táº£i dá»¯ liá»‡u tá»« server: " + err.message);
+      Swal.fire('Lỗi', getApiError(err, 'Không thể tải danh sách người dùng'), 'error');
     } finally {
       setLoading(false);
     }
-  };
-
-  // Tá»± Ä‘á»™ng táº£i dá»¯ liá»‡u khi vá»«a má»Ÿ trang
-  useEffect(() => {
-    loadData();
   }, []);
 
-  // 3. HÃ m kÃ­ch hoáº¡t hoáº·c vÃ´ hiá»‡u hÃ³a tÃ i khoáº£n (API PATCH)
-  const handleToggleStatus = async (user) => {
-    const action = user.trangThai ? "vÃ´ hiá»‡u hÃ³a" : "kÃ­ch hoáº¡t";
-    if (
-      !window.confirm(`Báº¡n cÃ³ cháº¯c muá»‘n ${action} tÃ i khoáº£n ${user.email}?`)
-    ) {
-      return;
-    }
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-    const token = localStorage.getItem("token");
-    try {
-      const response = await fetch(
-        `https://localhost:7004/api/taikhoan/${user.maTaiKhoan}/trang-thai`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ trangThai: !user.trangThai }),
-        },
-      );
-      const data = await response.json();
-      if (response.ok) {
-        alert("âœ… " + data.message);
-        loadData(); // Táº£i láº¡i danh sÃ¡ch sau khi sá»­a thÃ nh cÃ´ng
-      } else {
-        alert("âŒ Lá»—i: " + data.message);
-      }
-    } catch (error) {
-      alert("âŒ Lá»—i káº¿t ná»‘i Ä‘áº¿n server!");
-    }
+  const filteredUsers = useMemo(() => {
+    const q = (search || headerSearch).trim().toLowerCase();
+    return users.filter((u) => {
+      const matchSearch =
+        !q ||
+        (u.email || '').toLowerCase().includes(q) ||
+        (u.maTaiKhoan || '').toLowerCase().includes(q) ||
+        (u.tenVaiTro || '').toLowerCase().includes(q);
+      const matchRole = !filterRole || u.maVaiTro === filterRole;
+      return matchSearch && matchRole;
+    });
+  }, [users, search, filterRole, headerSearch]);
+
+  const stats = useMemo(() => {
+    const active = users.filter((u) => u.trangThai !== false).length;
+    return { total: users.length, active, inactive: users.length - active };
+  }, [users]);
+
+  const handleOpenModal = () => {
+    setForm(emptyForm);
+    setShowModal(true);
   };
 
-  // 4. HÃ m xÃ³a tÃ i khoáº£n ngÆ°á»i dÃ¹ng (API DELETE)
-  const handleDelete = async (user) => {
-    if (
-      !window.confirm(
-        `HÃ nh Ä‘á»™ng xÃ³a khÃ´ng thá»ƒ khÃ´i phá»¥c. Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a tÃ i khoáº£n ${user.email}?`,
-      )
-    ) {
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-    try {
-      const response = await fetch(
-        `https://localhost:7004/api/taikhoan/${user.maTaiKhoan}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      const data = await response.json();
-      if (response.ok) {
-        alert("âœ… " + data.message);
-        loadData(); // Táº£i láº¡i danh sÃ¡ch sau khi xÃ³a thÃ nh cÃ´ng
-      } else {
-        alert("âŒ Lá»—i: " + data.message);
-      }
-    } catch (error) {
-      alert("âŒ Lá»—i káº¿t ná»‘i Ä‘áº¿n server!");
-    }
-  };
-
-  // 5. HÃ m xá»­ lÃ½ gá»­i form táº¡o tÃ i khoáº£n má»›i (API POST)
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!form.email || !form.matKhau || !form.maVaiTro) {
-      alert("âš ï¸ Vui lÃ²ng Ä‘iá»n Ä‘áº§y Ä‘á»§ cÃ¡c thÃ´ng tin báº¯t buá»™c.");
+      Swal.fire('Thiếu thông tin', 'Vui lòng điền đầy đủ email, mật khẩu và vai trò', 'warning');
       return;
     }
-
-    const token = localStorage.getItem("token");
+    setSubmitting(true);
     try {
-      const response = await fetch("https://localhost:7004/api/taikhoan", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(form),
+      await userService.create({
+        email: form.email.trim(),
+        matKhau: form.matKhau,
+        maVaiTro: form.maVaiTro,
+        trangThai: true,
       });
-      const data = await response.json();
-      if (response.ok) {
-        alert("ðŸŽ‰ " + data.message);
-        setShowModal(false); // ÄÃ³ng Modal
-        setForm({ email: "", matKhau: "", maVaiTro: "" }); // Reset Form
-        loadData(); // Táº£i láº¡i dá»¯ liá»‡u má»›i nháº¥t
-      } else {
-        alert("âŒ Lá»—i: " + data.message);
-      }
-    } catch (error) {
-      alert("âŒ Lá»—i káº¿t ná»‘i Ä‘áº¿n server!");
+      Swal.fire('Thành công', 'Đã thêm người dùng mới', 'success');
+      setShowModal(false);
+      setForm(emptyForm);
+      loadData();
+    } catch (err) {
+      Swal.fire('Lỗi', err?.response?.data?.message || err.message || 'Không thể tạo tài khoản', 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // 6. Xá»­ lÃ½ tÃ¬m kiáº¿m vÃ  lá»c dá»¯ liá»‡u trÃªn danh sÃ¡ch hiá»ƒn thá»‹
-  const filteredUsers = users.filter((u) => {
-    const q = search.toLowerCase();
-    const matchSearch =
-      !q ||
-      (u.email || "").toLowerCase().includes(q) ||
-      (u.maTaiKhoan || "").toLowerCase().includes(q) ||
-      (u.tenVaiTro || "").toLowerCase().includes(q);
-    const matchRole = !filterRole || u.maVaiTro === filterRole;
-    return matchSearch && matchRole;
-  });
+  const handleToggleStatus = async (user) => {
+    const isActive = user.trangThai !== false;
+    const action = isActive ? 'vô hiệu hóa' : 'kích hoạt';
+    const result = await Swal.fire({
+      title: `${isActive ? 'Vô hiệu hóa' : 'Kích hoạt'} tài khoản?`,
+      html: `Bạn có chắc muốn ${action} tài khoản <b>${user.email}</b>?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: isActive ? '#dc2626' : PRIMARY_COLOR,
+      cancelButtonColor: '#94a3b8',
+      confirmButtonText: isActive ? 'Vô hiệu hóa' : 'Kích hoạt',
+      cancelButtonText: 'Hủy',
+    });
+    if (!result.isConfirmed) return;
+
+    try {
+      await userService.setTrangThai(user.maTaiKhoan, !isActive);
+      Swal.fire('Thành công', `Đã ${action} tài khoản`, 'success');
+      loadData();
+    } catch (err) {
+      Swal.fire('Lỗi', err?.response?.data?.message || 'Thao tác thất bại', 'error');
+    }
+  };
+
+  const handleDelete = async (user) => {
+    if (user.maTaiKhoan === currentUserId) {
+      Swal.fire('Không được phép', 'Bạn không thể xóa tài khoản đang đăng nhập', 'warning');
+      return;
+    }
+    const result = await Swal.fire({
+      title: 'Xóa tài khoản?',
+      html: `Hành động này không thể hoàn tác.<br/>Xóa tài khoản <b>${user.email}</b>?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#94a3b8',
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy',
+    });
+    if (!result.isConfirmed) return;
+
+    try {
+      await userService.delete(user.maTaiKhoan);
+      Swal.fire('Đã xóa', 'Tài khoản đã được xóa khỏi hệ thống', 'success');
+      loadData();
+    } catch (err) {
+      Swal.fire('Lỗi', err?.response?.data?.message || 'Không thể xóa tài khoản', 'error');
+    }
+  };
 
   return (
-    <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh", margin: 0 }}>
-      <Navbar />
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "40px 20px",
-          fontFamily: "sans-serif",
-        }}
-      >
-        {/* Pháº§n tiÃªu Ä‘á» trang */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            marginBottom: "30px",
-          }}
-        >
-          <div>
-            <h2
-              style={{
-                color: "#af101a",
-                fontWeight: "900",
-                fontSize: "28px",
-                margin: 0,
-              }}
-            >
-              ðŸ‘¥ Quáº£n LÃ½ NgÆ°á»i DÃ¹ng
-            </h2>
-            <p
-              style={{
-                color: "#6c757d",
-                margin: "5px 0 0 0",
-                fontSize: "14px",
-              }}
-            >
-              Quáº£n trá»‹ há»‡ thá»‘ng tÃ i khoáº£n vÃ  vai trÃ² cá»§a cÃ¡n bá»™ vÃ  tÃ¬nh nguyá»‡n
-              viÃªn.
-            </p>
-          </div>
-          <button
-            onClick={() => setShowModal(true)}
-            style={{
-              backgroundColor: "#af101a",
-              color: "#fff",
-              border: "none",
-              padding: "12px 24px",
-              fontWeight: "bold",
-              borderRadius: "8px",
-              cursor: "pointer",
-              boxShadow: "0 4px 6px rgba(175,16,26,0.2)",
-            }}
-          >
-            âž• ThÃªm NgÆ°á»i DÃ¹ng
-          </button>
+    <div className="space-y-6">
+      <div className="flex items-end justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Quản lý người dùng</h1>
+          <p className="text-slate-500 mt-1 text-sm">Thêm, vô hiệu hóa và xóa tài khoản trong hệ thống</p>
         </div>
-
-        {/* Bá»™ lá»c vÃ  TÃ¬m kiáº¿m nhanh */}
-        <div
-          style={{
-            backgroundColor: "#fff",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-            marginBottom: "20px",
-            display: "flex",
-            gap: "15px",
-            flexWrap: "wrap",
-          }}
+        <button
+          onClick={handleOpenModal}
+          className="flex items-center gap-2 h-11 px-6 bg-primary text-white font-bold rounded-xl hover:bg-red-800 transition-colors shadow-sm"
         >
+          <span className="material-symbols-outlined text-xl">person_add</span>
+          Thêm người dùng
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Tổng tài khoản</p>
+          <p className="text-3xl font-black text-slate-900">{stats.total}</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Đang hoạt động</p>
+          <p className="text-3xl font-black text-primary">{stats.active}</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Đã vô hiệu hóa</p>
+          <p className="text-3xl font-black text-red-600">{stats.inactive}</p>
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-wrap gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
           <input
-            type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="TÃ¬m theo email, mÃ£ tÃ i khoáº£n..."
-            style={{
-              flex: 1,
-              minWidth: "250px",
-              padding: "10px 15px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              fontSize: "14px",
-              outline: "none",
-            }}
+            placeholder="Tìm theo email, mã tài khoản..."
+            className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
           />
-          <select
-            value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
-            style={{
-              padding: "10px 15px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              fontSize: "14px",
-              backgroundColor: "#fff",
-              outline: "none",
-            }}
-          >
-            <option value="">Táº¥t cáº£ vai trÃ²</option>
-            {roles.map((r) => (
-              <option key={r.maVaiTro} value={r.maVaiTro}>
-                {ROLE_LABELS[r.maVaiTro] || r.tenVaiTro}
-              </option>
-            ))}
-          </select>
         </div>
-
-        {/* Báº£ng hiá»ƒn thá»‹ danh sÃ¡ch ngÆ°á»i dÃ¹ng */}
-        <div
-          style={{
-            backgroundColor: "#fff",
-            borderRadius: "12px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-            overflow: "hidden",
-          }}
+        <select
+          value={filterRole}
+          onChange={(e) => setFilterRole(e.target.value)}
+          className="h-11 px-4 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
         >
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              textAlign: "left",
-              fontSize: "14px",
-            }}
-          >
+          <option value="">Tất cả vai trò</option>
+          {roles.map((r) => (
+            <option key={r.maVaiTro} value={r.maVaiTro}>
+              {ROLE_LABELS[r.maVaiTro] || r.tenVaiTro}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
             <thead>
-              <tr
-                style={{
-                  backgroundColor: "#f1f3f5",
-                  borderBottom: "2px solid #dee2e6",
-                }}
-              >
-                <th
-                  style={{
-                    padding: "15px 20px",
-                    fontWeight: "bold",
-                    color: "#495057",
-                  }}
-                >
-                  MÃ£ tÃ i khoáº£n
-                </th>
-                <th
-                  style={{
-                    padding: "15px 20px",
-                    fontWeight: "bold",
-                    color: "#495057",
-                  }}
-                >
-                  Email
-                </th>
-                <th
-                  style={{
-                    padding: "15px 20px",
-                    fontWeight: "bold",
-                    color: "#495057",
-                  }}
-                >
-                  Vai trÃ²
-                </th>
-                <th
-                  style={{
-                    padding: "15px 20px",
-                    fontWeight: "bold",
-                    color: "#495057",
-                  }}
-                >
-                  Tráº¡ng thÃ¡i
-                </th>
-                <th
-                  style={{
-                    padding: "15px 20px",
-                    fontWeight: "bold",
-                    color: "#495057",
-                  }}
-                >
-                  Thao tÃ¡c
-                </th>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                {['Mã TK', 'Email', 'Vai trò', 'Trạng thái', 'Thao tác'].map((h) => (
+                  <th key={h} className="text-left px-5 py-3 text-xs font-black uppercase text-slate-400 tracking-wider whitespace-nowrap">
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td
-                    colSpan="5"
-                    style={{
-                      padding: "40px",
-                      textAlign: "center",
-                      color: "#6c757d",
-                    }}
-                  >
-                    Äang táº£i dá»¯ liá»‡u...
+                  <td colSpan={5} className="text-center py-16 text-slate-400">
+                    <div className="w-8 h-8 border-[3px] border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                    Đang tải...
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="5"
-                    style={{
-                      padding: "40px",
-                      textAlign: "center",
-                      color: "#6c757d",
-                    }}
-                  >
-                    KhÃ´ng tÃ¬m tháº¥y tÃ i khoáº£n nÃ o.
+                  <td colSpan={5} className="text-center py-16 text-slate-400">
+                    <span className="material-symbols-outlined text-5xl block mb-2">group_off</span>
+                    Không có người dùng nào
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
-                  <tr
-                    key={user.maTaiKhoan}
-                    style={{ borderBottom: "1px solid #dee2e6" }}
-                  >
-                    <td
-                      style={{
-                        padding: "15px 20px",
-                        fontFamily: "monospace",
-                        fontWeight: "bold",
-                        color: "#af101a",
-                      }}
-                    >
-                      {user.maTaiKhoan}
-                    </td>
-                    <td
-                      style={{
-                        padding: "15px 20px",
-                        fontWeight: "bold",
-                        color: "#333",
-                      }}
-                    >
-                      {user.email}
-                    </td>
-                    <td style={{ padding: "15px 20px" }}>
-                      <span
-                        style={{
-                          padding: "4px 10px",
-                          borderRadius: "20px",
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          backgroundColor:
-                            user.maVaiTro === "AD"
-                              ? "#ffe3e3"
-                              : user.maVaiTro === "BS"
-                                ? "#e3faf2"
-                                : "#e8f0fe",
-                          color:
-                            user.maVaiTro === "AD"
-                              ? "#af101a"
-                              : user.maVaiTro === "BS"
-                                ? "#0ca678"
-                                : "#1a73e8",
-                        }}
-                      >
-                        {ROLE_LABELS[user.maVaiTro] ||
-                          user.tenVaiTro ||
-                          user.maVaiTro}
-                      </span>
-                    </td>
-                    <td style={{ padding: "15px 20px" }}>
-                      <span
-                        style={{
-                          fontWeight: "bold",
-                          color: user.trangThai ? "#2b8a3e" : "#c92a2a",
-                        }}
-                      >
-                        {user.trangThai ? "â— Äang hoáº¡t Ä‘á»™ng" : "â—‹ VÃ´ hiá»‡u hÃ³a"}
-                      </span>
-                    </td>
-                    <td style={{ padding: "15px 20px" }}>
-                      <button
-                        onClick={() => handleToggleStatus(user)}
-                        style={{
-                          backgroundColor: "transparent",
-                          border:
-                            "1px solid " +
-                            (user.trangThai ? "#e03131" : "#0ca678"),
-                          color: user.trangThai ? "#e03131" : "#0ca678",
-                          padding: "6px 12px",
-                          borderRadius: "6px",
-                          fontWeight: "bold",
-                          cursor: "pointer",
-                          marginRight: "10px",
-                        }}
-                      >
-                        {user.trangThai ? "VÃ´ hiá»‡u hÃ³a" : "KÃ­ch hoáº¡t"}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user)}
-                        style={{
-                          backgroundColor: "transparent",
-                          border: "1px solid #c92a2a",
-                          color: "#c92a2a",
-                          padding: "6px 12px",
-                          borderRadius: "6px",
-                          fontWeight: "bold",
-                          cursor: "pointer",
-                        }}
-                      >
-                        XÃ³a
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filteredUsers.map((user) => {
+                  const isActive = user.trangThai !== false;
+                  return (
+                    <tr key={user.maTaiKhoan} className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors">
+                      <td className="px-5 py-4">
+                        <span className="font-mono text-xs font-bold text-primary bg-red-50 px-2 py-1 rounded-lg">
+                          {user.maTaiKhoan}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 font-medium text-slate-800">{user.email}</td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold ${ROLE_COLORS[user.maVaiTro] || 'bg-slate-100 text-slate-600'}`}>
+                          {ROLE_LABELS[user.maVaiTro] || user.tenVaiTro || user.maVaiTro}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
+                            isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'
+                          }`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                          {isActive ? 'Hoạt động' : 'Vô hiệu'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleToggleStatus(user)}
+                            title={isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                            className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${
+                              isActive
+                                ? 'text-amber-600 hover:bg-amber-50'
+                                : 'text-emerald-600 hover:bg-emerald-50'
+                            }`}
+                          >
+                            <span className="material-symbols-outlined text-xl">
+                              {isActive ? 'block' : 'check_circle'}
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(user)}
+                            disabled={user.maTaiKhoan === currentUserId}
+                            title="Xóa tài khoản"
+                            className="w-9 h-9 flex items-center justify-center rounded-lg text-red-600 hover:bg-red-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          >
+                            <span className="material-symbols-outlined text-xl">delete</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
-
-        {/* Modal táº¡o tÃ i khoáº£n má»›i */}
-        {showModal && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              backgroundColor: "rgba(0,0,0,0.5)",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: 1000,
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: "12px",
-                width: "100%",
-                maxWidth: "400px",
-                boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  backgroundColor: "#af101a",
-                  color: "#fff",
-                  padding: "20px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <h3 style={{ margin: 0, fontWeight: "900" }}>
-                  âž• ThÃªm ngÆ°á»i dÃ¹ng má»›i
-                </h3>
-                <span
-                  onClick={() => setShowModal(false)}
-                  style={{
-                    cursor: "pointer",
-                    fontSize: "20px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  âœ•
-                </span>
-              </div>
-              <form
-                onSubmit={handleCreate}
-                style={{
-                  padding: "20px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "15px",
-                }}
-              >
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: "#6c757d",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    EMAIL *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={form.email}
-                    onChange={(e) =>
-                      setForm({ ...form, email: e.target.value })
-                    }
-                    placeholder="user@example.com"
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      border: "1px solid #ccc",
-                      borderRadius: "6px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                </div>
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: "#6c757d",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    Máº¬T KHáº¨U *
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={form.matKhau}
-                    onChange={(e) =>
-                      setForm({ ...form, matKhau: e.target.value })
-                    }
-                    placeholder="Tá»‘i thiá»ƒu 6 kÃ½ tá»±"
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      border: "1px solid #ccc",
-                      borderRadius: "6px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                </div>
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: "#6c757d",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    VAI TRÃ’ *
-                  </label>
-                  <select
-                    required
-                    value={form.maVaiTro}
-                    onChange={(e) =>
-                      setForm({ ...form, maVaiTro: e.target.value })
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      border: "1px solid #ccc",
-                      borderRadius: "6px",
-                      backgroundColor: "#fff",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    <option value="">-- Chá»n vai trÃ² --</option>
-                    {roles.map((r) => (
-                      <option key={r.maVaiTro} value={r.maVaiTro}>
-                        {ROLE_LABELS[r.maVaiTro] || r.tenVaiTro}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div
-                  style={{ display: "flex", gap: "10px", marginTop: "10px" }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    style={{
-                      flex: 1,
-                      padding: "10px",
-                      borderRadius: "6px",
-                      border: "1px solid #ccc",
-                      backgroundColor: "#fff",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Há»§y
-                  </button>
-                  <button
-                    type="submit"
-                    style={{
-                      flex: 1,
-                      padding: "10px",
-                      borderRadius: "6px",
-                      border: "none",
-                      backgroundColor: "#af101a",
-                      color: "#fff",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    XÃ¡c nháº­n
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+            <div className="bg-gradient-to-r from-primary to-red-900 px-6 py-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-white text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  person_add
+                </span>
+                <h3 className="font-black text-white text-lg">Thêm người dùng</h3>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20"
+              >
+                <span className="material-symbols-outlined text-white">close</span>
+              </button>
+            </div>
+            <form onSubmit={handleCreate} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">Email *</label>
+                <input
+                  type="email"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="user@email.com"
+                  className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">Mật khẩu *</label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={form.matKhau}
+                  onChange={(e) => setForm({ ...form, matKhau: e.target.value })}
+                  placeholder="Tối thiểu 6 ký tự"
+                  className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">Vai trò *</label>
+                <select
+                  required
+                  value={form.maVaiTro}
+                  onChange={(e) => setForm({ ...form, maVaiTro: e.target.value })}
+                  className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                >
+                  <option value="">-- Chọn vai trò --</option>
+                  {roles.map((r) => (
+                    <option key={r.maVaiTro} value={r.maVaiTro}>
+                      {ROLE_LABELS[r.maVaiTro] || r.tenVaiTro}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 h-11 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 h-11 bg-primary hover:bg-red-800 text-white font-bold rounded-xl disabled:opacity-60 transition-colors"
+                >
+                  {submitting ? 'Đang lưu...' : 'Tạo tài khoản'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
