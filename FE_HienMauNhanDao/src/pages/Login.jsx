@@ -9,38 +9,53 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
       const res = await authService.login({ email, matKhau });
       const loginData = res.data?.success ? res.data.data : (res.data ?? res);
 
+      const token = loginData.accessToken || loginData.access_token;
+      const role = loginData.maVaiTro;
+      const userId = loginData.userId || loginData.user_id;
+      const maNV = loginData.maNhanVien || loginData.maNV;
+
       // Kiểm tra vai trò đăng nhập đối với Mobile App (MAUI WebView)
       const isMobileApp = localStorage.getItem('isMobileApp') === 'true';
-      if (isMobileApp && loginData.maVaiTro !== 'TNV') {
+      if (isMobileApp && role !== 'TNV') {
         setError('Tài khoản nội bộ không được phép đăng nhập trên ứng dụng di động!');
+        setLoading(false);
         return;
       }
 
-      localStorage.setItem('token', loginData.access_token);
+      localStorage.setItem('token', token);
       localStorage.setItem('email', loginData.email);
-      localStorage.setItem('userId', loginData.user_id);
-      localStorage.setItem('maNV', loginData.maNV);
-      localStorage.setItem('role', loginData.maVaiTro);
-      // Redirect theo vai trò
-      if (loginData.maVaiTro === 'BS') {
-        navigate('/bac-si/danh-sach-cho-kham', { replace: true });
-      } else if (loginData.maVaiTro === 'NVYT') {
-        navigate('/nvyt/don-dang-ky', { replace: true });
-      } else if (loginData.maVaiTro === 'QLK') {
-        navigate('/quan-ly-kho/thong-ke', { replace: true });
-      } else if (loginData.maVaiTro === 'AD') {
-        navigate('/admin/nguoi-dung', { replace: true });
+      localStorage.setItem('userId', userId);
+      if (maNV) localStorage.setItem('maNV', maNV);
+      localStorage.setItem('role', role);
+
+      // Redirect ngay theo vai trò
+      if (role === 'BS') {
+        window.location.href = '/bac-si/danh-sach-cho-kham';
+      } else if (role === 'NVYT') {
+        window.location.href = '/nvyt/don-dang-ky';
+      } else if (role === 'QLK') {
+        window.location.href = '/quan-ly-kho/thong-ke';
+      } else if (role === 'AD') {
+        window.location.href = '/admin/nguoi-dung';
       } else {
-        navigate('/', { replace: true });
+        window.location.href = '/';
       }
     } catch (err) {
-      setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+      console.error("Login error:", err);
+      const errorMsg = err?.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại Email và Mật khẩu.';
+      setError(errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,9 +122,21 @@ export default function Login() {
               </div>
               <Link to="#" className="text-sm font-bold text-primary hover:underline underline-offset-2">Quên mật khẩu?</Link>
             </div>
-            <button className="w-full h-12 bg-primary-container text-white font-bold rounded-md hover:bg-red-800 transition-all shadow-sm active:opacity-90 flex items-center justify-center gap-2" type="submit">
-              <span className="text-base">Đăng nhập</span>
-              <span className="material-symbols-outlined text-xl">arrow_forward</span>
+            <button 
+              disabled={loading}
+              className="w-full h-12 bg-[#e62e43] hover:bg-[#c01b30] text-white font-black rounded-xl transition-all shadow-md active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer" 
+              type="submit">
+              {loading ? (
+                <>
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  <span>Đang xác thực...</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-base">Đăng nhập</span>
+                  <span className="material-symbols-outlined text-xl">arrow_forward</span>
+                </>
+              )}
             </button>
             <div className="text-center pt-2">
               <p className="text-sm text-slate-500">
