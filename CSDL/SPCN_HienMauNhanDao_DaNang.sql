@@ -311,45 +311,26 @@ INSERT INTO KHOMAU VALUES
 ('K_8', 'Kho máu O-',  'O_negative',  0, 20, 'Tủ đông hiếm - Phòng bảo quản đặc biệt');
 
 -- =============================================================
--- ✅ XONG! DATABASE SẠCH - SẴN SÀNG ĐỂ TẠO TÀI KHOẢN QUA SCALAR
---
--- ═══════════════════════════════════════════════════════════════
--- HƯỚNG DẪN TẠO TÀI KHOẢN BẰNG SCALAR (THAY THẾ POSTMAN)
--- ═══════════════════════════════════════════════════════════════
---
--- BƯỚC 1: Chạy C# Backend lên
---   Nhấn F5 hoặc Ctrl+F5 trong Visual Studio
---
--- BƯỚC 2: Mở Scalar trong trình duyệt
---   https://localhost:7004/scalar/v1
---
--- BƯỚC 3: Tìm endpoint "POST /api/auth/register"
---   Nhập body:
---   {
---     "email": "admin@gmail.com",
---     "matKhau": "Abc123!@#"
---   }
---   Bấm "Send" → Tài khoản được tạo với BCrypt hash tự động
---
--- BƯỚC 4: Lấy mã hash trong MySQL Workbench
---   SELECT maTaiKhoan, email, matKhau FROM TAIKHOAN WHERE email = 'admin@gmail.com';
---   Copy chuỗi hash ($2a$10$...) và gửi cho agent để INSERT vào SQL này
---
--- BƯỚC 5: Nâng quyền tài khoản
---   UPDATE TAIKHOAN SET maVaiTro = 'AD' WHERE email = 'admin@gmail.com';
---
--- BƯỚC 6: Thêm hồ sơ Nhân viên (nếu là NVYT/BS/QLK)
---   INSERT INTO NHANVIEN VALUES (
---     'NV00001',
---     (SELECT maTaiKhoan FROM TAIKHOAN WHERE email = 'admin@gmail.com'),
---     'KC00006', 'DD00001',
---     'Tên Nhân Viên', '000000000000', 'Nam', '0900000000'
---   );
---
--- ═══════════════════════════════════════════════════════════════
--- GHI CHÚ BCrypt
--- ═══════════════════════════════════════════════════════════════
--- BCrypt là mã hóa 1 chiều - không giải mã ngược được.
--- Mỗi lần hash cùng 1 mật khẩu sẽ ra chuỗi KHÁC NHAU,
--- nhưng BCrypt.Verify("Abc123!@#", hash) luôn trả về TRUE.
+-- BƯỚC 4: DỮ LIỆU TÀI KHOẢN HỆ THỐNG (Mật khẩu mặc định: Abc123!@#)
+-- =============================================================
+
+INSERT INTO TAIKHOAN (maTaiKhoan, maVaiTro, email, matKhau, trangThai) VALUES 
+('TK00001', 'AD',   'admin@gmail.com',   '$2a$11$xk13z0u79iV/rzW89z/8uuQS36NE.fKNLwA9PG3MKtTScVKpKTufK', 1), -- Mật khẩu: Abc123!@#
+('TK00002', 'NVYT', 'nvyt1@gmail.com',   '$2a$11$t5e4TrPnBYrCVqxP8QDzOumOo9n2MboFAtbM8cu6HQzzx.JxPvQP2', 1), -- Mật khẩu: Abc123!@#
+('TK00003', 'NVYT', 'nvyt2@gmail.com',   '$2a$11$fJYOh9KSCyXttefr8NarOuB9I8.c.JKw5OcAjNlqoVSw5JU0tnAZG', 1), -- Mật khẩu: Abc123!@#
+('TK00004', 'BS',   'doctor1@gmail.com', '$2a$11$dcgltimlogByLALH9P8hPOy6Yf0hImynlzF0UkqNqNTJOQiUY6Z5G', 1), -- Mật khẩu: Abc123!@#
+('TK00005', 'BS',   'doctor2@gmail.com', '$2a$11$7v0Jg8k1Cf94UxKke.hVpOGWx5HC1pcj0L7nx1nexd3mojzcyI1IK', 1), -- Mật khẩu: Abc123!@#
+('TK00006', 'QLK',  'qlk@gmail.com',     '$2a$11$SoPa7XGP3InPdakUcjNC2ex2OmOZfyhGUQq1Erv2lnmN9g0VoPNvS', 1); -- Mật khẩu: Abc123!@#
+
+-- HỒ SƠ NHÂN VIÊN TƯƠNG ỨNG
+INSERT INTO NHANVIEN (maNhanVien, maTaiKhoan, maKhoa, maDiaDiem, hoTen, CCCD, gioiTinh, soDienThoai) VALUES 
+('NV00001', 'TK00001', 'KC00006', 'DD00001', 'Admin Hệ Thống', '048075000001', 'Nam', '0905000001'),
+('NV00002', 'TK00002', 'KC00002', 'DD00001', 'Nguyễn NVYT 1',  '048075000002', 'Nữ',  '0905000002'),
+('NV00003', 'TK00003', 'KC00002', 'DD00001', 'Trần NVYT 2',    '048075000003', 'Nữ',  '0905000003'),
+('NV00004', 'TK00004', 'KC00001', 'DD00001', 'Bác Sĩ Một',     '048075000004', 'Nam', '0905000004'),
+('NV00005', 'TK00005', 'KC00001', 'DD00001', 'Bác Sĩ Hai',     '048075000005', 'Nam', '0905000005'),
+('NV00006', 'TK00006', 'KC00003', 'DD00001', 'Quản Lý Kho',    '048075000006', 'Nam', '0905000006');
+
+-- =============================================================
+-- ✅ XONG! DATABASE ĐÃ ĐƯỢC CHUẨN BỊ ĐẦY ĐỦ
 -- =============================================================
