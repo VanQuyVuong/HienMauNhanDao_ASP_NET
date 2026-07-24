@@ -33,9 +33,10 @@ export default function RegisterVolunteer() {
       navigate('/otp', { state: { formData } });
     } catch (err) {
       if (err.response && err.response.data) {
-          setError(typeof err.response.data === 'string' ? err.response.data : 'Lỗi kết nối. Vui lòng thử lại.');
+          const errorMessage = err.response.data.message || err.response.data;
+          setError(typeof errorMessage === 'string' ? errorMessage : 'Lỗi kết nối. Vui lòng thử lại.');
       } else {
-          setError('Lỗi kết nối server. Vui lòng kiểm tra backend.');
+          setError('Lỗi kết nối server. Vui lòng kiểm tra backend có đang chạy không.');
       }
     } finally {
       setLoading(false);
@@ -100,6 +101,7 @@ export default function RegisterVolunteer() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">mail</span>
                   <input 
                     name="email" value={formData.email} onChange={handleChange} required 
+                    autoComplete="email"
                     className="w-full h-14 pl-12 pr-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all placeholder-slate-400" 
                     placeholder="example@email.com" type="email"
                   />
@@ -112,6 +114,7 @@ export default function RegisterVolunteer() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">lock</span>
                   <input 
                     name="matKhau" value={formData.matKhau} onChange={handleChange} required 
+                    autoComplete="new-password"
                     className="w-full h-14 pl-12 pr-12 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all placeholder-slate-400" 
                     placeholder="••••••••" 
                     type={showPassword ? "text" : "password"}
@@ -132,6 +135,7 @@ export default function RegisterVolunteer() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">lock_reset</span>
                   <input 
                     name="nhapLaiMatKhau" value={formData.nhapLaiMatKhau} onChange={handleChange} required 
+                    autoComplete="new-password"
                     className="w-full h-14 pl-12 pr-12 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all placeholder-slate-400" 
                     placeholder="••••••••" 
                     type={showConfirmPassword ? "text" : "password"}
