@@ -47,6 +47,7 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
             try
             {
                 using var client = new SmtpClient();
+                client.Timeout = 5000; // Giới hạn chờ 5 giây tránh treo Web quá lâu
 
                 //kết nối bất đồng bộ tới máy chủ mail sử dụng phương thức STARTLS
                 await client.ConnectAsync(host, port, MailKit.Security.SecureSocketOptions.StartTls);

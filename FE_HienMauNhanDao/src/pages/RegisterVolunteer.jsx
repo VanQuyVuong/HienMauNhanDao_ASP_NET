@@ -9,6 +9,7 @@ export default function RegisterVolunteer() {
     matKhau: '',
     nhapLaiMatKhau: ''
   });
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -21,8 +22,20 @@ export default function RegisterVolunteer() {
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
+    if (!agreed) {
+        setError('Bạn phải đồng ý với điều khoản sử dụng để tiếp tục.');
+        return;
+    }
+    
+    // Kiểm tra mật khẩu: ít nhất 6 ký tự, gồm cả chữ và số
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&^_-]{6,}$/;
+    if (!passwordRegex.test(formData.matKhau)) {
+        setError('Mật khẩu phải dài hơn 6 ký tự và bao gồm cả chữ cái và số.');
+        return;
+    }
+
     if (formData.matKhau !== formData.nhapLaiMatKhau) {
-      setError('Mật khẩu không khớp!');
+      setError('Mật khẩu xác nhận không khớp!');
       return;
     }
     setLoading(true);
@@ -151,19 +164,19 @@ export default function RegisterVolunteer() {
               </div>
             </div>
             
-            <div className="flex items-start gap-3 pt-2">
-              <div className="relative flex items-center justify-center mt-0.5">
-                <input required id="terms" type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#e62e43]/50 checked:bg-[#e62e43] checked:border-[#e62e43] transition-all cursor-pointer"/>
-                <span className="material-symbols-outlined text-white text-[14px] font-bold absolute pointer-events-none opacity-0 peer-checked:opacity-100">check</span>
+            {/* Terms and Submit */}
+            <div className="flex items-start gap-3 mt-8">
+              <div className="flex items-center h-5 mt-0.5">
+                <input id="terms" type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="w-5 h-5 border border-slate-300 rounded-md checked:bg-[#e62e43] checked:border-[#e62e43] focus:ring-[#e62e43] text-[#e62e43] cursor-pointer transition-colors" />
               </div>
-              <label className="text-sm text-slate-600 font-medium leading-relaxed cursor-pointer" htmlFor="terms">
-                Tôi đồng ý với <Link className="text-[#e62e43] font-bold hover:underline underline-offset-2" to="#">điều khoản sử dụng</Link> và chính sách bảo mật của hệ thống.
+              <label htmlFor="terms" className="text-sm text-slate-600 font-medium cursor-pointer select-none">
+                Tôi đồng ý với <a href="#" className="text-[#e62e43] font-bold hover:underline">điều khoản sử dụng</a> và chính sách bảo mật của hệ thống.
               </label>
             </div>
-            
+
             <button 
-              disabled={loading} 
-              className="w-full h-14 bg-[#e62e43] text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-[#c01b30] transition-all shadow-[0_8px_20px_rgba(230,46,67,0.25)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider mt-4" 
+              disabled={loading || !agreed} 
+              className="w-full h-14 bg-[#e62e43] text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-[#c81e32] transition-all shadow-[0_8px_20px_rgba(230,46,67,0.25)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider mt-8" 
               type="submit"
             >
               {loading ? (
