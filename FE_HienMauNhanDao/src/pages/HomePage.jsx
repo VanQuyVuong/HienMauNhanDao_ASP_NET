@@ -255,22 +255,38 @@ export default function HomePage() {
                     </div>
 
                     {/* Bento Box 3: Medical Facilities (12 Cols Bottom Split) */}
-                    <div className="md:col-span-12 bento-card p-8 bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 rounded-2xl bg-white/10 text-white flex items-center justify-center shrink-0 border border-white/10">
-                                <span className="material-symbols-outlined text-3xl">local_hospital</span>
-                            </div>
-                            <div>
-                                <h4 className="text-xl font-bold text-white">Mạng Lưới Y Tế Liên Kết ({countDD || 8} Điểm Tổ Chức)</h4>
-                                <p className="text-xs text-slate-400 font-light max-w-xl">Trải dài tại các Bệnh viện lớn, Trung tâm Y tế Quận Hải Châu, Thanh Khê, Liên Chiểu, Ngũ Hành Sơn...</p>
+                    <div className="md:col-span-12 bento-card p-0 bg-slate-900 text-white flex flex-col md:flex-row items-stretch justify-between gap-0 overflow-hidden min-h-[220px]">
+                        <div className="p-8 flex-1 flex flex-col justify-center relative z-10 bg-slate-900/90 backdrop-blur-md">
+                            <div className="flex items-start gap-5">
+                                <div className="w-14 h-14 rounded-2xl bg-white/10 text-white flex items-center justify-center shrink-0 border border-white/10 mt-1">
+                                    <span className="material-symbols-outlined text-3xl">map</span>
+                                </div>
+                                <div>
+                                    <h4 className="text-xl md:text-2xl font-bold text-white mb-2">Mạng Lưới Y Tế Liên Kết ({countDD || 8} Điểm Tổ Chức)</h4>
+                                    <p className="text-sm text-slate-400 font-light max-w-xl mb-6 leading-relaxed">Trải dài khắp thành phố tại các Bệnh viện đa khoa lớn và hệ thống Trung tâm Y tế Quận/Huyện.</p>
+                                    <button 
+                                        onClick={() => navigate('/chiendich')}
+                                        className="h-11 px-7 bg-[#e62e43] text-white rounded-xl font-bold text-xs hover:bg-[#c01b30] transition-colors w-fit flex items-center gap-2">
+                                        <span>Xem Bản Đồ Điểm Hiến</span>
+                                        <span className="material-symbols-outlined text-sm">location_on</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <button 
-                            onClick={() => navigate('/chiendich')}
-                            className="h-12 px-7 bg-[#e62e43] text-white rounded-xl font-bold text-xs hover:bg-[#c01b30] transition-colors shrink-0 flex items-center gap-2">
-                            <span>Xem danh sách điểm hiến</span>
-                            <span className="material-symbols-outlined text-sm">location_on</span>
-                        </button>
+                        <div className="w-full md:w-[45%] lg:w-[50%] h-[200px] md:h-auto relative shrink-0 bg-slate-800 overflow-hidden">
+                            {/* Google Map of Da Nang */}
+                            <iframe 
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d122691.80287711463!2d108.13524584742456!3d16.059632832560373!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x314219c792252a13%3A0x1df0cb4b86727e06!2zxJDDoCBO4bq1bmcsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1700000000000!5m2!1svi!2s" 
+                                width="100%" 
+                                height="100%" 
+                                style={{border:0, minHeight: "280px"}} 
+                                allowFullScreen="" 
+                                loading="lazy" 
+                                referrerPolicy="no-referrer-when-downgrade"
+                                className="opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500"
+                            ></iframe>
+                            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/100 via-slate-900/60 to-transparent md:bg-gradient-to-r md:from-slate-900 md:via-slate-900/40 md:to-transparent pointer-events-none"></div>
+                        </div>
                     </div>
 
                 </div>
@@ -418,6 +434,114 @@ export default function HomePage() {
                             <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
                                 — BS. CKI Nguyễn Văn A, Trưởng Khoa Huyết Học - Bệnh viện Đa Khoa Đà Nẵng
                             </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Lợi ích hiến máu & Điều kiện - Asymmetric Split */}
+            <section className="w-full max-w-[1280px] mx-auto px-4 md:px-8 py-20">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    
+                    {/* Benefits */}
+                    <div>
+                        <span className="text-xs font-black text-[#e62e43] uppercase tracking-widest block mb-2">Vì Sao Nên Hiến Máu?</span>
+                        <h2 className="text-3xl font-black text-slate-900 mb-8">Lợi Ích Sức Khỏe <br/>Dành Cho Người Hiến</h2>
+                        
+                        <div className="space-y-4">
+                            <div className="bento-card p-5 flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-full bg-rose-50 text-[#e62e43] flex items-center justify-center shrink-0">
+                                    <span className="material-symbols-outlined text-2xl">favorite</span>
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-bold text-slate-900">Giảm nguy cơ mắc bệnh tim mạch</h4>
+                                    <p className="text-xs text-slate-500 mt-1">Hiến máu giúp giảm lượng sắt thừa, cân bằng lượng sắt trong cơ thể, ngăn ngừa oxy hóa cholesterol gây tắc mạch máu.</p>
+                                </div>
+                            </div>
+                            <div className="bento-card p-5 flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-full bg-emerald-50 text-[#00b894] flex items-center justify-center shrink-0">
+                                    <span className="material-symbols-outlined text-2xl">healing</span>
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-bold text-slate-900">Tái tạo tế bào máu mới</h4>
+                                    <p className="text-xs text-slate-500 mt-1">Kích thích tủy xương sản sinh hồng cầu, bạch cầu và tiểu cầu mới, giúp cơ thể khỏe mạnh và tràn đầy năng lượng.</p>
+                                </div>
+                            </div>
+                            <div className="bento-card p-5 flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                    <span className="material-symbols-outlined text-2xl">medical_information</span>
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-bold text-slate-900">Kiểm tra sức khỏe định kỳ miễn phí</h4>
+                                    <p className="text-xs text-slate-500 mt-1">Được khám lâm sàng, đo huyết áp và xét nghiệm sàng lọc các bệnh lây truyền qua đường máu (HIV, Viêm gan B, C...).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Requirements */}
+                    <div className="bg-slate-900 rounded-[32px] p-8 md:p-12 text-white relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#e62e43]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                        
+                        <span className="text-xs font-black text-emerald-400 uppercase tracking-widest block mb-2 relative z-10">Checklist Y Tế</span>
+                        <h2 className="text-3xl font-black text-white mb-8 relative z-10">Tiêu Chuẩn Hiến Máu</h2>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <span className="material-symbols-outlined text-emerald-400 mb-2">cake</span>
+                                <h4 className="text-sm font-bold text-white mb-1">Độ Tuổi</h4>
+                                <p className="text-xs text-slate-400">Nam / Nữ từ 18 đến 60 tuổi.</p>
+                            </div>
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <span className="material-symbols-outlined text-emerald-400 mb-2">monitor_weight</span>
+                                <h4 className="text-sm font-bold text-white mb-1">Cân Nặng</h4>
+                                <p className="text-xs text-slate-400">Nam ≥ 45kg, Nữ ≥ 45kg.</p>
+                            </div>
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <span className="material-symbols-outlined text-emerald-400 mb-2">update</span>
+                                <h4 className="text-sm font-bold text-white mb-1">Khoảng Cách</h4>
+                                <p className="text-xs text-slate-400">Ít nhất 12 tuần kể từ lần hiến gần nhất.</p>
+                            </div>
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <span className="material-symbols-outlined text-emerald-400 mb-2">id_card</span>
+                                <h4 className="text-sm font-bold text-white mb-1">Giấy Tờ</h4>
+                                <p className="text-xs text-slate-400">Mang theo CMND/CCCD hoặc Hộ chiếu gốc.</p>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-white/10 relative z-10">
+                            <p className="text-xs text-amber-200/80 italic">
+                                * Lưu ý: Đêm trước ngày hiến máu không thức quá khuya. Sáng ngày hiến máu ăn nhẹ (không ăn nhiều dầu mỡ), không uống rượu bia.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            {/* Thư viện hình ảnh cộng đồng */}
+            <section className="py-20 w-full overflow-hidden relative">
+                <div className="w-full max-w-[1280px] mx-auto px-4 md:px-8 mb-12 text-center">
+                    <span className="text-xs font-black text-[#e62e43] uppercase tracking-widest block mb-2">Lan Tỏa Yêu Thương</span>
+                    <h2 className="text-3xl sm:text-4xl font-black text-slate-900">Khoảnh Khắc Đẹp Đà Nẵng</h2>
+                </div>
+
+                <div className="w-full max-w-[1440px] mx-auto px-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+                        <div className="col-span-2 md:col-span-2 row-span-2 rounded-[24px] overflow-hidden relative group h-[300px] md:h-[420px]">
+                            <img src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&q=80&w=1000" alt="Gallery 1" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                                <p className="text-white font-bold">Nụ cười tình nguyện viên Đà Nẵng</p>
+                            </div>
+                        </div>
+                        <div className="rounded-[24px] overflow-hidden relative group h-[145px] md:h-[200px]">
+                            <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=600" alt="Gallery 2" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        </div>
+                        <div className="rounded-[24px] overflow-hidden relative group h-[145px] md:h-[200px]">
+                            <img src="https://images.unsplash.com/photo-1615461066159-fea0960485d5?auto=format&fit=crop&q=80&w=600" alt="Gallery 3" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        </div>
+                        <div className="col-span-2 md:col-span-2 rounded-[24px] overflow-hidden relative group h-[145px] md:h-[200px]">
+                            <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=1000" alt="Gallery 4" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                         </div>
                     </div>
                 </div>
