@@ -60,88 +60,118 @@ export default function Login() {
   };
 
   return (
-    <div className="flex-1 p-4 sm:p-8 flex items-center justify-center bg-[#F3F4F6] min-h-[calc(100vh-100px)]">
-      <div className="w-full max-w-[1024px] bg-white border border-slate-200 rounded-2xl overflow-hidden flex shadow-sm">
-        <div className="w-[420px] relative hidden md:flex items-end p-12 shrink-0">
-          <div className="absolute inset-0 z-0">
-            <img alt="Blood Donation" className="w-full h-full object-cover opacity-30 mix-blend-overlay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDueaJAaTz0RjLbygBiVaKlLkFa-k5bSzh3hFB8rOEZTroPIavRCetrAXDv-_TSrjqBNwOmHaIjyqdkEZ8AjEpfikCmXmBCK0KXBQhlLR8Ol5Zw9MUnv74Jylcc41QYB6mFMcjnx4m6d8a3WnxZcdCPkxFWhxCi_4Cfxrq8U-m9ENBUTgvwqsNv_hmwBkTnL-4O8qAmZQTOYVe93SOUpTKuXqPXaQSnhULQandiA53FjSrpsyB6dqv2wxg1y4H-eCXtdDfi39hCAVvd" />
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
+    <div className="w-full min-h-[calc(100vh-80px)] bg-[#fdf8f9] flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#e62e43]/10 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl -translate-x-1/4 translate-y-1/4 pointer-events-none"></div>
+      
+      <div className="w-full max-w-[1000px] bento-card bg-white shadow-2xl shadow-slate-200/50 flex flex-col md:flex-row-reverse relative z-10 p-0 overflow-hidden border border-white">
+        
+        {/* Right Side - Banner */}
+        <div className="w-full md:w-[45%] bg-gradient-to-br from-[#e62e43] to-[#c01b30] p-10 md:p-12 text-white flex flex-col justify-between relative overflow-hidden hidden md:flex">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute bottom-0 left-0 p-8 opacity-[0.03] pointer-events-none">
+            <span className="material-symbols-outlined text-[200px]">login</span>
           </div>
-          <div className="relative z-10 text-white w-full">
-            <h1 className="text-3xl font-bold leading-tight mb-4">Hệ thống Quản lý Hiến máu Nhân đạo TP. Đà Nẵng</h1>
-            <p className="text-primary-fixed-dim text-sm leading-relaxed mb-8">Hành trình của mỗi giọt máu bắt đầu từ sự tự nguyện của bạn. Tham gia cộng đồng tình nguyện viên để cứu sống hàng ngàn người bệnh.</p>
-            <div className="flex gap-4 items-center">
-              <div className="flex -space-x-3">
-                <img alt="Avatar 1" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhekJIdPkF-QyoAl_qtcuNI3ofx8UcU-Wjx1kkojZVLuvHxNUBvL829pAsO3Z6dPOYCiY978fmgTJf81AlorlhA8ZB07UItddOy27nZFOQ78oUyq4NFdlDB-uMIf1ByiWkdXDfYCDi0D8iGLYR0N6IOJdHIavoBQjtyLGARMiL9eGObl1DnpwtWUbjNPQzG7dduIpCG19AA29I0KWGwy3UMquRndqqHs758gJbl-YBSVPrU8gmUFqkOu753j4JUxMWSqjqc5M4Um6q" />
-                <img alt="Avatar 2" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYs2c1u9I4LLYj0PwXno--xuejWcbyhwRjVoAI0flhk7hVjh5RmY0WQAOIDvQH6ulkxY6OUI7xQunKQtve9939ii_AeoNMX3l3xu4pCfRZa94VU5_gk3pdF_4MtjLYVI4m4GgmQTW84FxIJz6TZ7nl1jfaXqmxC71ZEhVqhxFEA5yBgyorwzGWgUVf9KlzVWE_mFGnol9gheykM7vEQ-4Z27spZIKt23b2RydbokGE4BXPgipv6MX9Pjs_u2X_x9wiBMlfw05TwO14" />
-                <img alt="Avatar 3" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACTIM9Xq4ZtI3pQefWqFM51fQYkjfY7WvbMCEzN-Cn1OEsMx3MD3DGpf27RW15Fl9hoHntk2N4MmZvM6ycrZvPRfu4mKNP8eViDJMuFeA_UHcLFu94VVrviNXzL2KC0DzrfNWHiQUpPexH8MhwdmUPDmeUvA1nIFiwhPV9WPDmTIyA1x0PlU6rkzeD_kNkafaH-OMzK-RhWQgg5erWKBJZfD0c6ajRtm7MtwD1jvAsVxahIzLxNo1EiSH0Z7wZDn5Mkk9N9Qm7K-Yu" />
-              </div>
-              <span className="text-xs font-medium">+5,000 tình nguyện viên</span>
+
+          <div className="relative z-10">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-8 border border-white/30 shadow-inner">
+              <span className="material-symbols-outlined text-white text-2xl">favorite</span>
             </div>
+            <h1 className="text-3xl md:text-4xl font-black leading-tight mb-4 tracking-tight">Chào mừng bạn trở lại!</h1>
+            <p className="text-white/80 font-medium text-sm leading-relaxed mb-8">Đăng nhập để xem lịch sử hiến máu, đăng ký tham gia các chiến dịch mới và cập nhật thông tin cá nhân của bạn.</p>
+          </div>
+          
+          <div className="relative z-10 p-4 rounded-2xl border border-white/20 bg-white/5 backdrop-blur-sm">
+            <p className="text-xs text-white/90 italic">"Mỗi giọt máu cho đi, một cuộc đời ở lại. Cảm ơn bạn đã luôn đồng hành cùng chúng tôi."</p>
           </div>
         </div>
-        <div className="flex-1 p-6 sm:p-12 flex flex-col justify-center">
-          <div className="mb-8">
-            <h2 className="text-2xl font-extrabold text-on-surface mb-2 tracking-tight">Đăng nhập Hệ thống</h2>
-            <p className="text-slate-500 text-sm">Vui lòng đăng nhập để sử dụng các tính năng của hệ thống.</p>
+
+        {/* Left Side - Form */}
+        <div className="flex-1 p-8 md:p-12 flex flex-col justify-center bg-white relative">
+          <div className="mb-10">
+            <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Đăng Nhập</h2>
+            <p className="text-slate-500 text-sm font-medium">Vui lòng điền thông tin email và mật khẩu của bạn.</p>
           </div>
-          {error && <div className="mb-4 text-red-600 text-sm font-bold">{error}</div>}
+          
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 animate-pulse">
+              <span className="material-symbols-outlined text-red-500">error</span>
+              <p className="text-red-700 text-sm font-bold">{error}</p>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-1.5">
-              <label className="block text-sm font-semibold text-on-surface-variant">Email</label>
-              <input value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full h-12 px-4 border border-slate-300 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all" placeholder="example@email.com" type="email" />
-            </div>
-            <div className="space-y-1.5">
-              <label className="block text-sm font-semibold text-on-surface-variant">Mật khẩu</label>
-              <div className="relative">
-                <input
-                  value={matKhau}
-                  onChange={(e) => setMatKhau(e.target.value)}
-                  required
-                  className="w-full h-12 px-4 pr-12 border border-slate-300 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all"
-                  placeholder="••••••••"
-                  type={showPassword ? 'text' : 'password'}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(prev => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 hover:text-slate-700 transition-colors"
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                >
-                  <span className="material-symbols-outlined text-xl">
-                    {showPassword ? 'visibility_off' : 'visibility'}
-                  </span>
-                </button>
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Email <span className="text-[#e62e43]">*</span></label>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">mail</span>
+                  <input 
+                    type="email" required 
+                    className="w-full h-14 pl-12 pr-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all placeholder-slate-400"
+                    placeholder="example@email.com"
+                    value={email} onChange={(e) => setEmail(e.target.value)} 
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Mật khẩu <span className="text-[#e62e43]">*</span></label>
+                  <Link to="#" className="text-xs font-bold text-[#e62e43] hover:underline underline-offset-2">Quên mật khẩu?</Link>
+                </div>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">lock</span>
+                  <input 
+                    type={showPassword ? "text" : "password"} required 
+                    className="w-full h-14 pl-12 pr-12 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all placeholder-slate-400"
+                    placeholder="••••••••"
+                    value={matKhau} onChange={(e) => setMatKhau(e.target.value)} 
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  >
+                    <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center gap-3">
-                <input className="w-4 h-4 rounded-sm text-primary focus:ring-primary border-slate-300" id="remember" type="checkbox" />
-                <label className="text-sm text-slate-600" htmlFor="remember">Ghi nhớ đăng nhập</label>
+            
+            <div className="flex items-center gap-3 pt-2">
+              <div className="relative flex items-center justify-center mt-0.5">
+                <input id="remember" type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#e62e43]/50 checked:bg-[#e62e43] checked:border-[#e62e43] transition-all cursor-pointer"/>
+                <span className="material-symbols-outlined text-white text-[14px] font-bold absolute pointer-events-none opacity-0 peer-checked:opacity-100">check</span>
               </div>
-              <Link to="#" className="text-sm font-bold text-primary hover:underline underline-offset-2">Quên mật khẩu?</Link>
+              <label className="text-sm text-slate-600 font-medium cursor-pointer" htmlFor="remember">
+                Ghi nhớ đăng nhập
+              </label>
             </div>
+            
             <button 
               disabled={loading}
-              className="w-full h-12 bg-[#e62e43] hover:bg-[#c01b30] text-white font-black rounded-xl transition-all shadow-md active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer" 
-              type="submit">
+              type="submit" 
+              className="w-full h-14 bg-[#e62e43] text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-[#c01b30] transition-all shadow-[0_8px_20px_rgba(230,46,67,0.25)] active:scale-[0.98] disabled:opacity-50 uppercase tracking-wider mt-4"
+            >
               {loading ? (
                 <>
                   <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  <span>Đang xác thực...</span>
+                  ĐANG XÁC THỰC...
                 </>
               ) : (
                 <>
-                  <span className="text-base">Đăng nhập</span>
-                  <span className="material-symbols-outlined text-xl">arrow_forward</span>
+                  ĐĂNG NHẬP
+                  <span className="material-symbols-outlined text-xl">login</span>
                 </>
               )}
             </button>
-            <div className="text-center pt-2">
-              <p className="text-sm text-slate-500">
-                Chưa có tài khoản?
-                <Link className="text-primary font-bold hover:underline underline-offset-4 ml-1" to="/register">Đăng ký ngay</Link>
+            
+            <div className="text-center pt-6 border-t border-slate-100 mt-6">
+              <p className="text-sm text-slate-500 font-medium">
+                Chưa có tài khoản? 
+                <Link to="/register" className="text-[#e62e43] font-black hover:underline underline-offset-4 ml-2">ĐĂNG KÝ NGAY</Link>
               </p>
             </div>
           </form>
