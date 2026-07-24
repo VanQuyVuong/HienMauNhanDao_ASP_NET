@@ -72,121 +72,137 @@ export default function HoSoCaNhan() {
   };
 
   return (
-    <div className="flex-1 p-4 sm:p-8 bg-[#F3F4F6] min-h-[calc(100vh-100px)] flex justify-center">
-      <div className="w-full max-w-[800px]">
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Hồ Sơ Cá Nhân</h1>
-          <p className="text-slate-500 text-sm mt-2">Quản lý thông tin tài khoản và cá nhân của bạn</p>
+    <div className="w-full bg-[#fdf8f9] min-h-[calc(100vh-100px)] py-12 px-4 md:px-8">
+      <main className="max-w-[1000px] mx-auto">
+        <div className="mb-10 text-center">
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-3">Hồ Sơ Cá Nhân</h1>
+          <p className="text-slate-500 text-base max-w-xl mx-auto">Quản lý thông tin tài khoản và thông tin tình nguyện viên của bạn.</p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="w-full bento-card bg-white shadow-xl shadow-slate-200/40 relative overflow-hidden">
           {/* Header Cover */}
-          <div className="h-32 bg-gradient-to-r from-red-600 to-red-800 relative">
-             <div className="absolute -bottom-12 left-8 w-24 h-24 rounded-full border-4 border-white bg-slate-100 flex items-center justify-center overflow-hidden shadow-md">
-                <span className="material-symbols-outlined text-5xl text-slate-400">person</span>
+          <div className="h-40 bg-gradient-to-r from-[#e62e43] to-[#c01b30] relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+            <div className="absolute bottom-0 left-0 p-8 opacity-[0.03] pointer-events-none">
+              <span className="material-symbols-outlined text-[150px]">admin_panel_settings</span>
+            </div>
+             <div className="absolute -bottom-16 left-8 sm:left-12 w-32 h-32 rounded-3xl border-4 border-white bg-white flex items-center justify-center overflow-hidden shadow-lg shadow-[#e62e43]/20 rotate-3 z-10">
+                <div className="w-full h-full bg-red-50 flex items-center justify-center -rotate-3">
+                  <span className="material-symbols-outlined text-6xl text-[#e62e43]">face</span>
+                </div>
              </div>
           </div>
 
-          <div className="pt-16 px-4 sm:px-8 pb-8 relative flex flex-col sm:block">
+          <div className="pt-20 px-8 sm:px-12 pb-12 relative flex flex-col sm:block">
             {tnv && !isEditing && (
               <button 
                 onClick={handleEdit}
-                className="w-full sm:w-auto mt-2 sm:mt-0 sm:absolute sm:top-6 sm:right-8 px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 text-sm order-last sm:order-none shadow-sm"
+                className="w-full sm:w-auto mt-6 sm:mt-0 sm:absolute sm:top-8 sm:right-12 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-black rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2 text-sm order-last sm:order-none shadow-sm active:scale-95"
               >
-                <span className="material-symbols-outlined text-[18px]">edit</span> Sửa thông tin
+                <span className="material-symbols-outlined text-[20px]">edit_document</span> 
+                CHỈNH SỬA
               </button>
             )}
 
-            <h2 className="text-2xl font-bold text-slate-800">{tnv ? tnv.hoVaTen : 'Người dùng mới'}</h2>
-            <p className="text-slate-500 font-medium mb-8">{email}</p>
+            <h2 className="text-3xl font-black text-slate-900 mb-1">{tnv ? tnv.hoVaTen : 'Người dùng mới'}</h2>
+            <p className="text-slate-500 font-bold mb-10 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px]">mail</span>
+              {email}
+            </p>
 
             {loading ? (
-              <div className="py-10 text-center text-slate-500">
-                <span className="material-symbols-outlined animate-spin text-4xl mb-2">sync</span>
-                <p>Đang tải thông tin...</p>
+              <div className="py-20 text-center text-slate-400">
+                <span className="material-symbols-outlined animate-spin text-5xl mb-4">refresh</span>
+                <p className="font-bold uppercase tracking-widest text-sm">Đang tải thông tin...</p>
               </div>
             ) : !tnv ? (
-              <div className="bg-red-50 border border-red-100 rounded-lg p-6 text-center">
-                <span className="material-symbols-outlined text-4xl text-red-300 mb-2">assignment_late</span>
-                <p className="text-red-800 font-semibold mb-2">Bạn chưa có thông tin hồ sơ tình nguyện viên!</p>
-                <p className="text-red-600 text-sm mb-6">Thông tin của bạn sẽ được tự động cập nhật khi bạn tham gia đăng ký hiến máu lần đầu tiên.</p>
+              <div className="bg-red-50/50 border-2 border-red-100 rounded-2xl p-10 text-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                  <span className="material-symbols-outlined text-9xl text-red-500">assignment_late</span>
+                </div>
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-red-100 relative z-10">
+                  <span className="material-symbols-outlined text-5xl text-[#e62e43]">assignment_late</span>
+                </div>
+                <p className="text-red-900 font-black text-xl mb-3 relative z-10">Bạn chưa có hồ sơ Tình Nguyện Viên!</p>
+                <p className="text-red-700/80 font-medium mb-8 max-w-md mx-auto relative z-10">Hệ thống sẽ tự động tạo hồ sơ cho bạn sau khi bạn hoàn tất đăng ký tham gia hiến máu lần đầu tiên.</p>
                 <button 
                   onClick={() => navigate('/chiendich')}
-                  className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-red-800 transition-colors"
+                  className="px-8 py-4 bg-[#e62e43] text-white font-black rounded-xl hover:bg-[#c01b30] transition-all shadow-[0_8px_20px_rgba(230,46,67,0.25)] active:scale-95 relative z-10 uppercase tracking-wider"
                 >
-                  Đăng ký hiến máu ngay
+                  ĐĂNG KÝ HIẾN MÁU NGAY
                 </button>
               </div>
             ) : isEditing ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4 bg-slate-50 p-4 sm:p-6 rounded-xl border border-slate-200">
-                <div className="flex flex-col items-start gap-1">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Họ và tên</span>
-                  <input type="text" name="hoVaTen" value={formData.hoVaTen} onChange={handleChange} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-primary" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 bg-slate-50 p-6 md:p-8 rounded-2xl border border-slate-200 shadow-inner">
+                <div className="col-span-1 md:col-span-2 mb-2">
+                  <h3 className="font-black text-slate-800 text-lg flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[#e62e43]">edit_square</span>
+                    Cập nhật thông tin
+                  </h3>
                 </div>
-                <div className="flex flex-col items-start gap-1">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Số CCCD</span>
-                  <input type="text" name="soCCCD" value={formData.soCCCD} onChange={handleChange} maxLength={12} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-primary" />
+                <div className="flex flex-col items-start gap-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Họ và tên <span className="text-[#e62e43]">*</span></span>
+                  <input type="text" name="hoVaTen" value={formData.hoVaTen} onChange={handleChange} className="w-full h-12 border-2 border-slate-200 bg-white rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all" />
                 </div>
-                <div className="flex flex-col items-start gap-1">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Ngày sinh</span>
-                  <input type="date" name="ngaySinh" value={formData.ngaySinh} onChange={handleChange} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-primary" />
+                <div className="flex flex-col items-start gap-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Số CCCD <span className="text-[#e62e43]">*</span></span>
+                  <input type="text" name="soCCCD" value={formData.soCCCD} onChange={handleChange} maxLength={12} className="w-full h-12 border-2 border-slate-200 bg-white rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all" />
                 </div>
-                <div className="flex flex-col items-start gap-1">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Giới tính</span>
-                  <select name="gioiTinh" value={formData.gioiTinh} onChange={handleChange} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-primary">
+                <div className="flex flex-col items-start gap-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày sinh <span className="text-[#e62e43]">*</span></span>
+                  <input type="date" name="ngaySinh" value={formData.ngaySinh} onChange={handleChange} className="w-full h-12 border-2 border-slate-200 bg-white rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all" />
+                </div>
+                <div className="flex flex-col items-start gap-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Giới tính <span className="text-[#e62e43]">*</span></span>
+                  <select name="gioiTinh" value={formData.gioiTinh} onChange={handleChange} className="w-full h-12 border-2 border-slate-200 bg-white rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all">
                     <option value="Nam">Nam</option>
                     <option value="Nữ">Nữ</option>
                   </select>
                 </div>
-                <div className="flex flex-col items-start gap-1">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Số điện thoại</span>
-                  <input type="tel" name="soDienThoai" value={formData.soDienThoai} onChange={handleChange} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-primary" />
+                <div className="flex flex-col items-start gap-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Số điện thoại <span className="text-[#e62e43]">*</span></span>
+                  <input type="tel" name="soDienThoai" value={formData.soDienThoai} onChange={handleChange} className="w-full h-12 border-2 border-slate-200 bg-white rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all" />
                 </div>
-                <div className="col-span-2 flex flex-col items-start gap-1 mt-2">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Địa chỉ cư trú</span>
-                  <input type="text" name="diaChi" value={formData.diaChi} onChange={handleChange} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-primary" />
+                <div className="col-span-1 md:col-span-2 flex flex-col items-start gap-2 mt-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Địa chỉ cư trú <span className="text-[#e62e43]">*</span></span>
+                  <input type="text" name="diaChi" value={formData.diaChi} onChange={handleChange} className="w-full h-12 border-2 border-slate-200 bg-white rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all" />
                 </div>
-                <div className="col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-slate-200">
-                  <button onClick={() => setIsEditing(false)} className="px-5 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
-                    Hủy
+                
+                <div className="col-span-1 md:col-span-2 flex justify-end gap-4 mt-6 pt-6 border-t border-slate-200">
+                  <button onClick={() => setIsEditing(false)} className="w-full md:w-32 h-12 bg-white text-slate-600 border-2 border-slate-200 rounded-xl font-bold text-sm hover:bg-slate-50 transition-all active:scale-[0.98]">
+                    HỦY BỎ
                   </button>
-                  <button onClick={handleSave} disabled={saving} className="px-5 py-2 text-sm font-bold text-white bg-primary rounded-lg hover:bg-red-800 transition-colors disabled:opacity-50 flex items-center gap-2">
-                    {saving ? <span className="material-symbols-outlined animate-spin text-[16px]">sync</span> : <span className="material-symbols-outlined text-[16px]">save</span>}
-                    Lưu thông tin
+                  <button onClick={handleSave} disabled={saving} className="w-full md:w-48 h-12 bg-[#e62e43] text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-[#c01b30] transition-all shadow-[0_8px_20px_rgba(230,46,67,0.25)] active:scale-[0.98] disabled:opacity-50 tracking-wider">
+                    {saving ? <span className="material-symbols-outlined animate-spin text-[18px]">sync</span> : <span className="material-symbols-outlined text-[18px]">save</span>}
+                    LƯU THÔNG TIN
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4 bg-slate-50 p-4 sm:p-6 rounded-xl border border-slate-100">
-                <div className="flex flex-col items-start gap-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase">Mã TNV</span>
-                  <p className="text-sm font-bold text-slate-800">{tnv.maTNV}</p>
-                </div>
-                <div className="flex flex-col items-start gap-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase">Số CCCD</span>
-                  <p className="text-sm font-bold text-slate-800">{tnv.soCCCD}</p>
-                </div>
-                <div className="flex flex-col items-start gap-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase">Ngày sinh</span>
-                  <p className="text-sm font-bold text-slate-800">{tnv.ngaySinh}</p>
-                </div>
-                <div className="flex flex-col items-start gap-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase">Giới tính</span>
-                  <p className="text-sm font-bold text-slate-800">{tnv.gioiTinh}</p>
-                </div>
-                <div className="flex flex-col items-start gap-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase">Số điện thoại</span>
-                  <p className="text-sm font-bold text-slate-800">{tnv.soDienThoai}</p>
-                </div>
-                <div className="col-span-2 flex flex-col items-start gap-1 mt-2">
-                  <span className="text-xs font-bold text-slate-400 uppercase">Địa chỉ cư trú</span>
-                  <p className="text-sm font-bold text-slate-800">{tnv.diaChi}</p>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                {[
+                  { label: 'Mã TNV', value: tnv.maTNV, icon: 'badge' },
+                  { label: 'Số CCCD', value: tnv.soCCCD, icon: 'credit_card' },
+                  { label: 'Ngày sinh', value: new Date(tnv.ngaySinh).toLocaleDateString('vi-VN'), icon: 'cake' },
+                  { label: 'Giới tính', value: tnv.gioiTinh, icon: 'wc' },
+                  { label: 'Số điện thoại', value: tnv.soDienThoai, icon: 'phone' },
+                  { label: 'Địa chỉ cư trú', value: tnv.diaChi, icon: 'home_pin', full: true },
+                ].map((item, idx) => (
+                  <div key={idx} className={`p-5 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:shadow-md hover:border-slate-200 transition-all ${item.full ? 'col-span-1 md:col-span-2' : ''} flex items-center gap-4`}>
+                    <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-slate-400">{item.icon}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</span>
+                      <p className="text-sm font-bold text-slate-800 mt-0.5">{item.value || <span className="text-slate-300 italic">Chưa cập nhật</span>}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
