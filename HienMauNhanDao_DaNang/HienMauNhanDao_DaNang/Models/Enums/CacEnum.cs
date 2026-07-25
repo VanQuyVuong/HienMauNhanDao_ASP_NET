@@ -51,7 +51,7 @@ namespace HienMauNhanDao_DaNang.Models.Enums
         TrungTamYTe,
         TruongHoc,
         CoQuan,
-        ĐiaiemCoDinh
+        DiaDiemCoDinh
     }
 
     //LoaiPhieuKhoMau

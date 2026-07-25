@@ -95,13 +95,13 @@ export default function OtpVerification() {
             </style>
 
             {/* Background Decorative Elements */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-[#00b894]/10 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#e62e43]/10 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#e62e43]/5 rounded-full blur-3xl -translate-x-1/4 translate-y-1/4 pointer-events-none"></div>
             
             <div className="w-full max-w-[1000px] bento-card bg-white shadow-2xl shadow-slate-200/50 flex flex-col md:flex-row relative z-10 p-0 overflow-hidden border border-white">
                 
                 {/* Left Side - Banner */}
-                <div className="w-full md:w-[45%] bg-gradient-to-br from-[#00b894] to-[#00a884] p-10 md:p-12 text-white flex flex-col justify-between relative overflow-hidden hidden md:flex">
+                <div className="w-full md:w-[45%] bg-gradient-to-br from-[#e62e43] to-[#c81e32] p-10 md:p-12 text-white flex flex-col justify-between relative overflow-hidden hidden md:flex">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
                     <div className="absolute bottom-0 left-0 p-8 opacity-[0.03] pointer-events-none">
                         <span className="material-symbols-outlined text-[200px]">mark_email_read</span>
@@ -134,8 +134,8 @@ export default function OtpVerification() {
                 {/* Right Side - Form */}
                 <div className="flex-1 p-8 md:p-12 flex flex-col justify-center bg-white relative">
                     <div className="mb-10 text-center">
-                        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-emerald-100">
-                            <span className="material-symbols-outlined text-emerald-500 text-3xl">mark_email_unread</span>
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-100">
+                            <span className="material-symbols-outlined text-[#e62e43] text-3xl">mark_email_unread</span>
                         </div>
                         <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Xác Thực Email</h2>
                         <p className="text-slate-500 text-sm font-medium leading-relaxed">
@@ -146,27 +146,27 @@ export default function OtpVerification() {
                     
                     {error && (
                         <div className={`mb-8 p-4 border rounded-xl flex items-center gap-3 animate-pulse ${error.includes('thành công') ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
-                            <span className={`material-symbols-outlined ${error.includes('thành công') ? 'text-emerald-500' : 'text-red-500'}`}>
+                            <span className={`material-symbols-outlined ${error.includes('thành công') ? 'text-emerald-500' : 'text-[#e62e43]'}`}>
                                 {error.includes('thành công') ? 'check_circle' : 'error'}
                             </span>
-                            <p className={`text-sm font-bold ${error.includes('thành công') ? 'text-emerald-700' : 'text-red-700'}`}>{error}</p>
+                            <p className={`text-sm font-bold ${error.includes('thành công') ? 'text-emerald-700' : 'text-[#e62e43]'}`}>{error}</p>
                         </div>
                     )}
                     
                     <form onSubmit={handleVerifyOtp} className="space-y-8" autoComplete="off">
                         <div className="space-y-4">
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Nhập mã xác thực OTP <span className="text-[#00b894]">*</span></label>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Nhập mã xác thực OTP <span className="text-[#e62e43]">*</span></label>
                             <input 
                                 name="otp" value={otp} onChange={(e) => setOtp(e.target.value)} required 
                                 autoComplete="off"
-                                className="w-full max-w-xs mx-auto h-16 px-4 block bg-slate-50 border-2 border-slate-200 rounded-xl text-center text-3xl tracking-[0.5em] font-black text-slate-800 focus:outline-none focus:border-[#00b894] focus:ring-4 focus:ring-[#00b894]/20 transition-all" 
+                                className="w-full max-w-xs mx-auto h-16 px-4 block bg-slate-50 border-2 border-slate-200 rounded-xl text-center text-3xl tracking-[0.5em] font-black text-slate-800 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/20 transition-all" 
                                 placeholder="------" type="text" maxLength={6} 
                             />
                         </div>
                         
                         <button 
                             disabled={loading} 
-                            className="w-full h-14 bg-[#00b894] text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-[#00a884] transition-all shadow-[0_8px_20px_rgba(0,184,148,0.25)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider" 
+                            className="w-full h-14 bg-[#e62e43] text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-[#c81e32] transition-all shadow-[0_8px_20px_rgba(230,46,67,0.25)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider" 
                             type="submit"
                         >
                             {loading ? (
@@ -185,7 +185,7 @@ export default function OtpVerification() {
                         <div className="text-center pt-8 border-t border-slate-100 space-y-4">
                             <p className="text-sm text-slate-500 font-medium">
                                 Chưa nhận được mã?
-                                <button type="button" onClick={handleSendOtp} disabled={loading} className="text-[#00b894] font-black hover:underline underline-offset-4 ml-2 disabled:opacity-50">
+                                <button type="button" onClick={handleSendOtp} disabled={loading} className="text-[#e62e43] font-black hover:underline underline-offset-4 ml-2 disabled:opacity-50">
                                     GỬI LẠI MÃ
                                 </button>
                             </p>

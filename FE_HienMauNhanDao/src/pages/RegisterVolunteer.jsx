@@ -27,8 +27,8 @@ export default function RegisterVolunteer() {
         return;
     }
     
-    // Kiểm tra mật khẩu: ít nhất 6 ký tự, gồm cả chữ và số
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&^_-]{6,}$/;
+    // Kiểm tra mật khẩu: ít nhất 6 ký tự, gồm cả chữ và số (cho phép mọi ký tự đặc biệt)
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
     if (!passwordRegex.test(formData.matKhau)) {
         setError('Mật khẩu phải dài hơn 6 ký tự và bao gồm cả chữ cái và số.');
         return;

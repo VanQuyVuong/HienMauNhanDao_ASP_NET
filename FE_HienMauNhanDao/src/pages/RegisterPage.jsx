@@ -13,6 +13,8 @@ export default function RegisterPage() {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -80,99 +82,201 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex-1 p-4 sm:p-8 flex items-center justify-center bg-[#fdf8f9] min-h-[calc(100vh-100px)]">
-      <div className="w-full max-w-[960px] glass-panel border border-rose-100 rounded-3xl overflow-hidden flex shadow-2xl">
-            <div className="w-[420px] relative flex items-end p-12 shrink-0">
-                <div className="absolute inset-0 z-0">
-                    <img alt="Blood Donation" className="w-full h-full object-cover opacity-30 mix-blend-overlay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDueaJAaTz0RjLbygBiVaKlLkFa-k5bSzh3hFB8rOEZTroPIavRCetrAXDv-_TSrjqBNwOmHaIjyqdkEZ8AjEpfikCmXmBCK0KXBQhlLR8Ol5Zw9MUnv74Jylcc41QYB6mFMcjnx4m6d8a3WnxZcdCPkxFWhxCi_4Cfxrq8U-m9ENBUTgvwqsNv_hmwBkTnL-4O8qAmZQTOYVe93SOUpTKuXqPXaQSnhULQandiA53FjSrpsyB6dqv2wxg1y4H-eCXtdDfi39hCAVvd"/>
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
-                </div>
-                <div className="relative z-10 text-white w-full">
-                    <h1 className="text-3xl font-bold leading-tight mb-4">Hệ thống Quản lý Hiến máu Nhân đạo TP. Đà Nẵng</h1>
-                    <p className="text-primary-fixed-dim text-sm leading-relaxed mb-8">Hành trình của mỗi giọt máu bắt đầu từ sự tự nguyện của bạn. Tham gia cộng đồng tình nguyện viên để cứu sống hàng ngàn người bệnh.</p>
-                    <div className="flex gap-4 items-center">
-                        <div className="flex -space-x-3">
-                            <img alt="Avatar 1" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhekJIdPkF-QyoAl_qtcuNI3ofx8UcU-Wjx1kkojZVLuvHxNUBvL829pAsO3Z6dPOYCiY978fmgTJf81AlorlhA8ZB07UItddOy27nZFOQ78oUyq4NFdlDB-uMIf1ByiWkdXDfYCDi0D8iGLYR0N6IOJdHIavoBQjtyLGARMiL9eGObl1DnpwtWUbjNPQzG7dduIpCG19AA29I0KWGwy3UMquRndqqHs758gJbl-YBSVPrU8gmUFqkOu753j4JUxMWSqjqc5M4Um6q"/>
-                            <img alt="Avatar 2" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYs2c1u9I4LLYj0PwXno--xuejWcbyhwRjVoAI0flhk7hVjh5RmY0WQAOIDvQH6ulkxY6OUI7xQunKQtve9939ii_AeoNMX3l3xu4pCfRZa94VU5_gk3pdF_4MtjLYVI4m4GgmQTW84FxIJz6TZ7nl1jfaXqmxC71ZEhVqhxFEA5yBgyorwzGWgUVf9KlzVWE_mFGnol9gheykM7vEQ-4Z27spZIKt23b2RydbokGE4BXPgipv6MX9Pjs_u2X_x9wiBMlfw05TwO14"/>
-                            <img alt="Avatar 3" className="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACTIM9Xq4ZtI3pQefWqFM51fQYkjfY7WvbMCEzN-Cn1OEsMx3MD3DGpf27RW15Fl9hoHntk2N4MmZvM6ycrZvPRfu4mKNP8eViDJMuFeA_UHcLFu94VVrviNXzL2KC0DzrfNWHiQUpPexH8MhwdmUPDmeUvA1nIFiwhPV9WPDmTIyA1x0PlU6rkzeD_kNkafaH-OMzK-RhWQgg5erWKBJZfD0c6ajRtm7MtwD1jvAsVxahIzLxNo1EiSH0Z7wZDn5Mkk9N9Qm7K-Yu"/>
-                        </div>
-                        <span className="text-xs font-medium">+5,000 tình nguyện viên</span>
-                    </div>
-                </div>
+    <div className="w-full min-h-[calc(100vh-80px)] bg-[#fdf8f9] flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#e62e43]/10 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl -translate-x-1/4 translate-y-1/4 pointer-events-none"></div>
+      
+      <div className="w-full max-w-[1000px] bento-card bg-white shadow-2xl shadow-slate-200/50 flex flex-col md:flex-row relative z-10 p-0 overflow-hidden border border-white">
+        
+        {/* Left Side - Banner */}
+        <div className="w-full md:w-[45%] bg-gradient-to-br from-[#e62e43] to-[#c01b30] p-10 md:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute bottom-0 left-0 p-8 opacity-[0.03] pointer-events-none">
+            <span className="material-symbols-outlined text-[200px]">volunteer_activism</span>
+          </div>
+
+          <div className="relative z-10">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-8 border border-white/30 shadow-inner">
+              <span className="material-symbols-outlined text-white text-2xl">water_drop</span>
             </div>
-            <div className="flex-1 p-12 flex flex-col justify-center">
-                <div className="mb-8">
-                    <h2 className="text-2xl font-extrabold text-on-surface mb-2 tracking-tight">Đăng ký Tài khoản</h2>
-                    <p className="text-slate-500 text-sm">{step === 1 ? 'Vui lòng cung cấp email và mật khẩu để tạo tài khoản.' : `Vui lòng nhập mã OTP được gửi đến ${formData.email}`}</p>
-                </div>
-                {error && <div className="mb-4 text-red-600 text-sm font-bold">{error}</div>}
-                
-                {step === 1 ? (
-                    <form onSubmit={handleSendOtp} className="space-y-6">
-                        <div className="space-y-4">
-                            <div className="space-y-1.5">
-                                <label className="block text-sm font-semibold text-on-surface-variant">Email</label>
-                                <input name="email" value={formData.email} onChange={handleChange} required className="w-full h-12 px-4 border border-slate-300 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all" placeholder="example@email.com" type="email"/>
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="block text-sm font-semibold text-on-surface-variant">Mật khẩu</label>
-                                <div className="relative">
-                                    <input name="matKhau" value={formData.matKhau} onChange={handleChange} required className="w-full h-12 px-4 border border-slate-300 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all" placeholder="••••••••" type="password"/>
-                                    <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer text-xl">visibility</span>
-                                </div>
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="block text-sm font-semibold text-on-surface-variant">Xác nhận mật khẩu</label>
-                                <div className="relative">
-                                    <input name="nhapLaiMatKhau" value={formData.nhapLaiMatKhau} onChange={handleChange} required className="w-full h-12 px-4 border border-slate-300 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all" placeholder="••••••••" type="password"/>
-                                    <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer text-xl">visibility</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-3 pt-2">
-                            <input required className="mt-1 w-4 h-4 rounded-sm text-primary focus:ring-primary border-slate-300" id="terms" type="checkbox"/>
-                            <label className="text-xs text-slate-600 leading-relaxed" htmlFor="terms">
-                                Tôi đồng ý với <Link className="text-primary font-medium underline underline-offset-2" to="#">điều khoản sử dụng</Link> và chính sách bảo mật của hệ thống.
-                            </label>
-                        </div>
-                        <button disabled={loading} className="w-full h-12 bg-primary-container text-white font-bold rounded-md hover:bg-red-800 transition-all shadow-sm active:opacity-90 flex items-center justify-center gap-2" type="submit">
-                            <span className="text-base">{loading ? 'Đang gửi OTP...' : 'Đăng ký'}</span>
-                            <span className="material-symbols-outlined text-xl">arrow_forward</span>
-                        </button>
-                        <div className="text-center pt-2">
-                            <p className="text-sm text-slate-500">
-                                Đã có tài khoản? 
-                                <Link className="text-primary font-bold hover:underline underline-offset-4 ml-1" to="/login">Đăng nhập</Link>
-                            </p>
-                        </div>
-                    </form>
-                ) : (
-                    <form onSubmit={handleVerifyOtp} className="space-y-6">
-                        <div className="space-y-1.5">
-                            <label className="block text-sm font-semibold text-on-surface-variant">Mã xác thực OTP</label>
-                            <input name="otp" value={otp} onChange={(e) => setOtp(e.target.value)} required className="w-full h-12 px-4 border border-slate-300 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-center text-xl tracking-[0.5em] font-bold transition-all" placeholder="------" type="text" maxLength={6} />
-                        </div>
-                        <button disabled={loading} className="w-full h-12 bg-primary-container text-white font-bold rounded-md hover:bg-red-800 transition-all shadow-sm active:opacity-90 flex items-center justify-center gap-2" type="submit">
-                            <span className="text-base">{loading ? 'Đang xác thực...' : 'Xác thực & Hoàn tất'}</span>
-                            <span className="material-symbols-outlined text-xl">verified</span>
-                        </button>
-                        <div className="text-center pt-2">
-                            <p className="text-sm text-slate-500">
-                                Chưa nhận được mã? 
-                                <button type="button" onClick={handleSendOtp} disabled={loading} className="text-primary font-bold hover:underline underline-offset-4 ml-1">
-                                    Gửi lại OTP
-                                </button>
-                            </p>
-                        </div>
-                        <div className="text-center pt-2">
-                            <button type="button" onClick={() => setStep(1)} className="text-slate-500 hover:text-slate-700 text-sm font-medium underline underline-offset-4">
-                                Quay lại chỉnh sửa thông tin
-                            </button>
-                        </div>
-                    </form>
-                )}
+            <h1 className="text-3xl md:text-4xl font-black leading-tight mb-4 tracking-tight">Hệ thống Quản lý Hiến máu Nhân đạo TP. Đà Nẵng</h1>
+            <p className="text-white/80 font-medium text-sm leading-relaxed mb-8">Hành trình của mỗi giọt máu bắt đầu từ sự tự nguyện của bạn. Trở thành một phần của hành trình nhân ái ngay hôm nay.</p>
+          </div>
+
+          <div className="relative z-10 flex items-center gap-4 bg-black/10 p-4 rounded-2xl backdrop-blur-md border border-white/10">
+            <div className="flex -space-x-3">
+              <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-[#c01b30] overflow-hidden flex items-center justify-center"><span className="material-symbols-outlined text-slate-500 text-sm">person</span></div>
+              <div className="w-10 h-10 rounded-full bg-slate-300 border-2 border-[#c01b30] overflow-hidden flex items-center justify-center"><span className="material-symbols-outlined text-slate-500 text-sm">face</span></div>
+              <div className="w-10 h-10 rounded-full bg-slate-400 border-2 border-[#c01b30] overflow-hidden flex items-center justify-center"><span className="material-symbols-outlined text-white text-sm">sentiment_satisfied</span></div>
             </div>
+            <div>
+              <p className="text-xs text-white/70 font-bold uppercase tracking-wider mb-0.5">Tham gia cùng</p>
+              <p className="text-sm font-black">+5,000 Tình nguyện viên</p>
+            </div>
+          </div>
         </div>
+
+        {/* Right Side - Form */}
+        <div className="flex-1 p-8 md:p-12 flex flex-col justify-center bg-white relative">
+          <div className="mb-10">
+            <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Đăng ký Tài khoản</h2>
+            <p className="text-slate-500 text-sm font-medium">
+              {step === 1 ? 'Vui lòng cung cấp email và mật khẩu để tạo tài khoản.' : `Vui lòng nhập mã OTP được gửi đến email của bạn.`}
+            </p>
+          </div>
+          
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 animate-pulse">
+              <span className="material-symbols-outlined text-red-500">error</span>
+              <p className="text-red-700 text-sm font-bold">{error}</p>
+            </div>
+          )}
+          
+          {step === 1 ? (
+            <form onSubmit={handleSendOtp} className="space-y-6">
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Email <span className="text-[#e62e43]">*</span></label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">mail</span>
+                    <input 
+                      name="email" value={formData.email} onChange={handleChange} required 
+                      className="w-full h-14 pl-12 pr-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all placeholder-slate-400" 
+                      placeholder="example@email.com" type="email"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Mật khẩu <span className="text-[#e62e43]">*</span></label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">lock</span>
+                    <input 
+                      name="matKhau" value={formData.matKhau} onChange={handleChange} required 
+                      className="w-full h-14 pl-12 pr-12 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all placeholder-slate-400" 
+                      placeholder="••••••••" 
+                      type={showPassword ? "text" : "password"}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                    >
+                      <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Xác nhận mật khẩu <span className="text-[#e62e43]">*</span></label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">lock_reset</span>
+                    <input 
+                      name="nhapLaiMatKhau" value={formData.nhapLaiMatKhau} onChange={handleChange} required 
+                      className="w-full h-14 pl-12 pr-12 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all placeholder-slate-400" 
+                      placeholder="••••••••" 
+                      type={showConfirmPassword ? "text" : "password"}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                    >
+                      <span className="material-symbols-outlined">{showConfirmPassword ? 'visibility_off' : 'visibility'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3 pt-2">
+                <div className="relative flex items-center justify-center mt-0.5">
+                  <input required id="terms" type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#e62e43]/50 checked:bg-[#e62e43] checked:border-[#e62e43] transition-all cursor-pointer"/>
+                  <span className="material-symbols-outlined text-white text-[14px] font-bold absolute pointer-events-none opacity-0 peer-checked:opacity-100">check</span>
+                </div>
+                <label className="text-sm text-slate-600 font-medium leading-relaxed cursor-pointer" htmlFor="terms">
+                  Tôi đồng ý với <Link className="text-[#e62e43] font-bold hover:underline underline-offset-2" to="#">điều khoản sử dụng</Link> và chính sách bảo mật của hệ thống.
+                </label>
+              </div>
+              
+              <button 
+                disabled={loading} 
+                className="w-full h-14 bg-[#e62e43] text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-[#c01b30] transition-all shadow-[0_8px_20px_rgba(230,46,67,0.25)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider mt-4" 
+                type="submit"
+              >
+                {loading ? (
+                  <>
+                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ĐANG GỬI MÃ OTP...
+                  </>
+                ) : (
+                  <>
+                    ĐĂNG KÝ NGAY
+                    <span className="material-symbols-outlined text-xl">arrow_forward</span>
+                  </>
+                )}
+              </button>
+              
+              <div className="text-center pt-6 border-t border-slate-100 mt-6">
+                <p className="text-sm text-slate-500 font-medium">
+                  Đã có tài khoản? 
+                  <Link className="text-[#e62e43] font-black hover:underline underline-offset-4 ml-2" to="/login">ĐĂNG NHẬP</Link>
+                </p>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-8">
+              <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl text-center mb-6">
+                <span className="material-symbols-outlined text-emerald-500 text-4xl mb-2">mark_email_read</span>
+                <p className="text-emerald-800 font-medium text-sm leading-relaxed">
+                  Chúng tôi đã gửi một mã OTP gồm 6 chữ số đến email <br/>
+                  <strong className="text-emerald-900">{formData.email}</strong>
+                </p>
+              </div>
+
+              <div className="space-y-3 text-center">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Nhập mã xác thực OTP <span className="text-[#e62e43]">*</span></label>
+                <input 
+                  name="otp" value={otp} onChange={(e) => setOtp(e.target.value)} required 
+                  className="w-full max-w-xs mx-auto h-16 px-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-center text-3xl tracking-[0.5em] font-black text-slate-800 focus:outline-none focus:border-[#00b894] focus:ring-4 focus:ring-[#00b894]/10 transition-all" 
+                  placeholder="------" type="text" maxLength={6} 
+                />
+              </div>
+
+              <button 
+                disabled={loading} 
+                className="w-full h-14 bg-[#00b894] text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-[#00a884] transition-all shadow-[0_8px_20px_rgba(0,184,148,0.25)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider mt-4" 
+                type="submit"
+              >
+                {loading ? (
+                  <>
+                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ĐANG XÁC THỰC...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-xl">verified</span>
+                    XÁC NHẬN VÀ TẠO TÀI KHOẢN
+                  </>
+                )}
+              </button>
+
+              <div className="text-center pt-6 space-y-4">
+                <p className="text-sm text-slate-500 font-medium">
+                  Chưa nhận được mã? 
+                  <button type="button" onClick={handleSendOtp} disabled={loading} className="text-[#e62e43] font-black hover:underline underline-offset-4 ml-2">
+                    GỬI LẠI MÃ
+                  </button>
+                </p>
+                <button type="button" onClick={() => setStep(1)} className="text-slate-400 hover:text-slate-600 text-sm font-medium underline underline-offset-4 flex items-center justify-center gap-1 mx-auto">
+                  <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+                  Quay lại chỉnh sửa email
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
