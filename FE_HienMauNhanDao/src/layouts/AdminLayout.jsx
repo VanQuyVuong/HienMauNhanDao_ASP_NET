@@ -39,7 +39,7 @@ export default function AdminLayout() {
 
   return (
     <div className="relative w-full min-h-screen flex bg-gradient-to-br from-slate-50 via-rose-50/20 to-slate-100 font-sans antialiased overflow-x-hidden selection:bg-[#e62e43] selection:text-white">
-      {/* 🔮 Background Ambient Blobs (Hiệu ứng ánh sáng lơ lửng 3D) */}
+      {/* 🔮 Background Ambient Blobs */}
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-rose-500/5 rounded-full blur-3xl pointer-events-none animate-pulse" />
       <div className="absolute bottom-0 left-1/3 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -51,132 +51,138 @@ export default function AdminLayout() {
         />
       )}
 
-      {/* 🪟 SIDEBAR - Medical Glassmorphism */}
+      {/* 🪟 SIDEBAR - Cố định 100% chiều cao màn hình (Sticky Height) */}
       <aside
-        className={`fixed inset-y-4 left-4 z-50 w-64 bg-white/85 backdrop-blur-2xl border border-white/80 rounded-3xl flex flex-col shadow-2xl shadow-slate-900/5 transition-all duration-300 md:translate-x-0 md:relative md:inset-y-4 md:left-4 md:mr-4 shrink-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-[120%]"}`}
+        className={`fixed inset-y-4 left-4 z-50 w-64 bg-white/85 backdrop-blur-2xl border border-white/80 rounded-3xl flex flex-col justify-between shadow-2xl shadow-slate-900/5 transition-all duration-300 md:sticky md:top-4 md:left-4 md:mr-4 md:h-[calc(100vh-2rem)] shrink-0 ${
+          isSidebarOpen
+            ? "translate-x-0"
+            : "-translate-x-[120%] md:translate-x-0"
+        }`}
       >
-        {/* Logo Section */}
-        <div className="flex items-center gap-3 px-6 py-6 border-b border-slate-100/80">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#e62e43] to-[#c01b30] flex items-center justify-center shrink-0 shadow-lg shadow-[#e62e43]/30 transform group-hover:rotate-6 transition-transform">
-            <span
-              className="material-symbols-outlined text-white text-2xl"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              favorite
-            </span>
-          </div>
-          <div>
-            <p className="text-xs font-black uppercase tracking-wider bg-gradient-to-r from-[#e62e43] to-slate-800 bg-clip-text text-transparent leading-tight">
-              Hệ thống Hiến máu
-            </p>
-            <p className="text-[10px] text-slate-400 font-bold tracking-wide mt-0.5">
-              ADMIN PORTAL · ĐÀ NẴNG
-            </p>
-          </div>
-        </div>
-
-        {/* User Card */}
-        <div className="px-4 py-4 border-b border-slate-100/80">
-          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-rose-50/60 to-slate-50/80 rounded-2xl border border-rose-100/50">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#e62e43] to-rose-400 flex items-center justify-center text-white text-sm font-black shrink-0 shadow-md shadow-[#e62e43]/20">
-              {initials}
+        {/* Phần trên: Logo + User Card + Navigation List */}
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Logo Section */}
+          <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-100/80 shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#e62e43] to-[#c01b30] flex items-center justify-center shrink-0 shadow-lg shadow-[#e62e43]/30 transform group-hover:rotate-6 transition-transform">
+              <span
+                className="material-symbols-outlined text-white text-2xl"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                favorite
+              </span>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-800 truncate">
-                {nameDisplay}
+            <div>
+              <p className="text-xs font-black uppercase tracking-wider bg-gradient-to-r from-[#e62e43] to-slate-800 bg-clip-text text-transparent leading-tight">
+                Hệ thống Hiến máu
               </p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest">
-                  Quản trị viên
-                </p>
+              <p className="text-[10px] text-slate-400 font-bold tracking-wide mt-0.5">
+                ADMIN PORTAL · ĐÀ NẴNG
+              </p>
+            </div>
+          </div>
+
+          {/* User Card */}
+          <div className="px-4 py-3 border-b border-slate-100/80 shrink-0">
+            <div className="flex items-center gap-3 p-2.5 bg-gradient-to-r from-rose-50/60 to-slate-50/80 rounded-2xl border border-rose-100/50">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#e62e43] to-rose-400 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-md shadow-[#e62e43]/20">
+                {initials}
               </div>
-              <p className="text-[10px] text-slate-400 font-medium truncate">
-                {email}
-              </p>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-800 truncate">
+                  {nameDisplay}
+                </p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="text-[9px] font-black uppercase text-emerald-600 tracking-widest">
+                    Quản trị viên
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Navigation Menu (Cuộn riêng bên trong nếu menu dài) */}
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            <p className="px-3 text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2">
+              MENU NGHIỆP VỤ
+            </p>
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.end}
+                onClick={() => setIsSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 group ${
+                    isActive
+                      ? "bg-gradient-to-r from-[#e62e43] to-[#c01b30] text-white shadow-lg shadow-[#e62e43]/25 scale-[1.02] translate-x-1"
+                      : "text-slate-600 hover:bg-rose-50/60 hover:text-[#e62e43] hover:translate-x-1.5"
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span
+                        className={`material-symbols-outlined text-xl shrink-0 transition-transform duration-300 ${!isActive && "group-hover:scale-110"}`}
+                        style={{
+                          fontVariationSettings: isActive
+                            ? "'FILL' 1"
+                            : "'FILL' 0",
+                        }}
+                      >
+                        {item.icon}
+                      </span>
+                      <span className="truncate">{item.label}</span>
+                    </div>
+                    {item.badge && (
+                      <span
+                        className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                          isActive
+                            ? "bg-white/20 text-white"
+                            : "bg-rose-100 text-[#e62e43]"
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </nav>
         </div>
 
-        {/* Navigation Menu */}
-        <nav className="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto">
-          <p className="px-3 text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2">
-            MENU NGHIỆP VỤ
-          </p>
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.end}
-              onClick={() => setIsSidebarOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 group ${
-                  isActive
-                    ? "bg-gradient-to-r from-[#e62e43] to-[#c01b30] text-white shadow-lg shadow-[#e62e43]/25 scale-[1.02] translate-x-1"
-                    : "text-slate-600 hover:bg-rose-50/60 hover:text-[#e62e43] hover:translate-x-1.5"
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span
-                      className={`material-symbols-outlined text-xl shrink-0 transition-transform duration-300 ${!isActive && "group-hover:scale-110"}`}
-                      style={{
-                        fontVariationSettings: isActive
-                          ? "'FILL' 1"
-                          : "'FILL' 0",
-                      }}
-                    >
-                      {item.icon}
-                    </span>
-                    <span className="truncate">{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span
-                      className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                        isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-rose-100 text-[#e62e43]"
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* 🩺 System Status Widget */}
-        <div className="mx-4 mb-3 p-3.5 bg-slate-900 rounded-2xl text-white shadow-xl relative overflow-hidden group">
-          <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-[#e62e43]/20 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500" />
-          <div className="flex items-center justify-between mb-1.5 relative z-10">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300">
-              An toàn y tế
-            </span>
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
+        {/* Phần dưới đáy: Widget y tế + Nút Đăng xuất luôn ghim cố định ở đáy */}
+        <div className="shrink-0 pt-2 bg-white/50 border-t border-slate-100/80">
+          {/* 🩺 System Status Widget thu nhỏ */}
+          <div className="mx-4 mb-2 p-3 bg-slate-900 rounded-2xl text-white shadow-md relative overflow-hidden group">
+            <div className="flex items-center justify-between mb-1 relative z-10">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                An toàn y tế 24/7
+              </span>
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+            </div>
+            <p className="text-[9px] text-slate-400 leading-tight relative z-10">
+              Hệ thống chuẩn hoá quy trình Bộ Y Tế.
+            </p>
           </div>
-          <p className="text-[10px] text-slate-400 leading-relaxed relative z-10">
-            Hệ thống chuẩn hoá quy trình Bộ Y Tế 24/7.
-          </p>
-        </div>
 
-        {/* Logout Button */}
-        <div className="p-3 border-t border-slate-100/80">
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2.5 px-4 py-2.5 w-full rounded-2xl text-xs font-black uppercase tracking-wider text-slate-500 hover:bg-rose-50 hover:text-red-600 transition-all duration-300 group"
-          >
-            <span className="material-symbols-outlined text-lg shrink-0 group-hover:-translate-x-0.5 transition-transform">
-              logout
-            </span>
-            Đăng xuất
-          </button>
+          {/* Logout Button Neo Đáy */}
+          <div className="p-3 pt-0">
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 w-full rounded-2xl text-xs font-black uppercase tracking-wider bg-rose-50/80 text-[#e62e43] hover:bg-[#e62e43] hover:text-white hover:shadow-lg hover:shadow-[#e62e43]/20 transition-all duration-300 group"
+            >
+              <span className="material-symbols-outlined text-lg shrink-0 group-hover:-translate-x-0.5 transition-transform">
+                logout
+              </span>
+              <span>Đăng xuất hệ thống</span>
+            </button>
+          </div>
         </div>
       </aside>
 
