@@ -39,7 +39,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 {
                     maTaiKhoan = t.MaTaiKhoan,
                     email = t.Email,
-                    maiVaiTro = t.MaVaiTro,
+                    maVaiTro = t.MaVaiTro,
                     tenVaiTro = t.VaiTro?.tenVaiTro ?? t.MaVaiTro,
                     trangThai = t.TrangThai
                 }).ToList();
@@ -109,12 +109,12 @@ namespace HienMauNhanDao_DaNang.Controllers
                 //Tự động sinh mã tài khoản 
                 var allTKs = await _context.TaiKhoans.ToListAsync();
                 int nextId = allTKs.Count + 1;
-                while (allTKs.Any(t => t.MaTaiKhoan == $"TK{nextId:DS}"))
+                while (allTKs.Any(t => t.MaTaiKhoan == $"TK{nextId:D5}"))
                 {
                     nextId++;
                 }
 
-                var maTaiKhoan = $"{nextId:DS}";
+                var maTaiKhoan = $"TK{nextId:D5}";
 
                 var taiKhoan = new TaiKhoan
                 {
