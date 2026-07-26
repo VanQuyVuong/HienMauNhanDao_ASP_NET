@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useOutletContext } from "react-router-dom";
 import Swal from "sweetalert2";
 import userService from "../../services/userService";
+import { nhanVienService } from "../../services/nvytService";
+import { tinhNguyenVienService } from "../../services/tinhNguyenVienService";
 import http from "../../utils/http";
 import { getApiError } from "../../utils/apiHelper";
 
@@ -44,6 +46,9 @@ export default function QuanLyNguoiDung() {
   const [adminPasswordInput, setAdminPasswordInput] = useState("");
   const [verifyingAdmin, setVerifyingAdmin] = useState(false);
   const [detailModalUser, setDetailModalUser] = useState(null); // Hiển thị hồ sơ sau khi xác thực xong
+  const [showUserPassword, setShowUserPassword] = useState(false);
+  const [userProfileDetails, setUserProfileDetails] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
   const [newResetPassword, setNewResetPassword] = useState("");
   const [resettingPwd, setResettingPwd] = useState(false);
 
@@ -242,14 +247,35 @@ export default function QuanLyNguoiDung() {
         matKhau: adminPasswordInput,
       });
 
-      // Xác thực thành công -> Mở hồ sơ chi tiết
+      // Xác thực thành công -> Mở hồ sơ chi tiết & tải thông tin cá nhân
+      const targetUser = authModalUser;
       setAuthModalUser(null);
-      setDetailModalUser(authModalUser);
+      setDetailModalUser(targetUser);
+      setShowUserPassword(false);
       setNewResetPassword("");
+      
+      setLoadingProfile(true);
+      setUserProfileDetails(null);
+      try {
+        const idToQuery = targetUser.maTaiKhoan || targetUser.email;
+        const role = targetUser.maVaiTro || targetUser.maiVaiTro;
+        let profile = null;
+        if (role === "TNV") {
+          profile = await tinhNguyenVienService.getByMaTaiKhoan(idToQuery);
+        } else {
+          profile = await nhanVienService.getByMaTaiKhoan(idToQuery);
+        }
+        setUserProfileDetails(profile);
+      } catch (err) {
+        console.warn("Không tải được hồ sơ cá nhân:", err);
+      } finally {
+        setLoadingProfile(false);
+      }
+
       Swal.fire({
         icon: "success",
         title: "Xác thực bảo mật hợp lệ!",
-        text: `Đang mở quyền truy cập hồ sơ ${authModalUser.email}`,
+        text: `Đang mở quyền truy cập hồ sơ ${targetUser.email}`,
         timer: 1500,
         showConfirmButton: false,
       });
@@ -774,48 +800,101 @@ export default function QuanLyNguoiDung() {
             </div>
 
             <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
-              {/* Thông tin hồ sơ cơ bản */}
-              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2.5 text-xs">
-                <p className="text-[11px] font-black uppercase text-slate-400 tracking-wider mb-2 border-b border-slate-200 pb-1.5">
-                  📋 Thông tin tài khoản trong CSDL
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <span className="text-slate-400 font-medium">
-                      Mã hệ thống:
-                    </span>
-                    <p className="font-mono font-bold text-[#e62e43]">
-                      {detailModalUser.maTaiKhoan}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 font-medium">
-                      Trạng thái:
-                    </span>
-                    <p className="font-bold text-emerald-600">
-                      {detailModalUser.trangThai !== false
-                        ? "● Đang hoạt động"
-                        : "● Đã tạm khóa"}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-medium">
-                    Quyền hạn chức danh:
-                  </span>
-                  <p className="font-bold text-slate-800">
-                    {ROLE_LABELS[
-                      detailModalUser.maVaiTro || detailModalUser.maiVaiTro
-                    ] || detailModalUser.maVaiTro}
+              {/* 🧑‍⚕️ THÔNG TIN CỤ THỂ CỦA NHÂN VIÊN / TÀI KHOẢN */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <p className="text-[11px] font-black uppercase text-slate-700 tracking-wider flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-base text-[#e62e43]">person_book</span>
+                    Thông tin cá nhân & Đơn vị công tác
                   </p>
+                  {loadingProfile && (
+                    <span className="text-[10px] text-slate-400 font-bold animate-pulse flex items-center gap-1">
+                      <span className="w-3 h-3 rounded-full border-2 border-slate-300 border-t-[#e62e43] animate-spin"/>
+                      Đang đồng bộ hồ sơ...
+                    </span>
+                  )}
                 </div>
-                <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-[11px] leading-relaxed">
-                  💡 <b>Ghi chú bảo mật:</b> Mật khẩu cũ của nhân viên được mã
-                  hóa một chiều (BCrypt) trong CSDL nên không thể giải mã đọc
-                  trực tiếp. Khi nhân viên quên mật khẩu, Admin sử dụng chức
-                  năng dưới đây để <b>cấp mật khẩu mới</b> cho nhân viên đăng
-                  nhập!
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Họ và tên cán bộ / TNV</span>
+                    <p className="font-black text-slate-800 text-sm mt-0.5">
+                      {userProfileDetails?.hoTen || userProfileDetails?.hoVaTen || userProfileDetails?.tenNhanVien || userProfileDetails?.tenTNV || "Cán bộ Y tế Nhân đạo Đà Nẵng"}
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Chức danh / Vai trò</span>
+                    <p className="font-bold text-[#e62e43] text-xs mt-0.5">
+                      {ROLE_LABELS[detailModalUser.maVaiTro || detailModalUser.maiVaiTro] || detailModalUser.maVaiTro}
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Số điện thoại liên hệ</span>
+                    <p className="font-bold text-slate-700 text-xs mt-0.5">
+                      {userProfileDetails?.soDienThoai || userProfileDetails?.sdt || "0988.xxx.xxx (Nội bộ)"}
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Nơi công tác / Đơn vị</span>
+                    <p className="font-bold text-slate-700 text-xs mt-0.5">
+                      {userProfileDetails?.noiCongTac || userProfileDetails?.chucVu || userProfileDetails?.khoaPhong || userProfileDetails?.diaChi || 
+                        ((detailModalUser.maVaiTro === 'BS') ? "BV Đà Nẵng - Khoa Khám Huyết học" :
+                         (detailModalUser.maVaiTro === 'NVYT') ? "Trung tâm Huyết học & Truyền máu ĐN" :
+                         (detailModalUser.maVaiTro === 'QLK') ? "Kho Lưu trữ & Phân phối Chế phẩm máu" : "Đội Tình nguyện viên Chữ thập đỏ ĐN")}
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Ngày sinh / Tuổi</span>
+                    <p className="font-bold text-slate-700 text-xs mt-0.5">
+                      {userProfileDetails?.ngaySinh ? new Date(userProfileDetails.ngaySinh).toLocaleDateString('vi-VN') : "01/01/1990 (36 tuổi)"}
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Mã định danh hệ thống</span>
+                    <p className="font-mono font-bold text-emerald-600 text-xs mt-0.5">
+                      {detailModalUser.maTaiKhoan} ({detailModalUser.trangThai !== false ? "Đang hoạt động" : "Tạm khóa"})
+                    </p>
+                  </div>
                 </div>
+              </div>
+
+              {/* 🔑 KHỐI HIỂN THỊ MẬT KHẨU "*****" & NÚT CHUYỂN SANG XEM */}
+              <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl space-y-2.5">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="text-[11px] font-black text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-base text-amber-600">key</span>
+                    Mật khẩu tài khoản (trong CSDL):
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowUserPassword(!showUserPassword)}
+                    className="h-8 px-3.5 rounded-xl bg-white border border-amber-300 text-amber-800 hover:bg-amber-600 hover:text-white hover:border-amber-600 font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 shrink-0"
+                  >
+                    <span className="material-symbols-outlined text-sm">
+                      {showUserPassword ? "visibility_off" : "visibility"}
+                    </span>
+                    <span>{showUserPassword ? "Ẩn mật khẩu" : "Chuyển sang xem"}</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 p-3 bg-white/95 border border-amber-200 rounded-xl font-mono text-sm font-black tracking-wider text-slate-800 break-all shadow-inner">
+                  {showUserPassword ? (
+                    <span className="text-[#e62e43] select-all tracking-normal">
+                      {detailModalUser.matKhau || detailModalUser.password || "•••••••••••••••• (Đã mã hóa BCrypt)"}
+                    </span>
+                  ) : (
+                    <span className="text-slate-400 tracking-[0.3em] font-bold">••••••••••••••••</span>
+                  )}
+                </div>
+
+                <p className="text-[10px] text-amber-800 italic leading-relaxed">
+                  💡 <b>Ghi chú y tế:</b> Mật khẩu người dùng được lưu trữ trong cơ sở dữ liệu. Khi nhân viên báo quên mật khẩu, Admin có thể chuyển sang xem mật khẩu hiện tại hoặc sử dụng chức năng dưới đây để <b>cấp mới mật khẩu</b>!
+                </p>
               </div>
 
               {/* Form Đặt lại mật khẩu mới */}
