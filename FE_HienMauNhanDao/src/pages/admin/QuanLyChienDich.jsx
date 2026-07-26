@@ -255,98 +255,69 @@ export default function QuanLyChienDich() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Quản lý Chiến dịch
-          </h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Quản lý và theo dõi tiến độ các hoạt động hiến máu tình nguyện.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={openCreate}
-          className="h-12 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-200 transition-all active:scale-95 flex items-center gap-2"
-        >
-          <span
-            className="material-symbols-outlined text-xl"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            add_circle
-          </span>
-          Tạo chiến dịch mới
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          {
-            label: "Tổng chiến dịch",
-            value: stats.total,
-            icon: "event_available",
-            color: "bg-blue-50 text-blue-600",
-          },
-          {
-            label: "Đang diễn ra",
-            value: stats.dangDienRa,
-            icon: "running_with_errors",
-            color: "bg-green-50 text-green-600",
-          },
-          {
-            label: "Sắp / phê duyệt",
-            value: stats.sapDienRa,
-            icon: "upcoming",
-            color: "bg-amber-50 text-amber-600",
-          },
-          {
-            label: "Đã thu nhận",
-            value: stats.daThu,
-            icon: "bloodtype",
-            color: "bg-red-50 text-red-600",
-            suffix: " đv",
-          },
-        ].map((s) => (
-          <div
-            key={s.label}
-            className="bg-white p-6 rounded-2xl border border-slate-200 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center ${s.color}`}
-            >
-              <span className="material-symbols-outlined text-2xl">
-                {s.icon}
+    <div className="space-y-6 pb-12 animate-in fade-in duration-500">
+      {/* 🚀 ROW 1: ULTRA-COMPACT HEADER & MINI STATS STRIP (Siêu gọn gàng bớt tốn diện tích) */}
+      <div className="flex items-center justify-between flex-wrap gap-3 bg-white/80 backdrop-blur-xl p-3.5 px-5 rounded-2xl border border-white/80 shadow-md shadow-slate-900/5">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#e62e43] to-red-600 flex items-center justify-center text-white shadow-sm shrink-0">
+            <span className="material-symbols-outlined text-lg">campaign</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-black text-slate-900 tracking-tight">Quản lý Chiến dịch</h1>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-100 text-[#e62e43] text-[9px] font-black uppercase tracking-wider">
+                <span className="w-1 h-1 rounded-full bg-[#e62e43] animate-pulse" />
+                Live
               </span>
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                {s.label}
-              </p>
-              <p className="text-2xl font-black text-slate-900">
-                {s.value}
-                {s.suffix && (
-                  <span className="text-sm font-medium text-slate-400">
-                    {s.suffix}
-                  </span>
-                )}
-              </p>
-            </div>
+            <p className="text-slate-500 text-[11px] font-medium leading-none mt-0.5">Điều phối & theo dõi tiến độ hiến máu nhân đạo</p>
           </div>
-        ))}
+        </div>
+
+        {/* Mini Stats + Button in same row */}
+        <div className="flex items-center flex-wrap gap-2">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-sm" title="Tổng chiến dịch">
+            <span className="material-symbols-outlined text-sm text-rose-400">event_available</span>
+            <span>Tổng: <b>{stats.total}</b></span>
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-sm" title="Đang diễn ra">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Diễn ra: <b>{stats.dangDienRa}</b></span>
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold shadow-sm" title="Sắp / phê duyệt">
+            <span className="material-symbols-outlined text-sm">upcoming</span>
+            <span>Sắp tới: <b>{stats.sapDienRa}</b></span>
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 text-[#e62e43] border border-rose-200 text-xs font-bold shadow-sm" title="Đã thu nhận">
+            <span className="material-symbols-outlined text-sm">bloodtype</span>
+            <span>Đã thu: <b>{stats.daThu}</b> đv</span>
+          </div>
+
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-1.5 h-9 px-4 bg-gradient-to-r from-[#e62e43] via-red-600 to-[#c01b30] text-white font-black text-xs rounded-xl hover:shadow-lg hover:shadow-[#e62e43]/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 group ml-1 shrink-0"
+          >
+            <span className="material-symbols-outlined text-base group-hover:rotate-90 transition-transform duration-300">add_circle</span>
+            <span>Tạo chiến dịch mới</span>
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-        <div className="h-16 px-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/30 flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-extrabold text-slate-900">
-              Danh sách chiến dịch
-            </span>
-            <span className="px-2 py-0.5 bg-slate-200 text-slate-600 text-[11px] font-bold rounded-full">
-              {filtered.length} MỤC
-            </span>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
+      {/* 🚀 ROW 2: SEARCH & FILTER CONTROL BAR */}
+      <div className="bg-white/80 backdrop-blur-xl border border-white/80 rounded-2xl p-2.5 px-4 shadow-md shadow-slate-900/5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-base text-[#e62e43]">list_alt</span>
+            Danh sách chiến dịch
+          </span>
+          <span className="px-2 py-0.5 bg-slate-100 text-slate-700 font-black text-[11px] rounded-full border border-slate-200 shadow-2xs">
+            {filtered.length} mục
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
+          <div className="relative w-full sm:w-60">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base">search</span>
             <input
               value={search}
               onChange={(e) => {
@@ -354,26 +325,29 @@ export default function QuanLyChienDich() {
                 setPage(0);
               }}
               placeholder="Tìm tên, mã, địa điểm..."
-              className="h-9 w-52 px-3 border border-slate-200 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+              className="w-full h-9 bg-slate-100 hover:bg-slate-50 border border-transparent rounded-xl pl-9 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43]/40 focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
             />
-            <select
-              value={filterStatus}
-              onChange={(e) => {
-                setFilterStatus(e.target.value);
-                setPage(0);
-              }}
-              className="h-9 px-3 border border-slate-200 rounded-lg text-sm bg-white outline-none"
-            >
-              <option value="">Tất cả trạng thái</option>
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
           </div>
-        </div>
 
+          <select
+            value={filterStatus}
+            onChange={(e) => {
+              setFilterStatus(e.target.value);
+              setPage(0);
+            }}
+            className="h-9 px-3 border border-slate-200 rounded-xl text-xs font-bold bg-white text-slate-700 outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 shadow-sm transition-all cursor-pointer hover:border-slate-300"
+          >
+            <option value="">Tất cả trạng thái</option>
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
