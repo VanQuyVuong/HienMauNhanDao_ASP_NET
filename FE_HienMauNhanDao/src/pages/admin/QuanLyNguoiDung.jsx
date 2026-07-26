@@ -229,7 +229,15 @@ export default function QuanLyNguoiDung() {
     try {
       // Gọi API thử đăng nhập bằng email admin hiện tại để kiểm tra mật khẩu có đúng không
       const adminEmail = localStorage.getItem("email");
-      await http.post("/TaiKhoan/Login", {
+      if (!adminEmail) {
+        Swal.fire(
+          "Lỗi phiên đăng nhập",
+          "Không xác định được Email Quản trị viên trong bộ nhớ. Vui lòng đăng xuất và đăng nhập lại!",
+          "error",
+        );
+        return;
+      }
+      await http.post("/auth/login", {
         email: adminEmail,
         matKhau: adminPasswordInput,
       });
