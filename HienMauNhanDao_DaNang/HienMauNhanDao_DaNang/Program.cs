@@ -129,6 +129,7 @@ namespace HienMauNhanDao_DaNang
             //app.UseSwagger();
 
             app.UseCors("AllowReactApp");
+            app.UseStaticFiles(); // Thêm dòng này để Backend C# cho phép trình duyệt hiển thị ảnh từ thư mục wwwroot/images
 
             app.UseAuthentication();
             app.UseAuthorization();
