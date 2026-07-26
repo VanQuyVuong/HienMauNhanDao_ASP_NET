@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useOutletContext } from "react-router-dom";
 import Swal from "sweetalert2";
 import userService from "../../services/userService";
+import http from "../../utils/http";
 import { getApiError } from "../../utils/apiHelper";
 
 const PRIMARY_COLOR = "#e62e43";
@@ -35,6 +36,17 @@ export default function QuanLyNguoiDung() {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
 
+  // 🚀 Chế độ 2 Tab: 'INTERNAL' (Nhân viên nội bộ) hoặc 'TNV' (Tình nguyện viên)
+  const [activeTab, setActiveTab] = useState("INTERNAL");
+
+  // 🔐 State bảo mật xác thực Admin & Xem thông tin chi tiết
+  const [authModalUser, setAuthModalUser] = useState(null); // Tài khoản đang yêu cầu xác thực
+  const [adminPasswordInput, setAdminPasswordInput] = useState("");
+  const [verifyingAdmin, setVerifyingAdmin] = useState(false);
+  const [detailModalUser, setDetailModalUser] = useState(null); // Hiển thị hồ sơ sau khi xác thực xong
+  const [newResetPassword, setNewResetPassword] = useState("");
+  const [resettingPwd, setResettingPwd] = useState(false);
+
   const currentUserId = localStorage.getItem("userId");
 
   const loadData = useCallback(async () => {
@@ -61,18 +73,29 @@ export default function QuanLyNguoiDung() {
     loadData();
   }, [loadData]);
 
+  // 💡 Xử lý tự động fix lỗi typo 'maiVaiTro' trong backend C#
   const filteredUsers = useMemo(() => {
     const q = (search || headerSearch).trim().toLowerCase();
     return users.filter((u) => {
+      const roleCode = u.maVaiTro || u.maiVaiTro; // Khắc phục lỗi gõ dư chữ 'i' của backend C#
+
+      // Lọc theo Tab
+      if (activeTab === "INTERNAL" && roleCode === "TNV") return false;
+      if (activeTab === "TNV" && roleCode !== "TNV") return false;
+
+      // Lọc theo từ khóa tìm kiếm
       const matchSearch =
         !q ||
         (u.email || "").toLowerCase().includes(q) ||
         (u.maTaiKhoan || "").toLowerCase().includes(q) ||
         (u.tenVaiTro || "").toLowerCase().includes(q);
-      const matchRole = !filterRole || u.maVaiTro === filterRole;
+
+      // Lọc theo dropdown vai trò
+      const matchRole = !filterRole || roleCode === filterRole;
+
       return matchSearch && matchRole;
     });
-  }, [users, search, filterRole, headerSearch]);
+  }, [users, search, filterRole, headerSearch, activeTab]);
 
   const stats = useMemo(() => {
     const active = users.filter((u) => u.trangThai !== false).length;
@@ -185,51 +208,129 @@ export default function QuanLyNguoiDung() {
     }
   };
 
+  // 🔐 1. Mở Modal xác thực Admin trước khi xem chi tiết nhạy cảm
+  const handleRequestDetail = (user) => {
+    setAuthModalUser(user);
+    setAdminPasswordInput("");
+  };
+
+  // 🔐 2. Admin bấm xác nhận mật khẩu
+  const handleVerifyAdminPassword = async (e) => {
+    e.preventDefault();
+    if (!adminPasswordInput) {
+      Swal.fire(
+        "Chú ý",
+        "Vui lòng nhập mật khẩu Quản trị viên để xác thực bảo mật!",
+        "warning",
+      );
+      return;
+    }
+    setVerifyingAdmin(true);
+    try {
+      // Gọi API thử đăng nhập bằng email admin hiện tại để kiểm tra mật khẩu có đúng không
+      const adminEmail = localStorage.getItem("email");
+      await http.post("/TaiKhoan/Login", {
+        email: adminEmail,
+        matKhau: adminPasswordInput,
+      });
+
+      // Xác thực thành công -> Mở hồ sơ chi tiết
+      setAuthModalUser(null);
+      setDetailModalUser(authModalUser);
+      setNewResetPassword("");
+      Swal.fire({
+        icon: "success",
+        title: "Xác thực bảo mật hợp lệ!",
+        text: `Đang mở quyền truy cập hồ sơ ${authModalUser.email}`,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      Swal.fire(
+        "Xác thực thất bại",
+        "Mật khẩu Quản trị viên không chính xác. Quyền xem hồ sơ bị từ chối!",
+        "error",
+      );
+    } finally {
+      setVerifyingAdmin(false);
+    }
+  };
+
+  // 🔑 3. Xử lý đặt lại mật khẩu mới cho nhân viên bị quên
+  const handleResetUserPassword = async () => {
+    if (!newResetPassword || newResetPassword.length < 6) {
+      Swal.fire("Chú ý", "Mật khẩu mới phải có ít nhất 6 ký tự!", "warning");
+      return;
+    }
+    setResettingPwd(true);
+    try {
+      await userService.update(detailModalUser.maTaiKhoan, {
+        email: detailModalUser.email,
+        maVaiTro: detailModalUser.maVaiTro || detailModalUser.maiVaiTro,
+        matKhau: newResetPassword,
+        trangThai: detailModalUser.trangThai !== false,
+      });
+      Swal.fire(
+        "Khôi phục thành công!",
+        `Đã cấp mật khẩu mới cho tài khoản ${detailModalUser.email}`,
+        "success",
+      );
+      setNewResetPassword("");
+    } catch (err) {
+      Swal.fire(
+        "Lỗi khôi phục",
+        err?.response?.data?.message || "Không thể cập nhật mật khẩu mới",
+        "error",
+      );
+    } finally {
+      setResettingPwd(false);
+    }
+  };
+
   return (
-    <div className="space-y-8 pb-12 animate-in fade-in duration-500">
+    <div className="space-y-6 pb-12 animate-in fade-in duration-500">
       {/* 🚀 Page Header & Action */}
-      <div className="flex items-end justify-between flex-wrap gap-6 bg-white/70 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-white/80 shadow-xl shadow-slate-900/5">
-        <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100/80 border border-rose-200 text-[#e62e43] text-xs font-black uppercase tracking-widest">
-            <span className="w-2 h-2 rounded-full bg-[#e62e43] animate-pulse" />
+      <div className="flex items-end justify-between flex-wrap gap-4 bg-white/70 backdrop-blur-xl p-5 md:p-6 rounded-3xl border border-white/80 shadow-lg shadow-slate-900/5">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-100/80 border border-rose-200 text-[#e62e43] text-[11px] font-black uppercase tracking-widest">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#e62e43] animate-pulse" />
             <span>Phân quyền & Bảo mật y tế</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
             Quản lý người dùng
           </h1>
-          <p className="text-slate-500 text-sm font-medium">
-            Kiểm soát truy cập, cấp quyền tài khoản cho Bác sĩ, Nhân viên y tế
-            và Tình nguyện viên.
+          <p className="text-slate-500 text-xs font-medium">
+            Kiểm soát truy cập, cấp quyền tài khoản cho Bác sĩ, NVYT và Tình
+            nguyện viên.
           </p>
         </div>
         <button
           onClick={handleOpenModal}
-          className="flex items-center gap-2.5 h-12 px-7 bg-gradient-to-r from-[#e62e43] via-red-600 to-[#c01b30] text-white font-black text-sm rounded-2xl hover:shadow-xl hover:shadow-[#e62e43]/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 group shrink-0"
+          className="flex items-center gap-2 h-11 px-6 bg-gradient-to-r from-[#e62e43] via-red-600 to-[#c01b30] text-white font-black text-xs rounded-2xl hover:shadow-xl hover:shadow-[#e62e43]/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 group shrink-0"
         >
-          <span className="material-symbols-outlined text-xl group-hover:rotate-90 transition-transform duration-300">
+          <span className="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform duration-300">
             person_add
           </span>
           <span>Cấp tài khoản mới</span>
         </button>
       </div>
 
-      {/* 🍱 Bento Stats Showcase */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      {/* 🍱 Bento Stats Showcase (Thu nhỏ gọn gàng bớt tốn diện tích) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Card 1 - Dark Cyber */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
-          <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-[#e62e43]/20 transition-all duration-500" />
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden group hover:scale-[1.01] transition-all duration-300">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
               Tổng tài khoản hệ thống
             </span>
-            <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-rose-400 border border-white/10">
-              <span className="material-symbols-outlined text-xl">
+            <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-rose-400 border border-white/10">
+              <span className="material-symbols-outlined text-base">
                 manage_accounts
               </span>
             </div>
           </div>
-          <div className="flex items-baseline gap-2 relative z-10">
-            <span className="text-4xl font-black text-white tracking-tight">
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-black text-white tracking-tight">
               {stats.total}
             </span>
             <span className="text-xs font-bold text-slate-400">tài khoản</span>
@@ -237,18 +338,18 @@ export default function QuanLyNguoiDung() {
         </div>
 
         {/* Card 2 - Medical Emerald */}
-        <div className="bg-gradient-to-br from-emerald-500/10 via-white to-white/90 border border-emerald-500/20 rounded-3xl p-6 shadow-xl shadow-emerald-500/5 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-black uppercase tracking-wider text-emerald-800">
+        <div className="bg-gradient-to-br from-emerald-500/10 via-white to-white/90 border border-emerald-500/20 rounded-2xl p-4 shadow-md shadow-emerald-500/5 relative overflow-hidden group hover:scale-[1.01] transition-all duration-300">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
               Đang hoạt động (Active)
             </span>
-            <span className="flex h-3 w-3 relative">
+            <span className="flex h-2.5 w-2.5 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-emerald-600 tracking-tight">
+            <span className="text-3xl font-black text-emerald-600 tracking-tight">
               {stats.active}
             </span>
             <span className="text-xs font-bold text-slate-500">
@@ -258,9 +359,9 @@ export default function QuanLyNguoiDung() {
         </div>
 
         {/* Card 3 - Ruby Warning */}
-        <div className="bg-gradient-to-br from-rose-500/10 via-white to-white/90 border border-rose-500/20 rounded-3xl p-6 shadow-xl shadow-rose-500/5 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-black uppercase tracking-wider text-rose-800">
+        <div className="bg-gradient-to-br from-rose-500/10 via-white to-white/90 border border-rose-500/20 rounded-2xl p-4 shadow-md shadow-rose-500/5 relative overflow-hidden group hover:scale-[1.01] transition-all duration-300">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-rose-800">
               Đã tạm khóa (Vô hiệu)
             </span>
             <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-[#e62e43]">
@@ -270,7 +371,7 @@ export default function QuanLyNguoiDung() {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-[#e62e43] tracking-tight">
+            <span className="text-3xl font-black text-[#e62e43] tracking-tight">
               {stats.inactive}
             </span>
             <span className="text-xs font-bold text-slate-500">
@@ -280,8 +381,43 @@ export default function QuanLyNguoiDung() {
         </div>
       </div>
 
+      {/* 🗂️ 2 TABS PHÂN LOẠI: NHÂN VIÊN NỘI BỘ vs TÌNH NGUYỆN VIÊN */}
+      <div className="flex items-center gap-2 bg-slate-200/70 p-1.5 rounded-2xl w-fit shadow-inner">
+        <button
+          onClick={() => {
+            setActiveTab("INTERNAL");
+            setFilterRole(""); // Reset dropdown khi đổi tab
+          }}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-xs tracking-wide transition-all duration-300 ${
+            activeTab === "INTERNAL"
+              ? "bg-gradient-to-r from-[#e62e43] to-red-600 text-white shadow-md shadow-[#e62e43]/30 scale-[1.02]"
+              : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+          }`}
+        >
+          <span className="material-symbols-outlined text-base">badge</span>
+          <span>Nhân viên Nội bộ (Admin, BS, NVYT, Kho)</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab("TNV");
+            setFilterRole("");
+          }}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-xs tracking-wide transition-all duration-300 ${
+            activeTab === "TNV"
+              ? "bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-md shadow-slate-900/30 scale-[1.02]"
+              : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+          }`}
+        >
+          <span className="material-symbols-outlined text-base">
+            volunteer_activism
+          </span>
+          <span>Tình nguyện viên (TNV)</span>
+        </button>
+      </div>
+
       {/* 🔍 Glass Filter & Control Bar */}
-      <div className="bg-white/80 backdrop-blur-xl border border-white/80 rounded-3xl p-5 shadow-xl shadow-slate-900/5 flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white/80 backdrop-blur-xl border border-white/80 rounded-3xl p-4 shadow-xl shadow-slate-900/5 flex flex-wrap items-center justify-between gap-4">
         <div className="relative flex-1 min-w-[280px]">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">
             search
@@ -289,46 +425,51 @@ export default function QuanLyNguoiDung() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm theo email, mã tài khoản y tế, quyền hạn..."
-            className="w-full h-12 bg-slate-100/80 hover:bg-slate-100 border border-transparent rounded-2xl pl-12 pr-4 text-sm font-medium text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43]/30 focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
+            placeholder={`Tìm kiếm trong nhóm ${activeTab === "INTERNAL" ? "Nhân viên y tế" : "Tình nguyện viên"}...`}
+            className="w-full h-11 bg-slate-100/80 hover:bg-slate-100 border border-transparent rounded-2xl pl-12 pr-4 text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43]/30 focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
           />
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="text-xs font-bold text-slate-400 uppercase hidden sm:inline">
-            Lọc vai trò:
-          </span>
-          <select
-            value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
-            className="h-12 px-5 border border-slate-200/80 rounded-2xl text-sm font-bold bg-white text-slate-700 outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 shadow-sm transition-all w-full sm:w-auto cursor-pointer hover:border-slate-300"
-          >
-            <option value="">✨ Tất cả quyền hạn</option>
-            {roles.map((r) => (
-              <option key={r.maVaiTro} value={r.maVaiTro}>
-                👑 {ROLE_LABELS[r.maVaiTro] || r.tenVaiTro}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Chỉ hiện lọc dropdown khi đang ở Tab Nội bộ */}
+        {activeTab === "INTERNAL" && (
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <span className="text-xs font-bold text-slate-400 uppercase hidden sm:inline">
+              Lọc vai trò:
+            </span>
+            <select
+              value={filterRole}
+              onChange={(e) => setFilterRole(e.target.value)}
+              className="h-11 px-4 border border-slate-200/80 rounded-2xl text-xs font-bold bg-white text-slate-700 outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 shadow-sm transition-all w-full sm:w-auto cursor-pointer hover:border-slate-300"
+            >
+              <option value="">✨ Tất cả chức danh nội bộ</option>
+              {roles
+                .filter((r) => r.maVaiTro !== "TNV")
+                .map((r) => (
+                  <option key={r.maVaiTro} value={r.maVaiTro}>
+                    👑 {ROLE_LABELS[r.maVaiTro] || r.tenVaiTro}
+                  </option>
+                ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* 📋 Cyber Glass Data Table */}
       <div className="bg-white/85 backdrop-blur-2xl border border-white/80 rounded-3xl shadow-2xl shadow-slate-900/5 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-900/5 border-b border-slate-200/70">
                 {[
                   "Mã Định Danh",
                   "Tài Khoản (Email)",
                   "Quyền Hạn Hệ Thống",
-                  "Trang Thái Truy Cập",
+                  "Trạng Thái Truy Cập",
                   "Thao Tác Bảo Mật",
                 ].map((h, i) => (
                   <th
                     key={h}
-                    className={`px-6 py-4 text-xs font-black uppercase text-slate-500 tracking-wider whitespace-nowrap ${i === 4 ? "text-right" : "text-left"}`}
+                    className={`px-5 py-3.5 text-[11px] font-black uppercase text-slate-500 tracking-wider whitespace-nowrap ${i === 4 ? "text-right" : "text-left"}`}
                   >
                     {h}
                   </th>
@@ -338,25 +479,25 @@ export default function QuanLyNguoiDung() {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-20">
-                    <div className="w-10 h-10 border-4 border-[#e62e43] border-t-transparent rounded-full animate-spin mx-auto mb-3 shadow-lg shadow-[#e62e43]/20" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                  <td colSpan={5} className="text-center py-16">
+                    <div className="w-8 h-8 border-3 border-[#e62e43] border-t-transparent rounded-full animate-spin mx-auto mb-2 shadow-lg shadow-[#e62e43]/20" />
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
                       Đang đồng bộ dữ liệu y tế...
                     </p>
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-20 text-slate-400">
-                    <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-300">
-                      <span className="material-symbols-outlined text-4xl">
+                  <td colSpan={5} className="text-center py-16 text-slate-400">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-2 text-slate-300">
+                      <span className="material-symbols-outlined text-3xl">
                         person_search
                       </span>
                     </div>
-                    <p className="text-base font-bold text-slate-700">
+                    <p className="text-sm font-bold text-slate-700">
                       Không tìm thấy tài khoản nào
                     </p>
-                    <p className="text-xs font-medium text-slate-400 mt-1">
+                    <p className="text-[11px] font-medium text-slate-400 mt-0.5">
                       Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc vai trò
                     </p>
                   </td>
@@ -364,59 +505,72 @@ export default function QuanLyNguoiDung() {
               ) : (
                 filteredUsers.map((user) => {
                   const isActive = user.trangThai !== false;
+                  const roleCode = user.maVaiTro || user.maiVaiTro;
                   return (
                     <tr
                       key={user.maTaiKhoan}
                       className="hover:bg-rose-50/30 hover:shadow-lg hover:shadow-slate-200/40 transition-all duration-200 group"
                     >
-                      <td className="px-6 py-5">
-                        <span className="font-mono text-xs font-extrabold text-[#e62e43] bg-rose-50 border border-rose-200/60 px-3 py-1.5 rounded-xl shadow-sm">
+                      <td className="px-5 py-4">
+                        <span className="font-mono text-xs font-extrabold text-[#e62e43] bg-rose-50 border border-rose-200/60 px-2.5 py-1 rounded-xl shadow-sm">
                           {user.maTaiKhoan}
                         </span>
                       </td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-600 text-xs shrink-0 group-hover:bg-[#e62e43] group-hover:text-white transition-colors">
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-600 text-xs shrink-0 group-hover:bg-[#e62e43] group-hover:text-white transition-colors">
                             {user.email.substring(0, 2).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-bold text-slate-800 text-sm">
+                            <p className="font-bold text-slate-800 text-xs">
                               {user.email}
                             </p>
-                            <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                            <p className="text-[10px] text-slate-400 font-medium mt-0.5">
                               Xác thực: Mật khẩu mã hóa
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-5">
+                      <td className="px-5 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black tracking-wide ${ROLE_STYLES[user.maVaiTro] || "bg-slate-100 text-slate-600"}`}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black tracking-wide ${ROLE_STYLES[roleCode] || "bg-slate-100 text-slate-600"}`}
                         >
-                          <span className="material-symbols-outlined text-base">
+                          <span className="material-symbols-outlined text-sm">
                             verified_user
                           </span>
-                          {ROLE_LABELS[user.maVaiTro] ||
-                            user.tenVaiTro ||
-                            user.maVaiTro}
+                          {ROLE_LABELS[roleCode] || user.tenVaiTro || roleCode}
                         </span>
                       </td>
-                      <td className="px-6 py-5">
+                      <td className="px-5 py-4">
                         <span
-                          className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider ${
                             isActive
                               ? "bg-emerald-50/80 text-emerald-700 border border-emerald-200/80 shadow-sm shadow-emerald-500/5"
                               : "bg-rose-50/80 text-[#e62e43] border border-rose-200/80 shadow-sm shadow-red-500/5"
                           }`}
                         >
                           <span
-                            className={`w-2 h-2 rounded-full ${isActive ? "bg-emerald-500 animate-pulse" : "bg-[#e62e43]"}`}
+                            className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-500 animate-pulse" : "bg-[#e62e43]"}`}
                           />
                           {isActive ? "Hợp lệ" : "Tạm khóa"}
                         </span>
                       </td>
-                      <td className="px-6 py-5 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="px-5 py-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* 🔐 Nút Xem Hồ sơ & Bảo mật có xác thực Admin */}
+                          <button
+                            onClick={() => handleRequestDetail(user)}
+                            title="Xem chi tiết & Khôi phục mật khẩu (Cần xác thực Admin)"
+                            className="h-9 px-3 flex items-center gap-1 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-700 border border-amber-300 hover:bg-amber-500 hover:text-white hover:shadow-md hover:shadow-amber-500/20 transition-all duration-200"
+                          >
+                            <span className="material-symbols-outlined text-base">
+                              shield_lock
+                            </span>
+                            <span className="hidden md:inline">
+                              Hồ sơ & Bảo mật
+                            </span>
+                          </button>
+
                           <button
                             onClick={() => handleToggleStatus(user)}
                             title={
@@ -424,25 +578,27 @@ export default function QuanLyNguoiDung() {
                                 ? "Khóa tài khoản này"
                                 : "Mở khóa tài khoản"
                             }
-                            className={`h-10 px-3.5 flex items-center gap-1.5 rounded-xl text-xs font-bold border transition-all duration-200 ${
+                            className={`h-9 px-3 flex items-center gap-1 rounded-xl text-xs font-bold border transition-all duration-200 ${
                               isActive
-                                ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 hover:shadow-md hover:shadow-amber-500/10"
+                                ? "bg-slate-50 text-slate-600 border-slate-200 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200"
                                 : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:shadow-md hover:shadow-emerald-500/10"
                             }`}
                           >
                             <span className="material-symbols-outlined text-base">
                               {isActive ? "lock" : "lock_open"}
                             </span>
-                            <span>{isActive ? "Khóa" : "Mở"}</span>
+                            <span className="hidden sm:inline">
+                              {isActive ? "Khóa" : "Mở"}
+                            </span>
                           </button>
 
                           <button
                             onClick={() => handleDelete(user)}
                             disabled={user.maTaiKhoan === currentUserId}
                             title="Xóa vĩnh viễn"
-                            className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-red-600 hover:border hover:border-rose-200 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-slate-50 disabled:hover:text-slate-400"
+                            className="h-9 w-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-red-600 hover:border hover:border-rose-200 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
                           >
-                            <span className="material-symbols-outlined text-lg">
+                            <span className="material-symbols-outlined text-base">
                               delete_forever
                             </span>
                           </button>
@@ -461,39 +617,38 @@ export default function QuanLyNguoiDung() {
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white/95 backdrop-blur-2xl w-full max-w-md rounded-3xl shadow-2xl border border-white/80 overflow-hidden scale-100 transition-all">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-[#e62e43] via-red-600 to-slate-900 px-7 py-6 flex items-center justify-between relative overflow-hidden">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex items-center gap-3.5 relative z-10">
-                <div className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/20 shadow-inner">
+            <div className="bg-gradient-to-r from-[#e62e43] via-red-600 to-slate-900 px-6 py-5 flex items-center justify-between relative overflow-hidden">
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/20 shadow-inner">
                   <span
-                    className="material-symbols-outlined text-white text-2xl"
+                    className="material-symbols-outlined text-white text-xl"
                     style={{ fontVariationSettings: "'FILL' 1" }}
                   >
                     shield_person
                   </span>
                 </div>
                 <div>
-                  <h3 className="font-black text-white text-lg tracking-tight">
+                  <h3 className="font-black text-white text-base tracking-tight">
                     Cấp Quyền Tài Khoản
                   </h3>
-                  <p className="text-[11px] text-rose-200 font-medium">
+                  <p className="text-[10px] text-rose-200 font-medium">
                     Hệ thống Y tế Nhân đạo Đà Nẵng
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="w-9 h-9 flex items-center justify-center rounded-2xl bg-white/10 hover:bg-white/25 text-white transition-colors relative z-10"
+                className="w-8 h-8 flex items-center justify-center rounded-2xl bg-white/10 hover:bg-white/25 text-white transition-colors relative z-10"
               >
-                <span className="material-symbols-outlined text-lg">close</span>
+                <span className="material-symbols-outlined text-base">
+                  close
+                </span>
               </button>
             </div>
 
-            {/* Modal Form */}
-            <form onSubmit={handleCreate} className="p-7 space-y-5">
+            <form onSubmit={handleCreate} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-black text-slate-700 mb-2 uppercase tracking-wider">
+                <label className="block text-[11px] font-black text-slate-700 mb-1.5 uppercase tracking-wider">
                   Email cán bộ / Bác sĩ{" "}
                   <span className="text-[#e62e43]">*</span>
                 </label>
@@ -503,12 +658,12 @@ export default function QuanLyNguoiDung() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="ví dụ: bacsi.nguyen@bvdn.vn"
-                  className="w-full h-12 px-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
+                  className="w-full h-11 px-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-700 mb-2 uppercase tracking-wider">
+                <label className="block text-[11px] font-black text-slate-700 mb-1.5 uppercase tracking-wider">
                   Mật khẩu khởi tạo <span className="text-[#e62e43]">*</span>
                 </label>
                 <input
@@ -520,12 +675,12 @@ export default function QuanLyNguoiDung() {
                     setForm({ ...form, matKhau: e.target.value })
                   }
                   placeholder="Tối thiểu 6 ký tự bảo mật"
-                  className="w-full h-12 px-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
+                  className="w-full h-11 px-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-700 mb-2 uppercase tracking-wider">
+                <label className="block text-[11px] font-black text-slate-700 mb-1.5 uppercase tracking-wider">
                   Phân quyền chức danh <span className="text-[#e62e43]">*</span>
                 </label>
                 <select
@@ -534,7 +689,7 @@ export default function QuanLyNguoiDung() {
                   onChange={(e) =>
                     setForm({ ...form, maVaiTro: e.target.value })
                   }
-                  className="w-full h-12 px-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all cursor-pointer"
+                  className="w-full h-11 px-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all cursor-pointer"
                 >
                   <option value="">-- Chọn quyền hạn y tế --</option>
                   {roles.map((r) => (
@@ -543,43 +698,208 @@ export default function QuanLyNguoiDung() {
                     </option>
                   ))}
                 </select>
-                <p className="text-[11px] text-slate-400 font-medium mt-2 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm text-[#e62e43]">
-                    info
-                  </span>
-                  Cán bộ được cấp tài khoản sẽ nhận quyền ngay lập tức.
-                </p>
               </div>
 
-              <div className="flex gap-3 pt-3 border-t border-slate-100">
+              <div className="flex gap-3 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 h-12 border border-slate-200 text-slate-600 font-extrabold text-sm rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all"
+                  className="flex-1 h-11 border border-slate-200 text-slate-600 font-extrabold text-xs rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all"
                 >
                   Hủy bỏ
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 h-12 bg-gradient-to-r from-[#e62e43] via-red-600 to-[#c01b30] hover:shadow-lg hover:shadow-[#e62e43]/30 text-white font-black text-sm rounded-2xl disabled:opacity-60 transition-all scale-[1.01] active:scale-95 flex items-center justify-center gap-2"
+                  className="flex-1 h-11 bg-gradient-to-r from-[#e62e43] via-red-600 to-[#c01b30] hover:shadow-lg hover:shadow-[#e62e43]/30 text-white font-black text-xs rounded-2xl disabled:opacity-60 transition-all scale-[1.01] active:scale-95 flex items-center justify-center gap-2"
                 >
-                  {submitting ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Đang cấp quyền...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-lg">
-                        check_circle
-                      </span>
-                      <span>Xác nhận cấp</span>
-                    </>
-                  )}
+                  {submitting ? "Đang cấp quyền..." : "Xác nhận cấp"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 🔐 MODAL 1: XÁC THỰC MẬT KHẨU ADMIN TRƯỚC KHI XEM THÔNG TIN NHẠY CẢM */}
+      {authModalUser && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white/95 backdrop-blur-2xl w-full max-w-sm rounded-3xl shadow-2xl border border-amber-500/30 overflow-hidden">
+            <div className="bg-gradient-to-r from-amber-600 to-amber-700 px-6 py-5 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-2xl animate-bounce">
+                  admin_panel_settings
+                </span>
+                <div>
+                  <h3 className="font-black text-sm uppercase tracking-wider">
+                    Xác thực Admin
+                  </h3>
+                  <p className="text-[10px] text-amber-100">
+                    Khu vực dữ liệu bảo mật y tế
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAuthModalUser(null)}
+                className="text-white/80 hover:text-white"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <form
+              onSubmit={handleVerifyAdminPassword}
+              className="p-6 space-y-4"
+            >
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 text-xs font-medium leading-relaxed">
+                Bạn đang yêu cầu xem hồ sơ và cấp lại mật khẩu cho tài khoản{" "}
+                <b>{authModalUser.email}</b>. Vui lòng nhập mật khẩu Quản trị
+                viên của bạn để tiếp tục.
+              </div>
+              <div>
+                <label className="block text-[11px] font-black text-slate-700 mb-1.5 uppercase tracking-wider">
+                  Mật khẩu Admin của bạn{" "}
+                  <span className="text-[#e62e43]">*</span>
+                </label>
+                <input
+                  type="password"
+                  required
+                  autoFocus
+                  value={adminPasswordInput}
+                  onChange={(e) => setAdminPasswordInput(e.target.value)}
+                  placeholder="Nhập mật khẩu để mở khóa..."
+                  className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setAuthModalUser(null)}
+                  className="flex-1 h-11 border border-slate-200 text-slate-600 font-bold text-xs rounded-2xl hover:bg-slate-50"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={verifyingAdmin}
+                  className="flex-1 h-11 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs rounded-2xl shadow-lg shadow-amber-600/30 transition-all flex items-center justify-center gap-1.5"
+                >
+                  {verifyingAdmin ? "Đang mở..." : "Xác thực ngay"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 🔑 MODAL 2: HỒ SƠ TÀI KHOẢN & KHÔI PHỤC MẬT KHẨU (SAU KHI XÁC THỰC THÀNH CÔNG) */}
+      {detailModalUser && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white/95 backdrop-blur-2xl w-full max-w-lg rounded-3xl shadow-2xl border border-white/80 overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-6 py-5 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#e62e43] flex items-center justify-center font-black text-white text-sm shadow-md">
+                  {detailModalUser.email.substring(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="font-black text-sm text-white">
+                    {detailModalUser.email}
+                  </h3>
+                  <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
+                    👑{" "}
+                    {ROLE_LABELS[
+                      detailModalUser.maVaiTro || detailModalUser.maiVaiTro
+                    ] || detailModalUser.maVaiTro}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDetailModalUser(null)}
+                className="text-white/80 hover:text-white"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+              {/* Thông tin hồ sơ cơ bản */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2.5 text-xs">
+                <p className="text-[11px] font-black uppercase text-slate-400 tracking-wider mb-2 border-b border-slate-200 pb-1.5">
+                  📋 Thông tin tài khoản trong CSDL
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <span className="text-slate-400 font-medium">
+                      Mã hệ thống:
+                    </span>
+                    <p className="font-mono font-bold text-[#e62e43]">
+                      {detailModalUser.maTaiKhoan}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-medium">
+                      Trạng thái:
+                    </span>
+                    <p className="font-bold text-emerald-600">
+                      {detailModalUser.trangThai !== false
+                        ? "● Đang hoạt động"
+                        : "● Đã tạm khóa"}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-medium">
+                    Quyền hạn chức danh:
+                  </span>
+                  <p className="font-bold text-slate-800">
+                    {ROLE_LABELS[
+                      detailModalUser.maVaiTro || detailModalUser.maiVaiTro
+                    ] || detailModalUser.maVaiTro}
+                  </p>
+                </div>
+                <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-[11px] leading-relaxed">
+                  💡 <b>Ghi chú bảo mật:</b> Mật khẩu cũ của nhân viên được mã
+                  hóa một chiều (BCrypt) trong CSDL nên không thể giải mã đọc
+                  trực tiếp. Khi nhân viên quên mật khẩu, Admin sử dụng chức
+                  năng dưới đây để <b>cấp mật khẩu mới</b> cho nhân viên đăng
+                  nhập!
+                </div>
+              </div>
+
+              {/* Form Đặt lại mật khẩu mới */}
+              <div className="space-y-3 pt-2 border-t border-slate-200">
+                <label className="block text-[11px] font-black text-slate-700 uppercase tracking-wider">
+                  🔑 Cấp / Đặt lại mật khẩu mới cho nhân viên này
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newResetPassword}
+                    onChange={(e) => setNewResetPassword(e.target.value)}
+                    placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)..."
+                    className="flex-1 h-11 px-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleResetUserPassword}
+                    disabled={resettingPwd}
+                    className="h-11 px-5 bg-[#e62e43] hover:bg-red-700 text-white font-black text-xs rounded-2xl shadow-lg shadow-[#e62e43]/30 transition-all shrink-0 flex items-center gap-1.5"
+                  >
+                    {resettingPwd ? "Đang lưu..." : "Lưu mật khẩu mới"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2 text-right">
+                <button
+                  type="button"
+                  onClick={() => setDetailModalUser(null)}
+                  className="h-10 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all"
+                >
+                  Đóng hồ sơ
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
