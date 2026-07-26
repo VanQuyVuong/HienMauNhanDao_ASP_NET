@@ -289,159 +289,103 @@ export default function QuanLyNguoiDung() {
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-500">
-      {/* 🚀 Page Header & Action */}
-      <div className="flex items-end justify-between flex-wrap gap-4 bg-white/70 backdrop-blur-xl p-5 md:p-6 rounded-3xl border border-white/80 shadow-lg shadow-slate-900/5">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-100/80 border border-rose-200 text-[#e62e43] text-[11px] font-black uppercase tracking-widest">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#e62e43] animate-pulse" />
-            <span>Phân quyền & Bảo mật y tế</span>
+      {/* 🚀 ROW 1: ULTRA-COMPACT HEADER & MINI STATS STRIP (Siêu gọn gàng bớt tốn diện tích) */}
+      <div className="flex items-center justify-between flex-wrap gap-3 bg-white/80 backdrop-blur-xl p-3.5 px-5 rounded-2xl border border-white/80 shadow-md shadow-slate-900/5">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#e62e43] to-red-600 flex items-center justify-center text-white shadow-sm shrink-0">
+            <span className="material-symbols-outlined text-lg">manage_accounts</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-            Quản lý người dùng
-          </h1>
-          <p className="text-slate-500 text-xs font-medium">
-            Kiểm soát truy cập, cấp quyền tài khoản cho Bác sĩ, NVYT và Tình
-            nguyện viên.
-          </p>
-        </div>
-        <button
-          onClick={handleOpenModal}
-          className="flex items-center gap-2 h-11 px-6 bg-gradient-to-r from-[#e62e43] via-red-600 to-[#c01b30] text-white font-black text-xs rounded-2xl hover:shadow-xl hover:shadow-[#e62e43]/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 group shrink-0"
-        >
-          <span className="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform duration-300">
-            person_add
-          </span>
-          <span>Cấp tài khoản mới</span>
-        </button>
-      </div>
-
-      {/* 🍱 Bento Stats Showcase (Thu nhỏ gọn gàng bớt tốn diện tích) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Card 1 - Dark Cyber */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden group hover:scale-[1.01] transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-              Tổng tài khoản hệ thống
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-rose-400 border border-white/10">
-              <span className="material-symbols-outlined text-base">
-                manage_accounts
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-black text-slate-900 tracking-tight">Quản lý người dùng</h1>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-100 text-[#e62e43] text-[9px] font-black uppercase tracking-wider">
+                <span className="w-1 h-1 rounded-full bg-[#e62e43] animate-pulse" />
+                24/7
               </span>
             </div>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white tracking-tight">
-              {stats.total}
-            </span>
-            <span className="text-xs font-bold text-slate-400">tài khoản</span>
+            <p className="text-slate-500 text-[11px] font-medium leading-none mt-0.5">Kiểm soát truy cập & Phân quyền y tế</p>
           </div>
         </div>
 
-        {/* Card 2 - Medical Emerald */}
-        <div className="bg-gradient-to-br from-emerald-500/10 via-white to-white/90 border border-emerald-500/20 rounded-2xl p-4 shadow-md shadow-emerald-500/5 relative overflow-hidden group hover:scale-[1.01] transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
-              Đang hoạt động (Active)
-            </span>
-            <span className="flex h-2.5 w-2.5 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-            </span>
+        {/* Mini Stats + Button in same row */}
+        <div className="flex items-center flex-wrap gap-2">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-sm" title="Tổng tài khoản">
+            <span className="material-symbols-outlined text-sm text-rose-400">group</span>
+            <span>Tổng: <b>{stats.total}</b></span>
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-emerald-600 tracking-tight">
-              {stats.active}
-            </span>
-            <span className="text-xs font-bold text-slate-500">
-              truy cập hợp lệ
-            </span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-sm" title="Đang hoạt động">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Hợp lệ: <b>{stats.active}</b></span>
           </div>
-        </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 text-[#e62e43] border border-rose-200 text-xs font-bold shadow-sm" title="Đã tạm khóa">
+            <span className="material-symbols-outlined text-sm">lock</span>
+            <span>Khóa: <b>{stats.inactive}</b></span>
+          </div>
 
-        {/* Card 3 - Ruby Warning */}
-        <div className="bg-gradient-to-br from-rose-500/10 via-white to-white/90 border border-rose-500/20 rounded-2xl p-4 shadow-md shadow-rose-500/5 relative overflow-hidden group hover:scale-[1.01] transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-black uppercase tracking-wider text-rose-800">
-              Đã tạm khóa (Vô hiệu)
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-[#e62e43]">
-              <span className="material-symbols-outlined text-base">
-                person_off
-              </span>
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-[#e62e43] tracking-tight">
-              {stats.inactive}
-            </span>
-            <span className="text-xs font-bold text-slate-500">
-              bị cấm truy cập
-            </span>
-          </div>
+          <button
+            onClick={handleOpenModal}
+            className="flex items-center gap-1.5 h-9 px-4 bg-gradient-to-r from-[#e62e43] via-red-600 to-[#c01b30] text-white font-black text-xs rounded-xl hover:shadow-lg hover:shadow-[#e62e43]/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 group ml-1 shrink-0"
+          >
+            <span className="material-symbols-outlined text-base group-hover:rotate-90 transition-transform duration-300">person_add</span>
+            <span>Cấp quyền mới</span>
+          </button>
         </div>
       </div>
 
-      {/* 🗂️ 2 TABS PHÂN LOẠI: NHÂN VIÊN NỘI BỘ vs TÌNH NGUYỆN VIÊN */}
-      <div className="flex items-center gap-2 bg-slate-200/70 p-1.5 rounded-2xl w-fit shadow-inner">
-        <button
-          onClick={() => {
-            setActiveTab("INTERNAL");
-            setFilterRole(""); // Reset dropdown khi đổi tab
-          }}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-xs tracking-wide transition-all duration-300 ${
-            activeTab === "INTERNAL"
-              ? "bg-gradient-to-r from-[#e62e43] to-red-600 text-white shadow-md shadow-[#e62e43]/30 scale-[1.02]"
-              : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-          }`}
-        >
-          <span className="material-symbols-outlined text-base">badge</span>
-          <span>Nhân viên Nội bộ (Admin, BS, NVYT, Kho)</span>
-        </button>
+      {/* 🚀 ROW 2: COMBINED TABS & FILTER CONTROL BAR (Gộp 2 Tab và Lọc vào 1 thanh duy nhất) */}
+      <div className="bg-white/80 backdrop-blur-xl border border-white/80 rounded-2xl p-2.5 px-4 shadow-md shadow-slate-900/5 flex flex-wrap items-center justify-between gap-3">
+        {/* Left: Compact Toggle Tabs */}
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl shadow-inner">
+          <button
+            onClick={() => {
+              setActiveTab("INTERNAL");
+              setFilterRole("");
+            }}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-black text-xs tracking-wide transition-all duration-200 ${
+              activeTab === "INTERNAL"
+                ? "bg-gradient-to-r from-[#e62e43] to-red-600 text-white shadow"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <span className="material-symbols-outlined text-sm">badge</span>
+            <span>Nhân viên Nội bộ</span>
+          </button>
 
-        <button
-          onClick={() => {
-            setActiveTab("TNV");
-            setFilterRole("");
-          }}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-xs tracking-wide transition-all duration-300 ${
-            activeTab === "TNV"
-              ? "bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-md shadow-slate-900/30 scale-[1.02]"
-              : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-          }`}
-        >
-          <span className="material-symbols-outlined text-base">
-            volunteer_activism
-          </span>
-          <span>Tình nguyện viên (TNV)</span>
-        </button>
-      </div>
-
-      {/* 🔍 Glass Filter & Control Bar */}
-      <div className="bg-white/80 backdrop-blur-xl border border-white/80 rounded-3xl p-4 shadow-xl shadow-slate-900/5 flex flex-wrap items-center justify-between gap-4">
-        <div className="relative flex-1 min-w-[280px]">
-          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">
-            search
-          </span>
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={`Tìm kiếm trong nhóm ${activeTab === "INTERNAL" ? "Nhân viên y tế" : "Tình nguyện viên"}...`}
-            className="w-full h-11 bg-slate-100/80 hover:bg-slate-100 border border-transparent rounded-2xl pl-12 pr-4 text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43]/30 focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
-          />
+          <button
+            onClick={() => {
+              setActiveTab("TNV");
+              setFilterRole("");
+            }}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-black text-xs tracking-wide transition-all duration-200 ${
+              activeTab === "TNV"
+                ? "bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <span className="material-symbols-outlined text-sm">volunteer_activism</span>
+            <span>Tình nguyện viên (TNV)</span>
+          </button>
         </div>
 
-        {/* Chỉ hiện lọc dropdown khi đang ở Tab Nội bộ */}
-        {activeTab === "INTERNAL" && (
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-xs font-bold text-slate-400 uppercase hidden sm:inline">
-              Lọc vai trò:
-            </span>
+        {/* Right: Search & Role Filter inside same row */}
+        <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
+          <div className="relative w-full sm:w-60">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base">search</span>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={`Tìm trong ${activeTab === "INTERNAL" ? "Nội bộ" : "TNV"}...`}
+              className="w-full h-9 bg-slate-100 hover:bg-slate-50 border border-transparent rounded-xl pl-9 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43]/40 focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
+            />
+          </div>
+
+          {activeTab === "INTERNAL" && (
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="h-11 px-4 border border-slate-200/80 rounded-2xl text-xs font-bold bg-white text-slate-700 outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 shadow-sm transition-all w-full sm:w-auto cursor-pointer hover:border-slate-300"
+              className="h-9 px-3 border border-slate-200 rounded-xl text-xs font-bold bg-white text-slate-700 outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 shadow-sm transition-all cursor-pointer hover:border-slate-300"
             >
-              <option value="">✨ Tất cả chức danh nội bộ</option>
+              <option value="">✨ Tất cả chức danh</option>
               {roles
                 .filter((r) => r.maVaiTro !== "TNV")
                 .map((r) => (
@@ -450,8 +394,8 @@ export default function QuanLyNguoiDung() {
                   </option>
                 ))}
             </select>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* 📋 Cyber Glass Data Table */}

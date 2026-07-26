@@ -51,9 +51,9 @@ export default function AdminLayout() {
         />
       )}
 
-      {/* 🪟 SIDEBAR - Cố định 100% chiều cao màn hình (Sticky Height) */}
+      {/* 🪟 SIDEBAR - 100% Cố định bất động (Fixed Monolith, độc lập với nội dung trang) */}
       <aside
-        className={`fixed inset-y-4 left-4 z-50 w-64 bg-white/85 backdrop-blur-2xl border border-white/80 rounded-3xl flex flex-col justify-between shadow-2xl shadow-slate-900/5 transition-all duration-300 md:sticky md:top-4 md:left-4 md:mr-4 md:h-[calc(100vh-2rem)] shrink-0 ${
+        className={`fixed inset-y-4 left-4 z-50 w-64 h-[calc(100vh-2rem)] bg-white/90 backdrop-blur-2xl border border-white/80 rounded-3xl flex flex-col justify-between shadow-2xl shadow-slate-900/5 transition-all duration-300 shrink-0 ${
           isSidebarOpen
             ? "translate-x-0"
             : "-translate-x-[120%] md:translate-x-0"
@@ -186,8 +186,8 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      {/* 🖥️ MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden md:py-4 md:pr-4">
+      {/* 🖥️ MAIN CONTENT AREA (Đã chừa lề md:pl-[21.5rem] để khoảng cách với Sidebar tự nhiên, thoáng đãng) */}
+      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden md:py-6 md:pr-6 md:pl-[21.5rem]">
         {/* Floating Header */}
         <header className="h-20 bg-white/80 backdrop-blur-xl border border-white/80 rounded-2xl px-6 md:px-8 flex items-center justify-between shrink-0 shadow-lg shadow-slate-900/5 z-30 mb-4 transition-all">
           <div className="flex items-center gap-3">
