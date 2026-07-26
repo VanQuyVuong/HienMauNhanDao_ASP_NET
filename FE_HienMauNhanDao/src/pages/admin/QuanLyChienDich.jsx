@@ -51,7 +51,7 @@ const toDatetimeLocal = (val) => {
 
 const fromDatetimeLocal = (val) => {
   if (!val) return null;
-  return val.replace("T", " ");
+  return val; // Giữ nguyên định dạng chuẩn ISO 8601 (có chữ T) để C# không bị lỗi binding
 };
 
 const emptyForm = {
