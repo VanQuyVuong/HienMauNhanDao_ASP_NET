@@ -37,12 +37,12 @@ namespace HienMauNhanDao_DaNang.Controllers
             {
                 if (string.IsNullOrEmpty(model.MaDiaDiem))
                 {
-                    model.MaDiaDiem = "DD" + new Random().Next(1000, 9999).ToString();
+                    model.MaDiaDiem = "DD" + new Random().Next(10000, 99999).ToString();
                 }
                 if (string.IsNullOrEmpty(model.MaPhuongXa))
                 {
                     var px = await _context.PhuongXas.FirstOrDefaultAsync();
-                    model.MaPhuongXa = px?.maPhuongXa ?? "PX001";
+                    model.MaPhuongXa = px?.maPhuongXa ?? "PX00001";
                 }
                 _context.DiaDiems.Add(model);
                 await _context.SaveChangesAsync();
@@ -50,7 +50,8 @@ namespace HienMauNhanDao_DaNang.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = "Lỗi khi tạo địa điểm: " + ex.Message });
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new { success = false, message = "Lỗi khi tạo địa điểm: " + msg });
             }
         }
 
