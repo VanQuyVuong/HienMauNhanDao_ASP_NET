@@ -14,4 +14,5 @@ export const chienDichService = {
 
 export const diaDiemService = {
     getAll: async () => unwrapList(await http.get('/diadiem')),
+    createDiaDiem: async (data) => unwrap(await http.post('/diadiem', data)),
 };
