@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using HienMauNhanDao_DaNang.Data;
 using Microsoft.EntityFrameworkCore;
+
+using HienMauNhanDao_DaNang.Models.Entities;
+using HienMauNhanDao_DaNang.Models.Enums;
 
 namespace HienMauNhanDao_DaNang.Controllers
 {
@@ -24,6 +27,31 @@ namespace HienMauNhanDao_DaNang.Controllers
         {
             var danhSach = await _context.DiaDiems.ToListAsync();
             return Ok(new { success = true, data = danhSach });
+        }
+
+        //api tạo mới địa điểm hiến máu lưu động / di động
+        [HttpPost]
+        public async Task<IActionResult> TaoMoi([FromBody] DiaDiem model)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(model.MaDiaDiem))
+                {
+                    model.MaDiaDiem = "DD" + new Random().Next(1000, 9999).ToString();
+                }
+                if (string.IsNullOrEmpty(model.MaPhuongXa))
+                {
+                    var px = await _context.PhuongXas.FirstOrDefaultAsync();
+                    model.MaPhuongXa = px?.maPhuongXa ?? "PX001";
+                }
+                _context.DiaDiems.Add(model);
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true, data = model });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Lỗi khi tạo địa điểm: " + ex.Message });
+            }
         }
 
     }
