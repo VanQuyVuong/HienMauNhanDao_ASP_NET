@@ -12,6 +12,7 @@ import {
   diaDiemService,
 } from "../../services/chienDichService";
 import { uploadService } from "../../services/uploadService";
+import { donDangKyService } from "../../services/donDangKy";
 import { getApiError } from "../../utils/apiHelper";
 
 const toImageSrc = (imageUrl) => {
@@ -79,6 +80,10 @@ export default function QuanLyChienDich() {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [campaignRegs, setCampaignRegs] = useState([]);
+  const [loadingRegs, setLoadingRegs] = useState(false);
+  const [searchReg, setSearchReg] = useState("");
   const imageInputRef = useRef(null);
 
   const loadData = useCallback(async () => {
@@ -152,6 +157,24 @@ export default function QuanLyChienDich() {
       imageUrl: c.imageUrl || "",
     });
     setModal({ type: "edit", maChienDich: c.maChienDich });
+  };
+
+  const openDetail = async (c) => {
+    setSelectedCampaign(c);
+    setSearchReg("");
+    setModal("detail");
+    setLoadingRegs(true);
+    try {
+      const res = await donDangKyService.getAll();
+      const allRegs = Array.isArray(res) ? res : (res?.content || []);
+      const matched = allRegs.filter(d => String(d.maChienDich) === String(c.maChienDich));
+      setCampaignRegs(matched);
+    } catch (err) {
+      console.error("Lỗi khi tải danh sách đăng ký:", err);
+      setCampaignRegs([]);
+    } finally {
+      setLoadingRegs(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -394,13 +417,17 @@ export default function QuanLyChienDich() {
                     >
                       <td className="px-6">
                         <div className="flex items-center gap-4">
-                          <div className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+                          <div className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center shrink-0 cursor-pointer hover:bg-red-200 transition-colors" onClick={() => openDetail(c)} title="Xem chi tiết & danh sách đăng ký">
                             <span className="material-symbols-outlined text-red-600">
                               volunteer_activism
                             </span>
                           </div>
                           <div className="truncate max-w-[200px]">
-                            <p className="text-sm font-bold text-slate-900 truncate">
+                            <p
+                              onClick={() => openDetail(c)}
+                              className="text-sm font-bold text-slate-900 truncate cursor-pointer hover:text-[#e62e43] transition-colors"
+                              title="Nhấp để xem chi tiết & danh sách TNV đăng ký"
+                            >
                               {c.tenChienDich}
                             </p>
                             <p className="text-[11px] text-slate-400 mt-0.5">
@@ -462,6 +489,16 @@ export default function QuanLyChienDich() {
                       </td>
                       <td className="px-6 text-right">
                         <div className="flex items-center justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => openDetail(c)}
+                            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors"
+                            title="Xem chi tiết & danh sách đăng ký"
+                          >
+                            <span className="material-symbols-outlined text-lg">
+                              visibility
+                            </span>
+                          </button>
                           <button
                             type="button"
                             onClick={() => openEdit(c)}
@@ -535,21 +572,244 @@ export default function QuanLyChienDich() {
         )}
       </div>
 
-      {modal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
-            <div className="bg-gradient-to-r from-red-700 to-red-900 px-7 py-6 flex items-center justify-between">
-              <h3 className="font-black text-white text-lg">
-                {modal === "create"
-                  ? "Tạo chiến dịch mới"
-                  : "Chỉnh sửa chiến dịch"}
-              </h3>
+      {/* 🚀 MODAL CHI TIẾT & DANH SÁCH TNV ĐĂNG KÝ */}
+      {modal === "detail" && selectedCampaign && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-7 py-5 flex items-center justify-between border-b border-slate-700/50 shrink-0">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#e62e43] to-red-600 flex items-center justify-center text-white shadow-lg shadow-red-500/20 shrink-0">
+                  <span className="material-symbols-outlined text-xl">event_note</span>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="font-black text-white text-base sm:text-lg tracking-tight">Chi tiết & Danh sách Đăng ký</h3>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${statusBadge(selectedCampaign.trangThai)}`}>
+                      {selectedCampaign.trangThai || "—"}
+                    </span>
+                  </div>
+                  <p className="text-slate-400 text-xs mt-0.5 flex items-center gap-1.5 font-medium">
+                    <span>Mã ID: <b>{selectedCampaign.maChienDich}</b></span>
+                    <span>•</span>
+                    <span className="truncate max-w-[300px]">{selectedCampaign.tenChienDich}</span>
+                  </p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setModal(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20"
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all active:scale-95"
               >
-                <span className="material-symbols-outlined text-white">
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
+            </div>
+
+            {/* Modal Body - Scrollable */}
+            <div className="p-7 overflow-y-auto space-y-7 flex-1">
+              {/* Top Overview Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50/80 p-5 rounded-2xl border border-slate-200/80 shadow-inner">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-red-100/80 text-[#e62e43] flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="material-symbols-outlined text-xl">location_on</span>
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Địa điểm tổ chức</p>
+                    <p className="text-sm font-bold text-slate-800 mt-1 truncate" title={selectedCampaign.diaDiem?.tenDiaDiem}>
+                      {selectedCampaign.diaDiem?.tenDiaDiem || "---"}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5 truncate">{selectedCampaign.diaDiem?.diaChi || "Đà Nẵng"}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5 border-t md:border-t-0 md:border-l border-slate-200/80 pt-4 md:pt-0 md:pl-5">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100/80 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="material-symbols-outlined text-xl">schedule</span>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Thời gian diễn ra</p>
+                    <p className="text-xs font-bold text-slate-800 mt-1">
+                      Bắt đầu: {toDatetimeLocal(selectedCampaign.thoiGianBD)?.replace("T", " ") || "---"}
+                    </p>
+                    <p className="text-xs font-bold text-slate-600 mt-0.5">
+                      Kết thúc: {toDatetimeLocal(selectedCampaign.thoiGianKT)?.replace("T", " ") || "---"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5 border-t md:border-t-0 md:border-l border-slate-200/80 pt-4 md:pt-0 md:pl-5">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100/80 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="material-symbols-outlined text-xl">bloodtype</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center mb-1">
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tiến độ thu máu</p>
+                      <span className="text-xs font-black text-emerald-600">{progressPct(selectedCampaign)}%</span>
+                    </div>
+                    <p className="text-sm font-black text-slate-800">
+                      <span className="text-[#e62e43]">{selectedCampaign.luongMauDaThu || 0}</span> / {selectedCampaign.soLuongDuKien || 0} <span className="text-xs font-normal text-slate-500">đv</span>
+                    </p>
+                    <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden mt-1.5">
+                      <div
+                        className={`h-full rounded-full ${progressPct(selectedCampaign) >= 100 ? "bg-emerald-500" : "bg-[#e62e43]"}`}
+                        style={{ width: `${progressPct(selectedCampaign)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Registrations Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-black text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2">
+                      <span className="material-symbols-outlined text-base text-[#e62e43]">group</span>
+                      Danh sách Tình nguyện viên đăng ký
+                    </h4>
+                    <span className="px-2.5 py-0.5 bg-rose-100 text-[#e62e43] font-black text-xs rounded-full border border-rose-200">
+                      {campaignRegs.length} người
+                    </span>
+                  </div>
+
+                  <div className="relative w-full sm:w-64">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base">search</span>
+                    <input
+                      value={searchReg}
+                      onChange={(e) => setSearchReg(e.target.value)}
+                      placeholder="Tìm tên TNV, CCCD, mã đơn..."
+                      className="w-full h-9 bg-slate-100 hover:bg-slate-50 border border-transparent rounded-xl pl-9 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43]/40 focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+                  {loadingRegs ? (
+                    <div className="py-12 text-center text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-2">
+                      <div className="w-7 h-7 border-[3px] border-[#e62e43] border-t-transparent rounded-full animate-spin" />
+                      <span>Đang tải dữ liệu đăng ký...</span>
+                    </div>
+                  ) : (() => {
+                    const qReg = searchReg.trim().toLowerCase();
+                    const filteredRegs = campaignRegs.filter((r) => {
+                      if (!qReg) return true;
+                      const ten = (r.tinhNguyenVien?.hoVaTen || r.maTNV || "").toLowerCase();
+                      const cccd = (r.tinhNguyenVien?.soCCCD || "").toLowerCase();
+                      const ma = (r.maDon || "").toLowerCase();
+                      const stt = (r.trangThai || "").toLowerCase();
+                      return ten.includes(qReg) || cccd.includes(qReg) || ma.includes(qReg) || stt.includes(qReg);
+                    });
+
+                    if (filteredRegs.length === 0) {
+                      return (
+                        <div className="py-12 text-center text-slate-400 text-xs">
+                          {searchReg ? "Không tìm thấy tình nguyện viên phù hợp" : "Chưa có tình nguyện viên nào đăng ký tham gia chiến dịch này"}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs">
+                          <thead>
+                            <tr className="bg-slate-50 border-b border-slate-200 font-bold text-slate-500 uppercase tracking-wider text-[10px]">
+                              <th className="py-3 px-4">Mã đơn</th>
+                              <th className="py-3 px-4">Tình nguyện viên</th>
+                              <th className="py-3 px-4">Số CCCD / SĐT</th>
+                              <th className="py-3 px-4 text-center">Thể tích</th>
+                              <th className="py-3 px-4 text-center">Trạng thái</th>
+                              <th className="py-3 px-4 text-right">Xử lý bởi</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                            {filteredRegs.map((r) => (
+                              <tr key={r.maDon} className="hover:bg-slate-50/80 transition-colors">
+                                <td className="py-3 px-4 font-mono font-bold text-[#e62e43]">
+                                  <span className="px-2 py-0.5 bg-rose-50 rounded border border-rose-100">{r.maDon}</span>
+                                </td>
+                                <td className="py-3 px-4 font-bold text-slate-900">
+                                  {r.tinhNguyenVien?.hoVaTen || r.maTNV || "---"}
+                                </td>
+                                <td className="py-3 px-4 text-slate-500 font-mono">
+                                  {r.tinhNguyenVien?.soCCCD || r.tinhNguyenVien?.soDienThoai || "---"}
+                                </td>
+                                <td className="py-3 px-4 text-center font-bold">
+                                  <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-lg">{r.theTich || 250} ml</span>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase
+                                    ${r.trangThai === "DA_KHAM" ? "bg-green-100 text-green-700" :
+                                      r.trangThai === "CHO_KHAM" ? "bg-amber-100 text-amber-700" :
+                                      r.trangThai === "DA_THU_NHAN" ? "bg-blue-100 text-blue-700" :
+                                      "bg-slate-100 text-slate-600"}`}>
+                                    {r.trangThai === "CHO_KHAM" ? "Chờ khám" :
+                                      r.trangThai === "DA_KHAM" ? "Đã khám" :
+                                      r.trangThai === "DA_THU_NHAN" ? "Đã thu máu" :
+                                      r.trangThai === "HUY" ? "Đã hủy" :
+                                      r.trangThai || "Chờ xử lý"}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 text-right text-slate-500 font-mono">
+                                  {r.maNV ? (
+                                    <span className="text-blue-600 font-bold flex items-center justify-end gap-1">
+                                      <span className="material-symbols-outlined text-xs">badge</span>
+                                      {r.maNV}
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-400 italic">TNV tự đăng ký</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 px-7 bg-slate-50 border-t border-slate-200 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setModal(null)}
+                className="h-10 px-6 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl transition-all shadow-sm active:scale-95"
+              >
+                Đóng chi tiết
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🚀 MODAL TẠO MỚI / CHỈNH SỬA CHIẾN DỊCH */}
+      {(modal === "create" || modal?.type === "edit") && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-7 py-5 flex items-center justify-between border-b border-slate-700/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#e62e43] to-red-600 flex items-center justify-center text-white shadow-lg shadow-red-500/20">
+                  <span className="material-symbols-outlined text-xl">
+                    {modal === "create" ? "add_circle" : "edit_document"}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="font-black text-white text-base sm:text-lg tracking-tight">
+                    {modal === "create" ? "Tạo chiến dịch mới" : "Chỉnh sửa chiến dịch"}
+                  </h3>
+                  <p className="text-slate-400 text-xs font-medium mt-0.5">
+                    {modal === "create" ? "Thiết lập thông tin điểm hiến máu mới" : `Cập nhật thông tin ID: ${modal.maChienDich}`}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setModal(null)}
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all active:scale-95"
+              >
+                <span className="material-symbols-outlined text-xl">
                   close
                 </span>
               </button>
