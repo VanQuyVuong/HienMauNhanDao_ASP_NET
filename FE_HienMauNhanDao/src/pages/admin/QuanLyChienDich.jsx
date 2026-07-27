@@ -483,11 +483,15 @@ export default function QuanLyChienDich() {
       setModal(null);
       loadData();
     } catch (err) {
-      Swal.fire(
-        "Lỗi",
-        err?.response?.data?.message || "Thao tác thất bại",
-        "error",
-      );
+      const errMsg =
+        err?.response?.data?.message ||
+        (err?.response?.data?.errors
+          ? Object.values(err.response.data.errors).flat().join("; ")
+          : null) ||
+        err?.response?.data?.title ||
+        err?.message ||
+        "Thao tác thất bại";
+      Swal.fire("Lỗi", errMsg, "error");
     } finally {
       setSubmitting(false);
     }
