@@ -276,7 +276,7 @@ const emptyForm = {
   newTenDiaDiem: "",
   newDiaChi: "",
   newLoaiDiaDiem: "TruongHoc",
-  newMaPhuongXa: "PX001",
+  newMaPhuongXa: "PX00001",
   pinnedLat: null,
   pinnedLng: null,
   maNhanVien: "",
@@ -379,7 +379,7 @@ export default function QuanLyChienDich() {
       newTenDiaDiem: c.diaDiem?.tenDiaDiem || "",
       newDiaChi: c.diaDiem?.diaChi || c.diaDiem?.diaChiChiTiet || "",
       newLoaiDiaDiem: c.diaDiem?.loaiDiaDiem || "TruongHoc",
-      newMaPhuongXa: c.diaDiem?.maPhuongXa || "PX001",
+      newMaPhuongXa: c.diaDiem?.maPhuongXa || "PX00001",
       pinnedLat: null,
       pinnedLng: null,
       maNhanVien: c.maNhanVien || "",
@@ -430,11 +430,11 @@ export default function QuanLyChienDich() {
           return;
         }
         const newLocPayload = {
-          maDiaDiem: `DD${Math.floor(1000 + Math.random() * 9000)}`,
+          maDiaDiem: `DD${Math.floor(10000 + Math.random() * 90000)}`,
           tenDiaDiem: form.newTenDiaDiem.trim(),
           diaChi: form.newDiaChi.trim(),
           loaiDiaDiem: form.newLoaiDiaDiem || "TruongHoc",
-          maPhuongXa: form.newMaPhuongXa || "PX001",
+          maPhuongXa: form.newMaPhuongXa || "PX00001",
         };
         const createLocRes = await diaDiemService.createDiaDiem(newLocPayload);
         targetMaDiaDiem =
