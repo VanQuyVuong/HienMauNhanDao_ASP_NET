@@ -25,22 +25,61 @@ const toImageSrc = (imageUrl) => {
 };
 
 const STATUS_OPTIONS = [
-  "Đang lập kế hoạch",
-  "Đã phê duyệt",
-  "Đang diễn ra",
-  "Đã kết thúc",
+  { value: "ChuaBatDau", label: "Đã mở đăng ký (Chưa diễn ra)" },
+  { value: "DangDienRa", label: "Đang diễn ra (Thực hiện thu nhận máu)" },
+  { value: "DaKetThuc", label: "Đã kết thúc" },
+  { value: "DaHuy", label: "Đã hủy / Tạm hoãn" },
 ];
 
+const getStatusLabel = (status) => {
+  const s = String(status || "").trim();
+  if (s === "ChuaBatDau" || s.includes("lập kế hoạch") || s.includes("phê duyệt") || s.includes("mở")) {
+    return "Đã mở đăng ký";
+  }
+  if (s === "DangDienRa" || (s.includes("diễn ra") && !s.includes("kết"))) {
+    return "Đang diễn ra";
+  }
+  if (s === "DaKetThuc" || s.includes("kết thúc")) {
+    return "Đã kết thúc";
+  }
+  if (s === "DaHuy" || s.includes("hủy")) {
+    return "Đã hủy";
+  }
+  return "Đã mở đăng ký";
+};
+
+const toBackendStatus = (status) => {
+  const s = String(status || "").trim();
+  if (s === "DangDienRa" || (s.includes("diễn ra") && !s.includes("kết"))) return "DangDienRa";
+  if (s === "DaKetThuc" || s.includes("kết thúc")) return "DaKetThuc";
+  if (s === "DaHuy" || s.includes("hủy")) return "DaHuy";
+  return "ChuaBatDau";
+};
+
+const calcStatusByTime = (bdVal, ktVal) => {
+  if (!bdVal || !ktVal) return "ChuaBatDau";
+  const now = new Date();
+  const bd = new Date(bdVal);
+  const kt = new Date(ktVal);
+  if (isNaN(bd.getTime()) || isNaN(kt.getTime())) return "ChuaBatDau";
+  if (now < bd) return "ChuaBatDau";
+  if (now >= bd && now <= kt) return "DangDienRa";
+  return "DaKetThuc";
+};
+
 const statusBadge = (status) => {
-  const s = status || "";
-  if (s.includes("diễn ra") && !s.includes("kết")) {
-    return "bg-green-100 text-green-700 border-green-200";
+  const label = getStatusLabel(status);
+  if (label === "Đang diễn ra") {
+    return "bg-emerald-100 text-emerald-700 border-emerald-200 shadow-xs shadow-emerald-500/10";
   }
-  if (s.includes("phê duyệt") || s.includes("Sắp")) {
-    return "bg-amber-100 text-amber-700 border-amber-200";
+  if (label === "Đã mở đăng ký") {
+    return "bg-blue-100 text-blue-700 border-blue-200 shadow-xs shadow-blue-500/10";
   }
-  if (s.includes("kết thúc")) {
+  if (label === "Đã kết thúc") {
     return "bg-slate-100 text-slate-600 border-slate-200";
+  }
+  if (label === "Đã hủy") {
+    return "bg-rose-100 text-rose-700 border-rose-200";
   }
   return "bg-blue-100 text-blue-700 border-blue-200";
 };
@@ -62,7 +101,7 @@ const emptyForm = {
   thoiGianBD: "",
   thoiGianKT: "",
   soLuongDuKien: 100,
-  trangThai: "Đang lập kế hoạch",
+  trangThai: "ChuaBatDau",
   imageUrl: "",
 };
 
@@ -84,6 +123,7 @@ export default function QuanLyChienDich() {
   const [campaignRegs, setCampaignRegs] = useState([]);
   const [loadingRegs, setLoadingRegs] = useState(false);
   const [searchReg, setSearchReg] = useState("");
+  const [filterRegStatus, setFilterRegStatus] = useState("");
   const imageInputRef = useRef(null);
 
   const loadData = useCallback(async () => {
@@ -113,12 +153,10 @@ export default function QuanLyChienDich() {
   const stats = useMemo(() => {
     const total = campaigns.length;
     const dangDienRa = campaigns.filter(
-      (c) =>
-        (c.trangThai || "").includes("diễn ra") &&
-        !(c.trangThai || "").includes("kết"),
+      (c) => getStatusLabel(c.trangThai) === "Đang diễn ra",
     ).length;
-    const sapDienRa = campaigns.filter((c) =>
-      (c.trangThai || "").includes("phê duyệt"),
+    const sapDienRa = campaigns.filter(
+      (c) => getStatusLabel(c.trangThai) === "Đã mở đăng ký",
     ).length;
     const daThu = campaigns.reduce((sum, c) => sum + (c.luongMauDaThu || 0), 0);
     return { total, dangDienRa, sapDienRa, daThu };
@@ -132,7 +170,7 @@ export default function QuanLyChienDich() {
         (c.tenChienDich || "").toLowerCase().includes(q) ||
         (c.maChienDich || "").toLowerCase().includes(q) ||
         (c.diaDiem?.tenDiaDiem || "").toLowerCase().includes(q);
-      const matchS = !filterStatus || c.trangThai === filterStatus;
+      const matchS = !filterStatus || toBackendStatus(c.trangThai) === filterStatus;
       return matchQ && matchS;
     });
   }, [campaigns, search, filterStatus, headerSearch]);
@@ -153,7 +191,7 @@ export default function QuanLyChienDich() {
       thoiGianBD: toDatetimeLocal(c.thoiGianBD),
       thoiGianKT: toDatetimeLocal(c.thoiGianKT),
       soLuongDuKien: c.soLuongDuKien || 100,
-      trangThai: c.trangThai || "Đang lập kế hoạch",
+      trangThai: toBackendStatus(c.trangThai),
       imageUrl: c.imageUrl || "",
     });
     setModal({ type: "edit", maChienDich: c.maChienDich });
@@ -162,6 +200,7 @@ export default function QuanLyChienDich() {
   const openDetail = async (c) => {
     setSelectedCampaign(c);
     setSearchReg("");
+    setFilterRegStatus("");
     setModal("detail");
     setLoadingRegs(true);
     try {
@@ -186,7 +225,7 @@ export default function QuanLyChienDich() {
       thoiGianBD: fromDatetimeLocal(form.thoiGianBD),
       thoiGianKT: fromDatetimeLocal(form.thoiGianKT),
       soLuongDuKien: Number(form.soLuongDuKien) || 100,
-      trangThai: form.trangThai,
+      trangThai: toBackendStatus(form.trangThai),
       imageUrl: form.imageUrl || null,
     };
     setSubmitting(true);
@@ -362,8 +401,8 @@ export default function QuanLyChienDich() {
           >
             <option value="">Tất cả trạng thái</option>
             {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {s}
+              <option key={s.value} value={s.value}>
+                {s.label}
               </option>
             ))}
           </select>
@@ -482,9 +521,9 @@ export default function QuanLyChienDich() {
                           className={`inline-flex items-center px-3 py-1 text-[11px] font-black rounded-full border ${statusBadge(c.trangThai)}`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full mr-2 ${(c.trangThai || "").includes("diễn ra") ? "bg-green-600 animate-pulse" : "bg-current"}`}
+                            className={`w-1.5 h-1.5 rounded-full mr-2 ${getStatusLabel(c.trangThai) === "Đang diễn ra" ? "bg-emerald-500 animate-pulse" : "bg-current"}`}
                           />
-                          {(c.trangThai || "—").toUpperCase()}
+                          {getStatusLabel(c.trangThai).toUpperCase()}
                         </span>
                       </td>
                       <td className="px-6 text-right">
@@ -572,198 +611,328 @@ export default function QuanLyChienDich() {
         )}
       </div>
 
-      {/* 🚀 MODAL CHI TIẾT & DANH SÁCH TNV ĐĂNG KÝ */}
+      {/* 🚀 MODAL CHI TIẾT & DANH SÁCH TNV ĐĂNG KÝ (PREMIUM WOW DESIGN) */}
       {modal === "detail" && selectedCampaign && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-7 py-5 flex items-center justify-between border-b border-slate-700/50 shrink-0">
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#e62e43] to-red-600 flex items-center justify-center text-white shadow-lg shadow-red-500/20 shrink-0">
-                  <span className="material-symbols-outlined text-xl">event_note</span>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2.5">
-                    <h3 className="font-black text-white text-base sm:text-lg tracking-tight">Chi tiết & Danh sách Đăng ký</h3>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${statusBadge(selectedCampaign.trangThai)}`}>
-                      {selectedCampaign.trangThai || "—"}
-                    </span>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-6xl rounded-[2rem] shadow-2xl overflow-hidden max-h-[92vh] flex flex-col border border-slate-100 animate-in zoom-in-95 duration-300">
+            
+            {/* 🌟 HERO BANNER & HEADER */}
+            <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-red-950 px-8 py-7 text-white border-b border-slate-800 shrink-0 overflow-hidden">
+              {/* Background decorative blur */}
+              <div className="absolute -top-24 -right-24 w-96 h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-start sm:items-center gap-5">
+                  {/* Thumbnail Banner or Glass Icon */}
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl shrink-0 bg-gradient-to-br from-red-600 to-rose-700 flex items-center justify-center group">
+                    {selectedCampaign.imageUrl ? (
+                      <img
+                        src={toImageSrc(selectedCampaign.imageUrl)}
+                        alt="Campaign Banner"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <span className="material-symbols-outlined text-4xl text-white drop-shadow-md animate-pulse">
+                        volunteer_activism
+                      </span>
+                    )}
                   </div>
-                  <p className="text-slate-400 text-xs mt-0.5 flex items-center gap-1.5 font-medium">
-                    <span>Mã ID: <b>{selectedCampaign.maChienDich}</b></span>
-                    <span>•</span>
-                    <span className="truncate max-w-[300px]">{selectedCampaign.tenChienDich}</span>
-                  </p>
+
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/15 text-[11px] font-mono font-bold text-rose-300">
+                        ID: {selectedCampaign.maChienDich}
+                      </span>
+                      <span className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-black uppercase border shadow-md backdrop-blur-md ${statusBadge(selectedCampaign.trangThai)}`}>
+                        <span className={`w-2 h-2 rounded-full mr-2 ${getStatusLabel(selectedCampaign.trangThai) === "Đang diễn ra" ? "bg-emerald-500 animate-ping" : "bg-current"}`} />
+                        {getStatusLabel(selectedCampaign.trangThai)}
+                      </span>
+                    </div>
+                    <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight drop-shadow-sm leading-snug">
+                      {selectedCampaign.tenChienDich}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-300 flex items-center gap-2 font-medium">
+                      <span className="material-symbols-outlined text-base text-rose-400">verified</span>
+                      Chiến dịch hiến máu tình nguyện được phê duyệt bởi Sở Y tế
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 self-end md:self-center">
+                  <button
+                    type="button"
+                    onClick={() => openDetail(selectedCampaign)}
+                    title="Làm mới dữ liệu đăng ký"
+                    className="h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-2 transition-all backdrop-blur-md border border-white/10 active:scale-95 shadow-lg"
+                  >
+                    <span className={`material-symbols-outlined text-base ${loadingRegs ? "animate-spin" : ""}`}>refresh</span>
+                    <span>Làm mới</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModal(null)}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-200 hover:text-white transition-all backdrop-blur-md border border-rose-500/30 active:scale-95 shadow-lg"
+                  >
+                    <span className="material-symbols-outlined text-xl">close</span>
+                  </button>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setModal(null)}
-                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all active:scale-95"
-              >
-                <span className="material-symbols-outlined text-xl">close</span>
-              </button>
             </div>
 
-            {/* Modal Body - Scrollable */}
-            <div className="p-7 overflow-y-auto space-y-7 flex-1">
-              {/* Top Overview Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50/80 p-5 rounded-2xl border border-slate-200/80 shadow-inner">
-                <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-red-100/80 text-[#e62e43] flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="material-symbols-outlined text-xl">location_on</span>
+            {/* 🌟 MODAL BODY (SCROLLABLE & HIGH AESTHETIC) */}
+            <div className="p-6 sm:p-8 overflow-y-auto space-y-8 flex-1 bg-slate-50/50">
+              
+              {/* 4 STATS OVERVIEW CARDS (GLASSMORPHISM & GRADIENTS) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Location */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-rose-500/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-2xl">location_on</span>
                   </div>
-                  <div className="overflow-hidden">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Địa điểm tổ chức</p>
-                    <p className="text-sm font-bold text-slate-800 mt-1 truncate" title={selectedCampaign.diaDiem?.tenDiaDiem}>
+                  <div className="overflow-hidden min-w-0">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Địa điểm tổ chức</p>
+                    <p className="text-sm font-black text-slate-800 mt-1 truncate" title={selectedCampaign.diaDiem?.tenDiaDiem}>
                       {selectedCampaign.diaDiem?.tenDiaDiem || "---"}
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5 truncate">{selectedCampaign.diaDiem?.diaChi || "Đà Nẵng"}</p>
+                    <p className="text-xs font-semibold text-slate-500 mt-0.5 truncate">{selectedCampaign.diaDiem?.diaChi || "Đà Nẵng"}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3.5 border-t md:border-t-0 md:border-l border-slate-200/80 pt-4 md:pt-0 md:pl-5">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100/80 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="material-symbols-outlined text-xl">schedule</span>
+                {/* Schedule */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-2xl">event_available</span>
                   </div>
-                  <div>
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Thời gian diễn ra</p>
-                    <p className="text-xs font-bold text-slate-800 mt-1">
-                      Bắt đầu: {toDatetimeLocal(selectedCampaign.thoiGianBD)?.replace("T", " ") || "---"}
-                    </p>
-                    <p className="text-xs font-bold text-slate-600 mt-0.5">
-                      Kết thúc: {toDatetimeLocal(selectedCampaign.thoiGianKT)?.replace("T", " ") || "---"}
-                    </p>
+                  <div className="overflow-hidden min-w-0">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Thời gian lịch trình</p>
+                    <div className="mt-1 space-y-0.5">
+                      <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5 truncate">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Từ: {toDatetimeLocal(selectedCampaign.thoiGianBD)?.replace("T", " ") || "---"}
+                      </p>
+                      <p className="text-xs font-bold text-slate-500 flex items-center gap-1.5 truncate">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        Đến: {toDatetimeLocal(selectedCampaign.thoiGianKT)?.replace("T", " ") || "---"}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3.5 border-t md:border-t-0 md:border-l border-slate-200/80 pt-4 md:pt-0 md:pl-5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100/80 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="material-symbols-outlined text-xl">bloodtype</span>
+                {/* Blood Volume Progress */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-2xl">bloodtype</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center mb-1">
-                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tiến độ thu máu</p>
-                      <span className="text-xs font-black text-emerald-600">{progressPct(selectedCampaign)}%</span>
+                    <div className="flex justify-between items-center">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiến độ thu máu</p>
+                      <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        {progressPct(selectedCampaign)}%
+                      </span>
                     </div>
-                    <p className="text-sm font-black text-slate-800">
-                      <span className="text-[#e62e43]">{selectedCampaign.luongMauDaThu || 0}</span> / {selectedCampaign.soLuongDuKien || 0} <span className="text-xs font-normal text-slate-500">đv</span>
+                    <p className="text-base font-black text-slate-900 mt-1">
+                      <span className="text-red-600 font-extrabold">{selectedCampaign.luongMauDaThu || 0}</span> / {selectedCampaign.soLuongDuKien || 0} <span className="text-xs font-semibold text-slate-500">đv</span>
                     </p>
-                    <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden mt-1.5">
+                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden mt-2 p-0.5 border border-slate-200/50">
                       <div
-                        className={`h-full rounded-full ${progressPct(selectedCampaign) >= 100 ? "bg-emerald-500" : "bg-[#e62e43]"}`}
-                        style={{ width: `${progressPct(selectedCampaign)}%` }}
+                        className={`h-full rounded-full transition-all duration-1000 ${progressPct(selectedCampaign) >= 100 ? "bg-gradient-to-r from-emerald-500 to-teal-400" : "bg-gradient-to-r from-red-600 to-rose-500"}`}
+                        style={{ width: `${Math.min(100, progressPct(selectedCampaign))}%` }}
                       />
                     </div>
                   </div>
                 </div>
+
+                {/* Volunteers Summary */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-2xl">groups</span>
+                  </div>
+                  <div className="overflow-hidden min-w-0 flex-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Đăng ký tham gia</p>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-2xl font-black text-slate-900">{campaignRegs.length}</span>
+                      <span className="text-xs font-bold text-slate-500">Tình nguyện viên</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-emerald-600 mt-1 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">check_circle</span>
+                      {campaignRegs.filter(r => r.trangThai === "DA_THU_NHAN").length} đã hiến thành công
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* Registrations Section */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-black text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2">
-                      <span className="material-symbols-outlined text-base text-[#e62e43]">group</span>
-                      Danh sách Tình nguyện viên đăng ký
-                    </h4>
-                    <span className="px-2.5 py-0.5 bg-rose-100 text-[#e62e43] font-black text-xs rounded-full border border-rose-200">
-                      {campaignRegs.length} người
-                    </span>
+              {/* 🌟 REGISTRATION LIST TABLE SECTION */}
+              <div className="bg-white rounded-3xl border border-slate-200/80 shadow-lg overflow-hidden flex flex-col">
+                {/* Table Header & Filters Bar */}
+                <div className="p-6 bg-slate-900 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center text-white shadow-md shadow-red-600/30">
+                      <span className="material-symbols-outlined text-xl">fact_check</span>
+                    </div>
+                    <div>
+                      <h4 className="font-black text-base uppercase tracking-wider">
+                        Danh sách Tình nguyện viên đăng ký
+                      </h4>
+                      <p className="text-xs text-slate-400 font-medium">
+                        Quản lý trạng thái khám và thu nhận máu của từng tình nguyện viên
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="relative w-full sm:w-64">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base">search</span>
-                    <input
-                      value={searchReg}
-                      onChange={(e) => setSearchReg(e.target.value)}
-                      placeholder="Tìm tên TNV, CCCD, mã đơn..."
-                      className="w-full h-9 bg-slate-100 hover:bg-slate-50 border border-transparent rounded-xl pl-9 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43]/40 focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
-                    />
+                  {/* Filter Status Tabs */}
+                  <div className="flex items-center gap-1 bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 overflow-x-auto max-w-full">
+                    {[
+                      { id: "", label: "Tất cả", count: campaignRegs.length },
+                      { id: "CHO_KHAM", label: "Chờ khám", count: campaignRegs.filter(r => r.trangThai === "CHO_KHAM").length },
+                      { id: "DA_KHAM", label: "Đã khám", count: campaignRegs.filter(r => r.trangThai === "DA_KHAM").length },
+                      { id: "DA_THU_NHAN", label: "Đã thu máu", count: campaignRegs.filter(r => r.trangThai === "DA_THU_NHAN").length },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setFilterRegStatus(tab.id)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filterRegStatus === tab.id ? "bg-red-600 text-white shadow-md shadow-red-600/30" : "text-slate-300 hover:bg-slate-700/60"}`}
+                      >
+                        <span>{tab.label}</span>
+                        <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${filterRegStatus === tab.id ? "bg-white/20 text-white" : "bg-slate-700 text-slate-400"}`}>
+                          {tab.count}
+                        </span>
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+                {/* Search Bar inside table section */}
+                <div className="px-6 py-4 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between gap-4 flex-wrap">
+                  <div className="relative w-full sm:w-80">
+                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                    <input
+                      value={searchReg}
+                      onChange={(e) => setSearchReg(e.target.value)}
+                      placeholder="Tìm tên TNV, CCCD, số điện thoại, mã đơn..."
+                      className="w-full h-10 bg-white border border-slate-200 rounded-xl pl-10 pr-4 text-xs font-bold text-slate-800 placeholder-slate-400 outline-none focus:border-red-600 focus:ring-4 focus:ring-red-600/10 shadow-xs transition-all"
+                    />
+                  </div>
+
+                  <div className="text-xs font-bold text-slate-500">
+                    Hiển thị <span className="text-slate-900 font-black">{campaignRegs.length}</span> đơn đăng ký
+                  </div>
+                </div>
+
+                {/* Table Data Render */}
+                <div className="overflow-x-auto min-h-[250px]">
                   {loadingRegs ? (
-                    <div className="py-12 text-center text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-2">
-                      <div className="w-7 h-7 border-[3px] border-[#e62e43] border-t-transparent rounded-full animate-spin" />
-                      <span>Đang tải dữ liệu đăng ký...</span>
+                    <div className="py-20 text-center text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-3">
+                      <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin shadow-lg" />
+                      <span className="text-sm font-black text-slate-600">Đang đồng bộ dữ liệu từ Sở Y tế...</span>
                     </div>
                   ) : (() => {
                     const qReg = searchReg.trim().toLowerCase();
                     const filteredRegs = campaignRegs.filter((r) => {
-                      if (!qReg) return true;
-                      const ten = (r.tinhNguyenVien?.hoVaTen || r.maTNV || "").toLowerCase();
-                      const cccd = (r.tinhNguyenVien?.soCCCD || "").toLowerCase();
-                      const ma = (r.maDon || "").toLowerCase();
-                      const stt = (r.trangThai || "").toLowerCase();
-                      return ten.includes(qReg) || cccd.includes(qReg) || ma.includes(qReg) || stt.includes(qReg);
+                      const matchQ = !qReg ||
+                        (r.tinhNguyenVien?.hoVaTen || r.maTNV || "").toLowerCase().includes(qReg) ||
+                        (r.tinhNguyenVien?.soCCCD || "").toLowerCase().includes(qReg) ||
+                        (r.tinhNguyenVien?.soDienThoai || "").toLowerCase().includes(qReg) ||
+                        (r.maDon || "").toLowerCase().includes(qReg);
+                      const matchS = !filterRegStatus || r.trangThai === filterRegStatus;
+                      return matchQ && matchS;
                     });
 
                     if (filteredRegs.length === 0) {
                       return (
-                        <div className="py-12 text-center text-slate-400 text-xs">
-                          {searchReg ? "Không tìm thấy tình nguyện viên phù hợp" : "Chưa có tình nguyện viên nào đăng ký tham gia chiến dịch này"}
+                        <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
+                          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                            <span className="material-symbols-outlined text-3xl">inbox</span>
+                          </div>
+                          <p className="text-sm font-black text-slate-600">
+                            {searchReg || filterRegStatus ? "Không tìm thấy tình nguyện viên nào phù hợp bộ lọc" : "Chưa có tình nguyện viên nào đăng ký tham gia chiến dịch này"}
+                          </p>
+                          {(searchReg || filterRegStatus) && (
+                            <button
+                              type="button"
+                              onClick={() => { setSearchReg(""); setFilterRegStatus(""); }}
+                              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                            >
+                              Xóa bộ lọc
+                            </button>
+                          )}
                         </div>
                       );
                     }
 
                     return (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs">
-                          <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200 font-bold text-slate-500 uppercase tracking-wider text-[10px]">
-                              <th className="py-3 px-4">Mã đơn</th>
-                              <th className="py-3 px-4">Tình nguyện viên</th>
-                              <th className="py-3 px-4">Số CCCD / SĐT</th>
-                              <th className="py-3 px-4 text-center">Thể tích</th>
-                              <th className="py-3 px-4 text-center">Trạng thái</th>
-                              <th className="py-3 px-4 text-right">Xử lý bởi</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                            {filteredRegs.map((r) => (
-                              <tr key={r.maDon} className="hover:bg-slate-50/80 transition-colors">
-                                <td className="py-3 px-4 font-mono font-bold text-[#e62e43]">
-                                  <span className="px-2 py-0.5 bg-rose-50 rounded border border-rose-100">{r.maDon}</span>
-                                </td>
-                                <td className="py-3 px-4 font-bold text-slate-900">
-                                  {r.tinhNguyenVien?.hoVaTen || r.maTNV || "---"}
-                                </td>
-                                <td className="py-3 px-4 text-slate-500 font-mono">
-                                  {r.tinhNguyenVien?.soCCCD || r.tinhNguyenVien?.soDienThoai || "---"}
-                                </td>
-                                <td className="py-3 px-4 text-center font-bold">
-                                  <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-lg">{r.theTich || 250} ml</span>
-                                </td>
-                                <td className="py-3 px-4 text-center">
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase
-                                    ${r.trangThai === "DA_KHAM" ? "bg-green-100 text-green-700" :
-                                      r.trangThai === "CHO_KHAM" ? "bg-amber-100 text-amber-700" :
-                                      r.trangThai === "DA_THU_NHAN" ? "bg-blue-100 text-blue-700" :
-                                      "bg-slate-100 text-slate-600"}`}>
-                                    {r.trangThai === "CHO_KHAM" ? "Chờ khám" :
-                                      r.trangThai === "DA_KHAM" ? "Đã khám" :
-                                      r.trangThai === "DA_THU_NHAN" ? "Đã thu máu" :
-                                      r.trangThai === "HUY" ? "Đã hủy" :
-                                      r.trangThai || "Chờ xử lý"}
+                      <table className="w-full text-left text-xs">
+                        <thead>
+                          <tr className="bg-slate-50/90 border-b border-slate-200 font-extrabold text-slate-500 uppercase tracking-wider text-[10px]">
+                            <th className="py-4 px-6">Mã đơn</th>
+                            <th className="py-4 px-6">Tình nguyện viên</th>
+                            <th className="py-4 px-6">CCCD / Liên hệ</th>
+                            <th className="py-4 px-6 text-center">Thể tích máu</th>
+                            <th className="py-4 px-6 text-center">Trạng thái khám/hiến</th>
+                            <th className="py-4 px-6 text-right">Người tiếp nhận</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                          {filteredRegs.map((r) => (
+                            <tr key={r.maDon} className="hover:bg-red-50/30 transition-colors group">
+                              <td className="py-4 px-6 font-mono font-black text-red-600">
+                                <span className="px-2.5 py-1 bg-red-50 rounded-lg border border-red-100 shadow-2xs group-hover:bg-red-100 transition-colors">
+                                  {r.maDon}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6 font-black text-slate-900 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">
+                                    {(r.tinhNguyenVien?.hoVaTen || "T").charAt(0).toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <p className="font-bold text-slate-900">{r.tinhNguyenVien?.hoVaTen || r.maTNV || "---"}</p>
+                                    <p className="text-[10px] text-slate-400 font-normal">TNV ID: {r.maTNV}</p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-4 px-6">
+                                <p className="font-mono font-bold text-slate-800">{r.tinhNguyenVien?.soCCCD || "---"}</p>
+                                <p className="text-[11px] text-slate-500">{r.tinhNguyenVien?.soDienThoai || "Không có SĐT"}</p>
+                              </td>
+                              <td className="py-4 px-6 text-center">
+                                <span className="px-3 py-1 bg-blue-50 text-blue-700 font-black rounded-full border border-blue-200 shadow-2xs">
+                                  {r.theTich || 250} ml
+                                </span>
+                              </td>
+                              <td className="py-4 px-6 text-center">
+                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase border shadow-2xs
+                                  ${r.trangThai === "DA_KHAM" ? "bg-emerald-100 text-emerald-800 border-emerald-200" :
+                                    r.trangThai === "CHO_KHAM" ? "bg-amber-100 text-amber-800 border-amber-200" :
+                                    r.trangThai === "DA_THU_NHAN" ? "bg-blue-600 text-white border-blue-700 shadow-blue-500/20" :
+                                    r.trangThai === "HUY" ? "bg-rose-100 text-rose-800 border-rose-200" :
+                                    "bg-slate-100 text-slate-700 border-slate-200"}`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${r.trangThai === "DA_THU_NHAN" ? "bg-white" : "bg-current"}`} />
+                                  {r.trangThai === "CHO_KHAM" ? "Chờ khám sàng lọc" :
+                                    r.trangThai === "DA_KHAM" ? "Đã đạt sức khỏe" :
+                                    r.trangThai === "DA_THU_NHAN" ? "Đã thu máu thành công" :
+                                    r.trangThai === "HUY" ? "Đã hủy / Không đạt" :
+                                    r.trangThai || "Chờ xử lý"}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6 text-right font-mono">
+                                {r.maNV ? (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 font-bold rounded-lg text-xs">
+                                    <span className="material-symbols-outlined text-sm text-blue-600">medical_services</span>
+                                    {r.maNV}
                                   </span>
-                                </td>
-                                <td className="py-3 px-4 text-right text-slate-500 font-mono">
-                                  {r.maNV ? (
-                                    <span className="text-blue-600 font-bold flex items-center justify-end gap-1">
-                                      <span className="material-symbols-outlined text-xs">badge</span>
-                                      {r.maNV}
-                                    </span>
-                                  ) : (
-                                    <span className="text-slate-400 italic">TNV tự đăng ký</span>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                                ) : (
+                                  <span className="text-slate-400 italic text-[11px]">TNV đăng ký online</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     );
                   })()}
                 </div>
@@ -771,13 +940,17 @@ export default function QuanLyChienDich() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 px-7 bg-slate-50 border-t border-slate-200 flex justify-end shrink-0">
+            <div className="p-5 px-8 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
+              <div className="text-xs font-semibold text-slate-500">
+                ⚡ Dữ liệu chiến dịch hiến máu được đồng bộ với <b className="text-slate-800">Sở Y tế Thành phố Đà Nẵng</b>
+              </div>
               <button
                 type="button"
                 onClick={() => setModal(null)}
-                className="h-10 px-6 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl transition-all shadow-sm active:scale-95"
+                className="h-11 px-8 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl transition-all shadow-lg shadow-slate-900/20 active:scale-95 flex items-center gap-2"
               >
-                Đóng chi tiết
+                <span>Đóng bảng chi tiết</span>
+                <span className="material-symbols-outlined text-base">close</span>
               </button>
             </div>
           </div>
@@ -857,10 +1030,12 @@ export default function QuanLyChienDich() {
                     type="datetime-local"
                     required
                     value={form.thoiGianBD}
-                    onChange={(e) =>
-                      setForm({ ...form, thoiGianBD: e.target.value })
-                    }
-                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm outline-none"
+                    onChange={(e) => {
+                      const newBD = e.target.value;
+                      const nextStatus = form.trangThai === "DaHuy" ? "DaHuy" : calcStatusByTime(newBD, form.thoiGianKT);
+                      setForm({ ...form, thoiGianBD: newBD, trangThai: nextStatus });
+                    }}
+                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#e62e43] transition-colors"
                   />
                 </div>
                 <div>
@@ -871,10 +1046,12 @@ export default function QuanLyChienDich() {
                     type="datetime-local"
                     required
                     value={form.thoiGianKT}
-                    onChange={(e) =>
-                      setForm({ ...form, thoiGianKT: e.target.value })
-                    }
-                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm outline-none"
+                    onChange={(e) => {
+                      const newKT = e.target.value;
+                      const nextStatus = form.trangThai === "DaHuy" ? "DaHuy" : calcStatusByTime(form.thoiGianBD, newKT);
+                      setForm({ ...form, thoiGianKT: newKT, trangThai: nextStatus });
+                    }}
+                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#e62e43] transition-colors"
                   />
                 </div>
               </div>
@@ -890,23 +1067,23 @@ export default function QuanLyChienDich() {
                     onChange={(e) =>
                       setForm({ ...form, soLuongDuKien: e.target.value })
                     }
-                    className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm outline-none"
+                    className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#e62e43] transition-colors"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                    Trạng thái
+                    Trạng thái (Tự động theo thời gian)
                   </label>
                   <select
                     value={form.trangThai}
                     onChange={(e) =>
                       setForm({ ...form, trangThai: e.target.value })
                     }
-                    className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm bg-white outline-none"
+                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-bold bg-white outline-none focus:border-[#e62e43] transition-colors cursor-pointer"
                   >
                     {STATUS_OPTIONS.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
+                      <option key={s.value} value={s.value}>
+                        {s.label}
                       </option>
                     ))}
                   </select>
