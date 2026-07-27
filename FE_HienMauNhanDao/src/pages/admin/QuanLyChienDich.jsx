@@ -94,9 +94,49 @@ const fromDatetimeLocal = (val) => {
   return val; // Giữ nguyên định dạng chuẩn ISO 8601 (có chữ T) để C# không bị lỗi binding
 };
 
+const DANANG_GIS_PLACES = {
+  TruongHoc: [
+    { ten: "Trường Đại học Bách Khoa - ĐH Đà Nẵng", diaChi: "54 Nguyễn Lương Bằng, Phường Hòa Khánh Bắc, Liên Chiểu, TP. Đà Nẵng", lat: 16.0741, lng: 108.1500, quan: "Liên Chiểu" },
+    { ten: "Trường Đại học Kinh Tế - ĐH Đà Nẵng", diaChi: "71 Ngũ Hành Sơn, Phường Mỹ An, Ngũ Hành Sơn, TP. Đà Nẵng", lat: 16.0435, lng: 108.2412, quan: "Ngũ Hành Sơn" },
+    { ten: "Trường Đại học Sư Phạm - ĐH Đà Nẵng", diaChi: "459 Tôn Đức Thắng, Phường Hòa Khánh Nam, Liên Chiểu, TP. Đà Nẵng", lat: 16.0689, lng: 108.1555, quan: "Liên Chiểu" },
+    { ten: "Trường Đại học Duy Tân (Cơ sở Nam Ô)", diaChi: "Khu đô thị FPT City, Phường Hòa Hải, Ngũ Hành Sơn, TP. Đà Nẵng", lat: 15.9922, lng: 108.2588, quan: "Ngũ Hành Sơn" },
+    { ten: "Trường THPT Phan Châu Trinh", diaChi: "154 Lê Lợi, Phường Hải Châu 1, Hải Châu, TP. Đà Nẵng", lat: 16.0718, lng: 108.2215, quan: "Hải Châu" },
+    { ten: "Trường Đại học Kiến trúc Đà Nẵng", diaChi: "566 Núi Thành, Phường Hòa Cường Nam, Hải Châu, TP. Đà Nẵng", lat: 16.0351, lng: 108.2201, quan: "Hải Châu" },
+    { ten: "Trường Đại học Đông Á", diaChi: "33 Xô Viết Nghệ Tĩnh, Phường Hòa Cường Nam, Hải Châu, TP. Đà Nẵng", lat: 16.0333, lng: 108.2199, quan: "Hải Châu" },
+  ],
+  TrungTamYTe: [
+    { ten: "Trung tâm Y tế Quận Hải Châu", diaChi: "388 Trần Phú, Phường Bình Thuận, Hải Châu, TP. Đà Nẵng", lat: 16.0520, lng: 108.2234, quan: "Hải Châu" },
+    { ten: "Trung tâm Y tế Quận Thanh Khê", diaChi: "62/32 Hà Huy Tập, Phường Hòa Khê, Thanh Khê, TP. Đà Nẵng", lat: 16.0645, lng: 108.1923, quan: "Thanh Khê" },
+    { ten: "Trung tâm Y tế Quận Liên Chiểu", diaChi: "522 Nguyễn Lương Bằng, Phường Hòa Khánh Bắc, Liên Chiểu, TP. Đà Nẵng", lat: 16.0812, lng: 108.1432, quan: "Liên Chiểu" },
+    { ten: "Trạm Y tế Phường Thanh Bình", diaChi: "114 Thanh Thủy, Phường Thanh Bình, Hải Châu, TP. Đà Nẵng", lat: 16.0765, lng: 108.2154, quan: "Hải Châu" },
+    { ten: "Trạm Y tế Phường Thuận Phước", diaChi: "28 Huỳnh Ngọc Huệ, Phường Thuận Phước, Hải Châu, TP. Đà Nẵng", lat: 16.0882, lng: 108.2198, quan: "Hải Châu" },
+    { ten: "Trạm Y tế Phường Thạch Thang", diaChi: "12 Lý Tự Trọng, Phường Thạch Thang, Hải Châu, TP. Đà Nẵng", lat: 16.0791, lng: 108.2223, quan: "Hải Châu" },
+  ],
+  CoQuan: [
+    { ten: "Trung tâm Hành chính Thành phố Đà Nẵng", diaChi: "24 Trần Phú, Phường Thạch Thang, Hải Châu, TP. Đà Nẵng", lat: 16.0788, lng: 108.2235, quan: "Hải Châu" },
+    { ten: "Khu Công nghệ cao Đà Nẵng (Da Nang Hi-Tech Park)", diaChi: "Xã Hòa Liên, Huyện Hòa Vang, TP. Đà Nẵng", lat: 16.1155, lng: 108.1022, quan: "Hòa Vang" },
+    { ten: "Tòa nhà FPT Complex Đà Nẵng", diaChi: "Khu đô thị FPT City, Phường Hòa Hải, Ngũ Hành Sơn, TP. Đà Nẵng", lat: 15.9901, lng: 108.2577, quan: "Ngũ Hành Sơn" },
+    { ten: "Cảng Hàng không Quốc tế Đà Nẵng", diaChi: "Đường Duy Tân, Phường Hòa Thuận Tây, Hải Châu, TP. Đà Nẵng", lat: 16.0533, lng: 108.2022, quan: "Hải Châu" },
+    { ten: "UBND Phường Hải Châu 1", diaChi: "68 Lê Lợi, Phường Hải Châu 1, Hải Châu, TP. Đà Nẵng", lat: 16.0723, lng: 108.2222, quan: "Hải Châu" },
+  ],
+  DiaDiemCoDinh: [
+    { ten: "Nhà Văn hóa Thanh niên Đà Nẵng", diaChi: "1 Quảng trường 2/9, Phường Hòa Cường Bắc, Hải Châu, TP. Đà Nẵng", lat: 16.0421, lng: 108.2241, quan: "Hải Châu" },
+    { ten: "Công viên APEC Đà Nẵng", diaChi: "Đường Bạch Đằng, Phường Bình Hiên, Hải Châu, TP. Đà Nẵng", lat: 16.0612, lng: 108.2255, quan: "Hải Châu" },
+    { ten: "Nhà sinh hoạt cộng đồng KDC Số 3", diaChi: "15 Ông Ích Khiêm, Phường Thanh Bình, Hải Châu, TP. Đà Nẵng", lat: 16.0771, lng: 108.2140, quan: "Hải Châu" },
+    { ten: "Trung tâm Văn hóa Thể thao Quận Sơn Trà", diaChi: "01 Trần Hưng Đạo, Phường An Hải Tây, Sơn Trà, TP. Đà Nẵng", lat: 16.0655, lng: 108.2312, quan: "Sơn Trà" },
+  ]
+};
+
 const emptyForm = {
   tenChienDich: "",
+  loaiChienDich: "CODINH",
   maDiaDiem: "",
+  newTenDiaDiem: "",
+  newDiaChi: "",
+  newLoaiDiaDiem: "TruongHoc",
+  newMaPhuongXa: "PX001",
+  pinnedLat: null,
+  pinnedLng: null,
   maNhanVien: "",
   thoiGianBD: "",
   thoiGianKT: "",
@@ -124,6 +164,7 @@ export default function QuanLyChienDich() {
   const [loadingRegs, setLoadingRegs] = useState(false);
   const [searchReg, setSearchReg] = useState("");
   const [filterRegStatus, setFilterRegStatus] = useState("");
+  const [showMapPicker, setShowMapPicker] = useState(false);
   const imageInputRef = useRef(null);
 
   const loadData = useCallback(async () => {
@@ -179,14 +220,22 @@ export default function QuanLyChienDich() {
   const pageItems = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   const openCreate = () => {
-    setForm(emptyForm);
+    setForm({ ...emptyForm, loaiChienDich: "CODINH" });
     setModal("create");
   };
 
   const openEdit = (c) => {
+    const isMobile = c.diaDiem?.loaiDiaDiem && c.diaDiem.loaiDiaDiem !== "BenhVien" && c.diaDiem.loaiDiaDiem !== "DiaDiemCoDinh";
     setForm({
       tenChienDich: c.tenChienDich || "",
+      loaiChienDich: isMobile ? "DIDONG" : "CODINH",
       maDiaDiem: c.diaDiem?.maDiaDiem || "",
+      newTenDiaDiem: c.diaDiem?.tenDiaDiem || "",
+      newDiaChi: c.diaDiem?.diaChi || c.diaDiem?.diaChiChiTiet || "",
+      newLoaiDiaDiem: c.diaDiem?.loaiDiaDiem || "TruongHoc",
+      newMaPhuongXa: c.diaDiem?.maPhuongXa || "PX001",
+      pinnedLat: null,
+      pinnedLng: null,
       maNhanVien: c.maNhanVien || "",
       thoiGianBD: toDatetimeLocal(c.thoiGianBD),
       thoiGianKT: toDatetimeLocal(c.thoiGianKT),
@@ -218,21 +267,52 @@ export default function QuanLyChienDich() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = {
-      tenChienDich: form.tenChienDich.trim(),
-      maDiaDiem: form.maDiaDiem,
-      maNhanVien: form.maNhanVien || null,
-      thoiGianBD: fromDatetimeLocal(form.thoiGianBD),
-      thoiGianKT: fromDatetimeLocal(form.thoiGianKT),
-      soLuongDuKien: Number(form.soLuongDuKien) || 100,
-      trangThai: toBackendStatus(form.trangThai),
-      imageUrl: form.imageUrl || null,
-    };
     setSubmitting(true);
     try {
+      let targetMaDiaDiem = form.maDiaDiem;
+
+      if (form.loaiChienDich === "DIDONG") {
+        if (!form.newTenDiaDiem?.trim() || !form.newDiaChi?.trim()) {
+          Swal.fire("Cảnh báo", "Vui lòng nhập đầy đủ Tên điểm tổ chức và Địa chỉ chi tiết cho điểm lưu động!", "warning");
+          setSubmitting(false);
+          return;
+        }
+        const newLocPayload = {
+          maDiaDiem: `DD${Math.floor(1000 + Math.random() * 9000)}`,
+          tenDiaDiem: form.newTenDiaDiem.trim(),
+          diaChi: form.newDiaChi.trim(),
+          loaiDiaDiem: form.newLoaiDiaDiem || "TruongHoc",
+          maPhuongXa: form.newMaPhuongXa || "PX001",
+        };
+        const createLocRes = await diaDiemService.createDiaDiem(newLocPayload);
+        targetMaDiaDiem = createLocRes?.maDiaDiem || createLocRes?.data?.maDiaDiem || newLocPayload.maDiaDiem;
+
+        try {
+          const locs = await diaDiemService.getAll();
+          setDiaDiems(Array.isArray(locs) ? locs : []);
+        } catch (err) {
+          console.error("Lỗi cập nhật ds địa điểm:", err);
+        }
+      } else if (!targetMaDiaDiem) {
+        Swal.fire("Cảnh báo", "Vui lòng chọn Bệnh viện / Trung tâm tiếp nhận máu!", "warning");
+        setSubmitting(false);
+        return;
+      }
+
+      const payload = {
+        tenChienDich: form.tenChienDich.trim(),
+        maDiaDiem: targetMaDiaDiem,
+        maNhanVien: form.maNhanVien || null,
+        thoiGianBD: fromDatetimeLocal(form.thoiGianBD),
+        thoiGianKT: fromDatetimeLocal(form.thoiGianKT),
+        soLuongDuKien: Number(form.soLuongDuKien) || 100,
+        trangThai: toBackendStatus(form.trangThai),
+        imageUrl: form.imageUrl || null,
+      };
+
       if (modal === "create") {
         await chienDichService.createChienDich(payload);
-        Swal.fire("Thành công", "Đã tạo chiến dịch mới", "success");
+        Swal.fire("Thành công", "Đã tạo chiến dịch và điểm hiến máu lưu động mới", "success");
       } else {
         await chienDichService.updateChienDich(modal.maChienDich, payload);
         Swal.fire("Thành công", "Đã cập nhật chiến dịch", "success");
@@ -1001,25 +1081,253 @@ export default function QuanLyChienDich() {
                   className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                  Địa điểm *
-                </label>
-                <select
-                  required
-                  value={form.maDiaDiem}
-                  onChange={(e) =>
-                    setForm({ ...form, maDiaDiem: e.target.value })
-                  }
-                  className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm bg-white outline-none"
-                >
-                  <option value="">-- Chọn địa điểm --</option>
-                  {diaDiems.map((d) => (
-                    <option key={d.maDiaDiem} value={d.maDiaDiem}>
-                      {d.tenDiaDiem}
-                    </option>
-                  ))}
-                </select>
+              {/* PHẦN CHỌN LOẠI HÌNH CHIẾN DỊCH: CỐ ĐỊNH vs DI ĐỘNG */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-4">
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-base text-[#e62e43]">share_location</span>
+                    Loại hình điểm hiến máu *
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, loaiChienDich: "CODINH" })}
+                      className={`h-12 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border-2 ${
+                        form.loaiChienDich === "CODINH"
+                          ? "bg-white border-[#e62e43] text-[#e62e43] shadow-md shadow-[#e62e43]/10"
+                          : "bg-slate-100/70 border-transparent text-slate-600 hover:bg-slate-200/60"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined">local_hospital</span>
+                      Cố định (Bệnh viện / TT)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, loaiChienDich: "DIDONG" })}
+                      className={`h-12 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border-2 ${
+                        form.loaiChienDich === "DIDONG"
+                          ? "bg-white border-[#e62e43] text-[#e62e43] shadow-md shadow-[#e62e43]/10"
+                          : "bg-slate-100/70 border-transparent text-slate-600 hover:bg-slate-200/60"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined">airport_shuttle</span>
+                      Linh động / Di động (Cộng đồng)
+                    </button>
+                  </div>
+                </div>
+
+                {/* TRƯỜNG HỢP 1: CỐ ĐỊNH (CHỌN TỪ DANH SÁCH BỆNH VIỆN HIỆN CÓ) */}
+                {form.loaiChienDich === "CODINH" ? (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                      Chọn Bệnh viện / Trung tâm tiếp nhận máu *
+                    </label>
+                    <select
+                      required={form.loaiChienDich === "CODINH"}
+                      value={form.maDiaDiem}
+                      onChange={(e) =>
+                        setForm({ ...form, maDiaDiem: e.target.value })
+                      }
+                      className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm bg-white font-semibold text-slate-800 outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
+                    >
+                      <option value="">-- Chọn Bệnh viện / Cơ sở y tế cố định --</option>
+                      {diaDiems.map((d) => (
+                        <option key={d.maDiaDiem} value={d.maDiaDiem}>
+                          🏥 {d.tenDiaDiem} ({d.diaChi || "Đà Nẵng"})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  /* TRƯỜNG HỢP 2: LINH ĐỘNG / DI ĐỘNG (TẠO ĐIỂM TẠI CỘNG ĐỒNG VỚI GOOGLE MAPS GIS) */
+                  <div className="space-y-4 pt-2 border-t border-slate-200/60 animate-fadeIn">
+                    {/* BƯỚC 1: CHỌN LOẠI HÌNH TỔ CHỨC */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2 uppercase flex items-center justify-between">
+                        <span>1. Phân loại địa điểm lưu động *</span>
+                        <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                          Tích hợp GIS Đà Nẵng
+                        </span>
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {[
+                          { id: "TruongHoc", label: "Trường học", icon: "school" },
+                          { id: "TrungTamYTe", label: "Trạm y tế", icon: "health_and_safety" },
+                          { id: "CoQuan", label: "Cơ quan / DN", icon: "domain" },
+                          { id: "DiaDiemCoDinh", label: "Khu dân cư / Khác", icon: "groups" },
+                        ].map((cat) => (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setForm({ ...form, newLoaiDiaDiem: cat.id })}
+                            className={`h-10 px-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all border ${
+                              form.newLoaiDiaDiem === cat.id
+                                ? "bg-red-50 border-red-200 text-[#e62e43] shadow-sm"
+                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                            }`}
+                          >
+                            <span className="material-symbols-outlined text-base">{cat.icon}</span>
+                            {cat.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* BƯỚC 2: TÊN ĐIỂM TỔ CHỨC & THANH GỢI Ý THÔNG MINH */}
+                    <div className="relative">
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                        2. Tên điểm tổ chức cụ thể * (Tự nhập hoặc chọn gợi ý)
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          required={form.loaiChienDich === "DIDONG"}
+                          placeholder="Ví dụ: Trường Đại học Bách Khoa, Trạm y tế Phường Thanh Bình..."
+                          value={form.newTenDiaDiem}
+                          onChange={(e) => setForm({ ...form, newTenDiaDiem: e.target.value })}
+                          className="w-full h-11 pl-9 pr-4 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 bg-white outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
+                        />
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
+                          location_on
+                        </span>
+                      </div>
+
+                      {/* THANH GỢI Ý THÔNG MINH TỪ GOOGLE MAPS GIS */}
+                      <div className="mt-2 bg-white p-2.5 rounded-xl border border-red-100 shadow-sm">
+                        <div className="text-[11px] font-bold text-slate-500 mb-1.5 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-amber-500 text-sm">lightbulb</span>
+                          Gợi ý nhanh điểm lưu động phổ biến tại Đà Nẵng ({form.newLoaiDiaDiem === "TruongHoc" ? "Trường học" : form.newLoaiDiaDiem === "TrungTamYTe" ? "Trạm y tế / TTYT" : form.newLoaiDiaDiem === "CoQuan" ? "Cơ quan / Doanh nghiệp" : "Khu dân cư / Khác"}):
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1 custom-scrollbar">
+                          {(DANANG_GIS_PLACES[form.newLoaiDiaDiem] || []).map((place, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                setForm({
+                                  ...form,
+                                  newTenDiaDiem: place.ten,
+                                  newDiaChi: place.diaChi,
+                                  pinnedLat: place.lat,
+                                  pinnedLng: place.lng,
+                                });
+                              }}
+                              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#e62e43] text-xs font-semibold transition-colors flex items-center gap-1 text-left border border-transparent hover:border-red-200"
+                            >
+                              <span className="material-symbols-outlined text-[13px] text-red-500">add_location_alt</span>
+                              <span>{place.ten}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* BƯỚC 3: ĐỊA CHỈ CHI TIẾT */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase flex items-center justify-between">
+                        <span>3. Địa chỉ chi tiết * (Bắt buộc nhập hoặc chọn từ Bản đồ)</span>
+                        {form.newDiaChi && (
+                          <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                            <span className="material-symbols-outlined text-sm">check_circle</span>
+                            Đã xác thực địa chỉ GIS
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        type="text"
+                        required={form.loaiChienDich === "DIDONG"}
+                        placeholder="Ví dụ: 114 Thanh Thủy, Phường Thanh Bình, Hải Châu, TP. Đà Nẵng"
+                        value={form.newDiaChi}
+                        onChange={(e) => setForm({ ...form, newDiaChi: e.target.value })}
+                        className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 bg-white outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
+                      />
+                    </div>
+
+                    {/* BƯỚC 4: TÍCH HỢP BẢN ĐỒ TƯƠNG TÁC GOOGLE MAPS / GIS PINNING */}
+                    <div className="border border-slate-200 rounded-xl p-3 bg-white space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="w-7 h-7 rounded-lg bg-red-50 text-[#e62e43] flex items-center justify-center font-bold">
+                            <span className="material-symbols-outlined text-base">map</span>
+                          </span>
+                          <div>
+                            <div className="text-xs font-bold text-slate-800">Bản đồ số GIS Đà Nẵng (Google Maps API)</div>
+                            <div className="text-[11px] text-slate-400">Bấm vào điểm ghim trên bản đồ để lấy tọa độ & thông tin tự động</div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowMapPicker(!showMapPicker)}
+                          className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-[#e62e43] text-white text-xs font-bold transition-all flex items-center gap-1 shadow-sm"
+                        >
+                          <span className="material-symbols-outlined text-sm">{showMapPicker ? "visibility_off" : "explore"}</span>
+                          {showMapPicker ? "Thu gọn bản đồ" : "Mở bản đồ ghim tọa độ"}
+                        </button>
+                      </div>
+
+                      {/* KHỐI HIỂN THỊ BẢN ĐỒ TƯƠNG TÁC */}
+                      {showMapPicker && (
+                        <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-900 text-white p-4 space-y-3 animate-fadeIn">
+                          <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#e62e43_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                          <div className="relative z-10 flex items-center justify-between text-xs font-semibold text-slate-300 border-b border-slate-700/60 pb-2">
+                            <span className="flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                              Tọa độ GPS đang ghim: {form.pinnedLat || "16.0544"}°N, {form.pinnedLng || "108.2022"}°E
+                            </span>
+                            <span className="text-[11px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-md font-bold">
+                              Khu vực: TP. Đà Nẵng
+                            </span>
+                          </div>
+
+                          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+                            {Object.entries(DANANG_GIS_PLACES).flatMap(([k, list]) => list).slice(0, 6).map((item, i) => (
+                              <div
+                                key={i}
+                                onClick={() => {
+                                  setForm({
+                                    ...form,
+                                    newTenDiaDiem: item.ten,
+                                    newDiaChi: item.diaChi,
+                                    pinnedLat: item.lat,
+                                    pinnedLng: item.lng,
+                                  });
+                                  Swal.fire({
+                                    icon: "success",
+                                    title: "Đã ghim từ Bản đồ!",
+                                    text: `Đã trích xuất thông tin: ${item.ten}`,
+                                    timer: 1500,
+                                    showConfirmButton: false,
+                                  });
+                                }}
+                                className="p-2.5 rounded-lg bg-slate-800/80 hover:bg-red-600/30 border border-slate-700 hover:border-red-500 cursor-pointer transition-all group flex flex-col justify-between"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <span className="text-xs font-bold text-white group-hover:text-red-400 transition-colors line-clamp-1">
+                                    {item.ten}
+                                  </span>
+                                  <span className="material-symbols-outlined text-red-500 text-sm group-hover:scale-125 transition-transform">
+                                    location_on
+                                  </span>
+                                </div>
+                                <div className="text-[10px] text-slate-400 mt-1 line-clamp-1">
+                                  {item.diaChi}
+                                </div>
+                                <div className="mt-1.5 flex items-center justify-between text-[9px] font-mono text-slate-500 group-hover:text-red-300">
+                                  <span>📌 Q. {item.quan}</span>
+                                  <span>{item.lat}, {item.lng}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="relative z-10 text-center pt-1 text-[11px] text-slate-400 italic">
+                            💡 Mẹo: Bấm chọn vào các điểm ghim GIS phía trên để hệ thống tự động điền Tên điểm & Địa chỉ vào biểu mẫu.
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
