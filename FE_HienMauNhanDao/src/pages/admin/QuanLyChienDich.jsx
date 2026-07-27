@@ -12,6 +12,7 @@ import {
   diaDiemService,
 } from "../../services/chienDichService";
 import { uploadService } from "../../services/uploadService";
+import { donDangKyService } from "../../services/donDangKy";
 import { getApiError } from "../../utils/apiHelper";
 
 const toImageSrc = (imageUrl) => {
@@ -24,22 +25,67 @@ const toImageSrc = (imageUrl) => {
 };
 
 const STATUS_OPTIONS = [
-  "Đang lập kế hoạch",
-  "Đã phê duyệt",
-  "Đang diễn ra",
-  "Đã kết thúc",
+  { value: "ChuaBatDau", label: "Đã mở đăng ký (Chưa diễn ra)" },
+  { value: "DangDienRa", label: "Đang diễn ra (Thực hiện thu nhận máu)" },
+  { value: "DaKetThuc", label: "Đã kết thúc" },
+  { value: "DaHuy", label: "Đã hủy / Tạm hoãn" },
 ];
 
+const getStatusLabel = (status) => {
+  const s = String(status || "").trim();
+  if (
+    s === "ChuaBatDau" ||
+    s.includes("lập kế hoạch") ||
+    s.includes("phê duyệt") ||
+    s.includes("mở")
+  ) {
+    return "Đã mở đăng ký";
+  }
+  if (s === "DangDienRa" || (s.includes("diễn ra") && !s.includes("kết"))) {
+    return "Đang diễn ra";
+  }
+  if (s === "DaKetThuc" || s.includes("kết thúc")) {
+    return "Đã kết thúc";
+  }
+  if (s === "DaHuy" || s.includes("hủy")) {
+    return "Đã hủy";
+  }
+  return "Đã mở đăng ký";
+};
+
+const toBackendStatus = (status) => {
+  const s = String(status || "").trim();
+  if (s === "DangDienRa" || (s.includes("diễn ra") && !s.includes("kết")))
+    return "DangDienRa";
+  if (s === "DaKetThuc" || s.includes("kết thúc")) return "DaKetThuc";
+  if (s === "DaHuy" || s.includes("hủy")) return "DaHuy";
+  return "ChuaBatDau";
+};
+
+const calcStatusByTime = (bdVal, ktVal) => {
+  if (!bdVal || !ktVal) return "ChuaBatDau";
+  const now = new Date();
+  const bd = new Date(bdVal);
+  const kt = new Date(ktVal);
+  if (isNaN(bd.getTime()) || isNaN(kt.getTime())) return "ChuaBatDau";
+  if (now < bd) return "ChuaBatDau";
+  if (now >= bd && now <= kt) return "DangDienRa";
+  return "DaKetThuc";
+};
+
 const statusBadge = (status) => {
-  const s = status || "";
-  if (s.includes("diễn ra") && !s.includes("kết")) {
-    return "bg-green-100 text-green-700 border-green-200";
+  const label = getStatusLabel(status);
+  if (label === "Đang diễn ra") {
+    return "bg-emerald-100 text-emerald-700 border-emerald-200 shadow-xs shadow-emerald-500/10";
   }
-  if (s.includes("phê duyệt") || s.includes("Sắp")) {
-    return "bg-amber-100 text-amber-700 border-amber-200";
+  if (label === "Đã mở đăng ký") {
+    return "bg-blue-100 text-blue-700 border-blue-200 shadow-xs shadow-blue-500/10";
   }
-  if (s.includes("kết thúc")) {
+  if (label === "Đã kết thúc") {
     return "bg-slate-100 text-slate-600 border-slate-200";
+  }
+  if (label === "Đã hủy") {
+    return "bg-rose-100 text-rose-700 border-rose-200";
   }
   return "bg-blue-100 text-blue-700 border-blue-200";
 };
@@ -54,14 +100,190 @@ const fromDatetimeLocal = (val) => {
   return val; // Giữ nguyên định dạng chuẩn ISO 8601 (có chữ T) để C# không bị lỗi binding
 };
 
+const DANANG_GIS_PLACES = {
+  TruongHoc: [
+    {
+      ten: "Trường Đại học Bách Khoa - ĐH Đà Nẵng",
+      diaChi:
+        "54 Nguyễn Lương Bằng, Phường Hòa Khánh Bắc, Liên Chiểu, TP. Đà Nẵng",
+      lat: 16.0741,
+      lng: 108.15,
+      quan: "Liên Chiểu",
+    },
+    {
+      ten: "Trường Đại học Kinh Tế - ĐH Đà Nẵng",
+      diaChi: "71 Ngũ Hành Sơn, Phường Mỹ An, Ngũ Hành Sơn, TP. Đà Nẵng",
+      lat: 16.0435,
+      lng: 108.2412,
+      quan: "Ngũ Hành Sơn",
+    },
+    {
+      ten: "Trường Đại học Sư Phạm - ĐH Đà Nẵng",
+      diaChi:
+        "459 Tôn Đức Thắng, Phường Hòa Khánh Nam, Liên Chiểu, TP. Đà Nẵng",
+      lat: 16.0689,
+      lng: 108.1555,
+      quan: "Liên Chiểu",
+    },
+    {
+      ten: "Trường Đại học Duy Tân (Cơ sở Nam Ô)",
+      diaChi: "Khu đô thị FPT City, Phường Hòa Hải, Ngũ Hành Sơn, TP. Đà Nẵng",
+      lat: 15.9922,
+      lng: 108.2588,
+      quan: "Ngũ Hành Sơn",
+    },
+    {
+      ten: "Trường THPT Phan Châu Trinh",
+      diaChi: "154 Lê Lợi, Phường Hải Châu 1, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0718,
+      lng: 108.2215,
+      quan: "Hải Châu",
+    },
+    {
+      ten: "Trường Đại học Kiến trúc Đà Nẵng",
+      diaChi: "566 Núi Thành, Phường Hòa Cường Nam, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0351,
+      lng: 108.2201,
+      quan: "Hải Châu",
+    },
+    {
+      ten: "Trường Đại học Đông Á",
+      diaChi:
+        "33 Xô Viết Nghệ Tĩnh, Phường Hòa Cường Nam, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0333,
+      lng: 108.2199,
+      quan: "Hải Châu",
+    },
+  ],
+  TrungTamYTe: [
+    {
+      ten: "Trung tâm Y tế Quận Hải Châu",
+      diaChi: "388 Trần Phú, Phường Bình Thuận, Hải Châu, TP. Đà Nẵng",
+      lat: 16.052,
+      lng: 108.2234,
+      quan: "Hải Châu",
+    },
+    {
+      ten: "Trung tâm Y tế Quận Thanh Khê",
+      diaChi: "62/32 Hà Huy Tập, Phường Hòa Khê, Thanh Khê, TP. Đà Nẵng",
+      lat: 16.0645,
+      lng: 108.1923,
+      quan: "Thanh Khê",
+    },
+    {
+      ten: "Trung tâm Y tế Quận Liên Chiểu",
+      diaChi:
+        "522 Nguyễn Lương Bằng, Phường Hòa Khánh Bắc, Liên Chiểu, TP. Đà Nẵng",
+      lat: 16.0812,
+      lng: 108.1432,
+      quan: "Liên Chiểu",
+    },
+    {
+      ten: "Trạm Y tế Phường Thanh Bình 1",
+      diaChi: "114 Thanh Thủy, Phường Thanh Bình, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0765,
+      lng: 108.2154,
+      quan: "Hải Châu",
+    },
+    {
+      ten: "Trạm Y tế Phường Thuận Phước",
+      diaChi: "28 Huỳnh Ngọc Huệ, Phường Thuận Phước, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0882,
+      lng: 108.2198,
+      quan: "Hải Châu",
+    },
+    {
+      ten: "Trạm Y tế Phường Thạch Thang",
+      diaChi: "12 Lý Tự Trọng, Phường Thạch Thang, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0791,
+      lng: 108.2223,
+      quan: "Hải Châu",
+    },
+  ],
+  CoQuan: [
+    {
+      ten: "Trung tâm Hành chính Thành phố Đà Nẵng",
+      diaChi: "24 Trần Phú, Phường Thạch Thang, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0788,
+      lng: 108.2235,
+      quan: "Hải Châu",
+    },
+    {
+      ten: "Khu Công nghệ cao Đà Nẵng (Da Nang Hi-Tech Park)",
+      diaChi: "Xã Hòa Liên, Huyện Hòa Vang, TP. Đà Nẵng",
+      lat: 16.1155,
+      lng: 108.1022,
+      quan: "Hòa Vang",
+    },
+    {
+      ten: "Tòa nhà FPT Complex Đà Nẵng",
+      diaChi: "Khu đô thị FPT City, Phường Hòa Hải, Ngũ Hành Sơn, TP. Đà Nẵng",
+      lat: 15.9901,
+      lng: 108.2577,
+      quan: "Ngũ Hành Sơn",
+    },
+    {
+      ten: "Cảng Hàng không Quốc tế Đà Nẵng",
+      diaChi: "Đường Duy Tân, Phường Hòa Thuận Tây, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0533,
+      lng: 108.2022,
+      quan: "Hải Châu",
+    },
+    {
+      ten: "UBND Phường Hải Châu 1",
+      diaChi: "68 Lê Lợi, Phường Hải Châu 1, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0723,
+      lng: 108.2222,
+      quan: "Hải Châu",
+    },
+  ],
+  DiaDiemCoDinh: [
+    {
+      ten: "Nhà Văn hóa Thanh niên Đà Nẵng",
+      diaChi: "1 Quảng trường 2/9, Phường Hòa Cường Bắc, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0421,
+      lng: 108.2241,
+      quan: "Hải Châu",
+    },
+    {
+      ten: "Công viên APEC Đà Nẵng",
+      diaChi: "Đường Bạch Đằng, Phường Bình Hiên, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0612,
+      lng: 108.2255,
+      quan: "Hải Châu",
+    },
+    {
+      ten: "Nhà sinh hoạt cộng đồng KDC Số 3",
+      diaChi: "15 Ông Ích Khiêm, Phường Thanh Bình, Hải Châu, TP. Đà Nẵng",
+      lat: 16.0771,
+      lng: 108.214,
+      quan: "Hải Châu",
+    },
+    {
+      ten: "Trung tâm Văn hóa Thể thao Quận Sơn Trà",
+      diaChi: "01 Trần Hưng Đạo, Phường An Hải Tây, Sơn Trà, TP. Đà Nẵng",
+      lat: 16.0655,
+      lng: 108.2312,
+      quan: "Sơn Trà",
+    },
+  ],
+};
+
 const emptyForm = {
   tenChienDich: "",
+  loaiChienDich: "CODINH",
   maDiaDiem: "",
+  newTenDiaDiem: "",
+  newDiaChi: "",
+  newLoaiDiaDiem: "TruongHoc",
+  newMaPhuongXa: "PX001",
+  pinnedLat: null,
+  pinnedLng: null,
   maNhanVien: "",
   thoiGianBD: "",
   thoiGianKT: "",
   soLuongDuKien: 100,
-  trangThai: "Đang lập kế hoạch",
+  trangThai: "ChuaBatDau",
   imageUrl: "",
 };
 
@@ -79,6 +301,12 @@ export default function QuanLyChienDich() {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [campaignRegs, setCampaignRegs] = useState([]);
+  const [loadingRegs, setLoadingRegs] = useState(false);
+  const [searchReg, setSearchReg] = useState("");
+  const [filterRegStatus, setFilterRegStatus] = useState("");
+  const [showMapPicker, setShowMapPicker] = useState(false);
   const imageInputRef = useRef(null);
 
   const loadData = useCallback(async () => {
@@ -108,12 +336,10 @@ export default function QuanLyChienDich() {
   const stats = useMemo(() => {
     const total = campaigns.length;
     const dangDienRa = campaigns.filter(
-      (c) =>
-        (c.trangThai || "").includes("diễn ra") &&
-        !(c.trangThai || "").includes("kết"),
+      (c) => getStatusLabel(c.trangThai) === "Đang diễn ra",
     ).length;
-    const sapDienRa = campaigns.filter((c) =>
-      (c.trangThai || "").includes("phê duyệt"),
+    const sapDienRa = campaigns.filter(
+      (c) => getStatusLabel(c.trangThai) === "Đã mở đăng ký",
     ).length;
     const daThu = campaigns.reduce((sum, c) => sum + (c.luongMauDaThu || 0), 0);
     return { total, dangDienRa, sapDienRa, daThu };
@@ -127,7 +353,8 @@ export default function QuanLyChienDich() {
         (c.tenChienDich || "").toLowerCase().includes(q) ||
         (c.maChienDich || "").toLowerCase().includes(q) ||
         (c.diaDiem?.tenDiaDiem || "").toLowerCase().includes(q);
-      const matchS = !filterStatus || c.trangThai === filterStatus;
+      const matchS =
+        !filterStatus || toBackendStatus(c.trangThai) === filterStatus;
       return matchQ && matchS;
     });
   }, [campaigns, search, filterStatus, headerSearch]);
@@ -136,41 +363,119 @@ export default function QuanLyChienDich() {
   const pageItems = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   const openCreate = () => {
-    setForm(emptyForm);
+    setForm({ ...emptyForm, loaiChienDich: "CODINH" });
     setModal("create");
   };
 
   const openEdit = (c) => {
+    const isMobile =
+      c.diaDiem?.loaiDiaDiem &&
+      c.diaDiem.loaiDiaDiem !== "BenhVien" &&
+      c.diaDiem.loaiDiaDiem !== "DiaDiemCoDinh";
     setForm({
       tenChienDich: c.tenChienDich || "",
+      loaiChienDich: isMobile ? "DIDONG" : "CODINH",
       maDiaDiem: c.diaDiem?.maDiaDiem || "",
+      newTenDiaDiem: c.diaDiem?.tenDiaDiem || "",
+      newDiaChi: c.diaDiem?.diaChi || c.diaDiem?.diaChiChiTiet || "",
+      newLoaiDiaDiem: c.diaDiem?.loaiDiaDiem || "TruongHoc",
+      newMaPhuongXa: c.diaDiem?.maPhuongXa || "PX001",
+      pinnedLat: null,
+      pinnedLng: null,
       maNhanVien: c.maNhanVien || "",
       thoiGianBD: toDatetimeLocal(c.thoiGianBD),
       thoiGianKT: toDatetimeLocal(c.thoiGianKT),
       soLuongDuKien: c.soLuongDuKien || 100,
-      trangThai: c.trangThai || "Đang lập kế hoạch",
+      trangThai: toBackendStatus(c.trangThai),
       imageUrl: c.imageUrl || "",
     });
     setModal({ type: "edit", maChienDich: c.maChienDich });
   };
 
+  const openDetail = async (c) => {
+    setSelectedCampaign(c);
+    setSearchReg("");
+    setFilterRegStatus("");
+    setModal("detail");
+    setLoadingRegs(true);
+    try {
+      const res = await donDangKyService.getAll();
+      const allRegs = Array.isArray(res) ? res : res?.content || [];
+      const matched = allRegs.filter(
+        (d) => String(d.maChienDich) === String(c.maChienDich),
+      );
+      setCampaignRegs(matched);
+    } catch (err) {
+      console.error("Lỗi khi tải danh sách đăng ký:", err);
+      setCampaignRegs([]);
+    } finally {
+      setLoadingRegs(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = {
-      tenChienDich: form.tenChienDich.trim(),
-      maDiaDiem: form.maDiaDiem,
-      maNhanVien: form.maNhanVien || null,
-      thoiGianBD: fromDatetimeLocal(form.thoiGianBD),
-      thoiGianKT: fromDatetimeLocal(form.thoiGianKT),
-      soLuongDuKien: Number(form.soLuongDuKien) || 100,
-      trangThai: form.trangThai,
-      imageUrl: form.imageUrl || null,
-    };
     setSubmitting(true);
     try {
+      let targetMaDiaDiem = form.maDiaDiem;
+
+      if (form.loaiChienDich === "DIDONG") {
+        if (!form.newTenDiaDiem?.trim() || !form.newDiaChi?.trim()) {
+          Swal.fire(
+            "Cảnh báo",
+            "Vui lòng nhập đầy đủ Tên điểm tổ chức và Địa chỉ chi tiết cho điểm lưu động!",
+            "warning",
+          );
+          setSubmitting(false);
+          return;
+        }
+        const newLocPayload = {
+          maDiaDiem: `DD${Math.floor(1000 + Math.random() * 9000)}`,
+          tenDiaDiem: form.newTenDiaDiem.trim(),
+          diaChi: form.newDiaChi.trim(),
+          loaiDiaDiem: form.newLoaiDiaDiem || "TruongHoc",
+          maPhuongXa: form.newMaPhuongXa || "PX001",
+        };
+        const createLocRes = await diaDiemService.createDiaDiem(newLocPayload);
+        targetMaDiaDiem =
+          createLocRes?.maDiaDiem ||
+          createLocRes?.data?.maDiaDiem ||
+          newLocPayload.maDiaDiem;
+
+        try {
+          const locs = await diaDiemService.getAll();
+          setDiaDiems(Array.isArray(locs) ? locs : []);
+        } catch (err) {
+          console.error("Lỗi cập nhật ds địa điểm:", err);
+        }
+      } else if (!targetMaDiaDiem) {
+        Swal.fire(
+          "Cảnh báo",
+          "Vui lòng chọn Bệnh viện / Trung tâm tiếp nhận máu!",
+          "warning",
+        );
+        setSubmitting(false);
+        return;
+      }
+
+      const payload = {
+        tenChienDich: form.tenChienDich.trim(),
+        maDiaDiem: targetMaDiaDiem,
+        maNhanVien: form.maNhanVien || null,
+        thoiGianBD: fromDatetimeLocal(form.thoiGianBD),
+        thoiGianKT: fromDatetimeLocal(form.thoiGianKT),
+        soLuongDuKien: Number(form.soLuongDuKien) || 100,
+        trangThai: toBackendStatus(form.trangThai),
+        imageUrl: form.imageUrl || null,
+      };
+
       if (modal === "create") {
         await chienDichService.createChienDich(payload);
-        Swal.fire("Thành công", "Đã tạo chiến dịch mới", "success");
+        Swal.fire(
+          "Thành công",
+          "Đã tạo chiến dịch và điểm hiến máu lưu động mới",
+          "success",
+        );
       } else {
         await chienDichService.updateChienDich(modal.maChienDich, payload);
         Swal.fire("Thành công", "Đã cập nhật chiến dịch", "success");
@@ -255,98 +560,101 @@ export default function QuanLyChienDich() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Quản lý Chiến dịch
-          </h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Quản lý và theo dõi tiến độ các hoạt động hiến máu tình nguyện.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={openCreate}
-          className="h-12 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-200 transition-all active:scale-95 flex items-center gap-2"
-        >
-          <span
-            className="material-symbols-outlined text-xl"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            add_circle
-          </span>
-          Tạo chiến dịch mới
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          {
-            label: "Tổng chiến dịch",
-            value: stats.total,
-            icon: "event_available",
-            color: "bg-blue-50 text-blue-600",
-          },
-          {
-            label: "Đang diễn ra",
-            value: stats.dangDienRa,
-            icon: "running_with_errors",
-            color: "bg-green-50 text-green-600",
-          },
-          {
-            label: "Sắp / phê duyệt",
-            value: stats.sapDienRa,
-            icon: "upcoming",
-            color: "bg-amber-50 text-amber-600",
-          },
-          {
-            label: "Đã thu nhận",
-            value: stats.daThu,
-            icon: "bloodtype",
-            color: "bg-red-50 text-red-600",
-            suffix: " đv",
-          },
-        ].map((s) => (
-          <div
-            key={s.label}
-            className="bg-white p-6 rounded-2xl border border-slate-200 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center ${s.color}`}
-            >
-              <span className="material-symbols-outlined text-2xl">
-                {s.icon}
+    <div className="space-y-6 pb-12 animate-in fade-in duration-500">
+      {/* 🚀 ROW 1: ULTRA-COMPACT HEADER & MINI STATS STRIP (Siêu gọn gàng bớt tốn diện tích) */}
+      <div className="flex items-center justify-between flex-wrap gap-3 bg-white/80 backdrop-blur-xl p-3.5 px-5 rounded-2xl border border-white/80 shadow-md shadow-slate-900/5">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#e62e43] to-red-600 flex items-center justify-center text-white shadow-sm shrink-0">
+            <span className="material-symbols-outlined text-lg">campaign</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-black text-slate-900 tracking-tight">
+                Quản lý Chiến dịch
+              </h1>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-100 text-[#e62e43] text-[9px] font-black uppercase tracking-wider">
+                <span className="w-1 h-1 rounded-full bg-[#e62e43] animate-pulse" />
+                Live
               </span>
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                {s.label}
-              </p>
-              <p className="text-2xl font-black text-slate-900">
-                {s.value}
-                {s.suffix && (
-                  <span className="text-sm font-medium text-slate-400">
-                    {s.suffix}
-                  </span>
-                )}
-              </p>
-            </div>
+            <p className="text-slate-500 text-[11px] font-medium leading-none mt-0.5">
+              Điều phối & theo dõi tiến độ hiến máu nhân đạo
+            </p>
           </div>
-        ))}
+        </div>
+
+        {/* Mini Stats + Button in same row */}
+        <div className="flex items-center flex-wrap gap-2">
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-sm"
+            title="Tổng chiến dịch"
+          >
+            <span className="material-symbols-outlined text-sm text-rose-400">
+              event_available
+            </span>
+            <span>
+              Tổng: <b>{stats.total}</b>
+            </span>
+          </div>
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-sm"
+            title="Đang diễn ra"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>
+              Diễn ra: <b>{stats.dangDienRa}</b>
+            </span>
+          </div>
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold shadow-sm"
+            title="Sắp / phê duyệt"
+          >
+            <span className="material-symbols-outlined text-sm">upcoming</span>
+            <span>
+              Sắp tới: <b>{stats.sapDienRa}</b>
+            </span>
+          </div>
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 text-[#e62e43] border border-rose-200 text-xs font-bold shadow-sm"
+            title="Đã thu nhận"
+          >
+            <span className="material-symbols-outlined text-sm">bloodtype</span>
+            <span>
+              Đã thu: <b>{stats.daThu}</b> đv
+            </span>
+          </div>
+
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-1.5 h-9 px-4 bg-gradient-to-r from-[#e62e43] via-red-600 to-[#c01b30] text-white font-black text-xs rounded-xl hover:shadow-lg hover:shadow-[#e62e43]/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 group ml-1 shrink-0"
+          >
+            <span className="material-symbols-outlined text-base group-hover:rotate-90 transition-transform duration-300">
+              add_circle
+            </span>
+            <span>Tạo chiến dịch mới</span>
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-        <div className="h-16 px-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/30 flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-extrabold text-slate-900">
-              Danh sách chiến dịch
+      {/* 🚀 ROW 2: SEARCH & FILTER CONTROL BAR */}
+      <div className="bg-white/80 backdrop-blur-xl border border-white/80 rounded-2xl p-2.5 px-4 shadow-md shadow-slate-900/5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-base text-[#e62e43]">
+              list_alt
             </span>
-            <span className="px-2 py-0.5 bg-slate-200 text-slate-600 text-[11px] font-bold rounded-full">
-              {filtered.length} MỤC
+            Danh sách chiến dịch
+          </span>
+          <span className="px-2 py-0.5 bg-slate-100 text-slate-700 font-black text-[11px] rounded-full border border-slate-200 shadow-2xs">
+            {filtered.length} mục
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
+          <div className="relative w-full sm:w-60">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base">
+              search
             </span>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
             <input
               value={search}
               onChange={(e) => {
@@ -354,26 +662,29 @@ export default function QuanLyChienDich() {
                 setPage(0);
               }}
               placeholder="Tìm tên, mã, địa điểm..."
-              className="h-9 w-52 px-3 border border-slate-200 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+              className="w-full h-9 bg-slate-100 hover:bg-slate-50 border border-transparent rounded-xl pl-9 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43]/40 focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
             />
-            <select
-              value={filterStatus}
-              onChange={(e) => {
-                setFilterStatus(e.target.value);
-                setPage(0);
-              }}
-              className="h-9 px-3 border border-slate-200 rounded-lg text-sm bg-white outline-none"
-            >
-              <option value="">Tất cả trạng thái</option>
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
           </div>
-        </div>
 
+          <select
+            value={filterStatus}
+            onChange={(e) => {
+              setFilterStatus(e.target.value);
+              setPage(0);
+            }}
+            className="h-9 px-3 border border-slate-200 rounded-xl text-xs font-bold bg-white text-slate-700 outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 shadow-sm transition-all cursor-pointer hover:border-slate-300"
+          >
+            <option value="">Tất cả trạng thái</option>
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -420,13 +731,21 @@ export default function QuanLyChienDich() {
                     >
                       <td className="px-6">
                         <div className="flex items-center gap-4">
-                          <div className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+                          <div
+                            className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center shrink-0 cursor-pointer hover:bg-red-200 transition-colors"
+                            onClick={() => openDetail(c)}
+                            title="Xem chi tiết & danh sách đăng ký"
+                          >
                             <span className="material-symbols-outlined text-red-600">
                               volunteer_activism
                             </span>
                           </div>
                           <div className="truncate max-w-[200px]">
-                            <p className="text-sm font-bold text-slate-900 truncate">
+                            <p
+                              onClick={() => openDetail(c)}
+                              className="text-sm font-bold text-slate-900 truncate cursor-pointer hover:text-[#e62e43] transition-colors"
+                              title="Nhấp để xem chi tiết & danh sách TNV đăng ký"
+                            >
                               {c.tenChienDich}
                             </p>
                             <p className="text-[11px] text-slate-400 mt-0.5">
@@ -481,13 +800,23 @@ export default function QuanLyChienDich() {
                           className={`inline-flex items-center px-3 py-1 text-[11px] font-black rounded-full border ${statusBadge(c.trangThai)}`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full mr-2 ${(c.trangThai || "").includes("diễn ra") ? "bg-green-600 animate-pulse" : "bg-current"}`}
+                            className={`w-1.5 h-1.5 rounded-full mr-2 ${getStatusLabel(c.trangThai) === "Đang diễn ra" ? "bg-emerald-500 animate-pulse" : "bg-current"}`}
                           />
-                          {(c.trangThai || "—").toUpperCase()}
+                          {getStatusLabel(c.trangThai).toUpperCase()}
                         </span>
                       </td>
                       <td className="px-6 text-right">
                         <div className="flex items-center justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => openDetail(c)}
+                            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors"
+                            title="Xem chi tiết & danh sách đăng ký"
+                          >
+                            <span className="material-symbols-outlined text-lg">
+                              visibility
+                            </span>
+                          </button>
                           <button
                             type="button"
                             onClick={() => openEdit(c)}
@@ -561,23 +890,531 @@ export default function QuanLyChienDich() {
         )}
       </div>
 
-      {modal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
-            <div className="bg-gradient-to-r from-red-700 to-red-900 px-7 py-6 flex items-center justify-between">
-              <h3 className="font-black text-white text-lg">
-                {modal === "create"
-                  ? "Tạo chiến dịch mới"
-                  : "Chỉnh sửa chiến dịch"}
-              </h3>
+      {/* 🚀 MODAL CHI TIẾT & DANH SÁCH TNV ĐĂNG KÝ (PREMIUM WOW DESIGN) */}
+      {modal === "detail" && selectedCampaign && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-6xl rounded-[2rem] shadow-2xl overflow-hidden max-h-[92vh] flex flex-col border border-slate-100 animate-in zoom-in-95 duration-300">
+            {/* 🌟 HERO BANNER & HEADER */}
+            <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-red-950 px-8 py-7 text-white border-b border-slate-800 shrink-0 overflow-hidden">
+              {/* Background decorative blur */}
+              <div className="absolute -top-24 -right-24 w-96 h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-start sm:items-center gap-5">
+                  {/* Thumbnail Banner or Glass Icon */}
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl shrink-0 bg-gradient-to-br from-red-600 to-rose-700 flex items-center justify-center group">
+                    {selectedCampaign.imageUrl ? (
+                      <img
+                        src={toImageSrc(selectedCampaign.imageUrl)}
+                        alt="Campaign Banner"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <span className="material-symbols-outlined text-4xl text-white drop-shadow-md animate-pulse">
+                        volunteer_activism
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/15 text-[11px] font-mono font-bold text-rose-300">
+                        ID: {selectedCampaign.maChienDich}
+                      </span>
+                      <span
+                        className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-black uppercase border shadow-md backdrop-blur-md ${statusBadge(selectedCampaign.trangThai)}`}
+                      >
+                        <span
+                          className={`w-2 h-2 rounded-full mr-2 ${getStatusLabel(selectedCampaign.trangThai) === "Đang diễn ra" ? "bg-emerald-500 animate-ping" : "bg-current"}`}
+                        />
+                        {getStatusLabel(selectedCampaign.trangThai)}
+                      </span>
+                    </div>
+                    <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight drop-shadow-sm leading-snug">
+                      {selectedCampaign.tenChienDich}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-300 flex items-center gap-2 font-medium">
+                      <span className="material-symbols-outlined text-base text-rose-400">
+                        verified
+                      </span>
+                      Chiến dịch hiến máu tình nguyện được phê duyệt bởi Sở Y tế
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 self-end md:self-center">
+                  <button
+                    type="button"
+                    onClick={() => openDetail(selectedCampaign)}
+                    title="Làm mới dữ liệu đăng ký"
+                    className="h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-2 transition-all backdrop-blur-md border border-white/10 active:scale-95 shadow-lg"
+                  >
+                    <span
+                      className={`material-symbols-outlined text-base ${loadingRegs ? "animate-spin" : ""}`}
+                    >
+                      refresh
+                    </span>
+                    <span>Làm mới</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModal(null)}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-200 hover:text-white transition-all backdrop-blur-md border border-rose-500/30 active:scale-95 shadow-lg"
+                  >
+                    <span className="material-symbols-outlined text-xl">
+                      close
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 🌟 MODAL BODY (SCROLLABLE & HIGH AESTHETIC) */}
+            <div className="p-6 sm:p-8 overflow-y-auto space-y-8 flex-1 bg-slate-50/50">
+              {/* 4 STATS OVERVIEW CARDS (GLASSMORPHISM & GRADIENTS) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Location */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-rose-500/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-2xl">
+                      location_on
+                    </span>
+                  </div>
+                  <div className="overflow-hidden min-w-0">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      Địa điểm tổ chức
+                    </p>
+                    <p
+                      className="text-sm font-black text-slate-800 mt-1 truncate"
+                      title={selectedCampaign.diaDiem?.tenDiaDiem}
+                    >
+                      {selectedCampaign.diaDiem?.tenDiaDiem || "---"}
+                    </p>
+                    <p className="text-xs font-semibold text-slate-500 mt-0.5 truncate">
+                      {selectedCampaign.diaDiem?.diaChi || "Đà Nẵng"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Schedule */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-2xl">
+                      event_available
+                    </span>
+                  </div>
+                  <div className="overflow-hidden min-w-0">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      Thời gian lịch trình
+                    </p>
+                    <div className="mt-1 space-y-0.5">
+                      <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5 truncate">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Từ:{" "}
+                        {toDatetimeLocal(selectedCampaign.thoiGianBD)?.replace(
+                          "T",
+                          " ",
+                        ) || "---"}
+                      </p>
+                      <p className="text-xs font-bold text-slate-500 flex items-center gap-1.5 truncate">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        Đến:{" "}
+                        {toDatetimeLocal(selectedCampaign.thoiGianKT)?.replace(
+                          "T",
+                          " ",
+                        ) || "---"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Blood Volume Progress */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-2xl">
+                      bloodtype
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Tiến độ thu máu
+                      </p>
+                      <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        {progressPct(selectedCampaign)}%
+                      </span>
+                    </div>
+                    <p className="text-base font-black text-slate-900 mt-1">
+                      <span className="text-red-600 font-extrabold">
+                        {selectedCampaign.luongMauDaThu || 0}
+                      </span>{" "}
+                      / {selectedCampaign.soLuongDuKien || 0}{" "}
+                      <span className="text-xs font-semibold text-slate-500">
+                        đv
+                      </span>
+                    </p>
+                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden mt-2 p-0.5 border border-slate-200/50">
+                      <div
+                        className={`h-full rounded-full transition-all duration-1000 ${progressPct(selectedCampaign) >= 100 ? "bg-gradient-to-r from-emerald-500 to-teal-400" : "bg-gradient-to-r from-red-600 to-rose-500"}`}
+                        style={{
+                          width: `${Math.min(100, progressPct(selectedCampaign))}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Volunteers Summary */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-2xl">
+                      groups
+                    </span>
+                  </div>
+                  <div className="overflow-hidden min-w-0 flex-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      Đăng ký tham gia
+                    </p>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-2xl font-black text-slate-900">
+                        {campaignRegs.length}
+                      </span>
+                      <span className="text-xs font-bold text-slate-500">
+                        Tình nguyện viên
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-bold text-emerald-600 mt-1 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">
+                        check_circle
+                      </span>
+                      {
+                        campaignRegs.filter(
+                          (r) => r.trangThai === "DA_THU_NHAN",
+                        ).length
+                      }{" "}
+                      đã hiến thành công
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 🌟 REGISTRATION LIST TABLE SECTION */}
+              <div className="bg-white rounded-3xl border border-slate-200/80 shadow-lg overflow-hidden flex flex-col">
+                {/* Table Header & Filters Bar */}
+                <div className="p-6 bg-slate-900 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center text-white shadow-md shadow-red-600/30">
+                      <span className="material-symbols-outlined text-xl">
+                        fact_check
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-black text-base uppercase tracking-wider">
+                        Danh sách Tình nguyện viên đăng ký
+                      </h4>
+                      <p className="text-xs text-slate-400 font-medium">
+                        Quản lý trạng thái khám và thu nhận máu của từng tình
+                        nguyện viên
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Filter Status Tabs */}
+                  <div className="flex items-center gap-1 bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 overflow-x-auto max-w-full">
+                    {[
+                      { id: "", label: "Tất cả", count: campaignRegs.length },
+                      {
+                        id: "CHO_KHAM",
+                        label: "Chờ khám",
+                        count: campaignRegs.filter(
+                          (r) => r.trangThai === "CHO_KHAM",
+                        ).length,
+                      },
+                      {
+                        id: "DA_KHAM",
+                        label: "Đã khám",
+                        count: campaignRegs.filter(
+                          (r) => r.trangThai === "DA_KHAM",
+                        ).length,
+                      },
+                      {
+                        id: "DA_THU_NHAN",
+                        label: "Đã thu máu",
+                        count: campaignRegs.filter(
+                          (r) => r.trangThai === "DA_THU_NHAN",
+                        ).length,
+                      },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setFilterRegStatus(tab.id)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filterRegStatus === tab.id ? "bg-red-600 text-white shadow-md shadow-red-600/30" : "text-slate-300 hover:bg-slate-700/60"}`}
+                      >
+                        <span>{tab.label}</span>
+                        <span
+                          className={`px-1.5 py-0.2 rounded-full text-[10px] ${filterRegStatus === tab.id ? "bg-white/20 text-white" : "bg-slate-700 text-slate-400"}`}
+                        >
+                          {tab.count}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Search Bar inside table section */}
+                <div className="px-6 py-4 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between gap-4 flex-wrap">
+                  <div className="relative w-full sm:w-80">
+                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
+                      search
+                    </span>
+                    <input
+                      value={searchReg}
+                      onChange={(e) => setSearchReg(e.target.value)}
+                      placeholder="Tìm tên TNV, CCCD, số điện thoại, mã đơn..."
+                      className="w-full h-10 bg-white border border-slate-200 rounded-xl pl-10 pr-4 text-xs font-bold text-slate-800 placeholder-slate-400 outline-none focus:border-red-600 focus:ring-4 focus:ring-red-600/10 shadow-xs transition-all"
+                    />
+                  </div>
+
+                  <div className="text-xs font-bold text-slate-500">
+                    Hiển thị{" "}
+                    <span className="text-slate-900 font-black">
+                      {campaignRegs.length}
+                    </span>{" "}
+                    đơn đăng ký
+                  </div>
+                </div>
+
+                {/* Table Data Render */}
+                <div className="overflow-x-auto min-h-[250px]">
+                  {loadingRegs ? (
+                    <div className="py-20 text-center text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-3">
+                      <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin shadow-lg" />
+                      <span className="text-sm font-black text-slate-600">
+                        Đang đồng bộ dữ liệu từ Sở Y tế...
+                      </span>
+                    </div>
+                  ) : (
+                    (() => {
+                      const qReg = searchReg.trim().toLowerCase();
+                      const filteredRegs = campaignRegs.filter((r) => {
+                        const matchQ =
+                          !qReg ||
+                          (r.tinhNguyenVien?.hoVaTen || r.maTNV || "")
+                            .toLowerCase()
+                            .includes(qReg) ||
+                          (r.tinhNguyenVien?.soCCCD || "")
+                            .toLowerCase()
+                            .includes(qReg) ||
+                          (r.tinhNguyenVien?.soDienThoai || "")
+                            .toLowerCase()
+                            .includes(qReg) ||
+                          (r.maDon || "").toLowerCase().includes(qReg);
+                        const matchS =
+                          !filterRegStatus || r.trangThai === filterRegStatus;
+                        return matchQ && matchS;
+                      });
+
+                      if (filteredRegs.length === 0) {
+                        return (
+                          <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
+                            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                              <span className="material-symbols-outlined text-3xl">
+                                inbox
+                              </span>
+                            </div>
+                            <p className="text-sm font-black text-slate-600">
+                              {searchReg || filterRegStatus
+                                ? "Không tìm thấy tình nguyện viên nào phù hợp bộ lọc"
+                                : "Chưa có tình nguyện viên nào đăng ký tham gia chiến dịch này"}
+                            </p>
+                            {(searchReg || filterRegStatus) && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSearchReg("");
+                                  setFilterRegStatus("");
+                                }}
+                                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                              >
+                                Xóa bộ lọc
+                              </button>
+                            )}
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <table className="w-full text-left text-xs">
+                          <thead>
+                            <tr className="bg-slate-50/90 border-b border-slate-200 font-extrabold text-slate-500 uppercase tracking-wider text-[10px]">
+                              <th className="py-4 px-6">Mã đơn</th>
+                              <th className="py-4 px-6">Tình nguyện viên</th>
+                              <th className="py-4 px-6">CCCD / Liên hệ</th>
+                              <th className="py-4 px-6 text-center">
+                                Thể tích máu
+                              </th>
+                              <th className="py-4 px-6 text-center">
+                                Trạng thái khám/hiến
+                              </th>
+                              <th className="py-4 px-6 text-right">
+                                Người tiếp nhận
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                            {filteredRegs.map((r) => (
+                              <tr
+                                key={r.maDon}
+                                className="hover:bg-red-50/30 transition-colors group"
+                              >
+                                <td className="py-4 px-6 font-mono font-black text-red-600">
+                                  <span className="px-2.5 py-1 bg-red-50 rounded-lg border border-red-100 shadow-2xs group-hover:bg-red-100 transition-colors">
+                                    {r.maDon}
+                                  </span>
+                                </td>
+                                <td className="py-4 px-6 font-black text-slate-900 text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">
+                                      {(r.tinhNguyenVien?.hoVaTen || "T")
+                                        .charAt(0)
+                                        .toUpperCase()}
+                                    </div>
+                                    <div>
+                                      <p className="font-bold text-slate-900">
+                                        {r.tinhNguyenVien?.hoVaTen ||
+                                          r.maTNV ||
+                                          "---"}
+                                      </p>
+                                      <p className="text-[10px] text-slate-400 font-normal">
+                                        TNV ID: {r.maTNV}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-4 px-6">
+                                  <p className="font-mono font-bold text-slate-800">
+                                    {r.tinhNguyenVien?.soCCCD || "---"}
+                                  </p>
+                                  <p className="text-[11px] text-slate-500">
+                                    {r.tinhNguyenVien?.soDienThoai ||
+                                      "Không có SĐT"}
+                                  </p>
+                                </td>
+                                <td className="py-4 px-6 text-center">
+                                  <span className="px-3 py-1 bg-blue-50 text-blue-700 font-black rounded-full border border-blue-200 shadow-2xs">
+                                    {r.theTich || 250} ml
+                                  </span>
+                                </td>
+                                <td className="py-4 px-6 text-center">
+                                  <span
+                                    className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase border shadow-2xs
+                                  ${
+                                    r.trangThai === "DA_KHAM"
+                                      ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                                      : r.trangThai === "CHO_KHAM"
+                                        ? "bg-amber-100 text-amber-800 border-amber-200"
+                                        : r.trangThai === "DA_THU_NHAN"
+                                          ? "bg-blue-600 text-white border-blue-700 shadow-blue-500/20"
+                                          : r.trangThai === "HUY"
+                                            ? "bg-rose-100 text-rose-800 border-rose-200"
+                                            : "bg-slate-100 text-slate-700 border-slate-200"
+                                  }`}
+                                  >
+                                    <span
+                                      className={`w-1.5 h-1.5 rounded-full mr-1.5 ${r.trangThai === "DA_THU_NHAN" ? "bg-white" : "bg-current"}`}
+                                    />
+                                    {r.trangThai === "CHO_KHAM"
+                                      ? "Chờ khám sàng lọc"
+                                      : r.trangThai === "DA_KHAM"
+                                        ? "Đã đạt sức khỏe"
+                                        : r.trangThai === "DA_THU_NHAN"
+                                          ? "Đã thu máu thành công"
+                                          : r.trangThai === "HUY"
+                                            ? "Đã hủy / Không đạt"
+                                            : r.trangThai || "Chờ xử lý"}
+                                  </span>
+                                </td>
+                                <td className="py-4 px-6 text-right font-mono">
+                                  {r.maNV ? (
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 font-bold rounded-lg text-xs">
+                                      <span className="material-symbols-outlined text-sm text-blue-600">
+                                        medical_services
+                                      </span>
+                                      {r.maNV}
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-400 italic text-[11px]">
+                                      TNV đăng ký online
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      );
+                    })()
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-5 px-8 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
+              <div className="text-xs font-semibold text-slate-500">
+                ⚡ Dữ liệu chiến dịch hiến máu được đồng bộ với{" "}
+                <b className="text-slate-800">Sở Y tế Thành phố Đà Nẵng</b>
+              </div>
               <button
                 type="button"
                 onClick={() => setModal(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20"
+                className="h-11 px-8 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl transition-all shadow-lg shadow-slate-900/20 active:scale-95 flex items-center gap-2"
               >
-                <span className="material-symbols-outlined text-white">
+                <span>Đóng bảng chi tiết</span>
+                <span className="material-symbols-outlined text-base">
                   close
                 </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🚀 MODAL TẠO MỚI / CHỈNH SỬA CHIẾN DỊCH */}
+      {(modal === "create" || modal?.type === "edit") && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-7 py-5 flex items-center justify-between border-b border-slate-700/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#e62e43] to-red-600 flex items-center justify-center text-white shadow-lg shadow-red-500/20">
+                  <span className="material-symbols-outlined text-xl">
+                    {modal === "create" ? "add_circle" : "edit_document"}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="font-black text-white text-base sm:text-lg tracking-tight">
+                    {modal === "create"
+                      ? "Tạo chiến dịch mới"
+                      : "Chỉnh sửa chiến dịch"}
+                  </h3>
+                  <p className="text-slate-400 text-xs font-medium mt-0.5">
+                    {modal === "create"
+                      ? "Thiết lập thông tin điểm hiến máu mới"
+                      : `Cập nhật thông tin ID: ${modal.maChienDich}`}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setModal(null)}
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all active:scale-95"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-7 space-y-4">
@@ -594,25 +1431,328 @@ export default function QuanLyChienDich() {
                   className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                  Địa điểm *
-                </label>
-                <select
-                  required
-                  value={form.maDiaDiem}
-                  onChange={(e) =>
-                    setForm({ ...form, maDiaDiem: e.target.value })
-                  }
-                  className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm bg-white outline-none"
-                >
-                  <option value="">-- Chọn địa điểm --</option>
-                  {diaDiems.map((d) => (
-                    <option key={d.maDiaDiem} value={d.maDiaDiem}>
-                      {d.tenDiaDiem}
-                    </option>
-                  ))}
-                </select>
+              {/* PHẦN CHỌN LOẠI HÌNH CHIẾN DỊCH: CỐ ĐỊNH vs DI ĐỘNG */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-4">
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-base text-[#e62e43]">
+                      share_location
+                    </span>
+                    Loại hình điểm hiến máu *
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm({ ...form, loaiChienDich: "CODINH" })
+                      }
+                      className={`h-12 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border-2 ${
+                        form.loaiChienDich === "CODINH"
+                          ? "bg-white border-[#e62e43] text-[#e62e43] shadow-md shadow-[#e62e43]/10"
+                          : "bg-slate-100/70 border-transparent text-slate-600 hover:bg-slate-200/60"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined">
+                        local_hospital
+                      </span>
+                      Cố định (Bệnh viện / TT)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm({ ...form, loaiChienDich: "DIDONG" })
+                      }
+                      className={`h-12 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border-2 ${
+                        form.loaiChienDich === "DIDONG"
+                          ? "bg-white border-[#e62e43] text-[#e62e43] shadow-md shadow-[#e62e43]/10"
+                          : "bg-slate-100/70 border-transparent text-slate-600 hover:bg-slate-200/60"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined">
+                        airport_shuttle
+                      </span>
+                      Linh động / Di động (Cộng đồng)
+                    </button>
+                  </div>
+                </div>
+
+                {/* TRƯỜNG HỢP 1: CỐ ĐỊNH (CHỌN TỪ DANH SÁCH BỆNH VIỆN HIỆN CÓ) */}
+                {form.loaiChienDich === "CODINH" ? (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                      Chọn Bệnh viện / Trung tâm tiếp nhận máu *
+                    </label>
+                    <select
+                      required={form.loaiChienDich === "CODINH"}
+                      value={form.maDiaDiem}
+                      onChange={(e) =>
+                        setForm({ ...form, maDiaDiem: e.target.value })
+                      }
+                      className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm bg-white font-semibold text-slate-800 outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
+                    >
+                      <option value="">
+                        -- Chọn Bệnh viện / Cơ sở y tế cố định --
+                      </option>
+                      {diaDiems.map((d) => (
+                        <option key={d.maDiaDiem} value={d.maDiaDiem}>
+                          🏥 {d.tenDiaDiem} ({d.diaChi || "Đà Nẵng"})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  /* TRƯỜNG HỢP 2: LINH ĐỘNG / DI ĐỘNG (TẠO ĐIỂM TẠI CỘNG ĐỒNG VỚI GOOGLE MAPS GIS) */
+                  <div className="space-y-4 pt-2 border-t border-slate-200/60 animate-fadeIn">
+                    {/* BƯỚC 1: CHỌN LOẠI HÌNH TỔ CHỨC */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2 uppercase flex items-center justify-between">
+                        <span>1. Phân loại địa điểm lưu động *</span>
+                        <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                          Tích hợp GIS Đà Nẵng
+                        </span>
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {[
+                          {
+                            id: "TruongHoc",
+                            label: "Trường học",
+                            icon: "school",
+                          },
+                          {
+                            id: "TrungTamYTe",
+                            label: "Trạm y tế",
+                            icon: "health_and_safety",
+                          },
+                          {
+                            id: "CoQuan",
+                            label: "Cơ quan / DN",
+                            icon: "domain",
+                          },
+                          {
+                            id: "DiaDiemCoDinh",
+                            label: "Khu dân cư / Khác",
+                            icon: "groups",
+                          },
+                        ].map((cat) => (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() =>
+                              setForm({ ...form, newLoaiDiaDiem: cat.id })
+                            }
+                            className={`h-10 px-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all border ${
+                              form.newLoaiDiaDiem === cat.id
+                                ? "bg-red-50 border-red-200 text-[#e62e43] shadow-sm"
+                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                            }`}
+                          >
+                            <span className="material-symbols-outlined text-base">
+                              {cat.icon}
+                            </span>
+                            {cat.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* BƯỚC 2: TÊN ĐIỂM TỔ CHỨC & THANH GỢI Ý THÔNG MINH */}
+                    <div className="relative">
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                        2. Tên điểm tổ chức cụ thể * (Tự nhập hoặc chọn gợi ý)
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          required={form.loaiChienDich === "DIDONG"}
+                          placeholder="Ví dụ: Trường Đại học Bách Khoa, Trạm y tế Phường Thanh Bình..."
+                          value={form.newTenDiaDiem}
+                          onChange={(e) =>
+                            setForm({ ...form, newTenDiaDiem: e.target.value })
+                          }
+                          className="w-full h-11 pl-9 pr-4 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 bg-white outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
+                        />
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
+                          location_on
+                        </span>
+                      </div>
+
+                      {/* THANH GỢI Ý THÔNG MINH TỪ GOOGLE MAPS GIS */}
+                      <div className="mt-2 bg-white p-2.5 rounded-xl border border-red-100 shadow-sm">
+                        <div className="text-[11px] font-bold text-slate-500 mb-1.5 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-amber-500 text-sm">
+                            lightbulb
+                          </span>
+                          Gợi ý nhanh điểm lưu động phổ biến tại Đà Nẵng (
+                          {form.newLoaiDiaDiem === "TruongHoc"
+                            ? "Trường học"
+                            : form.newLoaiDiaDiem === "TrungTamYTe"
+                              ? "Trạm y tế / TTYT"
+                              : form.newLoaiDiaDiem === "CoQuan"
+                                ? "Cơ quan / Doanh nghiệp"
+                                : "Khu dân cư / Khác"}
+                          ):
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1 custom-scrollbar">
+                          {(DANANG_GIS_PLACES[form.newLoaiDiaDiem] || []).map(
+                            (place, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => {
+                                  setForm({
+                                    ...form,
+                                    newTenDiaDiem: place.ten,
+                                    newDiaChi: place.diaChi,
+                                    pinnedLat: place.lat,
+                                    pinnedLng: place.lng,
+                                  });
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#e62e43] text-xs font-semibold transition-colors flex items-center gap-1 text-left border border-transparent hover:border-red-200"
+                              >
+                                <span className="material-symbols-outlined text-[13px] text-red-500">
+                                  add_location_alt
+                                </span>
+                                <span>{place.ten}</span>
+                              </button>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* BƯỚC 3: ĐỊA CHỈ CHI TIẾT */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase flex items-center justify-between">
+                        <span>
+                          3. Địa chỉ chi tiết * (Bắt buộc nhập hoặc chọn từ Bản
+                          đồ)
+                        </span>
+                        {form.newDiaChi && (
+                          <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                            <span className="material-symbols-outlined text-sm">
+                              check_circle
+                            </span>
+                            Đã xác thực địa chỉ GIS
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        type="text"
+                        required={form.loaiChienDich === "DIDONG"}
+                        placeholder="Ví dụ: 114 Thanh Thủy, Phường Thanh Bình, Hải Châu, TP. Đà Nẵng"
+                        value={form.newDiaChi}
+                        onChange={(e) =>
+                          setForm({ ...form, newDiaChi: e.target.value })
+                        }
+                        className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 bg-white outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
+                      />
+                    </div>
+
+                    {/* BƯỚC 4: TÍCH HỢP BẢN ĐỒ TƯƠNG TÁC GOOGLE MAPS / GIS PINNING */}
+                    <div className="border border-slate-200 rounded-xl p-3 bg-white space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="w-7 h-7 rounded-lg bg-red-50 text-[#e62e43] flex items-center justify-center font-bold">
+                            <span className="material-symbols-outlined text-base">
+                              map
+                            </span>
+                          </span>
+                          <div>
+                            <div className="text-xs font-bold text-slate-800">
+                              Bản đồ số GIS Đà Nẵng (Google Maps API)
+                            </div>
+                            <div className="text-[11px] text-slate-400">
+                              Bấm vào điểm ghim trên bản đồ để lấy tọa độ &
+                              thông tin tự động
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowMapPicker(!showMapPicker)}
+                          className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-[#e62e43] text-white text-xs font-bold transition-all flex items-center gap-1 shadow-sm"
+                        >
+                          <span className="material-symbols-outlined text-sm">
+                            {showMapPicker ? "visibility_off" : "explore"}
+                          </span>
+                          {showMapPicker
+                            ? "Thu gọn bản đồ"
+                            : "Mở bản đồ ghim tọa độ"}
+                        </button>
+                      </div>
+
+                      {/* KHỐI HIỂN THỊ BẢN ĐỒ TƯƠNG TÁC */}
+                      {showMapPicker && (
+                        <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-900 text-white p-4 space-y-3 animate-fadeIn">
+                          <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#e62e43_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                          <div className="relative z-10 flex items-center justify-between text-xs font-semibold text-slate-300 border-b border-slate-700/60 pb-2">
+                            <span className="flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                              Tọa độ GPS đang ghim:{" "}
+                              {form.pinnedLat || "16.0544"}°N,{" "}
+                              {form.pinnedLng || "108.2022"}°E
+                            </span>
+                            <span className="text-[11px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-md font-bold">
+                              Khu vực: TP. Đà Nẵng
+                            </span>
+                          </div>
+
+                          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+                            {Object.entries(DANANG_GIS_PLACES)
+                              .flatMap(([k, list]) => list)
+                              .slice(0, 6)
+                              .map((item, i) => (
+                                <div
+                                  key={i}
+                                  onClick={() => {
+                                    setForm({
+                                      ...form,
+                                      newTenDiaDiem: item.ten,
+                                      newDiaChi: item.diaChi,
+                                      pinnedLat: item.lat,
+                                      pinnedLng: item.lng,
+                                    });
+                                    Swal.fire({
+                                      icon: "success",
+                                      title: "Đã ghim từ Bản đồ!",
+                                      text: `Đã trích xuất thông tin: ${item.ten}`,
+                                      timer: 1500,
+                                      showConfirmButton: false,
+                                    });
+                                  }}
+                                  className="p-2.5 rounded-lg bg-slate-800/80 hover:bg-red-600/30 border border-slate-700 hover:border-red-500 cursor-pointer transition-all group flex flex-col justify-between"
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <span className="text-xs font-bold text-white group-hover:text-red-400 transition-colors line-clamp-1">
+                                      {item.ten}
+                                    </span>
+                                    <span className="material-symbols-outlined text-red-500 text-sm group-hover:scale-125 transition-transform">
+                                      location_on
+                                    </span>
+                                  </div>
+                                  <div className="text-[10px] text-slate-400 mt-1 line-clamp-1">
+                                    {item.diaChi}
+                                  </div>
+                                  <div className="mt-1.5 flex items-center justify-between text-[9px] font-mono text-slate-500 group-hover:text-red-300">
+                                    <span>📌 Q. {item.quan}</span>
+                                    <span>
+                                      {item.lat}, {item.lng}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                          <div className="relative z-10 text-center pt-1 text-[11px] text-slate-400 italic">
+                            💡 Mẹo: Bấm chọn vào các điểm ghim GIS phía trên để
+                            hệ thống tự động điền Tên điểm & Địa chỉ vào biểu
+                            mẫu.
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -623,10 +1763,19 @@ export default function QuanLyChienDich() {
                     type="datetime-local"
                     required
                     value={form.thoiGianBD}
-                    onChange={(e) =>
-                      setForm({ ...form, thoiGianBD: e.target.value })
-                    }
-                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm outline-none"
+                    onChange={(e) => {
+                      const newBD = e.target.value;
+                      const nextStatus =
+                        form.trangThai === "DaHuy"
+                          ? "DaHuy"
+                          : calcStatusByTime(newBD, form.thoiGianKT);
+                      setForm({
+                        ...form,
+                        thoiGianBD: newBD,
+                        trangThai: nextStatus,
+                      });
+                    }}
+                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#e62e43] transition-colors"
                   />
                 </div>
                 <div>
@@ -637,10 +1786,19 @@ export default function QuanLyChienDich() {
                     type="datetime-local"
                     required
                     value={form.thoiGianKT}
-                    onChange={(e) =>
-                      setForm({ ...form, thoiGianKT: e.target.value })
-                    }
-                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm outline-none"
+                    onChange={(e) => {
+                      const newKT = e.target.value;
+                      const nextStatus =
+                        form.trangThai === "DaHuy"
+                          ? "DaHuy"
+                          : calcStatusByTime(form.thoiGianBD, newKT);
+                      setForm({
+                        ...form,
+                        thoiGianKT: newKT,
+                        trangThai: nextStatus,
+                      });
+                    }}
+                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#e62e43] transition-colors"
                   />
                 </div>
               </div>
@@ -656,23 +1814,23 @@ export default function QuanLyChienDich() {
                     onChange={(e) =>
                       setForm({ ...form, soLuongDuKien: e.target.value })
                     }
-                    className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm outline-none"
+                    className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#e62e43] transition-colors"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                    Trạng thái
+                    Trạng thái (Tự động theo thời gian)
                   </label>
                   <select
                     value={form.trangThai}
                     onChange={(e) =>
                       setForm({ ...form, trangThai: e.target.value })
                     }
-                    className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm bg-white outline-none"
+                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-bold bg-white outline-none focus:border-[#e62e43] transition-colors cursor-pointer"
                   >
                     {STATUS_OPTIONS.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
+                      <option key={s.value} value={s.value}>
+                        {s.label}
                       </option>
                     ))}
                   </select>
