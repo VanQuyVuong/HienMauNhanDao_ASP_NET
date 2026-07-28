@@ -44,6 +44,10 @@ namespace HienMauNhanDao_DaNang.Controllers
                     var px = await _context.PhuongXas.FirstOrDefaultAsync();
                     model.MaPhuongXa = px?.maPhuongXa ?? "PX00001";
                 }
+                if (string.IsNullOrEmpty(model.HinhThuc))
+                {
+                    model.HinhThuc = "LuuDong";
+                }
                 _context.DiaDiems.Add(model);
                 await _context.SaveChangesAsync();
                 return Ok(new { success = true, data = model });
