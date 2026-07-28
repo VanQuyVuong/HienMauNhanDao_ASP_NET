@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HienMauNhanDao_DaNang.Models.Entities
@@ -17,14 +17,12 @@ namespace HienMauNhanDao_DaNang.Models.Entities
         public string tenPhuongXa { set; get; } = string.Empty;
 
         
-        [Column("tenQuanHuyen")]
-        [MaxLength(100)]
+        [NotMapped]
         public string? tenQuanHuyen { set; get; }
 
-        //tring? == có thể null
+        //string? == có thể null
 
-        [Column("tenThanhPho")]
-        [MaxLength(100)]
+        [NotMapped]
         public string? tenThanhPho { set; get; }
 
         

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Models.Enums;
@@ -18,7 +18,7 @@ namespace HienMauNhanDao_DaNang.Models.Entities
         [MaxLength(255)]
         public string TenDiaDiem { set; get; } = string.Empty;
 
-        [Column("diaChi")]
+        [Column("diaChiChiTiet")]
         [MaxLength(255)]
         public string? DiaChi { set; get; }
 

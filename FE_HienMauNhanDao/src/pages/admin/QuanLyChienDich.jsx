@@ -276,7 +276,7 @@ const emptyForm = {
   newTenDiaDiem: "",
   newDiaChi: "",
   newLoaiDiaDiem: "TruongHoc",
-  newMaPhuongXa: "PX001",
+  newMaPhuongXa: "PX00001",
   pinnedLat: null,
   pinnedLng: null,
   maNhanVien: "",
@@ -379,7 +379,7 @@ export default function QuanLyChienDich() {
       newTenDiaDiem: c.diaDiem?.tenDiaDiem || "",
       newDiaChi: c.diaDiem?.diaChi || c.diaDiem?.diaChiChiTiet || "",
       newLoaiDiaDiem: c.diaDiem?.loaiDiaDiem || "TruongHoc",
-      newMaPhuongXa: c.diaDiem?.maPhuongXa || "PX001",
+      newMaPhuongXa: c.diaDiem?.maPhuongXa || "PX00001",
       pinnedLat: null,
       pinnedLng: null,
       maNhanVien: c.maNhanVien || "",
@@ -430,11 +430,11 @@ export default function QuanLyChienDich() {
           return;
         }
         const newLocPayload = {
-          maDiaDiem: `DD${Math.floor(1000 + Math.random() * 9000)}`,
+          maDiaDiem: `DD${Math.floor(10000 + Math.random() * 90000)}`,
           tenDiaDiem: form.newTenDiaDiem.trim(),
           diaChi: form.newDiaChi.trim(),
           loaiDiaDiem: form.newLoaiDiaDiem || "TruongHoc",
-          maPhuongXa: form.newMaPhuongXa || "PX001",
+          maPhuongXa: form.newMaPhuongXa || "PX00001",
         };
         const createLocRes = await diaDiemService.createDiaDiem(newLocPayload);
         targetMaDiaDiem =
@@ -483,11 +483,15 @@ export default function QuanLyChienDich() {
       setModal(null);
       loadData();
     } catch (err) {
-      Swal.fire(
-        "Lỗi",
-        err?.response?.data?.message || "Thao tác thất bại",
-        "error",
-      );
+      const errMsg =
+        err?.response?.data?.message ||
+        (err?.response?.data?.errors
+          ? Object.values(err.response.data.errors).flat().join("; ")
+          : null) ||
+        err?.response?.data?.title ||
+        err?.message ||
+        "Thao tác thất bại";
+      Swal.fire("Lỗi", errMsg, "error");
     } finally {
       setSubmitting(false);
     }
@@ -1385,217 +1389,310 @@ export default function QuanLyChienDich() {
         </div>
       )}
 
-      {/* 🚀 MODAL TẠO MỚI / CHỈNH SỬA CHIẾN DỊCH */}
+      {/* 🚀 MODAL TẠO MỚI / CHỈNH SỬA CHIẾN DỊCH (CHUẨN TRANG GIẤY LỚN max-w-5xl) */}
       {(modal === "create" || modal?.type === "edit") && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
-            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-7 py-5 flex items-center justify-between border-b border-slate-700/50">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#e62e43] to-red-600 flex items-center justify-center text-white shadow-lg shadow-red-500/20">
-                  <span className="material-symbols-outlined text-xl">
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-[#f8fafc] w-full max-w-5xl rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden flex flex-col max-h-[94vh] animate-in zoom-in-95 duration-200">
+            {/* TOP HEADER */}
+            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-6 sm:px-8 py-5 flex items-center justify-between border-b border-slate-700/60 shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#e62e43] to-red-600 flex items-center justify-center text-white shadow-lg shadow-red-500/30 shrink-0">
+                  <span className="material-symbols-outlined text-2xl">
                     {modal === "create" ? "add_circle" : "edit_document"}
                   </span>
                 </div>
                 <div>
-                  <h3 className="font-black text-white text-base sm:text-lg tracking-tight">
-                    {modal === "create"
-                      ? "Tạo chiến dịch mới"
-                      : "Chỉnh sửa chiến dịch"}
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-black tracking-widest uppercase">
+                      {modal === "create" ? "BIỂU MẪU ĐĂNG KÝ MỚI" : "BIỂU MẪU CHỈNH SỬA"}
+                    </span>
+                    <span className="text-slate-400 text-xs">• Chuẩn định danh Y tế</span>
+                  </div>
+                  <h3 className="font-black text-white text-lg sm:text-xl tracking-tight mt-0.5">
+                    {modal === "create" ? "TẠO CHIẾN DỊCH HIẾN MÁU NHÂN ĐẠO MỚI" : "CẬP NHẬT THÔNG TIN CHIẾN DỊCH"}
                   </h3>
-                  <p className="text-slate-400 text-xs font-medium mt-0.5">
-                    {modal === "create"
-                      ? "Thiết lập thông tin điểm hiến máu mới"
-                      : `Cập nhật thông tin ID: ${modal.maChienDich}`}
+                  <p className="text-slate-400 text-xs font-medium">
+                    {modal === "create" ? "Thiết lập quy mô tổ chức, thời gian và định danh tọa độ điểm tiếp nhận máu chuẩn GIS" : `Đang hiệu chỉnh hồ sơ ID: ${modal.maChienDich}`}
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setModal(null)}
-                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all active:scale-95"
+                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all active:scale-95 shrink-0"
               >
-                <span className="material-symbols-outlined text-xl">close</span>
+                <span className="material-symbols-outlined text-2xl">close</span>
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-7 space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                  Tên chiến dịch *
-                </label>
-                <input
-                  required
-                  value={form.tenChienDich}
-                  onChange={(e) =>
-                    setForm({ ...form, tenChienDich: e.target.value })
-                  }
-                  className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
-                />
-              </div>
-              {/* PHẦN CHỌN LOẠI HÌNH CHIẾN DỊCH: CỐ ĐỊNH vs DI ĐỘNG */}
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-4">
-                <div>
-                  <label className="block text-xs font-black text-slate-700 mb-2 uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-base text-[#e62e43]">
-                      share_location
+
+            {/* FORM BODY (MÔ PHỎNG TRANG GIẤY LỚN SANG TRỌNG) */}
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6">
+              <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/70 space-y-8">
+                
+                {/* PHẦN I: THÔNG TIN CHUNG VÀ THỜI GIAN TỔ CHỨC */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <span className="w-8 h-8 rounded-xl bg-red-50 text-[#e62e43] flex items-center justify-center font-bold">
+                      <span className="material-symbols-outlined text-lg">info</span>
                     </span>
-                    Loại hình điểm hiến máu *
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setForm({ ...form, loaiChienDich: "CODINH" })
-                      }
-                      className={`h-12 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border-2 ${
-                        form.loaiChienDich === "CODINH"
-                          ? "bg-white border-[#e62e43] text-[#e62e43] shadow-md shadow-[#e62e43]/10"
-                          : "bg-slate-100/70 border-transparent text-slate-600 hover:bg-slate-200/60"
-                      }`}
-                    >
-                      <span className="material-symbols-outlined">
-                        local_hospital
-                      </span>
-                      Cố định (Bệnh viện / TT)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setForm({ ...form, loaiChienDich: "DIDONG" })
-                      }
-                      className={`h-12 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border-2 ${
-                        form.loaiChienDich === "DIDONG"
-                          ? "bg-white border-[#e62e43] text-[#e62e43] shadow-md shadow-[#e62e43]/10"
-                          : "bg-slate-100/70 border-transparent text-slate-600 hover:bg-slate-200/60"
-                      }`}
-                    >
-                      <span className="material-symbols-outlined">
-                        airport_shuttle
-                      </span>
-                      Linh động / Di động (Cộng đồng)
-                    </button>
-                  </div>
-                </div>
-
-                {/* TRƯỜNG HỢP 1: CỐ ĐỊNH (CHỌN TỪ DANH SÁCH BỆNH VIỆN HIỆN CÓ) */}
-                {form.loaiChienDich === "CODINH" ? (
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                      Chọn Bệnh viện / Trung tâm tiếp nhận máu *
-                    </label>
-                    <select
-                      required={form.loaiChienDich === "CODINH"}
-                      value={form.maDiaDiem}
-                      onChange={(e) =>
-                        setForm({ ...form, maDiaDiem: e.target.value })
-                      }
-                      className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm bg-white font-semibold text-slate-800 outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
-                    >
-                      <option value="">
-                        -- Chọn Bệnh viện / Cơ sở y tế cố định --
-                      </option>
-                      {diaDiems.map((d) => (
-                        <option key={d.maDiaDiem} value={d.maDiaDiem}>
-                          🏥 {d.tenDiaDiem} ({d.diaChi || "Đà Nẵng"})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ) : (
-                  /* TRƯỜNG HỢP 2: LINH ĐỘNG / DI ĐỘNG (TẠO ĐIỂM TẠI CỘNG ĐỒNG VỚI GOOGLE MAPS GIS) */
-                  <div className="space-y-4 pt-2 border-t border-slate-200/60 animate-fadeIn">
-                    {/* BƯỚC 1: CHỌN LOẠI HÌNH TỔ CHỨC */}
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2 uppercase flex items-center justify-between">
-                        <span>1. Phân loại địa điểm lưu động *</span>
-                        <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                          Tích hợp GIS Đà Nẵng
-                        </span>
-                      </label>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        {[
-                          {
-                            id: "TruongHoc",
-                            label: "Trường học",
-                            icon: "school",
-                          },
-                          {
-                            id: "TrungTamYTe",
-                            label: "Trạm y tế",
-                            icon: "health_and_safety",
-                          },
-                          {
-                            id: "CoQuan",
-                            label: "Cơ quan / DN",
-                            icon: "domain",
-                          },
-                          {
-                            id: "DiaDiemCoDinh",
-                            label: "Khu dân cư / Khác",
-                            icon: "groups",
-                          },
-                        ].map((cat) => (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() =>
-                              setForm({ ...form, newLoaiDiaDiem: cat.id })
-                            }
-                            className={`h-10 px-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all border ${
-                              form.newLoaiDiaDiem === cat.id
-                                ? "bg-red-50 border-red-200 text-[#e62e43] shadow-sm"
-                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                            }`}
-                          >
-                            <span className="material-symbols-outlined text-base">
-                              {cat.icon}
-                            </span>
-                            {cat.label}
-                          </button>
-                        ))}
-                      </div>
+                      <h4 className="text-sm font-black text-slate-800 uppercase tracking-wide">
+                        I. Thông tin định danh chiến dịch & Thời gian
+                      </h4>
+                      <p className="text-[11px] text-slate-400">Tên gọi chính thức và khung thời gian tiếp nhận hiến máu</p>
                     </div>
+                  </div>
 
-                    {/* BƯỚC 2: TÊN ĐIỂM TỔ CHỨC & THANH GỢI Ý THÔNG MINH */}
-                    <div className="relative">
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                        2. Tên điểm tổ chức cụ thể * (Tự nhập hoặc chọn gợi ý)
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                      Tên chiến dịch hiến máu *
+                    </label>
+                    <input
+                      required
+                      placeholder="Ví dụ: Ngày hội Hiến máu Giọt hồng Nhân ái 2026 - ĐH Bách Khoa..."
+                      value={form.tenChienDich}
+                      onChange={(e) => setForm({ ...form, tenChienDich: e.target.value })}
+                      className="w-full h-12 px-4 border-2 border-slate-200 rounded-xl text-base font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/60">
+                      <label className="block text-xs font-bold text-slate-700 mb-2 uppercase flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-base text-emerald-600">play_circle</span>
+                        Thời gian bắt đầu tiếp nhận *
+                      </label>
+                      <input
+                        type="datetime-local"
+                        required
+                        value={form.thoiGianBD}
+                        onChange={(e) => {
+                          const newBD = e.target.value;
+                          const nextStatus =
+                            form.trangThai === "DaHuy"
+                              ? "DaHuy"
+                              : calcStatusByTime(newBD, form.thoiGianKT);
+                          setForm({
+                            ...form,
+                            thoiGianBD: newBD,
+                            trangThai: nextStatus,
+                          });
+                        }}
+                        className="w-full h-11 px-3 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 bg-white outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-colors"
+                      />
+                    </div>
+                    <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/60">
+                      <label className="block text-xs font-bold text-slate-700 mb-2 uppercase flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-base text-rose-600">stop_circle</span>
+                        Thời gian kết thúc (Dự kiến) *
+                      </label>
+                      <input
+                        type="datetime-local"
+                        required
+                        value={form.thoiGianKT}
+                        onChange={(e) => {
+                          const newKT = e.target.value;
+                          const nextStatus =
+                            form.trangThai === "DaHuy"
+                              ? "DaHuy"
+                              : calcStatusByTime(form.thoiGianBD, newKT);
+                          setForm({
+                            ...form,
+                            thoiGianKT: newKT,
+                            trangThai: nextStatus,
+                          });
+                        }}
+                        className="w-full h-11 px-3 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 bg-white outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                        Chỉ tiêu tiếp nhận (Đơn vị máu) *
                       </label>
                       <div className="relative">
                         <input
-                          type="text"
-                          required={form.loaiChienDich === "DIDONG"}
-                          placeholder="Ví dụ: Trường Đại học Bách Khoa, Trạm y tế Phường Thanh Bình..."
-                          value={form.newTenDiaDiem}
+                          type="number"
+                          min={1}
+                          required
+                          value={form.soLuongDuKien}
                           onChange={(e) =>
-                            setForm({ ...form, newTenDiaDiem: e.target.value })
+                            setForm({ ...form, soLuongDuKien: e.target.value })
                           }
-                          className="w-full h-11 pl-9 pr-4 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 bg-white outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
+                          className="w-full h-11 pl-4 pr-16 border border-slate-200 rounded-xl text-base font-bold text-slate-800 bg-white outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-colors"
                         />
-                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
-                          location_on
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase">
+                          Đơn vị
                         </span>
                       </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider flex items-center justify-between">
+                        <span>Trạng thái hoạt động</span>
+                        <span className="text-[10px] text-red-500 font-semibold italic">⚡ Tự động theo giờ</span>
+                      </label>
+                      <select
+                        value={form.trangThai}
+                        onChange={(e) =>
+                          setForm({ ...form, trangThai: e.target.value })
+                        }
+                        className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 bg-slate-50/80 outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-colors cursor-pointer"
+                      >
+                        {STATUS_OPTIONS.map((s) => (
+                          <option key={s.value} value={s.value}>
+                            {s.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
 
-                      {/* THANH GỢI Ý THÔNG MINH TỪ GOOGLE MAPS GIS */}
-                      <div className="mt-2 bg-white p-2.5 rounded-xl border border-red-100 shadow-sm">
-                        <div className="text-[11px] font-bold text-slate-500 mb-1.5 flex items-center gap-1">
-                          <span className="material-symbols-outlined text-amber-500 text-sm">
-                            lightbulb
-                          </span>
-                          Gợi ý nhanh điểm lưu động phổ biến tại Đà Nẵng (
-                          {form.newLoaiDiaDiem === "TruongHoc"
-                            ? "Trường học"
-                            : form.newLoaiDiaDiem === "TrungTamYTe"
-                              ? "Trạm y tế / TTYT"
-                              : form.newLoaiDiaDiem === "CoQuan"
-                                ? "Cơ quan / Doanh nghiệp"
-                                : "Khu dân cư / Khác"}
-                          ):
+                {/* PHẦN II: THIẾT LẬP VỊ TRÍ & ĐỊA ĐIỂM TIẾP NHẬN MÁU (GIS) */}
+                <div className="space-y-5 pt-4 border-t-2 border-dashed border-slate-200">
+                  <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <span className="w-8 h-8 rounded-xl bg-red-50 text-[#e62e43] flex items-center justify-center font-bold">
+                      <span className="material-symbols-outlined text-lg">share_location</span>
+                    </span>
+                    <div>
+                      <h4 className="text-sm font-black text-slate-800 uppercase tracking-wide flex items-center gap-2">
+                        <span>II. Định danh điểm hiến máu & Tích hợp bản đồ số GIS</span>
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold">GIS Đà Nẵng</span>
+                      </h4>
+                      <p className="text-[11px] text-slate-400">Chọn cơ sở cố định tại viện hoặc tổ chức lưu động ngoài cộng đồng</p>
+                    </div>
+                  </div>
+
+                  {/* CHỌN CỐ ĐỊNH vs DI ĐỘNG */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, loaiChienDich: "CODINH" })}
+                      className={`p-4 rounded-2xl font-bold text-left flex items-start gap-3.5 transition-all border-2 ${
+                        form.loaiChienDich === "CODINH"
+                          ? "bg-red-50/50 border-[#e62e43] text-[#e62e43] shadow-md shadow-[#e62e43]/5"
+                          : "bg-slate-50 border-transparent text-slate-600 hover:bg-slate-100/80 hover:border-slate-200"
+                      }`}
+                    >
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 ${form.loaiChienDich === "CODINH" ? "bg-[#e62e43] text-white shadow-md" : "bg-white text-slate-500 border border-slate-200"}`}>
+                        🏥
+                      </div>
+                      <div>
+                        <div className="text-base font-black">Cố định tại Bệnh viện / TTYT</div>
+                        <div className={`text-xs font-medium mt-0.5 ${form.loaiChienDich === "CODINH" ? "text-red-700/80" : "text-slate-400"}`}>
+                          Tổ chức tại các bệnh viện lớn, cơ sở tiếp nhận máu chuyên nghiệp sẵn có.
                         </div>
-                        <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1 custom-scrollbar">
-                          {(DANANG_GIS_PLACES[form.newLoaiDiaDiem] || []).map(
-                            (place, idx) => (
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, loaiChienDich: "DIDONG" })}
+                      className={`p-4 rounded-2xl font-bold text-left flex items-start gap-3.5 transition-all border-2 ${
+                        form.loaiChienDich === "DIDONG"
+                          ? "bg-red-50/50 border-[#e62e43] text-[#e62e43] shadow-md shadow-[#e62e43]/5"
+                          : "bg-slate-50 border-transparent text-slate-600 hover:bg-slate-100/80 hover:border-slate-200"
+                      }`}
+                    >
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 ${form.loaiChienDich === "DIDONG" ? "bg-[#e62e43] text-white shadow-md" : "bg-white text-slate-500 border border-slate-200"}`}>
+                        🚑
+                      </div>
+                      <div>
+                        <div className="text-base font-black">Linh động / Di động cộng đồng</div>
+                        <div className={`text-xs font-medium mt-0.5 ${form.loaiChienDich === "DIDONG" ? "text-red-700/80" : "text-slate-400"}`}>
+                          Tổ chức tại Trường học, Trạm y tế, Cơ quan, Khu công nghiệp hoặc KDC.
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* TRƯỜNG HỢP 1: CỐ ĐỊNH */}
+                  {form.loaiChienDich === "CODINH" ? (
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-2">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        Chọn Bệnh viện / Trung tâm tiếp nhận máu trong hệ thống *
+                      </label>
+                      <select
+                        required={form.loaiChienDich === "CODINH"}
+                        value={form.maDiaDiem}
+                        onChange={(e) =>
+                          setForm({ ...form, maDiaDiem: e.target.value })
+                        }
+                        className="w-full h-12 px-4 border-2 border-slate-200 rounded-xl text-base bg-white font-bold text-slate-800 outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all cursor-pointer"
+                      >
+                        <option value="">-- Bấm để chọn Bệnh viện / Cơ sở y tế cố định --</option>
+                        {diaDiems.map((d) => (
+                          <option key={d.maDiaDiem} value={d.maDiaDiem}>
+                            🏥 {d.tenDiaDiem} ({d.diaChi || "Đà Nẵng"})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : (
+                    /* TRƯỜNG HỢP 2: LINH ĐỘNG / DI ĐỘNG (GIS) */
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200/80 space-y-6 animate-fadeIn">
+                      {/* BƯỚC 1: CHỌN LOẠI HÌNH TỔ CHỨC */}
+                      <div>
+                        <label className="block text-xs font-black text-slate-700 mb-2.5 uppercase tracking-wider flex items-center justify-between">
+                          <span>Bước 1: Phân loại địa điểm tổ chức lưu động *</span>
+                          <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                            Tích hợp cơ sở dữ liệu GIS Đà Nẵng
+                          </span>
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          {[
+                            { id: "TruongHoc", label: "Trường học / ĐH", icon: "school" },
+                            { id: "TrungTamYTe", label: "Trạm y tế / TTYT", icon: "health_and_safety" },
+                            { id: "CoQuan", label: "Cơ quan / Doanh nghiệp", icon: "domain" },
+                            { id: "DiaDiemCoDinh", label: "Khu dân cư / Khác", icon: "groups" },
+                          ].map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => setForm({ ...form, newLoaiDiaDiem: cat.id })}
+                              className={`h-12 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all border-2 ${
+                                form.newLoaiDiaDiem === cat.id
+                                  ? "bg-white border-[#e62e43] text-[#e62e43] shadow-md shadow-[#e62e43]/10"
+                                  : "bg-slate-100/70 border-transparent text-slate-600 hover:bg-slate-200/60"
+                              }`}
+                            >
+                              <span className="material-symbols-outlined text-xl">{cat.icon}</span>
+                              <span>{cat.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* BƯỚC 2: TÊN ĐIỂM TỔ CHỨC & THANH GỢI Ý THÔNG MINH */}
+                      <div className="space-y-2">
+                        <label className="block text-xs font-black text-slate-700 uppercase tracking-wider">
+                          Bước 2: Tên điểm tổ chức cụ thể * (Tự nhập hoặc bấm chọn gợi ý GIS bên dưới)
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            required={form.loaiChienDich === "DIDONG"}
+                            placeholder="Ví dụ: Trường Đại học Bách Khoa - ĐH Đà Nẵng, Trạm y tế Phường Thanh Bình..."
+                            value={form.newTenDiaDiem}
+                            onChange={(e) => setForm({ ...form, newTenDiaDiem: e.target.value })}
+                            className="w-full h-12 pl-11 pr-4 border-2 border-slate-200 rounded-xl text-base font-bold text-slate-900 bg-white outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
+                          />
+                          <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-2xl">
+                            location_on
+                          </span>
+                        </div>
+
+                        {/* THANH GỢI Ý THÔNG MINH TỪ GOOGLE MAPS GIS */}
+                        <div className="bg-white p-3.5 rounded-xl border border-red-100 shadow-sm">
+                          <div className="text-xs font-bold text-slate-600 mb-2 flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-amber-500 text-base">lightbulb</span>
+                            <span>Gợi ý nhanh điểm lưu động phổ biến tại Đà Nẵng ({form.newLoaiDiaDiem === "TruongHoc" ? "Trường học" : form.newLoaiDiaDiem === "TrungTamYTe" ? "Trạm y tế / TTYT" : form.newLoaiDiaDiem === "CoQuan" ? "Cơ quan / Doanh nghiệp" : "Khu dân cư / Khác"}):</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto pr-1 custom-scrollbar">
+                            {(DANANG_GIS_PLACES[form.newLoaiDiaDiem] || []).map((place, idx) => (
                               <button
                                 key={idx}
                                 type="button"
@@ -1608,101 +1705,76 @@ export default function QuanLyChienDich() {
                                     pinnedLng: place.lng,
                                   });
                                 }}
-                                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#e62e43] text-xs font-semibold transition-colors flex items-center gap-1 text-left border border-transparent hover:border-red-200"
+                                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#e62e43] text-xs font-bold transition-all flex items-center gap-1.5 text-left border border-transparent hover:border-red-200 shadow-2xs active:scale-95"
                               >
-                                <span className="material-symbols-outlined text-[13px] text-red-500">
-                                  add_location_alt
-                                </span>
+                                <span className="material-symbols-outlined text-sm text-red-500">add_location_alt</span>
                                 <span>{place.ten}</span>
                               </button>
-                            ),
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* BƯỚC 3: ĐỊA CHỈ CHI TIẾT */}
+                      <div>
+                        <label className="block text-xs font-black text-slate-700 mb-1.5 uppercase tracking-wider flex items-center justify-between">
+                          <span>Bước 3: Địa chỉ chi tiết điểm tiếp nhận máu *</span>
+                          {form.newDiaChi && (
+                            <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
+                              <span className="material-symbols-outlined text-base">check_circle</span>
+                              Đã định vị & chuẩn hóa địa chỉ GIS
+                            </span>
                           )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* BƯỚC 3: ĐỊA CHỈ CHI TIẾT */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase flex items-center justify-between">
-                        <span>
-                          3. Địa chỉ chi tiết * (Bắt buộc nhập hoặc chọn từ Bản
-                          đồ)
-                        </span>
-                        {form.newDiaChi && (
-                          <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                            <span className="material-symbols-outlined text-sm">
-                              check_circle
-                            </span>
-                            Đã xác thực địa chỉ GIS
-                          </span>
-                        )}
-                      </label>
-                      <input
-                        type="text"
-                        required={form.loaiChienDich === "DIDONG"}
-                        placeholder="Ví dụ: 114 Thanh Thủy, Phường Thanh Bình, Hải Châu, TP. Đà Nẵng"
-                        value={form.newDiaChi}
-                        onChange={(e) =>
-                          setForm({ ...form, newDiaChi: e.target.value })
-                        }
-                        className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 bg-white outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-all"
-                      />
-                    </div>
-
-                    {/* BƯỚC 4: TÍCH HỢP BẢN ĐỒ TƯƠNG TÁC GOOGLE MAPS / GIS PINNING */}
-                    <div className="border border-slate-200 rounded-xl p-3 bg-white space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="w-7 h-7 rounded-lg bg-red-50 text-[#e62e43] flex items-center justify-center font-bold">
-                            <span className="material-symbols-outlined text-base">
-                              map
-                            </span>
-                          </span>
-                          <div>
-                            <div className="text-xs font-bold text-slate-800">
-                              Bản đồ số GIS Đà Nẵng (Google Maps API)
-                            </div>
-                            <div className="text-[11px] text-slate-400">
-                              Bấm vào điểm ghim trên bản đồ để lấy tọa độ &
-                              thông tin tự động
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setShowMapPicker(!showMapPicker)}
-                          className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-[#e62e43] text-white text-xs font-bold transition-all flex items-center gap-1 shadow-sm"
-                        >
-                          <span className="material-symbols-outlined text-sm">
-                            {showMapPicker ? "visibility_off" : "explore"}
-                          </span>
-                          {showMapPicker
-                            ? "Thu gọn bản đồ"
-                            : "Mở bản đồ ghim tọa độ"}
-                        </button>
+                        </label>
+                        <input
+                          type="text"
+                          required={form.loaiChienDich === "DIDONG"}
+                          placeholder="Ví dụ: 54 Nguyễn Lương Bằng, Phường Hòa Khánh Bắc, Liên Chiểu, TP. Đà Nẵng"
+                          value={form.newDiaChi}
+                          onChange={(e) => setForm({ ...form, newDiaChi: e.target.value })}
+                          className="w-full h-12 px-4 border-2 border-slate-200 rounded-xl text-base font-bold text-slate-900 bg-white outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
+                        />
                       </div>
 
-                      {/* KHỐI HIỂN THỊ BẢN ĐỒ TƯƠNG TÁC */}
-                      {showMapPicker && (
-                        <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-900 text-white p-4 space-y-3 animate-fadeIn">
-                          <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#e62e43_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                          <div className="relative z-10 flex items-center justify-between text-xs font-semibold text-slate-300 border-b border-slate-700/60 pb-2">
-                            <span className="flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                              Tọa độ GPS đang ghim:{" "}
-                              {form.pinnedLat || "16.0544"}°N,{" "}
-                              {form.pinnedLng || "108.2022"}°E
+                      {/* BƯỚC 4: TÍCH HỢP BẢN ĐỒ TƯƠNG TÁC GOOGLE MAPS / GIS PINNING */}
+                      <div className="border-2 border-slate-200 rounded-2xl p-4 bg-white space-y-3 shadow-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <span className="w-10 h-10 rounded-xl bg-red-50 text-[#e62e43] flex items-center justify-center font-bold shrink-0 shadow-sm">
+                              <span className="material-symbols-outlined text-2xl">map</span>
                             </span>
-                            <span className="text-[11px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-md font-bold">
-                              Khu vực: TP. Đà Nẵng
-                            </span>
+                            <div>
+                              <div className="text-sm font-black text-slate-800">Bước 4: Bản đồ định vị vệ tinh GIS Đà Nẵng (Google Maps API)</div>
+                              <div className="text-xs text-slate-500">Bấm trực tiếp vào các trạm ghim trên bản đồ để trích xuất tọa độ GPS và thông tin tự động</div>
+                            </div>
                           </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowMapPicker(!showMapPicker)}
+                            className="h-10 px-4 rounded-xl bg-slate-900 hover:bg-[#e62e43] text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md shrink-0 active:scale-95"
+                          >
+                            <span className="material-symbols-outlined text-lg">{showMapPicker ? "visibility_off" : "explore"}</span>
+                            <span>{showMapPicker ? "Thu gọn bản đồ" : "🧭 Mở bản đồ ghim tọa độ"}</span>
+                          </button>
+                        </div>
 
-                          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
-                            {Object.entries(DANANG_GIS_PLACES)
-                              .flatMap(([k, list]) => list)
-                              .slice(0, 6)
-                              .map((item, i) => (
+                        {/* KHỐI HIỂN THỊ BẢN ĐỒ TƯƠNG TÁC */}
+                        {showMapPicker && (
+                          <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 text-white p-5 space-y-4 animate-fadeIn shadow-inner">
+                            <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#e62e43_1.5px,transparent_1.5px)] [background-size:20px_20px]"></div>
+                            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold text-slate-300 border-b border-slate-700/80 pb-3">
+                              <span className="flex items-center gap-2">
+                                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                                <span className="text-sm text-white">Tọa độ GPS đang ghim:</span>
+                                <span className="font-mono text-emerald-400 text-sm">{form.pinnedLat || "16.054400"}°N, {form.pinnedLng || "108.202200"}°E</span>
+                              </span>
+                              <span className="text-xs bg-red-500/20 text-red-300 px-3 py-1 rounded-lg font-black border border-red-500/30 w-fit">
+                                📍 Khu vực: TP. Đà Nẵng
+                              </span>
+                            </div>
+
+                            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1">
+                              {Object.entries(DANANG_GIS_PLACES).flatMap(([k, list]) => list).slice(0, 9).map((item, i) => (
                                 <div
                                   key={i}
                                   onClick={() => {
@@ -1721,211 +1793,152 @@ export default function QuanLyChienDich() {
                                       showConfirmButton: false,
                                     });
                                   }}
-                                  className="p-2.5 rounded-lg bg-slate-800/80 hover:bg-red-600/30 border border-slate-700 hover:border-red-500 cursor-pointer transition-all group flex flex-col justify-between"
+                                  className="p-3.5 rounded-xl bg-slate-800/90 hover:bg-red-600/30 border border-slate-700 hover:border-red-500 cursor-pointer transition-all group flex flex-col justify-between shadow-sm active:scale-95"
                                 >
-                                  <div className="flex items-start justify-between">
-                                    <span className="text-xs font-bold text-white group-hover:text-red-400 transition-colors line-clamp-1">
+                                  <div className="flex items-start justify-between gap-1">
+                                    <span className="text-xs font-black text-white group-hover:text-red-400 transition-colors line-clamp-1">
                                       {item.ten}
                                     </span>
-                                    <span className="material-symbols-outlined text-red-500 text-sm group-hover:scale-125 transition-transform">
+                                    <span className="material-symbols-outlined text-red-500 text-base group-hover:scale-125 transition-transform shrink-0">
                                       location_on
                                     </span>
                                   </div>
-                                  <div className="text-[10px] text-slate-400 mt-1 line-clamp-1">
+                                  <div className="text-[11px] text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">
                                     {item.diaChi}
                                   </div>
-                                  <div className="mt-1.5 flex items-center justify-between text-[9px] font-mono text-slate-500 group-hover:text-red-300">
-                                    <span>📌 Q. {item.quan}</span>
-                                    <span>
-                                      {item.lat}, {item.lng}
-                                    </span>
+                                  <div className="mt-2.5 pt-2 border-t border-slate-700/60 flex items-center justify-between text-[10px] font-mono text-slate-400 group-hover:text-red-300">
+                                    <span className="font-bold text-slate-300">📌 Q. {item.quan}</span>
+                                    <span>{item.lat}, {item.lng}</span>
                                   </div>
                                 </div>
                               ))}
+                            </div>
+                            <div className="relative z-10 text-center pt-2 text-xs text-slate-400 italic font-medium">
+                              💡 Mẹo: Bấm chọn vào các thẻ tọa độ phía trên để hệ thống tự động điền Tên điểm & Địa chỉ chính xác vào biểu mẫu.
+                            </div>
                           </div>
-                          <div className="relative z-10 text-center pt-1 text-[11px] text-slate-400 italic">
-                            💡 Mẹo: Bấm chọn vào các điểm ghim GIS phía trên để
-                            hệ thống tự động điền Tên điểm & Địa chỉ vào biểu
-                            mẫu.
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* PHẦN III: HÌNH ẢNH TRUYỀN THÔNG & BANNER */}
+                <div className="space-y-4 pt-4 border-t-2 border-dashed border-slate-200">
+                  <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <span className="w-8 h-8 rounded-xl bg-red-50 text-[#e62e43] flex items-center justify-center font-bold">
+                      <span className="material-symbols-outlined text-lg">image</span>
+                    </span>
+                    <div>
+                      <h4 className="text-sm font-black text-slate-800 uppercase tracking-wide">
+                        III. Banner truyền thông & Hình ảnh minh họa
+                      </h4>
+                      <p className="text-[11px] text-slate-400">Ảnh bìa hiển thị trên trang chủ và ứng dụng di động cho tình nguyện viên</p>
+                    </div>
+                  </div>
+
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    onChange={handleImageSelect}
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
+                    <div className="sm:col-span-1">
+                      {form.imageUrl ? (
+                        <div className="relative rounded-2xl overflow-hidden border-2 border-slate-200 bg-slate-50 shadow-sm group">
+                          <img
+                            src={toImageSrc(form.imageUrl)}
+                            alt="Xem trước ảnh chiến dịch"
+                            className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-black/70 hover:bg-red-600 text-white flex items-center justify-center transition-colors shadow-lg"
+                            title="Xóa ảnh"
+                          >
+                            <span className="material-symbols-outlined text-base">close</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div 
+                          onClick={() => imageInputRef.current?.click()}
+                          className="h-44 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/80 hover:bg-red-50/40 hover:border-[#e62e43]/60 flex flex-col items-center justify-center text-slate-400 hover:text-[#e62e43] cursor-pointer transition-all p-4 text-center group"
+                        >
+                          <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                            <span className="material-symbols-outlined text-2xl text-slate-400 group-hover:text-[#e62e43]">add_photo_alternate</span>
                           </div>
+                          <p className="text-xs font-bold text-slate-600 group-hover:text-[#e62e43]">Bấm tải ảnh lên</p>
+                          <p className="text-[10px] text-slate-400 mt-0.5">JPG, PNG, WEBP (max 5MB)</p>
                         </div>
                       )}
                     </div>
-                  </div>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                    Bắt đầu *
-                  </label>
-                  <input
-                    type="datetime-local"
-                    required
-                    value={form.thoiGianBD}
-                    onChange={(e) => {
-                      const newBD = e.target.value;
-                      const nextStatus =
-                        form.trangThai === "DaHuy"
-                          ? "DaHuy"
-                          : calcStatusByTime(newBD, form.thoiGianKT);
-                      setForm({
-                        ...form,
-                        thoiGianBD: newBD,
-                        trangThai: nextStatus,
-                      });
-                    }}
-                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#e62e43] transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                    Kết thúc *
-                  </label>
-                  <input
-                    type="datetime-local"
-                    required
-                    value={form.thoiGianKT}
-                    onChange={(e) => {
-                      const newKT = e.target.value;
-                      const nextStatus =
-                        form.trangThai === "DaHuy"
-                          ? "DaHuy"
-                          : calcStatusByTime(form.thoiGianBD, newKT);
-                      setForm({
-                        ...form,
-                        thoiGianKT: newKT,
-                        trangThai: nextStatus,
-                      });
-                    }}
-                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#e62e43] transition-colors"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                    Chỉ tiêu (đv)
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={form.soLuongDuKien}
-                    onChange={(e) =>
-                      setForm({ ...form, soLuongDuKien: e.target.value })
-                    }
-                    className="w-full h-11 px-4 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#e62e43] transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                    Trạng thái (Tự động theo thời gian)
-                  </label>
-                  <select
-                    value={form.trangThai}
-                    onChange={(e) =>
-                      setForm({ ...form, trangThai: e.target.value })
-                    }
-                    className="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-bold bg-white outline-none focus:border-[#e62e43] transition-colors cursor-pointer"
-                  >
-                    {STATUS_OPTIONS.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
-                  Hình ảnh
-                </label>
-                <input
-                  ref={imageInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  className="hidden"
-                  onChange={handleImageSelect}
-                />
-                <div className="flex flex-col gap-3">
-                  {form.imageUrl ? (
-                    <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
-                      <img
-                        src={toImageSrc(form.imageUrl)}
-                        alt="Xem trước ảnh chiến dịch"
-                        className="w-full h-40 object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleRemoveImage}
-                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center"
-                        title="Xóa ảnh"
-                      >
-                        <span className="material-symbols-outlined text-base">
-                          close
-                        </span>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="h-32 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center text-slate-400">
-                      <span className="material-symbols-outlined text-3xl mb-1">
-                        image
-                      </span>
-                      <p className="text-xs font-medium">
-                        Chưa có ảnh chiến dịch
+                    
+                    <div className="sm:col-span-2 space-y-3">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => imageInputRef.current?.click()}
+                          disabled={uploadingImage}
+                          className="h-11 px-5 bg-slate-900 hover:bg-[#e62e43] text-white rounded-xl text-xs font-bold flex items-center gap-2 disabled:opacity-60 transition-all shadow-md active:scale-95"
+                        >
+                          <span className="material-symbols-outlined text-lg">
+                            {uploadingImage ? "progress_activity" : "upload"}
+                          </span>
+                          <span>{uploadingImage ? "Đang xử lý ảnh..." : form.imageUrl ? "Thay đổi hình ảnh khác" : "Chọn tệp hình ảnh"}</span>
+                        </button>
+                        {form.imageUrl && (
+                          <span className="text-xs font-mono font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 truncate max-w-[280px]">
+                            ✓ {form.imageUrl}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        💡 **Lời khuyên:** Sử dụng banner ngang độ phân giải cao (tỷ lệ 16:9 hoặc 4:3) để tạo ấn tượng mạnh mẽ cho tình nguyện viên đăng ký hiến máu.
                       </p>
                     </div>
-                  )}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() => imageInputRef.current?.click()}
-                      disabled={uploadingImage}
-                      className="h-10 px-4 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-sm font-bold flex items-center gap-2 disabled:opacity-60"
-                    >
-                      <span className="material-symbols-outlined text-lg">
-                        {uploadingImage
-                          ? "progress_activity"
-                          : "add_photo_alternate"}
-                      </span>
-                      {uploadingImage ? "Đang tải ảnh..." : "Thêm ảnh"}
-                    </button>
-                    {form.imageUrl && (
-                      <span
-                        className="text-xs text-slate-500 truncate max-w-[220px]"
-                        title={form.imageUrl}
-                      >
-                        {form.imageUrl}
-                      </span>
-                    )}
                   </div>
-                  <p className="text-[11px] text-slate-400">
-                    Ảnh được lưu vào thư mục public/images (JPG, PNG, WEBP, GIF
-                    — tối đa 5MB).
-                  </p>
                 </div>
+
               </div>
-              <div className="flex gap-3 pt-2">
+            </form>
+
+            {/* BOTTOM FOOTER (ACTIONS) */}
+            <div className="bg-slate-100 px-6 sm:px-8 py-4 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
+              <div className="text-xs text-slate-500 font-medium flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-emerald-600 text-base">verified</span>
+                <span>Dữ liệu được mã hóa và đồng bộ trực tiếp với cơ sở dữ liệu Y tế Đà Nẵng.</span>
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={() => setModal(null)}
-                  className="flex-1 h-11 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  className="flex-1 sm:flex-initial h-12 px-6 border-2 border-slate-300 rounded-xl text-sm font-bold text-slate-700 hover:bg-white hover:border-slate-400 transition-all active:scale-95"
                 >
-                  Hủy
+                  Hủy bỏ
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 h-11 bg-red-700 hover:bg-red-800 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/20 disabled:opacity-60"
+                  onClick={handleSubmit}
+                  className="flex-1 sm:flex-initial h-12 px-8 bg-gradient-to-r from-[#e62e43] to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-black shadow-lg shadow-red-500/25 flex items-center justify-center gap-2 disabled:opacity-60 transition-all active:scale-95"
                 >
-                  {submitting
-                    ? "Đang lưu..."
-                    : modal === "create"
-                      ? "Tạo chiến dịch"
-                      : "Lưu thay đổi"}
+                  <span className="material-symbols-outlined text-lg">
+                    {submitting ? "progress_activity" : "save"}
+                  </span>
+                  <span>
+                    {submitting
+                      ? "ĐANG XỬ LÝ LƯU..."
+                      : modal === "create"
+                        ? "🚀 TẠO & PHÁT HÀNH CHIẾN DỊCH"
+                        : "💾 LƯU THAY ĐỔI HỒ SƠ"}
+                  </span>
                 </button>
               </div>
-            </form>
+            </div>
+
           </div>
         </div>
       )}
