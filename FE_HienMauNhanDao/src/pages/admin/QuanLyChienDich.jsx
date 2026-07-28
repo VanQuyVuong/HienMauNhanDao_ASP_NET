@@ -13,6 +13,7 @@ import {
 } from "../../services/chienDichService";
 import { uploadService } from "../../services/uploadService";
 import { donDangKyService } from "../../services/donDangKy";
+import { phuongXaService } from "../../services/phuongXaService";
 import { getApiError } from "../../utils/apiHelper";
 
 const toImageSrc = (imageUrl) => {
@@ -155,7 +156,7 @@ const DANANG_GIS_PLACES = {
       quan: "Hải Châu",
     },
   ],
-  TrungTamYTe: [
+  TramYTe: [
     {
       ten: "Trung tâm Y tế Quận Hải Châu",
       diaChi: "388 Trần Phú, Phường Bình Thuận, Hải Châu, TP. Đà Nẵng",
@@ -237,7 +238,7 @@ const DANANG_GIS_PLACES = {
       quan: "Hải Châu",
     },
   ],
-  DiaDiemCoDinh: [
+  KhuDanCu: [
     {
       ten: "Nhà Văn hóa Thanh niên Đà Nẵng",
       diaChi: "1 Quảng trường 2/9, Phường Hòa Cường Bắc, Hải Châu, TP. Đà Nẵng",
@@ -293,6 +294,7 @@ export default function QuanLyChienDich() {
   const { searchQuery: headerSearch = "" } = useOutletContext() || {};
   const [campaigns, setCampaigns] = useState([]);
   const [diaDiems, setDiaDiems] = useState([]);
+  const [phuongXas, setPhuongXas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("");
   const [search, setSearch] = useState("");
@@ -312,12 +314,14 @@ export default function QuanLyChienDich() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [cdRes, ddRes] = await Promise.all([
+      const [cdRes, ddRes, pxRes] = await Promise.all([
         chienDichService.getChienDichsList(),
         diaDiemService.getAll(),
+        phuongXaService.getAll(),
       ]);
       setCampaigns(Array.isArray(cdRes) ? cdRes : []);
       setDiaDiems(Array.isArray(ddRes) ? ddRes : []);
+      setPhuongXas(Array.isArray(pxRes) ? pxRes : []);
     } catch (err) {
       Swal.fire(
         "Lỗi",
@@ -1284,13 +1288,18 @@ export default function QuanLyChienDich() {
                                 <td className="py-4 px-6 font-black text-slate-900 text-sm">
                                   <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">
-                                      {(r.tinhNguyenVien?.hoVaTen || "T")
+                                      {(
+                                        r.tinhNguyenVien?.hoTen ||
+                                        r.tinhNguyenVien?.hoVaTen ||
+                                        "T"
+                                      )
                                         .charAt(0)
                                         .toUpperCase()}
                                     </div>
                                     <div>
                                       <p className="font-bold text-slate-900">
-                                        {r.tinhNguyenVien?.hoVaTen ||
+                                        {r.tinhNguyenVien?.hoTen ||
+                                          r.tinhNguyenVien?.hoVaTen ||
                                           r.maTNV ||
                                           "---"}
                                       </p>
@@ -1302,10 +1311,13 @@ export default function QuanLyChienDich() {
                                 </td>
                                 <td className="py-4 px-6">
                                   <p className="font-mono font-bold text-slate-800">
-                                    {r.tinhNguyenVien?.soCCCD || "---"}
+                                    {r.tinhNguyenVien?.cccd ||
+                                      r.tinhNguyenVien?.soCCCD ||
+                                      "---"}
                                   </p>
                                   <p className="text-[11px] text-slate-500">
                                     {r.tinhNguyenVien?.soDienThoai ||
+                                      r.tinhNguyenVien?.sdt ||
                                       "Không có SĐT"}
                                   </p>
                                 </td>
@@ -1633,10 +1645,34 @@ export default function QuanLyChienDich() {
                   ) : (
                     /* TRƯỜNG HỢP 2: LINH ĐỘNG / DI ĐỘNG (GIS) */
                     <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200/80 space-y-6 animate-fadeIn">
-                      {/* BƯỚC 1: CHỌN LOẠI HÌNH TỔ CHỨC */}
+                      {/* BƯỚC 1: CHỌN PHƯỜNG / XÃ (KHU VỰC ĐÀ NẴNG) */}
+                      <div>
+                        <label className="block text-xs font-black text-slate-700 mb-1.5 uppercase tracking-wider flex items-center justify-between">
+                          <span>Bước 1: Chọn Phường/Xã / Khu vực tại TP. Đà Nẵng *</span>
+                          <span className="text-xs text-blue-600 font-bold flex items-center gap-1">
+                            <span className="material-symbols-outlined text-sm">filter_alt</span>
+                            Lọc gợi ý GIS theo khu vực
+                          </span>
+                        </label>
+                        <select
+                          required={form.loaiChienDich === "DIDONG"}
+                          value={form.newMaPhuongXa}
+                          onChange={(e) => setForm({ ...form, newMaPhuongXa: e.target.value })}
+                          className="w-full h-12 px-4 border-2 border-slate-200 rounded-xl text-sm bg-white font-bold text-slate-800 outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all cursor-pointer"
+                        >
+                          <option value="">-- Chọn Phường / Xã tại TP. Đà Nẵng --</option>
+                          {phuongXas.map((px) => (
+                            <option key={px.maPhuongXa} value={px.maPhuongXa}>
+                              📍 {px.tenPhuongXa}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* BƯỚC 2: CHỌN LOẠI HÌNH TỔ CHỨC */}
                       <div>
                         <label className="block text-xs font-black text-slate-700 mb-2.5 uppercase tracking-wider flex items-center justify-between">
-                          <span>Bước 1: Phân loại địa điểm tổ chức lưu động *</span>
+                          <span>Bước 2: Phân loại địa điểm tổ chức lưu động *</span>
                           <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                             Tích hợp cơ sở dữ liệu GIS Đà Nẵng
@@ -1645,9 +1681,9 @@ export default function QuanLyChienDich() {
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                           {[
                             { id: "TruongHoc", label: "Trường học / ĐH", icon: "school" },
-                            { id: "TrungTamYTe", label: "Trạm y tế / TTYT", icon: "health_and_safety" },
+                            { id: "TramYTe", label: "Trạm xá / Trạm y tế", icon: "health_and_safety" },
                             { id: "CoQuan", label: "Cơ quan / Doanh nghiệp", icon: "domain" },
-                            { id: "DiaDiemCoDinh", label: "Khu dân cư / Khác", icon: "groups" },
+                            { id: "KhuDanCu", label: "Khu dân cư / Khác", icon: "groups" },
                           ].map((cat) => (
                             <button
                               key={cat.id}
@@ -1666,16 +1702,16 @@ export default function QuanLyChienDich() {
                         </div>
                       </div>
 
-                      {/* BƯỚC 2: TÊN ĐIỂM TỔ CHỨC & THANH GỢI Ý THÔNG MINH */}
+                      {/* BƯỚC 3: TÊN ĐIỂM TỔ CHỨC & THANH GỢI Ý THÔNG MINH */}
                       <div className="space-y-2">
                         <label className="block text-xs font-black text-slate-700 uppercase tracking-wider">
-                          Bước 2: Tên điểm tổ chức cụ thể * (Tự nhập hoặc bấm chọn gợi ý GIS bên dưới)
+                          Bước 3: Tên điểm tổ chức cụ thể * (Tự nhập hoặc bấm chọn gợi ý GIS bên dưới)
                         </label>
                         <div className="relative">
                           <input
                             type="text"
                             required={form.loaiChienDich === "DIDONG"}
-                            placeholder="Ví dụ: Trường Đại học Bách Khoa - ĐH Đà Nẵng, Trạm y tế Phường Thanh Bình..."
+                            placeholder="Ví dụ: Trường Đại học Bách Khoa - ĐH Đà Nẵng, Nhà văn hoá thôn 4..."
                             value={form.newTenDiaDiem}
                             onChange={(e) => setForm({ ...form, newTenDiaDiem: e.target.value })}
                             className="w-full h-12 pl-11 pr-4 border-2 border-slate-200 rounded-xl text-base font-bold text-slate-900 bg-white outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
@@ -1685,40 +1721,63 @@ export default function QuanLyChienDich() {
                           </span>
                         </div>
 
-                        {/* THANH GỢI Ý THÔNG MINH TỪ GOOGLE MAPS GIS */}
-                        <div className="bg-white p-3.5 rounded-xl border border-red-100 shadow-sm">
-                          <div className="text-xs font-bold text-slate-600 mb-2 flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-amber-500 text-base">lightbulb</span>
-                            <span>Gợi ý nhanh điểm lưu động phổ biến tại Đà Nẵng ({form.newLoaiDiaDiem === "TruongHoc" ? "Trường học" : form.newLoaiDiaDiem === "TrungTamYTe" ? "Trạm y tế / TTYT" : form.newLoaiDiaDiem === "CoQuan" ? "Cơ quan / Doanh nghiệp" : "Khu dân cư / Khác"}):</span>
+                        {/* THANH GỢI Ý THÔNG MINH TỪ GOOGLE MAPS GIS HOẶC THÔNG BÁO TỰ NHẬP */}
+                        {form.newLoaiDiaDiem === "KhuDanCu" ? (
+                          <div className="bg-amber-50 p-3.5 rounded-xl border border-amber-200 text-amber-900 text-xs font-bold flex items-center gap-2 shadow-2xs">
+                            <span className="material-symbols-outlined text-amber-600 text-base shrink-0">info</span>
+                            <span>Bạn đã chọn loại hình Khu dân cư / Khác. Vui lòng tự nhập Tên điểm tổ chức (vd: Nhà văn hoá thôn 4) và Địa chỉ cụ thể (vd: 114 Thanh Thủy), hoặc chọn trực tiếp trên Bản đồ GIS bên dưới.</span>
                           </div>
-                          <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto pr-1 custom-scrollbar">
-                            {(DANANG_GIS_PLACES[form.newLoaiDiaDiem] || []).map((place, idx) => (
-                              <button
-                                key={idx}
-                                type="button"
-                                onClick={() => {
-                                  setForm({
-                                    ...form,
-                                    newTenDiaDiem: place.ten,
-                                    newDiaChi: place.diaChi,
-                                    pinnedLat: place.lat,
-                                    pinnedLng: place.lng,
-                                  });
-                                }}
-                                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#e62e43] text-xs font-bold transition-all flex items-center gap-1.5 text-left border border-transparent hover:border-red-200 shadow-2xs active:scale-95"
-                              >
-                                <span className="material-symbols-outlined text-sm text-red-500">add_location_alt</span>
-                                <span>{place.ten}</span>
-                              </button>
-                            ))}
+                        ) : (
+                          <div className="bg-white p-3.5 rounded-xl border border-red-100 shadow-sm">
+                            <div className="text-xs font-bold text-slate-600 mb-2 flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-amber-500 text-base">lightbulb</span>
+                                <span>Gợi ý điểm lưu động ({form.newLoaiDiaDiem === "TruongHoc" ? "Trường học" : form.newLoaiDiaDiem === "TramYTe" ? "Trạm xá / Trạm y tế" : "Cơ quan / Doanh nghiệp"}):</span>
+                              </div>
+                              {(() => {
+                                const selPx = phuongXas.find(p => p.maPhuongXa === form.newMaPhuongXa);
+                                const selQuan = selPx ? selPx.tenPhuongXa.split(',').pop().trim() : "";
+                                return selQuan ? (
+                                  <span className="text-[11px] text-blue-600 font-extrabold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">Khu vực: {selQuan}</span>
+                                ) : null;
+                              })()}
+                            </div>
+                            <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto pr-1 custom-scrollbar">
+                              {(() => {
+                                const selPx = phuongXas.find(p => p.maPhuongXa === form.newMaPhuongXa);
+                                const selQuan = selPx ? selPx.tenPhuongXa.split(',').pop().trim() : "";
+                                const allPlaces = DANANG_GIS_PLACES[form.newLoaiDiaDiem] || [];
+                                const filtered = selQuan ? allPlaces.filter(p => p.quan === selQuan) : allPlaces;
+                                const listToShow = filtered.length > 0 ? filtered : allPlaces;
+                                return listToShow.map((place, idx) => (
+                                  <button
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => {
+                                      setForm({
+                                        ...form,
+                                        newTenDiaDiem: place.ten,
+                                        newDiaChi: place.diaChi,
+                                        pinnedLat: place.lat,
+                                        pinnedLng: place.lng,
+                                      });
+                                    }}
+                                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#e62e43] text-xs font-bold transition-all flex items-center gap-1.5 text-left border border-transparent hover:border-red-200 shadow-2xs active:scale-95"
+                                  >
+                                    <span className="material-symbols-outlined text-sm text-red-500">add_location_alt</span>
+                                    <span>{place.ten}</span>
+                                  </button>
+                                ));
+                              })()}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
 
-                      {/* BƯỚC 3: ĐỊA CHỈ CHI TIẾT */}
+                      {/* BƯỚC 4: ĐỊA CHỈ CHI TIẾT */}
                       <div>
                         <label className="block text-xs font-black text-slate-700 mb-1.5 uppercase tracking-wider flex items-center justify-between">
-                          <span>Bước 3: Địa chỉ chi tiết điểm tiếp nhận máu *</span>
+                          <span>Bước 4: Địa chỉ chi tiết điểm tiếp nhận máu *</span>
                           {form.newDiaChi && (
                             <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
                               <span className="material-symbols-outlined text-base">check_circle</span>
@@ -1729,14 +1788,14 @@ export default function QuanLyChienDich() {
                         <input
                           type="text"
                           required={form.loaiChienDich === "DIDONG"}
-                          placeholder="Ví dụ: 54 Nguyễn Lương Bằng, Phường Hòa Khánh Bắc, Liên Chiểu, TP. Đà Nẵng"
+                          placeholder="Ví dụ: 114 Thanh Thủy, Phường Thanh Bình, Hải Châu, TP. Đà Nẵng"
                           value={form.newDiaChi}
                           onChange={(e) => setForm({ ...form, newDiaChi: e.target.value })}
                           className="w-full h-12 px-4 border-2 border-slate-200 rounded-xl text-base font-bold text-slate-900 bg-white outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
                         />
                       </div>
 
-                      {/* BƯỚC 4: TÍCH HỢP BẢN ĐỒ TƯƠNG TÁC GOOGLE MAPS / GIS PINNING */}
+                      {/* BƯỚC 5: TÍCH HỢP BẢN ĐỒ TƯƠNG TÁC GOOGLE MAPS / GIS PINNING */}
                       <div className="border-2 border-slate-200 rounded-2xl p-4 bg-white space-y-3 shadow-sm">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
@@ -1744,7 +1803,7 @@ export default function QuanLyChienDich() {
                               <span className="material-symbols-outlined text-2xl">map</span>
                             </span>
                             <div>
-                              <div className="text-sm font-black text-slate-800">Bước 4: Bản đồ định vị vệ tinh GIS Đà Nẵng (Google Maps API)</div>
+                              <div className="text-sm font-black text-slate-800">Bước 5: Bản đồ định vị vệ tinh GIS Đà Nẵng (Google Maps API)</div>
                               <div className="text-xs text-slate-500">Bấm trực tiếp vào các trạm ghim trên bản đồ để trích xuất tọa độ GPS và thông tin tự động</div>
                             </div>
                           </div>

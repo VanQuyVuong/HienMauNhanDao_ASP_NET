@@ -44,7 +44,7 @@ export const donDangKyService = {
      */
     getAll: async () => {
         try {
-            const response = await http.get('/dondangky');
+            const response = await http.get('/dondangky/tat-ca');
             return response?.data || [];
         } catch (error) {
             console.error('Error fetching danh sách đơn đăng ký:', error);

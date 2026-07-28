@@ -48,10 +48,10 @@ namespace HienMauNhanDao_DaNang.Models.Enums
     public enum LoaiDiaDiem
     {
         BenhVien,
-        TrungTamYTe,
+        TramYTe,
         TruongHoc,
         CoQuan,
-        DiaDiemCoDinh
+        KhuDanCu
     }
 
     //LoaiPhieuKhoMau
