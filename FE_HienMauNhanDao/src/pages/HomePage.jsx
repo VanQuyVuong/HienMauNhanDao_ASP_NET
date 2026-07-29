@@ -224,7 +224,7 @@ export default function HomePage() {
                 trangThai: "DaDangKy",
                 theTich: 350
             };
-            await donDangKyService.createDonDangKy(payload);
+            await donDangKyService.create(payload);
             setFastTrackCampaign(null);
             Swal.fire({
                 icon: 'success',
@@ -233,7 +233,8 @@ export default function HomePage() {
                 confirmButtonColor: '#e62e43'
             });
         } catch (err) {
-            Swal.fire('Thông báo', err?.response?.data?.message || 'Bạn đã đăng ký chiến dịch này rồi!', 'info');
+            const errorMsg = err?.message || err?.data?.message || err?.response?.data?.message;
+            Swal.fire('Thông báo', errorMsg || 'Bạn đã đăng ký tham gia chiến dịch này rồi! Hãy kiểm tra danh sách đơn của bạn.', 'info');
         } finally {
             setSubmittingFastTrack(false);
         }

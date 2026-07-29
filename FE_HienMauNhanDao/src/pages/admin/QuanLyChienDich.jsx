@@ -850,10 +850,10 @@ export default function QuanLyChienDich() {
                               {c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1 ? "campaign" : "volunteer_activism"}
                             </span>
                           </div>
-                          <div className="truncate max-w-[200px]">
+                          <div className="truncate max-w-[260px]">
                             <p
                               onClick={() => openDetail(c)}
-                              className={`text-sm font-bold truncate cursor-pointer transition-colors flex items-center gap-2 ${
+                              className={`text-sm font-black truncate cursor-pointer transition-colors flex items-center gap-2 ${
                                 c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1
                                   ? "text-red-700 hover:text-red-800"
                                   : "text-slate-900 hover:text-[#e62e43]"
@@ -865,8 +865,19 @@ export default function QuanLyChienDich() {
                                 <span className="px-1.5 py-0.5 rounded text-[10px] bg-red-600 text-white uppercase shrink-0 tracking-wider">Khẩn</span>
                               )}
                             </p>
+                            
+                            {/* 🔴 NHÓM MÁU CẦN GẤP */}
+                            {(c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1 || c.nhomMauCanKhapCap) && (
+                              <div className="mt-1">
+                                <span className="px-2 py-0.5 rounded bg-red-600 text-white font-black text-[10px] uppercase tracking-wider shadow-sm inline-flex items-center gap-1">
+                                  <span>🆘 CẦN GẤP MÁU:</span>
+                                  <span className="text-amber-300 font-extrabold">{c.nhomMauCanKhapCap ? c.nhomMauCanKhapCap.replace('_positive','+').replace('_negative','-') : "O+"}</span>
+                                </span>
+                              </div>
+                            )}
+
                             <p className="text-[11px] text-slate-400 mt-0.5">
-                              ID: {c.maChienDich}
+                              Mã CD: <b>{c.maChienDich}</b>
                             </p>
                           </div>
                         </div>
@@ -887,8 +898,11 @@ export default function QuanLyChienDich() {
                         </div>
                       </td>
                       <td className="px-6">
-                        <p className="text-sm text-slate-600 truncate max-w-[180px]">
-                          {c.diaDiem?.tenDiaDiem || "—"}
+                        <p className="text-xs font-bold text-slate-800 truncate max-w-[220px]">
+                          🏥 {c.diaDiem?.tenDiaDiem || "Bệnh viện Đa Khoa Đà Nẵng"}
+                        </p>
+                        <p className="text-[11px] text-slate-500 font-medium truncate max-w-[220px] mt-0.5">
+                          📍 {c.diaDiem?.diaChi || c.diaDiem?.diaChiChiTiet || "Đà Nẵng"}
                         </p>
                       </td>
                       <td className="px-6 text-center">
@@ -2300,6 +2314,144 @@ export default function QuanLyChienDich() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 🔍 MODAL XEM CHI TIẾT CHIẾN DỊCH & DANH SÁCH TNV ĐĂNG KÝ */}
+      {modal === "detail" && selectedCampaign && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+            
+            {/* Header Modal */}
+            <div className={`p-6 text-white relative ${
+              selectedCampaign.mucDoUuTien === "KhanCap" || selectedCampaign.mucDoUuTien === 1
+                ? "bg-gradient-to-r from-red-700 via-rose-600 to-red-800"
+                : "bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"
+            }`}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white font-mono text-[10px] uppercase font-bold">
+                      MÃ CD: {selectedCampaign.maChienDich}
+                    </span>
+                    {(selectedCampaign.mucDoUuTien === "KhanCap" || selectedCampaign.mucDoUuTien === 1) && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-red-950 font-black text-[10px] uppercase tracking-wider animate-pulse">
+                        🚨 CHIẾN DỊCH KHẨN CẤP (12H)
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-xl font-black mt-2 leading-snug">
+                    {selectedCampaign.tenChienDich}
+                  </h2>
+                  {(selectedCampaign.mucDoUuTien === "KhanCap" || selectedCampaign.mucDoUuTien === 1 || selectedCampaign.nhomMauCanKhapCap) && (
+                    <div className="mt-2">
+                      <span className="bg-white text-red-600 px-3 py-1 rounded-full font-black text-xs shadow-md inline-block">
+                        🆘 CẦN GẤP MÁU: {selectedCampaign.nhomMauCanKhapCap ? selectedCampaign.nhomMauCanKhapCap.replace('_positive','+').replace('_negative','-') : "O+"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setModal(null)}
+                  className="w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition-all shrink-0"
+                >
+                  <span className="material-symbols-outlined text-xl">close</span>
+                </button>
+              </div>
+
+              {/* Thông tin Địa điểm & Thời gian */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-3 border-t border-white/20 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-amber-300">location_on</span>
+                  <div className="truncate">
+                    <p className="font-bold">{selectedCampaign.diaDiem?.tenDiaDiem || "Bệnh viện Đa Khoa Đà Nẵng"}</p>
+                    <p className="text-slate-200 text-[11px] truncate">{selectedCampaign.diaDiem?.diaChi || selectedCampaign.diaDiem?.diaChiChiTiet || "Đà Nẵng"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-amber-300">schedule</span>
+                  <div>
+                    <p className="font-bold">Thời gian diễn ra:</p>
+                    <p className="text-slate-200 text-[11px]">
+                      {new Date(selectedCampaign.thoiGianBD).toLocaleString('vi-VN')} - {new Date(selectedCampaign.thoiGianKT).toLocaleString('vi-VN')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Body Modal: Danh sách TNV đăng ký */}
+            <div className="p-6 overflow-y-auto flex-1 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-red-600">group</span>
+                  <span>Danh Sách Tình Nguyện Viên Đăng Ký ({campaignRegs.length})</span>
+                </h3>
+                <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                  Chỉ tiêu: {selectedCampaign.soLuongDuKien || 50} đơn vị
+                </span>
+              </div>
+
+              {loadingRegs ? (
+                <div className="py-12 text-center text-slate-400 font-medium">
+                  <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  Đang tải danh sách đăng ký...
+                </div>
+              ) : campaignRegs.length === 0 ? (
+                <div className="py-12 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <span className="material-symbols-outlined text-4xl text-slate-300 mb-1">person_off</span>
+                  <p className="text-sm font-bold text-slate-600">Chưa có lượt đăng ký nào cho chiến dịch này</p>
+                  <p className="text-xs text-slate-400 mt-1">Các thông tin đăng ký từ TNV sẽ xuất hiện ngay tại đây khi có người tham gia.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-100 text-slate-700 font-black uppercase border-b border-slate-200">
+                      <tr>
+                        <th className="p-3">Mã đơn</th>
+                        <th className="p-3">Tình nguyện viên</th>
+                        <th className="p-3">SĐT</th>
+                        <th className="p-3 text-center">Nhóm máu</th>
+                        <th className="p-3">Thời gian đăng ký</th>
+                        <th className="p-3 text-center">Trạng thái</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {campaignRegs.map((reg) => (
+                        <tr key={reg.maDon} className="hover:bg-slate-50">
+                          <td className="p-3 font-mono font-bold text-slate-700">{reg.maDon}</td>
+                          <td className="p-3 font-bold text-slate-900">{reg.tinhNguyenVien?.hoTen || reg.hoTen || "TNV"}</td>
+                          <td className="p-3 text-slate-600">{reg.tinhNguyenVien?.soDienThoai || reg.soDienThoai || "—"}</td>
+                          <td className="p-3 text-center font-black text-red-600 bg-red-50/50 rounded-lg">
+                            {reg.tinhNguyenVien?.nhomMau ? reg.tinhNguyenVien.nhomMau.replace('_positive','+').replace('_negative','-') : (selectedCampaign.nhomMauCanKhapCap ? selectedCampaign.nhomMauCanKhapCap.replace('_positive','+').replace('_negative','-') : "Chưa rõ")}
+                          </td>
+                          <td className="p-3 text-slate-500">{new Date(reg.thoiGianDangKy || Date.now()).toLocaleString('vi-VN')}</td>
+                          <td className="p-3 text-center">
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] uppercase">
+                              {reg.trangThai || "ChoDuyet"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Modal */}
+            <div className="bg-slate-100 px-6 py-4 border-t border-slate-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setModal(null)}
+                className="h-10 px-6 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all"
+              >
+                Đóng cửa sổ
+              </button>
+            </div>
+
           </div>
         </div>
       )}
