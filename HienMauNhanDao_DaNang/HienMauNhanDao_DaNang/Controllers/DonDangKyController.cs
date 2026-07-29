@@ -66,6 +66,44 @@ namespace HienMauNhanDao_DaNang.Controllers
             return Ok(new { success = true, message = "Đăng ký hiến máu thành công!", maDon=donMoi.MaDon });
         }
 
+        public class TiepNhanRequest
+        {
+            public string? MaTNV { get; set; }
+            public string? MaChienDich { get; set; }
+            public int TheTich { get; set; } = 250;
+            public string? GhiChu { get; set; }
+        }
+
+        // API dành cho Lễ tân / Y tá tạo đơn (kể cả tự do không có chiến dịch)
+        [HttpPost("tiep-nhan")]
+        [Authorize(Roles = "NVYT, AD")]
+        public async Task<IActionResult> TiepNhanHienMau([FromBody] TiepNhanRequest request)
+        {
+            var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value;
+            var nhanVien = await _context.NhanViens.FirstOrDefaultAsync(n => n.MaTaiKhoan == maTaiKhoan);
+
+            if (string.IsNullOrEmpty(request.MaTNV))
+            {
+                return BadRequest(new { success = false, message = "Cần mã Tình nguyện viên để tiếp nhận!" });
+            }
+
+            var donMoi = new DonDangKy
+            {
+                MaDon = "DON" + DateTime.Now.ToString("HHmmss"),
+                MaTNV = request.MaTNV,
+                MaChienDich = string.IsNullOrEmpty(request.MaChienDich) ? null : request.MaChienDich,
+                MaNhanVien = nhanVien?.MaNhanVien,
+                ThoiGianDangKy = DateTime.Now,
+                TrangThai = TrangThaiDonDangKy.ChoDuyet,
+                TheTich = request.TheTich
+            };
+
+            _context.DonDangKys.Add(donMoi);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Tiếp nhận hiến máu thành công!", maDon = donMoi.MaDon });
+        }
+
         [HttpGet]
         public async Task<IActionResult> LayLichSuDangKy()
         {

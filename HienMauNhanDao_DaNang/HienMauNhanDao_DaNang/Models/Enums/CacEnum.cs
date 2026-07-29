@@ -23,6 +23,13 @@ namespace HienMauNhanDao_DaNang.Models.Enums
         DaHuy
     }
 
+    //Mức độ ưu tiên chiến dịch
+    public enum MucDoUuTienChienDich
+    {
+        BinhThuong,
+        KhanCap
+    }
+
     //trạng thái đơn đăng ký hiến máu
     public enum TrangThaiDonDangKy
     {

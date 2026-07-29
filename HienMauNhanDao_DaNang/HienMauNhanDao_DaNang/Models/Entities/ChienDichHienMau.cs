@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using HienMauNhanDao_DaNang.Models.Enums;
 
@@ -43,5 +43,7 @@ namespace HienMauNhanDao_DaNang.Models.Entities
             public TrangThaiChienDich TrangThai { get; set; }
             [Column("imageUrl")]
             public string? ImageUrl { get; set; }
+            [Column("mucDoUuTien")]
+            public MucDoUuTienChienDich MucDoUuTien { get; set; } = MucDoUuTienChienDich.BinhThuong;
         }
 }
