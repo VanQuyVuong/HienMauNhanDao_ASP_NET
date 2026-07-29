@@ -45,5 +45,8 @@ namespace HienMauNhanDao_DaNang.Models.Entities
             public string? ImageUrl { get; set; }
             [Column("mucDoUuTien")]
             public MucDoUuTienChienDich MucDoUuTien { get; set; } = MucDoUuTienChienDich.BinhThuong;
+            [Column("nhomMauCanKhapCap")]
+            [MaxLength(5)]
+            public string? NhomMauCanKhapCap { get; set; }
         }
 }

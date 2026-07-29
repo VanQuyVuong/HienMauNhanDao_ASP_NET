@@ -83,6 +83,7 @@ namespace HienMauNhanDao_DaNang
             builder.Services.AddScoped<ITaiKhoanService, TaiKhoanServiceImpl>();
             builder.Services.AddScoped<IOtpService, OtpServiceImpl>();
             builder.Services.AddScoped<IEmailService, EmailServiceImpl>();
+            builder.Services.AddHostedService<EmergencyCampaignHostedService>();
 
             // AddSingleton: Cả nhà hàng chỉ dùng chung 1 máy làm Token
             builder.Services.AddSingleton<JwtHelper>();

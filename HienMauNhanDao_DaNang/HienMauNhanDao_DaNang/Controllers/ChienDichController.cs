@@ -78,6 +78,7 @@ namespace HienMauNhanDao_DaNang.Controllers
             public string? MaDiaDiem { set; get; }
             public string? ImageUrl { set; get; }
             public MucDoUuTienChienDich MucDoUuTien { get; set; } = MucDoUuTienChienDich.BinhThuong;
+            public string? NhomMauCanKhapCap { get; set; }
         }
 
 
@@ -107,7 +108,8 @@ namespace HienMauNhanDao_DaNang.Controllers
                     ImageUrl = request.ImageUrl,
                     TrangThai = TrangThaiChienDich.ChuaBatDau,
                     MaNhanVien = nhanVien?.MaNhanVien,
-                    MucDoUuTien = request.MucDoUuTien
+                    MucDoUuTien = request.MucDoUuTien,
+                    NhomMauCanKhapCap = request.NhomMauCanKhapCap
                 };
 
                 //4.lưu vào csdl
@@ -134,6 +136,7 @@ namespace HienMauNhanDao_DaNang.Controllers
             public string? ImageUrl { get; set; }
             public TrangThaiChienDich TrangThai { get; set; }
             public MucDoUuTienChienDich MucDoUuTien { get; set; } = MucDoUuTienChienDich.BinhThuong;
+            public string? NhomMauCanKhapCap { get; set; }
         }
 
         // api cập nhật chiến dịch
@@ -159,6 +162,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 cd.ImageUrl = request.ImageUrl;
                 cd.TrangThai = request.TrangThai;
                 cd.MucDoUuTien = request.MucDoUuTien;
+                cd.NhomMauCanKhapCap = request.NhomMauCanKhapCap;
 
                 //3. LƯU TẤT CẢ THAY ĐỔI XUỐNG CSDL MYSQL
                 await _context.SaveChangesAsync();
