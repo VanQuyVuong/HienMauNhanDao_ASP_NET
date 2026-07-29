@@ -286,6 +286,7 @@ const emptyForm = {
   soLuongDuKien: 100,
   trangThai: "ChuaBatDau",
   imageUrl: "",
+  mucDoUuTien: "BinhThuong",
 };
 
 const PAGE_SIZE = 8;
@@ -392,6 +393,7 @@ export default function QuanLyChienDich() {
       soLuongDuKien: c.soLuongDuKien || 100,
       trangThai: toBackendStatus(c.trangThai),
       imageUrl: c.imageUrl || "",
+      mucDoUuTien: c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1 ? "KhanCap" : "BinhThuong",
     });
     setModal({ type: "edit", maChienDich: c.maChienDich });
   };
@@ -471,6 +473,7 @@ export default function QuanLyChienDich() {
         soLuongDuKien: Number(form.soLuongDuKien) || 100,
         trangThai: toBackendStatus(form.trangThai),
         imageUrl: form.imageUrl || null,
+        mucDoUuTien: form.mucDoUuTien === "KhanCap" ? 1 : 0,
       };
 
       if (modal === "create") {
@@ -735,26 +738,47 @@ export default function QuanLyChienDich() {
                   return (
                     <tr
                       key={c.maChienDich}
-                      className="h-[84px] hover:bg-slate-50/50 transition-colors"
+                      className={`h-[84px] transition-colors ${
+                        c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1
+                          ? "bg-red-50/50 hover:bg-red-50"
+                          : "hover:bg-slate-50/50"
+                      }`}
                     >
                       <td className="px-6">
                         <div className="flex items-center gap-4">
                           <div
-                            className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center shrink-0 cursor-pointer hover:bg-red-200 transition-colors"
+                            className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
+                              c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1
+                                ? "bg-red-600 hover:bg-red-700 shadow-md shadow-red-500/20"
+                                : "bg-red-100 hover:bg-red-200"
+                            }`}
                             onClick={() => openDetail(c)}
                             title="Xem chi tiết & danh sách đăng ký"
                           >
-                            <span className="material-symbols-outlined text-red-600">
-                              volunteer_activism
+                            <span
+                              className={`material-symbols-outlined ${
+                                c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1
+                                  ? "text-white animate-pulse"
+                                  : "text-red-600"
+                              }`}
+                            >
+                              {c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1 ? "campaign" : "volunteer_activism"}
                             </span>
                           </div>
                           <div className="truncate max-w-[200px]">
                             <p
                               onClick={() => openDetail(c)}
-                              className="text-sm font-bold text-slate-900 truncate cursor-pointer hover:text-[#e62e43] transition-colors"
+                              className={`text-sm font-bold truncate cursor-pointer transition-colors flex items-center gap-2 ${
+                                c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1
+                                  ? "text-red-700 hover:text-red-800"
+                                  : "text-slate-900 hover:text-[#e62e43]"
+                              }`}
                               title="Nhấp để xem chi tiết & danh sách TNV đăng ký"
                             >
                               {c.tenChienDich}
+                              {(c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1) && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] bg-red-600 text-white uppercase shrink-0 tracking-wider">Khẩn</span>
+                              )}
                             </p>
                             <p className="text-[11px] text-slate-400 mt-0.5">
                               ID: {c.maChienDich}
@@ -1466,6 +1490,39 @@ export default function QuanLyChienDich() {
                       onChange={(e) => setForm({ ...form, tenChienDich: e.target.value })}
                       className="w-full h-12 px-4 border-2 border-slate-200 rounded-xl text-base font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
                     />
+                    </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">
+                      Tính chất / Mức độ ưu tiên *
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="mucDoUuTien"
+                          value="BinhThuong"
+                          checked={form.mucDoUuTien === "BinhThuong"}
+                          onChange={(e) => setForm({ ...form, mucDoUuTien: e.target.value })}
+                          className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-semibold text-slate-700">Bình thường</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer bg-red-50 px-3 py-1.5 rounded-lg border border-red-200">
+                        <input
+                          type="radio"
+                          name="mucDoUuTien"
+                          value="KhanCap"
+                          checked={form.mucDoUuTien === "KhanCap"}
+                          onChange={(e) => setForm({ ...form, mucDoUuTien: e.target.value })}
+                          className="w-4 h-4 text-red-600 border-red-300 focus:ring-red-500"
+                        />
+                        <span className="text-sm font-bold text-red-700 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[16px]">campaign</span>
+                          Khẩn cấp
+                        </span>
+                      </label>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
