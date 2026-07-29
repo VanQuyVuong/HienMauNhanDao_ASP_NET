@@ -87,7 +87,8 @@ CREATE TABLE CHIENDICHHIENMAU (
     trangThai VARCHAR(50) NOT NULL,
     -- Giá trị hợp lệ: ChuaBatDau, DangDienRa, DaKetThuc, DaHuy
     maQR VARCHAR(255),
-    imageUrl VARCHAR(255)
+    imageUrl VARCHAR(255),
+    mucDoUuTien VARCHAR(50) DEFAULT 'BinhThuong'
 );
 
 CREATE TABLE DONDANGKY (
@@ -287,7 +288,7 @@ INSERT INTO DIADIEM VALUES
 ('DD00002', 'Bệnh viện C Đà Nẵng',                  '122 Hải Phòng, Hải Châu',         'PX00001', 'BenhVien', 'CoDinh'),
 ('DD00003', 'Bệnh viện Ung Bướu Đà Nẵng',           'Hoàng Trung Thông, Hải Châu',     'PX00007', 'BenhVien', 'CoDinh'),
 ('DD00004', 'Bệnh viện Phụ Sản - Nhi Đà Nẵng',      '402 Lê Văn Hiến, Ngũ Hành Sơn',  'PX00009', 'BenhVien', 'CoDinh'),
-('DD00005', 'Hội Chữ Thập Đỏ TP. Đà Nẵng',         '522 Ông Ích Khiêm, Hải Châu',     'PX00003', 'KhuDanCu', 'CoDinh'),
+('DD00005', 'Hội Chữ Thập Đỏ TP. Đà Nẵng',         '522 Ông Ích Khiêm, Hải Châu',     'PX00003', 'CoQuan', 'CoDinh'),
 ('DD00006', 'Trường Đại học Sư phạm Kỹ thuật (UTE)','48 Cao Thắng, Hải Châu',          'PX00001', 'TruongHoc', 'LuuDong'),
 ('DD00007', 'Trường Đại học Đông Á',                '33 Xô Viết Nghệ Tĩnh, Hải Châu', 'PX00002', 'TruongHoc', 'LuuDong'),
 ('DD00008', 'Khoa Huyết học - Truyền máu (BV Đà Nẵng)', '103 Quang Trung, Hải Châu',  'PX00001', 'BenhVien', 'CoDinh');
