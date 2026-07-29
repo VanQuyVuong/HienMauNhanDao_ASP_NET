@@ -37,7 +37,9 @@ namespace HienMauNhanDao_DaNang.Models.Enums
         DaDuyet,
         DaTuChoi,
         DaHoanThanh,
-        DaHuy
+        DaHuy,
+        DaDangKy,
+        DaHien
     }
 
     //Trạng thái túi máu

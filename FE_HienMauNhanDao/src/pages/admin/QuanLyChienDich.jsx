@@ -409,7 +409,7 @@ export default function QuanLyChienDich() {
 
   const filtered = useMemo(() => {
     const q = (search || headerSearch).trim().toLowerCase();
-    return campaigns.filter((c) => {
+    let res = campaigns.filter((c) => {
       const matchQ =
         !q ||
         (c.tenChienDich || "").toLowerCase().includes(q) ||
@@ -419,6 +419,24 @@ export default function QuanLyChienDich() {
         !filterStatus || toBackendStatus(c.trangThai) === filterStatus;
       return matchQ && matchS;
     });
+
+    // 🏆 THUẬT TOÁN SẮP XẾP ADMIN:
+    // 1. Đợt KHẨN CẤP ĐANG DIỄN RA xếp vị trí ĐẦU TIÊN
+    // 2. Các đợt Khẩn cấp khác
+    // 3. Xếp theo thời gian bắt đầu mới nhất giảm dần
+    res.sort((a, b) => {
+      const aIsEmergActive = (a.mucDoUuTien === "KhanCap" || a.mucDoUuTien === 1) && (a.trangThai === "DangDienRa" || toBackendStatus(a.trangThai) === "DangDienRa") ? 1 : 0;
+      const bIsEmergActive = (b.mucDoUuTien === "KhanCap" || b.mucDoUuTien === 1) && (b.trangThai === "DangDienRa" || toBackendStatus(b.trangThai) === "DangDienRa") ? 1 : 0;
+      if (aIsEmergActive !== bIsEmergActive) return bIsEmergActive - aIsEmergActive;
+
+      const aIsEmerg = (a.mucDoUuTien === "KhanCap" || a.mucDoUuTien === 1) ? 1 : 0;
+      const bIsEmerg = (b.mucDoUuTien === "KhanCap" || b.mucDoUuTien === 1) ? 1 : 0;
+      if (aIsEmerg !== bIsEmerg) return bIsEmerg - aIsEmerg;
+
+      return new Date(b.thoiGianBD) - new Date(a.thoiGianBD);
+    });
+
+    return res;
   }, [campaigns, search, filterStatus, headerSearch]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -1676,7 +1694,10 @@ export default function QuanLyChienDich() {
                         }
                         className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 bg-slate-50/80 outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-colors cursor-pointer"
                       >
-                        {STATUS_OPTIONS.map((s) => (
+                        {(form.mucDoUuTien === "KhanCap"
+                          ? STATUS_OPTIONS.filter((s) => s.value === "DangDienRa" || s.value === "DaKetThuc")
+                          : STATUS_OPTIONS
+                        ).map((s) => (
                           <option key={s.value} value={s.value}>
                             {s.label}
                           </option>
