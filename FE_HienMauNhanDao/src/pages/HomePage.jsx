@@ -3,13 +3,33 @@ import { Link, useNavigate } from 'react-router-dom';
 import { chienDichService } from '../services/chienDichService';
 import { DiaDiemService } from '../services/DiaDiemService';
 import { tinhNguyenVienService } from '../services/tinhNguyenVienService';
+import { donDangKyService } from '../services/donDangKy';
 import { useQuery } from '@tanstack/react-query';
 import { thuNhanMauService } from '../services/khamLamSangService';
+import Swal from 'sweetalert2';
 
 export default function HomePage() {
     const navigate = useNavigate();
+    const [allCampaignsList, setAllCampaignsList] = useState([]);
     const [campaigns, setCampaigns] = useState([]);
+    const [emergencyCampaigns, setEmergencyCampaigns] = useState([]);
+    const [activeEmergIndex, setActiveEmergIndex] = useState(0);
+    const [spotlightIndex, setSpotlightIndex] = useState(0);
+    const [fastTrackCampaign, setFastTrackCampaign] = useState(null);
+    const [userProfile, setUserProfile] = useState(null);
+    const [submittingFastTrack, setSubmittingFastTrack] = useState(false);
 
+    // Tải thông tin người dùng đang đăng nhập
+    useEffect(() => {
+        const userEmail = localStorage.getItem('email');
+        if (userEmail) {
+            tinhNguyenVienService.getByMaTaiKhoan(userEmail)
+                .then(tnv => setUserProfile(tnv))
+                .catch(() => {});
+        }
+    }, []);
+
+    // Tải danh sách chiến dịch và lọc đợt khẩn cấp
     useEffect(() => {
         const fetchCampaigns = async () => {
             try {
@@ -21,25 +41,52 @@ export default function HomePage() {
                     campaignsData = response;
                 }
 
+                setAllCampaignsList(campaignsData);
+
                 const now = new Date();
-                let activeCampaigns = campaignsData.filter(campaign => {
-                    const endDate = new Date(campaign.thoiGianKT);
-                    return now <= endDate;
+                
+                // Lọc các chiến dịch khẩn cấp đang hoạt động
+                const activeEmergencies = campaignsData.filter(c => {
+                    const isKhanCap = c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1;
+                    const endDate = new Date(c.thoiGianKT);
+                    return isKhanCap && now <= endDate && c.trangThai !== "DaKetThuc" && c.trangThai !== "DaHuy";
+                });
+                setEmergencyCampaigns(activeEmergencies);
+
+                // Ưu tiên Sắp xếp: Chiến dịch Khẩn cấp lên đầu tiên, sau đó xếp theo thời gian mới nhất
+                let sortedCampaigns = [...campaignsData].filter(c => now <= new Date(c.thoiGianKT));
+                sortedCampaigns.sort((a, b) => {
+                    const aIsKhanCap = (a.mucDoUuTien === "KhanCap" || a.mucDoUuTien === 1) ? 1 : 0;
+                    const bIsKhanCap = (b.mucDoUuTien === "KhanCap" || b.mucDoUuTien === 1) ? 1 : 0;
+                    if (aIsKhanCap !== bIsKhanCap) return bIsKhanCap - aIsKhanCap;
+                    return new Date(b.thoiGianBD) - new Date(a.thoiGianBD);
                 });
 
-                activeCampaigns.sort((a, b) => {
-                    const aIsActive = now >= new Date(a.thoiGianBD) ? -1 : 1;
-                    const bIsActive = now >= new Date(b.thoiGianBD) ? -1 : 1;
-                    return aIsActive - bIsActive;
-                });
-
-                setCampaigns(activeCampaigns.slice(0, 2));
+                setCampaigns(sortedCampaigns);
             } catch (error) {
-                console.error("Failed to fetch campaigns:", error);
+                console.error("Lỗi khi tải chiến dịch:", error);
             }
         };
         fetchCampaigns();
     }, []);
+
+    // Tự động xoay vòng Thông báo Banner Khẩn cấp cứ mỗi 30 giây nếu có từ 2 đợt khẩn cấp trở lên
+    useEffect(() => {
+        if (emergencyCampaigns.length <= 1) return;
+        const interval = setInterval(() => {
+            setActiveEmergIndex(prev => (prev + 1) % emergencyCampaigns.length);
+        }, 30000); // 30 giây
+        return () => clearInterval(interval);
+    }, [emergencyCampaigns]);
+
+    // Tự động xoay vòng Thẻ bài Spotlight cứ mỗi 30 giây
+    useEffect(() => {
+        if (campaigns.length <= 1) return;
+        const interval = setInterval(() => {
+            setSpotlightIndex(prev => (prev + 1) % campaigns.length);
+        }, 30000); // 30 giây
+        return () => clearInterval(interval);
+    }, [campaigns]);
 
     const { data: countDD } = useQuery({
         queryKey: ['countDiaDiem'],
@@ -70,6 +117,10 @@ export default function HomePage() {
     });
 
     const getCampaignStatus = (campaign) => {
+        const isKhanCap = campaign.mucDoUuTien === "KhanCap" || campaign.mucDoUuTien === 1;
+        if (isKhanCap) {
+            return { status: "🚨 KHẨN CẤP (12H)", color: "bg-red-600 text-white font-black animate-pulse shadow-md shadow-red-500/30" };
+        }
         const now = new Date();
         const startDate = new Date(campaign.thoiGianBD);
         const endDate = new Date(campaign.thoiGianKT);
@@ -83,32 +134,103 @@ export default function HomePage() {
         }
     };
 
+    // Đăng ký Nhanh Fast-Track 1-Click cho Chiến dịch Khẩn cấp
+    const handleFastTrackRegister = async (campaign) => {
+        const userEmail = localStorage.getItem('email');
+        if (!userEmail) {
+            Swal.fire({
+                title: 'Yêu cầu đăng nhập',
+                text: 'Vui lòng đăng nhập tài khoản Tình nguyện viên để tham gia đợt khẩn cấp!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đăng nhập ngay',
+                cancelButtonText: 'Đóng'
+            }).then(res => {
+                if (res.isConfirmed) navigate('/login');
+            });
+            return;
+        }
+
+        if (!userProfile?.maTNV) {
+            Swal.fire('Lỗi', 'Không tìm thấy hồ sơ Tình nguyện viên của bạn.', 'error');
+            return;
+        }
+
+        setFastTrackCampaign(campaign);
+    };
+
+    const confirmFastTrack = async () => {
+        if (!fastTrackCampaign || !userProfile?.maTNV) return;
+        setSubmittingFastTrack(true);
+        try {
+            const payload = {
+                maTNV: userProfile.maTNV,
+                maChienDich: fastTrackCampaign.maChienDich,
+                trangThai: "DaDangKy",
+                theTich: 350
+            };
+            await donDangKyService.createDonDangKy(payload);
+            setFastTrackCampaign(null);
+            Swal.fire({
+                icon: 'success',
+                title: '🎉 XÁC NHẬN THÀNH CÔNG!',
+                html: `Cảm ơn bạn <b>${userProfile.hoTen}</b> đã sẵn sàng hỗ trợ ca hiến máu khẩn cấp <b>${fastTrackCampaign.tenChienDich}</b>!`,
+                confirmButtonColor: '#e62e43'
+            });
+        } catch (err) {
+            Swal.fire('Thông báo', err?.response?.data?.message || 'Bạn đã đăng ký chiến dịch này rồi!', 'info');
+        } finally {
+            setSubmittingFastTrack(false);
+        }
+    };
+
+    const currentEmergency = emergencyCampaigns.length > 0 ? emergencyCampaigns[activeEmergIndex] : null;
+
     return (
         <main className="flex-1 w-full bg-[#fdf8f9] text-[#121826] overflow-hidden">
 
-            {/* Top Clinical Alert Bar */}
-            <div className="w-full bg-[#e62e43] text-white py-3 px-4 shadow-md">
+            {/* 🔴 Top Dynamic Emergency Alert Bar (Luân phiên 30s) */}
+            <div className="w-full bg-gradient-to-r from-red-700 via-[#e62e43] to-rose-700 text-white py-3 px-4 shadow-lg border-b border-red-800">
                 <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
                     <div className="flex items-center gap-3">
-                        <span className="flex h-2.5 w-2.5 relative shrink-0">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                        <span className="flex h-3 w-3 relative shrink-0">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-90"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-400"></span>
                         </span>
-                        <span className="text-xs md:text-sm font-extrabold tracking-wide uppercase">
-                            THÔNG BÁO Y TẾ: Cần bổ sung khẩn cấp nhóm máu O- và AB- tại Bệnh viện Đa Khoa Đà Nẵng
-                        </span>
+                        {currentEmergency ? (
+                            <span className="text-xs md:text-sm font-black tracking-wide uppercase flex flex-wrap items-center gap-2">
+                                <span className="px-2 py-0.5 rounded bg-amber-400 text-red-950 font-black text-[10px]">🚨 BÁO ĐỘNG KHẨN CẤP</span>
+                                <span>{currentEmergency.tenChienDich}</span>
+                                {currentEmergency.nhomMauCanKhapCap && (
+                                    <span className="bg-white text-red-600 px-2 py-0.5 rounded font-black">
+                                        CẦN GẤP MÁU: {currentEmergency.nhomMauCanKhapCap.replace('_positive','+').replace('_negative','-')}
+                                    </span>
+                                )}
+                                {emergencyCampaigns.length > 1 && (
+                                    <span className="text-[10px] text-red-200 font-mono">({activeEmergIndex + 1}/{emergencyCampaigns.length} - Thay đổi mỗi 30s)</span>
+                                )}
+                            </span>
+                        ) : (
+                            <span className="text-xs md:text-sm font-extrabold tracking-wide uppercase">
+                                THÔNG BÁO Y TẾ: Cần bổ sung khẩn cấp các nhóm máu hiếm O- và AB- tại Ngân hàng máu Đà Nẵng
+                            </span>
+                        )}
                     </div>
+                    
                     <button 
-                        onClick={() => navigate('/chiendich')}
-                        className="h-8 px-5 bg-white text-[#e62e43] rounded-full text-xs font-black hover:bg-slate-100 transition-all uppercase tracking-wider shrink-0 flex items-center gap-1 shadow-sm">
-                        <span>Đăng ký hỗ trợ ngay</span>
+                        onClick={() => {
+                            if (currentEmergency) handleFastTrackRegister(currentEmergency);
+                            else navigate('/chiendich');
+                        }}
+                        className="h-8 px-5 bg-white text-red-600 hover:bg-amber-300 hover:text-red-950 rounded-full text-xs font-black transition-all uppercase tracking-wider shrink-0 flex items-center gap-1.5 shadow-md active:scale-95">
+                        <span>{currentEmergency ? "🚨 ĐĂNG KÝ HỖ TRỢ NGAY" : "Đăng ký hỗ trợ"}</span>
                         <span className="material-symbols-outlined text-sm">arrow_forward</span>
                     </button>
                 </div>
             </div>
 
-            {/* Editorial Hero Section with Real Medical Photography */}
-            <section className="relative min-h-[620px] md:min-h-[680px] w-full flex items-center py-12 lg:py-20">
+            {/* Editorial Hero Section */}
+            <section className="relative min-h-[580px] md:min-h-[640px] w-full flex items-center py-12 lg:py-16">
                 <div className="w-full max-w-[1280px] mx-auto px-4 md:px-8 relative z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                         
@@ -146,7 +268,6 @@ export default function HomePage() {
                                 </button>
                             </div>
 
-                            {/* Medical Credentials */}
                             <div className="pt-8 border-t border-slate-200/80 grid grid-cols-3 gap-4 text-center lg:text-left">
                                 <div>
                                     <p className="text-xl sm:text-2xl font-black text-slate-900">100%</p>
@@ -163,10 +284,9 @@ export default function HomePage() {
                             </div>
                         </div>
 
-                        {/* Right Column: Real Medical Photography Frame */}
+                        {/* Right Column: Hero Medical Frame */}
                         <div className="lg:col-span-5 relative">
                             <div className="relative mx-auto max-w-[420px] lg:max-w-none">
-                                {/* Main Realistic Image */}
                                 <div className="rounded-[36px] overflow-hidden shadow-2xl border-4 border-white bg-slate-100 h-[460px] relative">
                                     <img 
                                         src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=1000" 
@@ -174,25 +294,12 @@ export default function HomePage() {
                                         className="w-full h-full object-cover" 
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
-                                    
                                     <div className="absolute bottom-6 left-6 right-6 text-white space-y-1">
                                         <span className="px-3 py-1 bg-[#e62e43] text-white text-[10px] font-black uppercase tracking-wider rounded-full">Bệnh viện Đa Khoa Đà Nẵng</span>
                                         <h4 className="text-lg font-bold">Đội ngũ Y bác sĩ chuyên khoa</h4>
                                         <p className="text-xs text-slate-300 font-light">Đồng hành cùng hơn 5.000 lượt hiến máu an toàn mỗi năm.</p>
                                     </div>
                                 </div>
-
-                                {/* Floating Clinical Overlay Panel */}
-                                <div className="absolute -bottom-8 -left-6 sm:-left-8 clinical-glass p-5 rounded-3xl shadow-2xl max-w-[260px] hidden sm:flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-[#00b894] flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-black text-slate-900">Sàng lọc kỹ càng</p>
-                                        <p className="text-xs text-slate-500 font-medium">Đảm bảo sức khỏe cho người hiến & nhận</p>
-                                    </div>
-                                </div>
-
                             </div>
                         </div>
 
@@ -200,16 +307,141 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* Asymmetric Bento-Grid Layout (Bố cục Bento Đột Phá) */}
-            <section className="w-full max-w-[1280px] mx-auto px-4 md:px-8 py-12 mb-16">
+            {/* 🎴 🔥 SECTION MỚI: BẢNG TIN TỨC & THẺ BÀI KHẨN CẤP CHỒNG NHAU (STACKING CARDS CAROUSEL) */}
+            <section className="w-full max-w-[1280px] mx-auto px-4 md:px-8 py-10 mb-12">
+                <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-red-950 rounded-[36px] p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden border border-white/10">
+                    
+                    {/* Background glow */}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8 border-b border-white/10 pb-6 relative z-10">
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <span className="px-3 py-1 bg-red-600 text-white font-black text-[10px] uppercase tracking-widest rounded-full shadow-sm">
+                                    SPOTLIGHT & THÔNG TIN ĐIỀU PHỐI
+                                </span>
+                                {emergencyCampaigns.length > 0 && (
+                                    <span className="px-2.5 py-1 bg-amber-400 text-red-950 font-black text-[10px] uppercase tracking-wider rounded-full animate-pulse">
+                                        🚨 ƯU TIÊN KHẨN CẤP (12H)
+                                    </span>
+                                )}
+                            </div>
+                            <h2 className="text-2xl sm:text-3xl font-black text-white mt-2">
+                                Bảng Tin & Sự Kiện Nổi Bật
+                            </h2>
+                        </div>
+                        <div className="text-xs text-slate-400 font-mono">
+                            🔄 Tự động luôn chuyển thẻ bài cứ mỗi 30 giây
+                        </div>
+                    </div>
+
+                    {/* Stacking Card Deck (3D Deck Carousel - Đè lên khoảng 2/3 chiều ngang) */}
+                    <div className="relative min-h-[380px] md:min-h-[320px] w-full flex items-center justify-center relative z-10">
+                        {campaigns.length === 0 ? (
+                            <div className="text-slate-400 text-sm font-medium py-12">Đang tải danh sách sự kiện...</div>
+                        ) : (
+                            campaigns.slice(0, 4).map((c, idx) => {
+                                const isKhanCap = c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1;
+                                // Tính khoảng cách offset dựa trên vị trí luân phiên 30s (spotlightIndex)
+                                const offset = (idx - (spotlightIndex % campaigns.slice(0, 4).length) + 4) % 4;
+                                const isFront = offset === 0;
+
+                                return (
+                                    <div
+                                        key={c.maChienDich}
+                                        style={{
+                                            transform: `translateX(${offset * 40}px) translateY(${offset * 12}px) scale(${1 - offset * 0.05})`,
+                                            zIndex: 40 - offset * 10,
+                                            opacity: 1 - offset * 0.25,
+                                        }}
+                                        className={`absolute top-0 left-0 right-0 md:w-[85%] mx-auto transition-all duration-700 ease-out bg-white text-slate-900 rounded-3xl p-6 shadow-2xl border-2 ${
+                                            isKhanCap
+                                                ? "border-red-500 ring-4 ring-red-500/20 bg-gradient-to-r from-white via-red-50/40 to-white"
+                                                : "border-slate-200"
+                                        } ${isFront ? "pointer-events-auto shadow-red-500/10" : "pointer-events-none cursor-pointer"}`}
+                                    >
+                                        <div className="flex flex-col md:flex-row items-center gap-6">
+                                            {/* Image */}
+                                            <div className="w-full md:w-56 h-48 rounded-2xl overflow-hidden shrink-0 relative border border-slate-100 shadow-sm">
+                                                <img
+                                                    src={c.imageUrl ? `/images/${c.imageUrl}` : "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=600"}
+                                                    alt="Campaign Banner"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                {isKhanCap && (
+                                                    <div className="absolute top-2 left-2 bg-red-600 text-white font-black text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full animate-pulse shadow-md">
+                                                        🚨 ĐỢT KHẨN CẤP
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Card Content */}
+                                            <div className="flex-1 space-y-3 text-left w-full">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    {isKhanCap ? (
+                                                        <span className="px-3 py-1 rounded-full bg-red-600 text-white font-black text-xs uppercase tracking-wider shadow-sm">
+                                                            🆘 CẦN GẤP MÁU: {c.nhomMauCanKhapCap ? c.nhomMauCanKhapCap.replace('_positive','+').replace('_negative','-') : "O+"}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-black text-[10px] uppercase tracking-wider">
+                                                            📅 SỰ KIỆN TIẾP NHẬN
+                                                        </span>
+                                                    )}
+                                                    <span className="text-xs text-slate-500 font-semibold">
+                                                        ⏱️ {new Date(c.thoiGianBD).toLocaleDateString('vi-VN')} - {new Date(c.thoiGianKT).toLocaleDateString('vi-VN')}
+                                                    </span>
+                                                </div>
+
+                                                <h3 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">
+                                                    {c.tenChienDich}
+                                                </h3>
+
+                                                <p className="text-xs text-slate-600 font-medium flex items-center gap-1.5">
+                                                    <span className="material-symbols-outlined text-sm text-red-600">location_on</span>
+                                                    <span>{c.diaDiem?.tenDiaDiem || "Bệnh viện Đa Khoa Đà Nẵng"}</span>
+                                                </p>
+
+                                                <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100">
+                                                    <div className="text-xs text-slate-500 font-semibold">
+                                                        Dự kiến: <b className="text-slate-900">{c.soLuongDuKien || 50} đơn vị</b>
+                                                    </div>
+
+                                                    {isKhanCap ? (
+                                                        <button
+                                                            onClick={() => handleFastTrackRegister(c)}
+                                                            className="h-11 px-6 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black text-xs rounded-xl shadow-lg shadow-red-600/30 flex items-center gap-2 transition-all active:scale-95"
+                                                        >
+                                                            <span className="material-symbols-outlined text-sm">bolt</span>
+                                                            <span>🚨 ĐĂNG KÝ HỖ TRỢ KHẨN CẤP (1-CLICK)</span>
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => navigate('/chiendich')}
+                                                            className="h-10 px-5 bg-slate-900 hover:bg-[#e62e43] text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5"
+                                                        >
+                                                            <span>Xem chi tiết</span>
+                                                            <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+            </section>
+
+            {/* Asymmetric Bento-Grid Layout */}
+            <section className="w-full max-w-[1280px] mx-auto px-4 md:px-8 py-6 mb-16">
                 <div className="mb-8">
                     <span className="text-xs font-black text-[#e62e43] uppercase tracking-widest block mb-1">Tổng Quan Dữ Liệu</span>
                     <h2 className="text-2xl sm:text-3xl font-black text-slate-900">Thống Kê Hoạt Động Hiến Máu Đà Nẵng</h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                    
-                    {/* Bento Box 1: Volunteers Stats (Large 7 Cols) */}
                     <div className="md:col-span-7 bento-card p-8 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-white to-rose-50/50">
                         <div className="flex items-start justify-between">
                             <div className="space-y-1">
@@ -236,7 +468,6 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Bento Box 2: Blood Units Storage (5 Cols) */}
                     <div className="md:col-span-5 bento-card p-8 flex flex-col justify-between bg-white">
                         <div className="flex items-start justify-between">
                             <div className="space-y-1">
@@ -254,7 +485,6 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Bento Box 3: Medical Facilities (12 Cols Bottom Split) */}
                     <div className="md:col-span-12 bento-card p-0 bg-slate-900 text-white flex flex-col md:flex-row items-stretch justify-between gap-0 overflow-hidden min-h-[220px]">
                         <div className="p-8 flex-1 flex flex-col justify-center relative z-10 bg-slate-900/90 backdrop-blur-md">
                             <div className="flex items-start gap-5">
@@ -274,7 +504,6 @@ export default function HomePage() {
                             </div>
                         </div>
                         <div className="w-full md:w-[45%] lg:w-[50%] h-[200px] md:h-auto relative shrink-0 bg-slate-800 overflow-hidden">
-                            {/* Google Map of Da Nang */}
                             <iframe 
                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d122691.80287711463!2d108.13524584742456!3d16.059632832560373!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x314219c792252a13%3A0x1df0cb4b86727e06!2zxJDDoCBO4bq1bmcsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1700000000000!5m2!1svi!2s" 
                                 width="100%" 
@@ -288,11 +517,10 @@ export default function HomePage() {
                             <div className="absolute inset-0 bg-gradient-to-r from-slate-900/100 via-slate-900/60 to-transparent md:bg-gradient-to-r md:from-slate-900 md:via-slate-900/40 md:to-transparent pointer-events-none"></div>
                         </div>
                     </div>
-
                 </div>
             </section>
 
-            {/* Active Medical Campaigns Showcase */}
+            {/* Active Medical Campaigns Showcase (Khẩn cấp xếp vị trí ĐẦU TIÊN) */}
             <section id="chien-dich-noi-bat" className="w-full max-w-[1280px] mx-auto px-4 md:px-8 mb-24">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 border-b border-slate-200/80 pb-6">
                     <div>
@@ -306,10 +534,17 @@ export default function HomePage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {campaigns.map((campaign) => {
+                    {campaigns.slice(0, 4).map((campaign) => {
                         const statusInfo = getCampaignStatus(campaign);
+                        const isKhanCap = campaign.mucDoUuTien === "KhanCap" || campaign.mucDoUuTien === 1;
+
                         return (
-                            <div key={campaign.maChienDich} className="bento-card p-6 flex flex-col sm:flex-row gap-6 items-center">
+                            <div 
+                                key={campaign.maChienDich} 
+                                className={`bento-card p-6 flex flex-col sm:flex-row gap-6 items-center border-2 ${
+                                    isKhanCap ? "border-red-500 bg-red-50/20 shadow-xl shadow-red-500/10 animate-pulse" : "border-slate-100"
+                                }`}
+                            >
                                 <div className="w-full sm:w-[240px] h-[190px] shrink-0 rounded-2xl overflow-hidden relative border border-slate-100">
                                     <img 
                                         src={campaign.imageUrl ? `/images/${campaign.imageUrl}` : "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=600"}
@@ -317,6 +552,11 @@ export default function HomePage() {
                                         alt="Campaign" 
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent"></div>
+                                    {isKhanCap && (
+                                        <div className="absolute top-2 left-2 bg-red-600 text-white font-black text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full animate-bounce">
+                                            🚨 KHẨN CẤP
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="flex-1 flex flex-col justify-between w-full h-full space-y-4">
@@ -339,12 +579,21 @@ export default function HomePage() {
                                         </div>
                                     </div>
 
-                                    <button 
-                                        onClick={() => navigate('/chiendich')}
-                                        className="h-11 px-6 bg-slate-900 text-white hover:bg-[#e62e43] rounded-xl font-bold text-xs transition-colors w-full flex items-center justify-center gap-2">
-                                        <span>Đăng Ký Tham Gia</span>
-                                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                                    </button>
+                                    {isKhanCap ? (
+                                        <button 
+                                            onClick={() => handleFastTrackRegister(campaign)}
+                                            className="h-11 px-6 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-red-500/20 w-full flex items-center justify-center gap-2">
+                                            <span>🚨 ĐĂNG KÝ HỖ TRỢ NGAY (1-CLICK)</span>
+                                            <span className="material-symbols-outlined text-sm">bolt</span>
+                                        </button>
+                                    ) : (
+                                        <button 
+                                            onClick={() => navigate('/chiendich')}
+                                            className="h-11 px-6 bg-slate-900 text-white hover:bg-[#e62e43] rounded-xl font-bold text-xs transition-colors w-full flex items-center justify-center gap-2">
+                                            <span>Đăng Ký Tham Gia</span>
+                                            <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -352,7 +601,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* Photorealistic 4-Step Medical Process (Quy Trình 4 Bước Y Khoa Tạp Chí) */}
+            {/* Quy trình 4 bước */}
             <section id="quy-trinh" className="bg-slate-900 py-20 text-white relative">
                 <div className="w-full max-w-[1280px] mx-auto px-4 md:px-8">
                     <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
@@ -362,8 +611,6 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                        
-                        {/* Step 1 */}
                         <div className="bg-white/5 border border-white/10 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between group hover:border-[#e62e43]/50 transition-all">
                             <span className="text-6xl font-black text-white/10 absolute top-4 right-4 pointer-events-none">01</span>
                             <div className="space-y-4 relative z-10">
@@ -375,7 +622,6 @@ export default function HomePage() {
                             </div>
                         </div>
 
-                        {/* Step 2 */}
                         <div className="bg-white/5 border border-white/10 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between group hover:border-[#00b894]/50 transition-all">
                             <span className="text-6xl font-black text-white/10 absolute top-4 right-4 pointer-events-none">02</span>
                             <div className="space-y-4 relative z-10">
@@ -387,7 +633,6 @@ export default function HomePage() {
                             </div>
                         </div>
 
-                        {/* Step 3 */}
                         <div className="bg-white/5 border border-white/10 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between group hover:border-purple-500/50 transition-all">
                             <span className="text-6xl font-black text-white/10 absolute top-4 right-4 pointer-events-none">03</span>
                             <div className="space-y-4 relative z-10">
@@ -399,7 +644,6 @@ export default function HomePage() {
                             </div>
                         </div>
 
-                        {/* Step 4 */}
                         <div className="bg-white/5 border border-white/10 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between group hover:border-amber-500/50 transition-all">
                             <span className="text-6xl font-black text-white/10 absolute top-4 right-4 pointer-events-none">04</span>
                             <div className="space-y-4 relative z-10">
@@ -410,142 +654,65 @@ export default function HomePage() {
                                 <p className="text-xs text-slate-400 font-light leading-relaxed">Nghỉ ngơi, dùng phần ăn nhẹ và nhận Giấy chứng nhận điện tử QR.</p>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </section>
 
-            {/* Doctor's Editorial Quote & Testimonials */}
-            <section className="py-20 bg-[#fff9fa]">
-                <div className="w-full max-w-[1280px] mx-auto px-4 md:px-8">
-                    <div className="bento-card p-8 md:p-12 bg-white flex flex-col lg:flex-row items-center gap-10">
-                        <div className="w-full lg:w-1/3 h-[280px] rounded-2xl overflow-hidden shrink-0">
-                            <img 
-                                src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=800" 
-                                alt="Bác sĩ trưởng khoa" 
-                                className="w-full h-full object-cover" 
-                            />
-                        </div>
-                        <div className="w-full lg:w-2/3 space-y-4 text-left">
-                            <span className="text-xs font-black text-[#e62e43] uppercase tracking-widest">Lời Khuyên Y Bác Sĩ</span>
-                            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 leading-snug">
-                                "Hiến máu định kỳ không chỉ giúp cứu chữa bệnh nhân nguy kịch mà còn giúp kích thích cơ thể tái tạo dòng máu mới khỏe mạnh."
+            {/* FAST-TRACK POPUP MODAL FOR TNV (1-CLICK CONFIRM) */}
+            {fastTrackCampaign && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="bg-white rounded-3xl shadow-2xl border-2 border-red-500 max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-300">
+                        <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-6 text-white text-center relative">
+                            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-amber-300 text-3xl mx-auto mb-3 shadow-inner animate-pulse">
+                                <span className="material-symbols-outlined">bolt</span>
+                            </div>
+                            <span className="px-3 py-1 bg-amber-400 text-red-950 font-black text-[10px] uppercase tracking-wider rounded-full">
+                                ⚡ XÁC NHẬN HỖ TRỢ KHẨN CẤP
+                            </span>
+                            <h3 className="text-lg font-black mt-2 leading-snug">
+                                {fastTrackCampaign.tenChienDich}
                             </h3>
-                            <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
-                                — BS. CKI Nguyễn Văn A, Trưởng Khoa Huyết Học - Bệnh viện Đa Khoa Đà Nẵng
+                            {fastTrackCampaign.nhomMauCanKhapCap && (
+                                <p className="text-xs font-bold text-amber-200 mt-1">
+                                    🔴 Nhóm máu cần gấp: {fastTrackCampaign.nhomMauCanKhapCap.replace('_positive','+').replace('_negative','-')}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="p-6 space-y-4 text-left">
+                            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2 text-xs">
+                                <p className="text-slate-500">Tình nguyện viên đăng ký:</p>
+                                <p className="text-sm font-black text-slate-900">{userProfile?.hoTen || "Tình nguyện viên"}</p>
+                                <p className="text-slate-600">SĐT: <b>{userProfile?.soDienThoai || "Đã đăng ký"}</b> | Nhóm máu: <b className="text-red-600">{userProfile?.nhomMau?.replace('_positive','+') || "Khớp hồ sơ"}</b></p>
+                                <p className="text-slate-600">Địa điểm: <b>{fastTrackCampaign.diaDiem?.tenDiaDiem || "Bệnh viện Đa Khoa Đà Nẵng"}</b></p>
+                            </div>
+
+                            <p className="text-[11px] text-slate-500 italic text-center">
+                                * Bằng việc bấm Xác nhận, thông tin của bạn sẽ được chuyển ngay tới Ban điều phối Y tế.
                             </p>
+
+                            <div className="flex items-center gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setFastTrackCampaign(null)}
+                                    className="flex-1 h-12 rounded-xl border border-slate-300 font-bold text-xs text-slate-700 hover:bg-slate-50 transition-all">
+                                    Hủy bỏ
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={submittingFastTrack}
+                                    onClick={confirmFastTrack}
+                                    className="flex-1 h-12 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black text-xs shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-60">
+                                    <span className="material-symbols-outlined text-base">
+                                        {submittingFastTrack ? "progress_activity" : "volunteer_activism"}
+                                    </span>
+                                    <span>{submittingFastTrack ? "ĐANG XỬ LÝ..." : "XÁC NHẬN HỖ TRỢ"}</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </section>
-
-            {/* Lợi ích hiến máu & Điều kiện - Asymmetric Split */}
-            <section className="w-full max-w-[1280px] mx-auto px-4 md:px-8 py-20">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    
-                    {/* Benefits */}
-                    <div>
-                        <span className="text-xs font-black text-[#e62e43] uppercase tracking-widest block mb-2">Vì Sao Nên Hiến Máu?</span>
-                        <h2 className="text-3xl font-black text-slate-900 mb-8">Lợi Ích Sức Khỏe <br/>Dành Cho Người Hiến</h2>
-                        
-                        <div className="space-y-4">
-                            <div className="bento-card p-5 flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-full bg-rose-50 text-[#e62e43] flex items-center justify-center shrink-0">
-                                    <span className="material-symbols-outlined text-2xl">favorite</span>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-slate-900">Giảm nguy cơ mắc bệnh tim mạch</h4>
-                                    <p className="text-xs text-slate-500 mt-1">Hiến máu giúp giảm lượng sắt thừa, cân bằng lượng sắt trong cơ thể, ngăn ngừa oxy hóa cholesterol gây tắc mạch máu.</p>
-                                </div>
-                            </div>
-                            <div className="bento-card p-5 flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-full bg-emerald-50 text-[#00b894] flex items-center justify-center shrink-0">
-                                    <span className="material-symbols-outlined text-2xl">healing</span>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-slate-900">Tái tạo tế bào máu mới</h4>
-                                    <p className="text-xs text-slate-500 mt-1">Kích thích tủy xương sản sinh hồng cầu, bạch cầu và tiểu cầu mới, giúp cơ thể khỏe mạnh và tràn đầy năng lượng.</p>
-                                </div>
-                            </div>
-                            <div className="bento-card p-5 flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                                    <span className="material-symbols-outlined text-2xl">medical_information</span>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-slate-900">Kiểm tra sức khỏe định kỳ miễn phí</h4>
-                                    <p className="text-xs text-slate-500 mt-1">Được khám lâm sàng, đo huyết áp và xét nghiệm sàng lọc các bệnh lây truyền qua đường máu (HIV, Viêm gan B, C...).</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Requirements */}
-                    <div className="bg-slate-900 rounded-[32px] p-8 md:p-12 text-white relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#e62e43]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                        
-                        <span className="text-xs font-black text-emerald-400 uppercase tracking-widest block mb-2 relative z-10">Checklist Y Tế</span>
-                        <h2 className="text-3xl font-black text-white mb-8 relative z-10">Tiêu Chuẩn Hiến Máu</h2>
-                        
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                                <span className="material-symbols-outlined text-emerald-400 mb-2">cake</span>
-                                <h4 className="text-sm font-bold text-white mb-1">Độ Tuổi</h4>
-                                <p className="text-xs text-slate-400">Nam / Nữ từ 18 đến 60 tuổi.</p>
-                            </div>
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                                <span className="material-symbols-outlined text-emerald-400 mb-2">monitor_weight</span>
-                                <h4 className="text-sm font-bold text-white mb-1">Cân Nặng</h4>
-                                <p className="text-xs text-slate-400">Nam ≥ 45kg, Nữ ≥ 45kg.</p>
-                            </div>
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                                <span className="material-symbols-outlined text-emerald-400 mb-2">update</span>
-                                <h4 className="text-sm font-bold text-white mb-1">Khoảng Cách</h4>
-                                <p className="text-xs text-slate-400">Ít nhất 12 tuần kể từ lần hiến gần nhất.</p>
-                            </div>
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                                <span className="material-symbols-outlined text-emerald-400 mb-2">id_card</span>
-                                <h4 className="text-sm font-bold text-white mb-1">Giấy Tờ</h4>
-                                <p className="text-xs text-slate-400">Mang theo CMND/CCCD hoặc Hộ chiếu gốc.</p>
-                            </div>
-                        </div>
-
-                        <div className="mt-8 pt-6 border-t border-white/10 relative z-10">
-                            <p className="text-xs text-amber-200/80 italic">
-                                * Lưu ý: Đêm trước ngày hiến máu không thức quá khuya. Sáng ngày hiến máu ăn nhẹ (không ăn nhiều dầu mỡ), không uống rượu bia.
-                            </p>
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-
-            {/* Thư viện hình ảnh cộng đồng */}
-            <section className="py-20 w-full overflow-hidden relative">
-                <div className="w-full max-w-[1280px] mx-auto px-4 md:px-8 mb-12 text-center">
-                    <span className="text-xs font-black text-[#e62e43] uppercase tracking-widest block mb-2">Lan Tỏa Yêu Thương</span>
-                    <h2 className="text-3xl sm:text-4xl font-black text-slate-900">Khoảnh Khắc Đẹp Đà Nẵng</h2>
-                </div>
-
-                <div className="w-full max-w-[1440px] mx-auto px-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-                        <div className="col-span-2 md:col-span-2 row-span-2 rounded-[24px] overflow-hidden relative group h-[300px] md:h-[420px]">
-                            <img src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&q=80&w=1000" alt="Gallery 1" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-                                <p className="text-white font-bold">Nụ cười tình nguyện viên Đà Nẵng</p>
-                            </div>
-                        </div>
-                        <div className="rounded-[24px] overflow-hidden relative group h-[145px] md:h-[200px]">
-                            <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=600" alt="Gallery 2" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                        </div>
-                        <div className="rounded-[24px] overflow-hidden relative group h-[145px] md:h-[200px]">
-                            <img src="https://images.unsplash.com/photo-1615461066159-fea0960485d5?auto=format&fit=crop&q=80&w=600" alt="Gallery 3" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                        </div>
-                        <div className="col-span-2 md:col-span-2 rounded-[24px] overflow-hidden relative group h-[145px] md:h-[200px]">
-                            <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=1000" alt="Gallery 4" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                        </div>
-                    </div>
-                </div>
-            </section>
+            )}
 
         </main>
     );

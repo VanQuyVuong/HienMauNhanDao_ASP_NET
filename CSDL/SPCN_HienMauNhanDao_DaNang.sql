@@ -89,7 +89,7 @@ CREATE TABLE CHIENDICHHIENMAU (
     maQR VARCHAR(255),
     imageUrl VARCHAR(255),
     mucDoUuTien VARCHAR(50) DEFAULT 'BinhThuong',
-    nhomMauCanKhapCap VARCHAR(5) NULL
+    nhomMauCanKhapCap VARCHAR(50) NULL
 );
 
 CREATE TABLE DONDANGKY (

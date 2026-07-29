@@ -46,7 +46,7 @@ namespace HienMauNhanDao_DaNang.Models.Entities
             [Column("mucDoUuTien")]
             public MucDoUuTienChienDich MucDoUuTien { get; set; } = MucDoUuTienChienDich.BinhThuong;
             [Column("nhomMauCanKhapCap")]
-            [MaxLength(5)]
+            [MaxLength(50)]
             public string? NhomMauCanKhapCap { get; set; }
         }
 }

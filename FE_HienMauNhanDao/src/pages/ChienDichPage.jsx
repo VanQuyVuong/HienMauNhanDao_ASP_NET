@@ -116,6 +116,10 @@ export default function ChienDichPage() {
         }
 
         filtered.sort((a, b) => {
+            const aIsKhanCap = (a.mucDoUuTien === "KhanCap" || a.mucDoUuTien === 1) ? 1 : 0;
+            const bIsKhanCap = (b.mucDoUuTien === "KhanCap" || b.mucDoUuTien === 1) ? 1 : 0;
+            if (aIsKhanCap !== bIsKhanCap) return bIsKhanCap - aIsKhanCap;
+
             const weightA = STATUS_PRIORITY[a.trangThai] || 99;
             const weightB = STATUS_PRIORITY[b.trangThai] || 99;
             return weightA - weightB;

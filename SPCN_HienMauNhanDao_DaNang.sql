@@ -1,5 +1,9 @@
 -- ============================================================= 
-
+-- ĐỒ ÁN: HỆ THỐNG QUẢN LÝ HIẾN MÁU NHÂN ĐẠO ĐÀ NẴNG
+-- Phiên bản: SẠCH - Chỉ cấu trúc + dữ liệu thiết yếu
+-- Mật khẩu tài khoản: Bạn tự tạo qua Scalar/Postman
+-- Nhóm: Văn Quý Vương - Phạm Minh Huy - Lê Việt Hưng - Lê Văn Mạnh
+-- Cập nhật: 2026-07-23
 -- =============================================================
 
 DROP DATABASE IF EXISTS SPCN_HienMauNhanDao_DaNang;
@@ -85,7 +89,7 @@ CREATE TABLE CHIENDICHHIENMAU (
     maQR VARCHAR(255),
     imageUrl VARCHAR(255),
     mucDoUuTien VARCHAR(50) DEFAULT 'BinhThuong',
-    nhomMauCanKhapCap VARCHAR(5) NULL
+    nhomMauCanKhapCap VARCHAR(50) NULL
 );
 
 CREATE TABLE DONDANGKY (
