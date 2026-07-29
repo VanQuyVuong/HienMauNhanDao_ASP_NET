@@ -37,11 +37,19 @@ namespace HienMauNhanDao_DaNang.Controllers
 
                        var danhSach = await _context.ChienDichHienMaus
                 .Include(c => c.DiaDiem)
-                .Include(c => c.NhanVienPhuTrach) // <-- Dùng NhanVienPhuTrach cho đúng tên thuộc tính trong thực thể
+                .Include(c => c.NhanVienPhuTrach)
                 .ToListAsync();
 
-            // Trả về cho React dưới định dạng JSON
+            // Tự động chuẩn hóa đợt khẩn cấp luôn luôn là DangDienRa (trừ khi DaKetThuc / DaHuy)
+            foreach (var c in danhSach)
+            {
+                if (c.MucDoUuTien == MucDoUuTienChienDich.KhanCap && c.TrangThai == TrangThaiChienDich.ChuaBatDau)
+                {
+                    c.TrangThai = TrangThaiChienDich.DangDienRa;
+                }
+            }
 
+            // Trả về cho React dưới định dạng JSON
             return Ok(new
             {
                 success = true,
@@ -77,6 +85,8 @@ namespace HienMauNhanDao_DaNang.Controllers
             public int SoLuongDuKien { set; get; }
             public string? MaDiaDiem { set; get; }
             public string? ImageUrl { set; get; }
+            public MucDoUuTienChienDich MucDoUuTien { get; set; } = MucDoUuTienChienDich.BinhThuong;
+            public string? NhomMauCanKhapCap { get; set; }
         }
 
 
@@ -105,7 +115,9 @@ namespace HienMauNhanDao_DaNang.Controllers
                     MaDiaDiem = request.MaDiaDiem,
                     ImageUrl = request.ImageUrl,
                     TrangThai = TrangThaiChienDich.ChuaBatDau,
-                    MaNhanVien = nhanVien?.MaNhanVien
+                    MaNhanVien = nhanVien?.MaNhanVien,
+                    MucDoUuTien = request.MucDoUuTien,
+                    NhomMauCanKhapCap = request.NhomMauCanKhapCap
                 };
 
                 //4.lưu vào csdl
@@ -131,6 +143,8 @@ namespace HienMauNhanDao_DaNang.Controllers
             public string? MaDiaDiem { get; set; }
             public string? ImageUrl { get; set; }
             public TrangThaiChienDich TrangThai { get; set; }
+            public MucDoUuTienChienDich MucDoUuTien { get; set; } = MucDoUuTienChienDich.BinhThuong;
+            public string? NhomMauCanKhapCap { get; set; }
         }
 
         // api cập nhật chiến dịch
@@ -155,6 +169,8 @@ namespace HienMauNhanDao_DaNang.Controllers
                 cd.MaDiaDiem = request.MaDiaDiem;
                 cd.ImageUrl = request.ImageUrl;
                 cd.TrangThai = request.TrangThai;
+                cd.MucDoUuTien = request.MucDoUuTien;
+                cd.NhomMauCanKhapCap = request.NhomMauCanKhapCap;
 
                 //3. LƯU TẤT CẢ THAY ĐỔI XUỐNG CSDL MYSQL
                 await _context.SaveChangesAsync();

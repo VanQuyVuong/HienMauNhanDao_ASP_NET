@@ -37,8 +37,8 @@ export const tnvNvytService = {
   findByCCCD: async (soCCCD) => {
     try {
       const res = await http.get(`/tinhnguyenvien/cccd/${encodeURIComponent(soCCCD)}`);
-      if (!res?.status) return null;
-      return res?.data || null;
+      if (!res?.success) return null;
+      return res; // Trả về toàn bộ (data, duDieuKien, thongBao)
     } catch (err) {
       if (err.response?.status === 404) return null;
       throw err;
@@ -143,7 +143,7 @@ export const donDangKyNvytService = {
    */
   create: async (data) => {
     try {
-      const res = await http.post('/dondangky', data);
+      const res = await http.post('/dondangky/tiep-nhan', data);
       if (res?.status === false) {
         throw { message: res.message || 'Lỗi khi tạo đơn', isBusinessError: true };
       }

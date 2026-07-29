@@ -1,6 +1,7 @@
-﻿using HienMauNhanDao_DaNang.Models.Entities;
+using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Models.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HienMauNhanDao_DaNang.Data
 {
@@ -47,20 +48,36 @@ namespace HienMauNhanDao_DaNang.Data
             modelBuilder.Entity<ChiTietNhapXuat>()
                 .HasKey(ct => new { ct.MaPhieu, ct.MaTuiMau });
 
+            // Custom converter cho GioiTinh để đọc được cả 'Nữ' và 'Nu' từ DB
+            var gioiTinhConverter = new ValueConverter<GioiTinh?, string?>(
+                v => v == null ? null : (v == GioiTinh.Nu ? "Nữ" : v.ToString()),
+                v => string.IsNullOrEmpty(v) ? null : (v == "Nữ" || v == "Nu" ? GioiTinh.Nu : v == "Nam" ? GioiTinh.Nam : GioiTinh.Khac)
+            );
+
             //Lưu enum dưới dạng chuỗi 
-            // Mặc định C# lưu: Nam=0, Nu=1 (khó đọc trong DB)
-            // Ta muốn lưu: "Nam", "Nu" (dễ đọc hơn)
             modelBuilder.Entity<TinhNguyenVien>()
-                .Property(t => t.GioiTinh).HasConversion<string>();
+                .Property(t => t.GioiTinh).HasConversion(gioiTinhConverter);
 
             modelBuilder.Entity<TinhNguyenVien>()
                 .Property(t => t.NhomMau).HasConversion<string>();
 
-            modelBuilder.Entity<NhanVien>().Property(n => n.GioiTinh).HasConversion<string>();
+            modelBuilder.Entity<NhanVien>().Property(n => n.GioiTinh).HasConversion(gioiTinhConverter);
 
             modelBuilder.Entity<ChienDichHienMau>().Property(c => c.TrangThai).HasConversion<string>();
+            modelBuilder.Entity<ChienDichHienMau>().Property(c => c.MucDoUuTien).HasConversion<string>();
 
-            modelBuilder.Entity<DonDangKy>().Property(d => d.TrangThai).HasConversion<string>();
+            // Custom converter cho TrangThaiDonDangKy để tương thích mọi giá trị chuỗi từ DB (DaHien, DaDangKy, ChoDuyet...)
+            var trangThaiDonConverter = new ValueConverter<TrangThaiDonDangKy, string>(
+                v => v.ToString(),
+                v => string.IsNullOrEmpty(v) ? TrangThaiDonDangKy.ChoDuyet :
+                     (v == "DaHien" || v == "Da_Hien" || v == "DaHoanThanh" || v == "HoanThanh") ? TrangThaiDonDangKy.DaHoanThanh :
+                     (v == "DaDangKy" || v == "ChoDuyet") ? TrangThaiDonDangKy.ChoDuyet :
+                     (v == "DaDuyet") ? TrangThaiDonDangKy.DaDuyet :
+                     (v == "DaTuChoi") ? TrangThaiDonDangKy.DaTuChoi :
+                     (v == "DaHuy") ? TrangThaiDonDangKy.DaHuy : TrangThaiDonDangKy.ChoDuyet
+            );
+
+            modelBuilder.Entity<DonDangKy>().Property(d => d.TrangThai).HasConversion(trangThaiDonConverter);
 
             modelBuilder.Entity<TuiMau>().Property(t => t.TrangThai).HasConversion<string>();
 

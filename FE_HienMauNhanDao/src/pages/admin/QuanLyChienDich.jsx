@@ -74,8 +74,8 @@ const calcStatusByTime = (bdVal, ktVal) => {
   return "DaKetThuc";
 };
 
-const statusBadge = (status) => {
-  const label = getStatusLabel(status);
+const statusBadge = (status, mucDoUuTien) => {
+  const label = getStatusLabel(status, mucDoUuTien);
   if (label === "Đang diễn ra") {
     return "bg-emerald-100 text-emerald-700 border-emerald-200 shadow-xs shadow-emerald-500/10";
   }
@@ -286,6 +286,7 @@ const emptyForm = {
   soLuongDuKien: 100,
   trangThai: "ChuaBatDau",
   imageUrl: "",
+  mucDoUuTien: "BinhThuong",
 };
 
 const PAGE_SIZE = 8;
@@ -309,7 +310,64 @@ export default function QuanLyChienDich() {
   const [searchReg, setSearchReg] = useState("");
   const [filterRegStatus, setFilterRegStatus] = useState("");
   const [showMapPicker, setShowMapPicker] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [emergencyForm, setEmergencyForm] = useState({
+    tenChienDich: "",
+    nhomMauCanKhapCap: "O_positive",
+    maDiaDiem: "",
+    soLuongDuKien: 10,
+  });
+  const [emergencySubmitting, setEmergencySubmitting] = useState(false);
   const imageInputRef = useRef(null);
+
+  const openEmergencyModal = () => {
+    setEmergencyForm({
+      tenChienDich: "🚨 KHẨN CẤP: Cần gấp máu O+ tại Bệnh viện",
+      nhomMauCanKhapCap: "O_positive",
+      maDiaDiem: diaDiems[0]?.maDiaDiem || "DD00001",
+      soLuongDuKien: 10,
+    });
+    setShowEmergencyModal(true);
+  };
+
+  const handleEmergencySubmit = async (e) => {
+    e.preventDefault();
+    if (!emergencyForm.tenChienDich.trim()) {
+      Swal.fire("Lỗi", "Vui lòng nhập tên chiến dịch khẩn cấp", "error");
+      return;
+    }
+    setEmergencySubmitting(true);
+    try {
+      const now = new Date();
+      const endTime = new Date(Date.now() + 12 * 3600 * 1000); // 12h từ bây giờ
+
+      const payload = {
+        tenChienDich: emergencyForm.tenChienDich,
+        maDiaDiem: emergencyForm.maDiaDiem || diaDiems[0]?.maDiaDiem || "DD00001",
+        soLuongDuKien: parseInt(emergencyForm.soLuongDuKien) || 10,
+        thoiGianBD: now.toISOString(),
+        thoiGianKT: endTime.toISOString(),
+        trangThai: "DangDienRa",
+        mucDoUuTien: "KhanCap",
+        nhomMauCanKhapCap: emergencyForm.nhomMauCanKhapCap,
+        imageUrl: "hienmau.jpg",
+      };
+
+      await chienDichService.createChienDich(payload);
+      setShowEmergencyModal(false);
+      Swal.fire({
+        icon: "success",
+        title: "🚨 ĐÃ PHÁT LỆNH HUY ĐỘNG KHẨN CẤP!",
+        html: `Chiến dịch khẩn cấp đã được kích hoạt thành công!<br/><small class="text-slate-500">Tự động đóng sau 12 giờ.</small>`,
+        confirmButtonColor: "#dc2626",
+      });
+      loadData();
+    } catch (err) {
+      Swal.fire("Lỗi", getApiError(err, "Không thể tạo chiến dịch khẩn cấp"), "error");
+    } finally {
+      setEmergencySubmitting(false);
+    }
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -351,7 +409,7 @@ export default function QuanLyChienDich() {
 
   const filtered = useMemo(() => {
     const q = (search || headerSearch).trim().toLowerCase();
-    return campaigns.filter((c) => {
+    let res = campaigns.filter((c) => {
       const matchQ =
         !q ||
         (c.tenChienDich || "").toLowerCase().includes(q) ||
@@ -361,6 +419,24 @@ export default function QuanLyChienDich() {
         !filterStatus || toBackendStatus(c.trangThai) === filterStatus;
       return matchQ && matchS;
     });
+
+    // 🏆 THUẬT TOÁN SẮP XẾP ADMIN:
+    // 1. Đợt KHẨN CẤP ĐANG DIỄN RA xếp vị trí ĐẦU TIÊN
+    // 2. Các đợt Khẩn cấp khác
+    // 3. Xếp theo thời gian bắt đầu mới nhất giảm dần
+    res.sort((a, b) => {
+      const aIsEmergActive = (a.mucDoUuTien === "KhanCap" || a.mucDoUuTien === 1) && (a.trangThai === "DangDienRa" || toBackendStatus(a.trangThai) === "DangDienRa") ? 1 : 0;
+      const bIsEmergActive = (b.mucDoUuTien === "KhanCap" || b.mucDoUuTien === 1) && (b.trangThai === "DangDienRa" || toBackendStatus(b.trangThai) === "DangDienRa") ? 1 : 0;
+      if (aIsEmergActive !== bIsEmergActive) return bIsEmergActive - aIsEmergActive;
+
+      const aIsEmerg = (a.mucDoUuTien === "KhanCap" || a.mucDoUuTien === 1) ? 1 : 0;
+      const bIsEmerg = (b.mucDoUuTien === "KhanCap" || b.mucDoUuTien === 1) ? 1 : 0;
+      if (aIsEmerg !== bIsEmerg) return bIsEmerg - aIsEmerg;
+
+      return new Date(b.thoiGianBD) - new Date(a.thoiGianBD);
+    });
+
+    return res;
   }, [campaigns, search, filterStatus, headerSearch]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -392,6 +468,7 @@ export default function QuanLyChienDich() {
       soLuongDuKien: c.soLuongDuKien || 100,
       trangThai: toBackendStatus(c.trangThai),
       imageUrl: c.imageUrl || "",
+      mucDoUuTien: c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1 ? "KhanCap" : "BinhThuong",
     });
     setModal({ type: "edit", maChienDich: c.maChienDich });
   };
@@ -404,9 +481,9 @@ export default function QuanLyChienDich() {
     setLoadingRegs(true);
     try {
       const res = await donDangKyService.getAll();
-      const allRegs = Array.isArray(res) ? res : res?.content || [];
+      const allRegs = res?.data || (Array.isArray(res) ? res : res?.content || []);
       const matched = allRegs.filter(
-        (d) => String(d.maChienDich) === String(c.maChienDich),
+        (d) => String(d.maChienDich || d.MaChienDich) === String(c.maChienDich || c.MaChienDich),
       );
       setCampaignRegs(matched);
     } catch (err) {
@@ -471,6 +548,7 @@ export default function QuanLyChienDich() {
         soLuongDuKien: Number(form.soLuongDuKien) || 100,
         trangThai: toBackendStatus(form.trangThai),
         imageUrl: form.imageUrl || null,
+        mucDoUuTien: form.mucDoUuTien === "KhanCap" ? 1 : 0,
       };
 
       if (modal === "create") {
@@ -633,8 +711,18 @@ export default function QuanLyChienDich() {
           </div>
 
           <button
+            onClick={openEmergencyModal}
+            className="flex items-center gap-1.5 h-9 px-4 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white font-black text-xs rounded-xl hover:shadow-lg hover:shadow-red-600/40 hover:scale-[1.02] active:scale-95 transition-all duration-300 animate-pulse border-2 border-red-400/50 shrink-0 shadow-md shadow-red-500/20"
+          >
+            <span className="material-symbols-outlined text-base text-amber-300 animate-bounce">
+              warning
+            </span>
+            <span>🚨 Tạo Đợt Hiến Máu Khẩn Cấp</span>
+          </button>
+
+          <button
             onClick={openCreate}
-            className="flex items-center gap-1.5 h-9 px-4 bg-gradient-to-r from-[#e62e43] via-red-600 to-[#c01b30] text-white font-black text-xs rounded-xl hover:shadow-lg hover:shadow-[#e62e43]/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 group ml-1 shrink-0"
+            className="flex items-center gap-1.5 h-9 px-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white font-black text-xs rounded-xl hover:shadow-lg hover:shadow-slate-900/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 group ml-1 shrink-0"
           >
             <span className="material-symbols-outlined text-base group-hover:rotate-90 transition-transform duration-300">
               add_circle
@@ -735,29 +823,61 @@ export default function QuanLyChienDich() {
                   return (
                     <tr
                       key={c.maChienDich}
-                      className="h-[84px] hover:bg-slate-50/50 transition-colors"
+                      className={`h-[84px] transition-colors ${
+                        c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1
+                          ? "bg-red-50/50 hover:bg-red-50"
+                          : "hover:bg-slate-50/50"
+                      }`}
                     >
                       <td className="px-6">
                         <div className="flex items-center gap-4">
                           <div
-                            className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center shrink-0 cursor-pointer hover:bg-red-200 transition-colors"
+                            className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
+                              c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1
+                                ? "bg-red-600 hover:bg-red-700 shadow-md shadow-red-500/20"
+                                : "bg-red-100 hover:bg-red-200"
+                            }`}
                             onClick={() => openDetail(c)}
                             title="Xem chi tiết & danh sách đăng ký"
                           >
-                            <span className="material-symbols-outlined text-red-600">
-                              volunteer_activism
+                            <span
+                              className={`material-symbols-outlined ${
+                                c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1
+                                  ? "text-white animate-pulse"
+                                  : "text-red-600"
+                              }`}
+                            >
+                              {c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1 ? "campaign" : "volunteer_activism"}
                             </span>
                           </div>
-                          <div className="truncate max-w-[200px]">
+                          <div className="truncate max-w-[260px]">
                             <p
                               onClick={() => openDetail(c)}
-                              className="text-sm font-bold text-slate-900 truncate cursor-pointer hover:text-[#e62e43] transition-colors"
+                              className={`text-sm font-black truncate cursor-pointer transition-colors flex items-center gap-2 ${
+                                c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1
+                                  ? "text-red-700 hover:text-red-800"
+                                  : "text-slate-900 hover:text-[#e62e43]"
+                              }`}
                               title="Nhấp để xem chi tiết & danh sách TNV đăng ký"
                             >
                               {c.tenChienDich}
+                              {(c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1) && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] bg-red-600 text-white uppercase shrink-0 tracking-wider">Khẩn</span>
+                              )}
                             </p>
+                            
+                            {/* 🔴 NHÓM MÁU CẦN GẤP */}
+                            {(c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1 || c.nhomMauCanKhapCap) && (
+                              <div className="mt-1">
+                                <span className="px-2 py-0.5 rounded bg-red-600 text-white font-black text-[10px] uppercase tracking-wider shadow-sm inline-flex items-center gap-1">
+                                  <span>🆘 CẦN GẤP MÁU:</span>
+                                  <span className="text-amber-300 font-extrabold">{c.nhomMauCanKhapCap ? c.nhomMauCanKhapCap.replace('_positive','+').replace('_negative','-') : "O+"}</span>
+                                </span>
+                              </div>
+                            )}
+
                             <p className="text-[11px] text-slate-400 mt-0.5">
-                              ID: {c.maChienDich}
+                              Mã CD: <b>{c.maChienDich}</b>
                             </p>
                           </div>
                         </div>
@@ -778,8 +898,11 @@ export default function QuanLyChienDich() {
                         </div>
                       </td>
                       <td className="px-6">
-                        <p className="text-sm text-slate-600 truncate max-w-[180px]">
-                          {c.diaDiem?.tenDiaDiem || "—"}
+                        <p className="text-xs font-bold text-slate-800 truncate max-w-[220px]">
+                          🏥 {c.diaDiem?.tenDiaDiem || "Bệnh viện Đa Khoa Đà Nẵng"}
+                        </p>
+                        <p className="text-[11px] text-slate-500 font-medium truncate max-w-[220px] mt-0.5">
+                          📍 {c.diaDiem?.diaChi || c.diaDiem?.diaChiChiTiet || "Đà Nẵng"}
                         </p>
                       </td>
                       <td className="px-6 text-center">
@@ -805,12 +928,12 @@ export default function QuanLyChienDich() {
                       </td>
                       <td className="px-6 text-center">
                         <span
-                          className={`inline-flex items-center px-3 py-1 text-[11px] font-black rounded-full border ${statusBadge(c.trangThai)}`}
+                          className={`inline-flex items-center px-3 py-1 text-[11px] font-black rounded-full border ${statusBadge(c.trangThai, c.mucDoUuTien)}`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full mr-2 ${getStatusLabel(c.trangThai) === "Đang diễn ra" ? "bg-emerald-500 animate-pulse" : "bg-current"}`}
+                            className={`w-1.5 h-1.5 rounded-full mr-2 ${getStatusLabel(c.trangThai, c.mucDoUuTien) === "Đang diễn ra" ? "bg-emerald-500 animate-pulse" : "bg-current"}`}
                           />
-                          {getStatusLabel(c.trangThai).toUpperCase()}
+                          {getStatusLabel(c.trangThai, c.mucDoUuTien).toUpperCase()}
                         </span>
                       </td>
                       <td className="px-6 text-right">
@@ -1466,6 +1589,39 @@ export default function QuanLyChienDich() {
                       onChange={(e) => setForm({ ...form, tenChienDich: e.target.value })}
                       className="w-full h-12 px-4 border-2 border-slate-200 rounded-xl text-base font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal outline-none focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
                     />
+                    </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">
+                      Tính chất / Mức độ ưu tiên *
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="mucDoUuTien"
+                          value="BinhThuong"
+                          checked={form.mucDoUuTien === "BinhThuong"}
+                          onChange={(e) => setForm({ ...form, mucDoUuTien: e.target.value })}
+                          className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-semibold text-slate-700">Bình thường</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer bg-red-50 px-3 py-1.5 rounded-lg border border-red-200">
+                        <input
+                          type="radio"
+                          name="mucDoUuTien"
+                          value="KhanCap"
+                          checked={form.mucDoUuTien === "KhanCap"}
+                          onChange={(e) => setForm({ ...form, mucDoUuTien: e.target.value })}
+                          className="w-4 h-4 text-red-600 border-red-300 focus:ring-red-500"
+                        />
+                        <span className="text-sm font-bold text-red-700 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[16px]">campaign</span>
+                          Khẩn cấp
+                        </span>
+                      </label>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -1552,7 +1708,10 @@ export default function QuanLyChienDich() {
                         }
                         className="w-full h-11 px-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 bg-slate-50/80 outline-none focus:border-[#e62e43] focus:ring-2 focus:ring-[#e62e43]/10 transition-colors cursor-pointer"
                       >
-                        {STATUS_OPTIONS.map((s) => (
+                        {(form.mucDoUuTien === "KhanCap"
+                          ? STATUS_OPTIONS.filter((s) => s.value === "DangDienRa" || s.value === "DaKetThuc")
+                          : STATUS_OPTIONS
+                        ).map((s) => (
                           <option key={s.value} value={s.value}>
                             {s.label}
                           </option>
@@ -1996,6 +2155,301 @@ export default function QuanLyChienDich() {
                   </span>
                 </button>
               </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* 🚨 MODAL HIẾN MÁU KHẨN CẤP (FAST-TRACK FORM TỐI GIẢN) */}
+      {showEmergencyModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl border-2 border-red-500 max-w-xl w-full overflow-hidden animate-in zoom-in-95 duration-300">
+            
+            {/* Header Modal Khẩn cấp */}
+            <div className="bg-gradient-to-r from-red-700 via-rose-600 to-red-800 p-6 text-white relative">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-amber-300 text-2xl shadow-inner animate-pulse">
+                    <span className="material-symbols-outlined">warning</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-red-950 font-black text-[10px] uppercase tracking-wider shadow-sm">
+                        ⚡ QUY TRÌNH FAST-TRACK KHẨN CẤP
+                      </span>
+                    </div>
+                    <h2 className="text-xl font-black tracking-tight mt-1">
+                      🚨 Kích Hoạt Đợt Hiến Máu Khẩn Cấp
+                    </h2>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowEmergencyModal(false)}
+                  className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition-all"
+                >
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              </div>
+              <p className="text-red-100 text-xs mt-3 leading-relaxed font-medium">
+                Điền thông tin tối giản để phát hành lệnh ngay lập tức. Hệ thống sẽ tự động gán thời hạn <b>12 giờ</b> và mở cổng tiếp nhận.
+              </p>
+            </div>
+
+            {/* Body Form */}
+            <form onSubmit={handleEmergencySubmit} className="p-6 space-y-4">
+              
+              {/* 1. Tên chiến dịch khẩn cấp */}
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  1. Tên Đợt Cấp Cứu Khẩn Cấp <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={emergencyForm.tenChienDich}
+                  onChange={(e) =>
+                    setEmergencyForm((prev) => ({ ...prev, tenChienDich: e.target.value }))
+                  }
+                  placeholder="Ví dụ: Cần gấp máu O+ cho bệnh nhân cấp cứu tại BV Đà Nẵng"
+                  className="w-full h-11 px-4 rounded-xl border border-red-200 bg-red-50/30 font-bold text-sm text-slate-900 focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                />
+              </div>
+
+              {/* 2. Nhóm máu & Số lượng trong cùng 1 hàng */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                    2. Nhóm Máu Cần Gấp <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={emergencyForm.nhomMauCanKhapCap}
+                    onChange={(e) =>
+                      setEmergencyForm((prev) => ({
+                        ...prev,
+                        nhomMauCanKhapCap: e.target.value,
+                        tenChienDich: `🚨 KHẨN CẤP: Cần gấp máu ${e.target.value.replace('_positive','+').replace('_negative','-')} tại Bệnh viện`
+                      }))
+                    }
+                    className="w-full h-11 px-4 rounded-xl border border-red-300 bg-red-50 font-black text-sm text-red-700 focus:bg-white focus:border-red-500 outline-none transition-all"
+                  >
+                    <option value="O_positive">🔴 Nhóm O+</option>
+                    <option value="A_positive">🅰️ Nhóm A+</option>
+                    <option value="B_positive">🅱️ Nhóm B+</option>
+                    <option value="AB_positive">🆎 Nhóm AB+</option>
+                    <option value="O_negative">🆘 Nhóm O- (Hiếm)</option>
+                    <option value="A_negative">🆘 Nhóm A- (Hiếm)</option>
+                    <option value="B_negative">🆘 Nhóm B- (Hiếm)</option>
+                    <option value="AB_negative">🆘 Nhóm AB- (Hiếm)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                    3. Số Đơn Vị Cần Gấp <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="500"
+                    required
+                    value={emergencyForm.soLuongDuKien}
+                    onChange={(e) =>
+                      setEmergencyForm((prev) => ({ ...prev, soLuongDuKien: e.target.value }))
+                    }
+                    className="w-full h-11 px-4 rounded-xl border border-slate-300 font-bold text-sm text-slate-900 focus:border-red-500 outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* 3. Địa điểm bệnh viện */}
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  4. Bệnh Viện / Địa Điểm Tiếp Nhận <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={emergencyForm.maDiaDiem}
+                  onChange={(e) =>
+                    setEmergencyForm((prev) => ({ ...prev, maDiaDiem: e.target.value }))
+                  }
+                  className="w-full h-11 px-4 rounded-xl border border-slate-300 font-semibold text-sm text-slate-900 focus:border-red-500 outline-none transition-all"
+                >
+                  {diaDiems.map((dd) => (
+                    <option key={dd.maDiaDiem} value={dd.maDiaDiem}>
+                      🏥 {dd.tenDiaDiem} ({dd.diaChiChiTiet})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Thông báo quy định thời gian */}
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex items-start gap-3 text-xs text-amber-900">
+                <span className="material-symbols-outlined text-amber-600 text-xl shrink-0 mt-0.5 animate-bounce">timer</span>
+                <div>
+                  <b className="text-amber-950 font-extrabold">Quy trình tự động:</b> Thời gian bắt đầu được tính ngay từ <b>BÂY GIỜ</b> và đợt khẩn cấp sẽ <b>tự động đóng sau 12 giờ</b>.
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowEmergencyModal(false)}
+                  className="h-11 px-5 rounded-xl border border-slate-300 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={emergencySubmitting}
+                  className="h-11 px-6 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black text-xs shadow-lg shadow-red-600/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-60"
+                >
+                  <span className="material-symbols-outlined text-base">
+                    {emergencySubmitting ? "progress_activity" : "send"}
+                  </span>
+                  <span>
+                    {emergencySubmitting ? "ĐANG PHÁT LỆNH..." : "🚨 PHÁT LỆNH KHẨN CẤP NGAY"}
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 🔍 MODAL XEM CHI TIẾT CHIẾN DỊCH & DANH SÁCH TNV ĐĂNG KÝ */}
+      {modal === "detail" && selectedCampaign && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+            
+            {/* Header Modal */}
+            <div className={`p-6 text-white relative ${
+              selectedCampaign.mucDoUuTien === "KhanCap" || selectedCampaign.mucDoUuTien === 1
+                ? "bg-gradient-to-r from-red-700 via-rose-600 to-red-800"
+                : "bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"
+            }`}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white font-mono text-[10px] uppercase font-bold">
+                      MÃ CD: {selectedCampaign.maChienDich}
+                    </span>
+                    {(selectedCampaign.mucDoUuTien === "KhanCap" || selectedCampaign.mucDoUuTien === 1) && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-red-950 font-black text-[10px] uppercase tracking-wider animate-pulse">
+                        🚨 CHIẾN DỊCH KHẨN CẤP (12H)
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-xl font-black mt-2 leading-snug">
+                    {selectedCampaign.tenChienDich}
+                  </h2>
+                  {(selectedCampaign.mucDoUuTien === "KhanCap" || selectedCampaign.mucDoUuTien === 1 || selectedCampaign.nhomMauCanKhapCap) && (
+                    <div className="mt-2">
+                      <span className="bg-white text-red-600 px-3 py-1 rounded-full font-black text-xs shadow-md inline-block">
+                        🆘 CẦN GẤP MÁU: {selectedCampaign.nhomMauCanKhapCap ? selectedCampaign.nhomMauCanKhapCap.replace('_positive','+').replace('_negative','-') : "O+"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setModal(null)}
+                  className="w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition-all shrink-0"
+                >
+                  <span className="material-symbols-outlined text-xl">close</span>
+                </button>
+              </div>
+
+              {/* Thông tin Địa điểm & Thời gian */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-3 border-t border-white/20 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-amber-300">location_on</span>
+                  <div className="truncate">
+                    <p className="font-bold">{selectedCampaign.diaDiem?.tenDiaDiem || "Bệnh viện Đa Khoa Đà Nẵng"}</p>
+                    <p className="text-slate-200 text-[11px] truncate">{selectedCampaign.diaDiem?.diaChi || selectedCampaign.diaDiem?.diaChiChiTiet || "Đà Nẵng"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-amber-300">schedule</span>
+                  <div>
+                    <p className="font-bold">Thời gian diễn ra:</p>
+                    <p className="text-slate-200 text-[11px]">
+                      {new Date(selectedCampaign.thoiGianBD).toLocaleString('vi-VN')} - {new Date(selectedCampaign.thoiGianKT).toLocaleString('vi-VN')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Body Modal: Danh sách TNV đăng ký */}
+            <div className="p-6 overflow-y-auto flex-1 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-red-600">group</span>
+                  <span>Danh Sách Tình Nguyện Viên Đăng Ký ({campaignRegs.length})</span>
+                </h3>
+                <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                  Chỉ tiêu: {selectedCampaign.soLuongDuKien || 50} đơn vị
+                </span>
+              </div>
+
+              {loadingRegs ? (
+                <div className="py-12 text-center text-slate-400 font-medium">
+                  <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  Đang tải danh sách đăng ký...
+                </div>
+              ) : campaignRegs.length === 0 ? (
+                <div className="py-12 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <span className="material-symbols-outlined text-4xl text-slate-300 mb-1">person_off</span>
+                  <p className="text-sm font-bold text-slate-600">Chưa có lượt đăng ký nào cho chiến dịch này</p>
+                  <p className="text-xs text-slate-400 mt-1">Các thông tin đăng ký từ TNV sẽ xuất hiện ngay tại đây khi có người tham gia.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-100 text-slate-700 font-black uppercase border-b border-slate-200">
+                      <tr>
+                        <th className="p-3">Mã đơn</th>
+                        <th className="p-3">Tình nguyện viên</th>
+                        <th className="p-3">SĐT</th>
+                        <th className="p-3 text-center">Nhóm máu</th>
+                        <th className="p-3">Thời gian đăng ký</th>
+                        <th className="p-3 text-center">Trạng thái</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {campaignRegs.map((reg) => (
+                        <tr key={reg.maDon} className="hover:bg-slate-50">
+                          <td className="p-3 font-mono font-bold text-slate-700">{reg.maDon}</td>
+                          <td className="p-3 font-bold text-slate-900">{reg.tinhNguyenVien?.hoTen || reg.hoTen || "TNV"}</td>
+                          <td className="p-3 text-slate-600">{reg.tinhNguyenVien?.soDienThoai || reg.soDienThoai || "—"}</td>
+                          <td className="p-3 text-center font-black text-red-600 bg-red-50/50 rounded-lg">
+                            {reg.tinhNguyenVien?.nhomMau ? reg.tinhNguyenVien.nhomMau.replace('_positive','+').replace('_negative','-') : (selectedCampaign.nhomMauCanKhapCap ? selectedCampaign.nhomMauCanKhapCap.replace('_positive','+').replace('_negative','-') : "Chưa rõ")}
+                          </td>
+                          <td className="p-3 text-slate-500">{new Date(reg.thoiGianDangKy || Date.now()).toLocaleString('vi-VN')}</td>
+                          <td className="p-3 text-center">
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] uppercase">
+                              {reg.trangThai || "ChoDuyet"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Modal */}
+            <div className="bg-slate-100 px-6 py-4 border-t border-slate-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setModal(null)}
+                className="h-10 px-6 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all"
+              >
+                Đóng cửa sổ
+              </button>
             </div>
 
           </div>

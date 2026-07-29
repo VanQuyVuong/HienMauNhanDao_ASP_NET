@@ -127,12 +127,82 @@ namespace HienMauNhanDao_DaNang.Controllers
         [Authorize(Roles = "AD,NVYT")]
         public async Task<IActionResult> GetByCCCD(string soCCCD)
         {
-            var tnv = await _context.TinhNguyenViens.FirstOrDefaultAsync(t => t.Cccd == soCCCD);
+            var tnv = await _context.TinhNguyenViens
+                .FirstOrDefaultAsync(t => t.Cccd == soCCCD);
+                
             if (tnv == null)
             {
                 return NotFound(new { success = false, message = "Không tìm thấy tình nguyện viên" });
             }
-            return Ok(new { success = true, data = tnv });
+
+            // Tính toán lần hiến gần nhất (trạng thái Đã Hoàn Thành)
+            var lanHienGanNhat = await _context.DonDangKys
+                .Where(d => d.MaTNV == tnv.maTNV && d.TrangThai == TrangThaiDonDangKy.DaHoanThanh)
+                .OrderByDescending(d => d.ThoiGianDangKy)
+                .FirstOrDefaultAsync();
+
+            bool duDieuKien = true;
+            string thongBao = "";
+
+            if (lanHienGanNhat != null && lanHienGanNhat.ThoiGianDangKy.HasValue)
+            {
+                var khoangCach = (DateTime.Now - lanHienGanNhat.ThoiGianDangKy.Value).TotalDays;
+                if (khoangCach < 84)
+                {
+                    duDieuKien = false;
+                    thongBao = $"Lần hiến gần nhất cách đây {Math.Floor(khoangCach)} ngày (chưa đủ 84 ngày).";
+                }
+            }
+
+            return Ok(new { success = true, data = tnv, duDieuKien, thongBao });
+        }
+
+        public class CreateTnvRequest
+        {
+            public string HoVaTen { get; set; }
+            public string NgaySinh { get; set; }
+            public string GioiTinh { get; set; }
+            public string SoDienThoai { get; set; }
+            public string DiaChi { get; set; }
+            public string SoCCCD { get; set; }
+            public string MaPhuongXa { get; set; }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "AD,NVYT")]
+        public async Task<IActionResult> CreateTnv([FromBody] CreateTnvRequest request)
+        {
+            var exists = await _context.TinhNguyenViens.AnyAsync(t => t.Cccd == request.SoCCCD);
+            if (exists)
+            {
+                return BadRequest(new { success = false, message = "CCCD này đã tồn tại trong hệ thống." });
+            }
+
+            var tnv = new TinhNguyenVien
+            {
+                maTNV = "TNV" + DateTime.Now.ToString("HHmmss"),
+                MaTaiKhoan = null, // Không có tài khoản
+                HoTen = request.HoVaTen,
+                Cccd = request.SoCCCD,
+                SoDienThoai = request.SoDienThoai,
+                DiaChi = request.DiaChi,
+                MaPhuongXa = request.MaPhuongXa
+            };
+
+            if (DateOnly.TryParse(request.NgaySinh, out var parsedDate))
+            {
+                tnv.NgaySinh = parsedDate;
+            }
+
+            if (Enum.TryParse<GioiTinh>(request.GioiTinh, out var parsedGioiTinh))
+            {
+                tnv.GioiTinh = parsedGioiTinh;
+            }
+
+            _context.TinhNguyenViens.Add(tnv);
+            await _context.SaveChangesAsync();
+
+            return Ok(tnv);
         }
     }
 }

@@ -12,8 +12,6 @@ export const donDangKyService = {
     create: async (data) => {
         try {
             const response = await http.post('/dondangky', data);
-            // response = ApiResponse { status, message, data: DonDangKyResponse }
-            // Khi status=false (đã đăng ký rồi), backend trả 201 nhưng status=false
             if (response?.success === false) {
                 throw { message: response.message || 'Lỗi khi tạo đơn đăng ký', isBusinessError: true };
             }
@@ -26,7 +24,6 @@ export const donDangKyService = {
                 ...(response?.data ?? response)
             };
         } catch (error) {
-            // Re-throw business errors trực tiếp
             if (error.isBusinessError) throw error;
             console.error('Error creating đơn đăng ký:', error);
             throw {
@@ -35,6 +32,10 @@ export const donDangKyService = {
                 data: error.response?.data
             };
         }
+    },
+
+    createDonDangKy: async (data) => {
+        return donDangKyService.create(data);
     },
 
 

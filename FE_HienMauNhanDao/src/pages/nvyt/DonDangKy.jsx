@@ -16,12 +16,14 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
   const [notFound, setNotFound] = useState(false);
   const [newTnv, setNewTnv] = useState({ hoVaTen: '', ngaySinh: '', gioiTinh: 'Nam', soDienThoai: '', diaChi: '', soCCCD: '', maPhuongXa: '' });
   const [form, setForm] = useState({
+    loaiHinh: 'ChienDich',
     maChienDich: don?.maChienDich || '',
     theTich: String(don?.theTich || 250),
     ghiChu: don?.ghiChu || '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [warning, setWarning] = useState('');
   const [phuongXaList, setPhuongXaList] = useState([]);
   const [chiendichList, setChienDichList] = useState([]);
 
@@ -60,7 +62,15 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
       console.log('Tìm kiếm CCCD:', cccd.trim());
       const found = await tnvNvytService.findByCCCD(cccd.trim());
       console.log('Kết quả tìm kiếm:', found);
-      if (found) { setTnv(found); setStep('form'); }
+      if (found && found.data) { 
+        setTnv(found.data); 
+        if (found.duDieuKien === false) {
+          setWarning(found.thongBao || 'Tình nguyện viên chưa đủ điều kiện thời gian hiến máu.');
+        } else {
+          setWarning('');
+        }
+        setStep('form'); 
+      }
       else { setNotFound(true); setNewTnv(p => ({ ...p, soCCCD: cccd.trim() })); }
     } catch (err) { 
       console.error('Error tìm kiếm CCCD:', err);
@@ -99,7 +109,7 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
   };
 
   const handleSubmit = async () => {
-    if (!form.maChienDich.trim()) { setError('Vui lòng chọn mã chiến dịch'); return; }
+    if (form.loaiHinh === 'ChienDich' && !form.maChienDich.trim()) { setError('Vui lòng chọn mã chiến dịch'); return; }
     if (!tnv?.maTNV && !newTnv.soCCCD) { setError('Vui lòng tìm hoặc tạo tình nguyện viên trước'); return; }
     setLoading(true); setError('');
     try {
@@ -107,7 +117,7 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
         maTNV: tnv?.maTNV,
         maNV: nhanVien?.maNV,
         emailNhanVien: localStorage.getItem('email') || '',
-        maChienDich: form.maChienDich,
+        maChienDich: form.loaiHinh === 'TuDo' ? null : form.maChienDich,
         theTich: parseInt(form.theTich) || 250,
         ghiChu: form.ghiChu,
         maPhuongXa: tnv?.maPhuongXa || newTnv.maPhuongXa || '',
@@ -231,25 +241,51 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
                   <p className="text-xs text-green-700">Địa chỉ: {tnv.diaChi || '---'}</p>
                 </div>
               )}
+              {warning && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex gap-2 items-start text-amber-800">
+                  <span className="material-symbols-outlined text-amber-600 text-[20px]">warning</span>
+                  <div className="text-sm font-medium">
+                    <p className="font-bold text-amber-900 mb-0.5">Cảnh báo khoảng cách hiến máu</p>
+                    <p>{warning}</p>
+                    <p className="text-[11px] mt-1 text-amber-700 font-semibold italic">Y tá có thể cân nhắc và chịu trách nhiệm nếu vẫn quyết định tiếp nhận.</p>
+                  </div>
+                </div>
+              )}
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
                 <p className="text-xs font-bold text-blue-700">Nhân viên phụ trách: {nhanVien?.hoVaTen || '---'}</p>
                 <p className="text-xs text-blue-600 font-mono">Mã NV: {nhanVien?.maNV || '---'}</p>
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-700 block mb-1">Mã chiến dịch *</label>
-                <select
-                  value={form.maChienDich}
-                  onChange={e => setForm(p => ({ ...p, maChienDich: e.target.value }))}
-                  className="w-full h-11 border border-slate-200 rounded-xl px-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white cursor-pointer"
-                >
-                  <option value="">-- Chọn chiến dịch --</option>
-                  {chiendichList.map((cd) => (
-                    <option key={cd.maChienDich} value={cd.maChienDich}>
-                      {cd.maChienDich} - {cd.tenChienDich}
-                    </option>
-                  ))}
-                </select>
+                <label className="text-sm font-semibold text-slate-700 block mb-1">Loại hình tiếp nhận *</label>
+                <div className="flex gap-4 mb-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="loaiHinh" checked={form.loaiHinh === 'ChienDich'} onChange={() => setForm({ ...form, loaiHinh: 'ChienDich' })} />
+                    <span className="text-sm font-medium">Theo chiến dịch</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="loaiHinh" checked={form.loaiHinh === 'TuDo'} onChange={() => setForm({ ...form, loaiHinh: 'TuDo', maChienDich: '' })} />
+                    <span className="text-sm font-medium">Hiến máu tự do (Walk-in)</span>
+                  </label>
+                </div>
               </div>
+              
+              {form.loaiHinh === 'ChienDich' && (
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 block mb-1">Mã chiến dịch *</label>
+                  <select
+                    value={form.maChienDich}
+                    onChange={e => setForm(p => ({ ...p, maChienDich: e.target.value }))}
+                    className="w-full h-11 border border-slate-200 rounded-xl px-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white cursor-pointer"
+                  >
+                    <option value="">-- Chọn chiến dịch --</option>
+                    {chiendichList.map((cd) => (
+                      <option key={cd.maChienDich} value={cd.maChienDich}>
+                        {cd.maChienDich} - {cd.tenChienDich}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="text-sm font-semibold text-slate-700 block mb-1">Thể tích máu hiến</label>
                 <select value={form.theTich} onChange={e => setForm(p => ({ ...p, theTich: e.target.value }))}
