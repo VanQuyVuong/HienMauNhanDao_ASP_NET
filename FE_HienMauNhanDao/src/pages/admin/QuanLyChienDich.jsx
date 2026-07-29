@@ -310,7 +310,64 @@ export default function QuanLyChienDich() {
   const [searchReg, setSearchReg] = useState("");
   const [filterRegStatus, setFilterRegStatus] = useState("");
   const [showMapPicker, setShowMapPicker] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [emergencyForm, setEmergencyForm] = useState({
+    tenChienDich: "",
+    nhomMauCanKhapCap: "O_positive",
+    maDiaDiem: "",
+    soLuongDuKien: 10,
+  });
+  const [emergencySubmitting, setEmergencySubmitting] = useState(false);
   const imageInputRef = useRef(null);
+
+  const openEmergencyModal = () => {
+    setEmergencyForm({
+      tenChienDich: "🚨 KHẨN CẤP: Cần gấp máu O+ tại Bệnh viện",
+      nhomMauCanKhapCap: "O_positive",
+      maDiaDiem: diaDiems[0]?.maDiaDiem || "DD00001",
+      soLuongDuKien: 10,
+    });
+    setShowEmergencyModal(true);
+  };
+
+  const handleEmergencySubmit = async (e) => {
+    e.preventDefault();
+    if (!emergencyForm.tenChienDich.trim()) {
+      Swal.fire("Lỗi", "Vui lòng nhập tên chiến dịch khẩn cấp", "error");
+      return;
+    }
+    setEmergencySubmitting(true);
+    try {
+      const now = new Date();
+      const endTime = new Date(Date.now() + 12 * 3600 * 1000); // 12h từ bây giờ
+
+      const payload = {
+        tenChienDich: emergencyForm.tenChienDich,
+        maDiaDiem: emergencyForm.maDiaDiem || diaDiems[0]?.maDiaDiem || "DD00001",
+        soLuongDuKien: parseInt(emergencyForm.soLuongDuKien) || 10,
+        thoiGianBD: now.toISOString(),
+        thoiGianKT: endTime.toISOString(),
+        trangThai: "DangDienRa",
+        mucDoUuTien: "KhanCap",
+        nhomMauCanKhapCap: emergencyForm.nhomMauCanKhapCap,
+        imageUrl: "hienmau.jpg",
+      };
+
+      await chienDichService.createChienDich(payload);
+      setShowEmergencyModal(false);
+      Swal.fire({
+        icon: "success",
+        title: "🚨 ĐÃ PHÁT LỆNH HUY ĐỘNG KHẨN CẤP!",
+        html: `Chiến dịch khẩn cấp đã được kích hoạt thành công!<br/><small class="text-slate-500">Tự động đóng sau 12 giờ.</small>`,
+        confirmButtonColor: "#dc2626",
+      });
+      loadData();
+    } catch (err) {
+      Swal.fire("Lỗi", getApiError(err, "Không thể tạo chiến dịch khẩn cấp"), "error");
+    } finally {
+      setEmergencySubmitting(false);
+    }
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -636,8 +693,18 @@ export default function QuanLyChienDich() {
           </div>
 
           <button
+            onClick={openEmergencyModal}
+            className="flex items-center gap-1.5 h-9 px-4 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white font-black text-xs rounded-xl hover:shadow-lg hover:shadow-red-600/40 hover:scale-[1.02] active:scale-95 transition-all duration-300 animate-pulse border-2 border-red-400/50 shrink-0 shadow-md shadow-red-500/20"
+          >
+            <span className="material-symbols-outlined text-base text-amber-300 animate-bounce">
+              warning
+            </span>
+            <span>🚨 Tạo Đợt Hiến Máu Khẩn Cấp</span>
+          </button>
+
+          <button
             onClick={openCreate}
-            className="flex items-center gap-1.5 h-9 px-4 bg-gradient-to-r from-[#e62e43] via-red-600 to-[#c01b30] text-white font-black text-xs rounded-xl hover:shadow-lg hover:shadow-[#e62e43]/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 group ml-1 shrink-0"
+            className="flex items-center gap-1.5 h-9 px-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white font-black text-xs rounded-xl hover:shadow-lg hover:shadow-slate-900/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 group ml-1 shrink-0"
           >
             <span className="material-symbols-outlined text-base group-hover:rotate-90 transition-transform duration-300">
               add_circle
@@ -2055,6 +2122,163 @@ export default function QuanLyChienDich() {
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* 🚨 MODAL HIẾN MÁU KHẨN CẤP (FAST-TRACK FORM TỐI GIẢN) */}
+      {showEmergencyModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl border-2 border-red-500 max-w-xl w-full overflow-hidden animate-in zoom-in-95 duration-300">
+            
+            {/* Header Modal Khẩn cấp */}
+            <div className="bg-gradient-to-r from-red-700 via-rose-600 to-red-800 p-6 text-white relative">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-amber-300 text-2xl shadow-inner animate-pulse">
+                    <span className="material-symbols-outlined">warning</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-red-950 font-black text-[10px] uppercase tracking-wider shadow-sm">
+                        ⚡ QUY TRÌNH FAST-TRACK KHẨN CẤP
+                      </span>
+                    </div>
+                    <h2 className="text-xl font-black tracking-tight mt-1">
+                      🚨 Kích Hoạt Đợt Hiến Máu Khẩn Cấp
+                    </h2>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowEmergencyModal(false)}
+                  className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition-all"
+                >
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              </div>
+              <p className="text-red-100 text-xs mt-3 leading-relaxed font-medium">
+                Điền thông tin tối giản để phát hành lệnh ngay lập tức. Hệ thống sẽ tự động gán thời hạn <b>12 giờ</b> và mở cổng tiếp nhận.
+              </p>
+            </div>
+
+            {/* Body Form */}
+            <form onSubmit={handleEmergencySubmit} className="p-6 space-y-4">
+              
+              {/* 1. Tên chiến dịch khẩn cấp */}
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  1. Tên Đợt Cấp Cứu Khẩn Cấp <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={emergencyForm.tenChienDich}
+                  onChange={(e) =>
+                    setEmergencyForm((prev) => ({ ...prev, tenChienDich: e.target.value }))
+                  }
+                  placeholder="Ví dụ: Cần gấp máu O+ cho bệnh nhân cấp cứu tại BV Đà Nẵng"
+                  className="w-full h-11 px-4 rounded-xl border border-red-200 bg-red-50/30 font-bold text-sm text-slate-900 focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                />
+              </div>
+
+              {/* 2. Nhóm máu & Số lượng trong cùng 1 hàng */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                    2. Nhóm Máu Cần Gấp <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={emergencyForm.nhomMauCanKhapCap}
+                    onChange={(e) =>
+                      setEmergencyForm((prev) => ({
+                        ...prev,
+                        nhomMauCanKhapCap: e.target.value,
+                        tenChienDich: `🚨 KHẨN CẤP: Cần gấp máu ${e.target.value.replace('_positive','+').replace('_negative','-')} tại Bệnh viện`
+                      }))
+                    }
+                    className="w-full h-11 px-4 rounded-xl border border-red-300 bg-red-50 font-black text-sm text-red-700 focus:bg-white focus:border-red-500 outline-none transition-all"
+                  >
+                    <option value="O_positive">🔴 Nhóm O+</option>
+                    <option value="A_positive">🅰️ Nhóm A+</option>
+                    <option value="B_positive">🅱️ Nhóm B+</option>
+                    <option value="AB_positive">🆎 Nhóm AB+</option>
+                    <option value="O_negative">🆘 Nhóm O- (Hiếm)</option>
+                    <option value="A_negative">🆘 Nhóm A- (Hiếm)</option>
+                    <option value="B_negative">🆘 Nhóm B- (Hiếm)</option>
+                    <option value="AB_negative">🆘 Nhóm AB- (Hiếm)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                    3. Số Đơn Vị Cần Gấp <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="500"
+                    required
+                    value={emergencyForm.soLuongDuKien}
+                    onChange={(e) =>
+                      setEmergencyForm((prev) => ({ ...prev, soLuongDuKien: e.target.value }))
+                    }
+                    className="w-full h-11 px-4 rounded-xl border border-slate-300 font-bold text-sm text-slate-900 focus:border-red-500 outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* 3. Địa điểm bệnh viện */}
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  4. Bệnh Viện / Địa Điểm Tiếp Nhận <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={emergencyForm.maDiaDiem}
+                  onChange={(e) =>
+                    setEmergencyForm((prev) => ({ ...prev, maDiaDiem: e.target.value }))
+                  }
+                  className="w-full h-11 px-4 rounded-xl border border-slate-300 font-semibold text-sm text-slate-900 focus:border-red-500 outline-none transition-all"
+                >
+                  {diaDiems.map((dd) => (
+                    <option key={dd.maDiaDiem} value={dd.maDiaDiem}>
+                      🏥 {dd.tenDiaDiem} ({dd.diaChiChiTiet})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Thông báo quy định thời gian */}
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex items-start gap-3 text-xs text-amber-900">
+                <span className="material-symbols-outlined text-amber-600 text-xl shrink-0 mt-0.5 animate-bounce">timer</span>
+                <div>
+                  <b className="text-amber-950 font-extrabold">Quy trình tự động:</b> Thời gian bắt đầu được tính ngay từ <b>BÂY GIỜ</b> và đợt khẩn cấp sẽ <b>tự động đóng sau 12 giờ</b>.
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowEmergencyModal(false)}
+                  className="h-11 px-5 rounded-xl border border-slate-300 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={emergencySubmitting}
+                  className="h-11 px-6 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black text-xs shadow-lg shadow-red-600/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-60"
+                >
+                  <span className="material-symbols-outlined text-base">
+                    {emergencySubmitting ? "progress_activity" : "send"}
+                  </span>
+                  <span>
+                    {emergencySubmitting ? "ĐANG PHÁT LỆNH..." : "🚨 PHÁT LỆNH KHẨN CẤP NGAY"}
+                  </span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

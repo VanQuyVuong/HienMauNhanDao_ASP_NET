@@ -1,6 +1,7 @@
 using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Models.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HienMauNhanDao_DaNang.Data
 {
@@ -47,16 +48,20 @@ namespace HienMauNhanDao_DaNang.Data
             modelBuilder.Entity<ChiTietNhapXuat>()
                 .HasKey(ct => new { ct.MaPhieu, ct.MaTuiMau });
 
+            // Custom converter cho GioiTinh để đọc được cả 'Nữ' và 'Nu' từ DB
+            var gioiTinhConverter = new ValueConverter<GioiTinh?, string?>(
+                v => v == null ? null : (v == GioiTinh.Nu ? "Nữ" : v.ToString()),
+                v => string.IsNullOrEmpty(v) ? null : (v == "Nữ" || v == "Nu" ? GioiTinh.Nu : v == "Nam" ? GioiTinh.Nam : GioiTinh.Khac)
+            );
+
             //Lưu enum dưới dạng chuỗi 
-            // Mặc định C# lưu: Nam=0, Nu=1 (khó đọc trong DB)
-            // Ta muốn lưu: "Nam", "Nu" (dễ đọc hơn)
             modelBuilder.Entity<TinhNguyenVien>()
-                .Property(t => t.GioiTinh).HasConversion<string>();
+                .Property(t => t.GioiTinh).HasConversion(gioiTinhConverter);
 
             modelBuilder.Entity<TinhNguyenVien>()
                 .Property(t => t.NhomMau).HasConversion<string>();
 
-            modelBuilder.Entity<NhanVien>().Property(n => n.GioiTinh).HasConversion<string>();
+            modelBuilder.Entity<NhanVien>().Property(n => n.GioiTinh).HasConversion(gioiTinhConverter);
 
             modelBuilder.Entity<ChienDichHienMau>().Property(c => c.TrangThai).HasConversion<string>();
             modelBuilder.Entity<ChienDichHienMau>().Property(c => c.MucDoUuTien).HasConversion<string>();
