@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Models.Entities;
+using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -59,6 +59,7 @@ namespace HienMauNhanDao_DaNang.Data
             modelBuilder.Entity<NhanVien>().Property(n => n.GioiTinh).HasConversion<string>();
 
             modelBuilder.Entity<ChienDichHienMau>().Property(c => c.TrangThai).HasConversion<string>();
+            modelBuilder.Entity<ChienDichHienMau>().Property(c => c.MucDoUuTien).HasConversion<string>();
 
             modelBuilder.Entity<DonDangKy>().Property(d => d.TrangThai).HasConversion<string>();
 
