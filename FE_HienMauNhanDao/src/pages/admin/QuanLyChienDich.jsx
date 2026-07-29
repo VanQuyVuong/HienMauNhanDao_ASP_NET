@@ -74,8 +74,8 @@ const calcStatusByTime = (bdVal, ktVal) => {
   return "DaKetThuc";
 };
 
-const statusBadge = (status) => {
-  const label = getStatusLabel(status);
+const statusBadge = (status, mucDoUuTien) => {
+  const label = getStatusLabel(status, mucDoUuTien);
   if (label === "Đang diễn ra") {
     return "bg-emerald-100 text-emerald-700 border-emerald-200 shadow-xs shadow-emerald-500/10";
   }
@@ -481,9 +481,9 @@ export default function QuanLyChienDich() {
     setLoadingRegs(true);
     try {
       const res = await donDangKyService.getAll();
-      const allRegs = Array.isArray(res) ? res : res?.content || [];
+      const allRegs = res?.data || (Array.isArray(res) ? res : res?.content || []);
       const matched = allRegs.filter(
-        (d) => String(d.maChienDich) === String(c.maChienDich),
+        (d) => String(d.maChienDich || d.MaChienDich) === String(c.maChienDich || c.MaChienDich),
       );
       setCampaignRegs(matched);
     } catch (err) {
@@ -928,12 +928,12 @@ export default function QuanLyChienDich() {
                       </td>
                       <td className="px-6 text-center">
                         <span
-                          className={`inline-flex items-center px-3 py-1 text-[11px] font-black rounded-full border ${statusBadge(c.trangThai)}`}
+                          className={`inline-flex items-center px-3 py-1 text-[11px] font-black rounded-full border ${statusBadge(c.trangThai, c.mucDoUuTien)}`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full mr-2 ${getStatusLabel(c.trangThai) === "Đang diễn ra" ? "bg-emerald-500 animate-pulse" : "bg-current"}`}
+                            className={`w-1.5 h-1.5 rounded-full mr-2 ${getStatusLabel(c.trangThai, c.mucDoUuTien) === "Đang diễn ra" ? "bg-emerald-500 animate-pulse" : "bg-current"}`}
                           />
-                          {getStatusLabel(c.trangThai).toUpperCase()}
+                          {getStatusLabel(c.trangThai, c.mucDoUuTien).toUpperCase()}
                         </span>
                       </td>
                       <td className="px-6 text-right">

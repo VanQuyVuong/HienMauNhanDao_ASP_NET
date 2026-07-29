@@ -1054,3 +1054,7 @@ INSERT INTO CHIENDICHHIENMAU (maChienDich, maDiaDiem, maNhanVien, tenChienDich, 
 ('CD99991', 'DD00001', 'NV00001', 'Khẩn cấp cần máu A+ tại BV Đà Nẵng', DATE_ADD(NOW(), INTERVAL -1 HOUR), DATE_ADD(NOW(), INTERVAL 11 HOUR), 10, 'DangDienRa', 'QR_KCA', 'hienmau.jpg', 'KhanCap', 'A+'),
 ('CD99992', 'DD00002', 'NV00001', 'Khẩn cấp cần máu O+ tại BV C Đà Nẵng', DATE_ADD(NOW(), INTERVAL -2 HOUR), DATE_ADD(NOW(), INTERVAL 10 HOUR), 5, 'DangDienRa', 'QR_KCO', 'hienmau.jpg', 'KhanCap', 'O+');
 
+SET SQL_SAFE_UPDATES = 0;
+UPDATE CHIENDICHHIENMAU SET trangThai = 'DangDienRa' WHERE mucDoUuTien = 'KhanCap' AND trangThai = 'ChuaBatDau';
+SET SQL_SAFE_UPDATES = 1;
+

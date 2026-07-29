@@ -37,11 +37,19 @@ namespace HienMauNhanDao_DaNang.Controllers
 
                        var danhSach = await _context.ChienDichHienMaus
                 .Include(c => c.DiaDiem)
-                .Include(c => c.NhanVienPhuTrach) // <-- Dùng NhanVienPhuTrach cho đúng tên thuộc tính trong thực thể
+                .Include(c => c.NhanVienPhuTrach)
                 .ToListAsync();
 
-            // Trả về cho React dưới định dạng JSON
+            // Tự động chuẩn hóa đợt khẩn cấp luôn luôn là DangDienRa (trừ khi DaKetThuc / DaHuy)
+            foreach (var c in danhSach)
+            {
+                if (c.MucDoUuTien == MucDoUuTienChienDich.KhanCap && c.TrangThai == TrangThaiChienDich.ChuaBatDau)
+                {
+                    c.TrangThai = TrangThaiChienDich.DangDienRa;
+                }
+            }
 
+            // Trả về cho React dưới định dạng JSON
             return Ok(new
             {
                 success = true,

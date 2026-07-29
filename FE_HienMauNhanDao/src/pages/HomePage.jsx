@@ -17,6 +17,7 @@ export default function HomePage() {
     const [spotlightPageIndex, setSpotlightPageIndex] = useState(0);
     const [fastTrackCampaign, setFastTrackCampaign] = useState(null);
     const [userProfile, setUserProfile] = useState(null);
+    const [registeredCampaignIds, setRegisteredCampaignIds] = useState([]);
     const [submittingFastTrack, setSubmittingFastTrack] = useState(false);
 
     // Kéo thả chuột / Chạm vuốt tay
@@ -25,12 +26,24 @@ export default function HomePage() {
 
     const CARDS_PER_PAGE = 4; // Hiển thị 4 thẻ bài song song nằm ngang
 
-    // Tải thông tin người dùng đang đăng nhập
+    // Tải thông tin người dùng đang đăng nhập & danh sách chiến dịch đã đăng ký
     useEffect(() => {
         const userEmail = localStorage.getItem('email');
         if (userEmail) {
             tinhNguyenVienService.getByMaTaiKhoan(userEmail)
-                .then(tnv => setUserProfile(tnv))
+                .then(async (tnv) => {
+                    setUserProfile(tnv);
+                    if (tnv?.maTNV) {
+                        try {
+                            const regs = await donDangKyService.getByMaTNV(tnv.maTNV);
+                            const list = Array.isArray(regs) ? regs : regs?.content || [];
+                            const activeIds = list
+                                .filter(r => r.trangThai !== "DaHuy" && r.trangThai !== "DaTuChoi")
+                                .map(r => r.maChienDich);
+                            setRegisteredCampaignIds(activeIds);
+                        } catch (e) {}
+                    }
+                })
                 .catch(() => {});
         }
     }, []);
@@ -226,6 +239,7 @@ export default function HomePage() {
             };
             await donDangKyService.create(payload);
             setFastTrackCampaign(null);
+            setRegisteredCampaignIds(prev => [...prev, fastTrackCampaign.maChienDich]);
             Swal.fire({
                 icon: 'success',
                 title: '🎉 XÁC NHẬN THÀNH CÔNG!',
@@ -305,15 +319,24 @@ export default function HomePage() {
                             </div>
                         )}
 
-                        <button 
-                            onClick={() => {
-                                if (currentEmergency) handleFastTrackRegister(currentEmergency);
-                                else navigate('/chiendich');
-                            }}
-                            className="h-8 px-5 bg-white text-red-600 hover:bg-amber-300 hover:text-red-950 rounded-full text-xs font-black transition-all uppercase tracking-wider flex items-center gap-1.5 shadow-md active:scale-95">
-                            <span>{currentEmergency ? "🚨 ĐĂNG KÝ HỖ TRỢ NGAY" : "Đăng ký hỗ trợ"}</span>
-                            <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                        </button>
+                        {currentEmergency && registeredCampaignIds.includes(currentEmergency.maChienDich) ? (
+                            <button 
+                                disabled
+                                className="h-8 px-5 bg-white/20 text-white rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-not-allowed opacity-90 border border-white/30">
+                                <span className="material-symbols-outlined text-sm text-amber-300">check_circle</span>
+                                <span>✓ ĐÃ ĐĂNG KÝ HỖ TRỢ</span>
+                            </button>
+                        ) : (
+                            <button 
+                                onClick={() => {
+                                    if (currentEmergency) handleFastTrackRegister(currentEmergency);
+                                    else navigate('/chiendich');
+                                }}
+                                className="h-8 px-5 bg-white text-red-600 hover:bg-amber-300 hover:text-red-950 rounded-full text-xs font-black transition-all uppercase tracking-wider flex items-center gap-1.5 shadow-md active:scale-95">
+                                <span>{currentEmergency ? "🚨 ĐĂNG KÝ HỖ TRỢ NGAY" : "Đăng ký hỗ trợ"}</span>
+                                <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -466,6 +489,7 @@ export default function HomePage() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5 animate-in fade-in duration-500">
                                 {currentPageCards.map((c) => {
                                     const isKhanCap = c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1;
+                                    const isRegistered = registeredCampaignIds.includes(c.maChienDich);
 
                                     return (
                                         <div
@@ -523,8 +547,16 @@ export default function HomePage() {
                                                     <span className="truncate">{c.diaDiem?.tenDiaDiem || "Bệnh viện Đa Khoa Đà Nẵng"}</span>
                                                 </p>
 
-                                                {/* Action Button */}
-                                                {isKhanCap ? (
+                                                {/* Action Button: Đã đăng ký -> Nút mờ disabled */}
+                                                {isRegistered ? (
+                                                    <button
+                                                        disabled
+                                                        className="h-9 px-3 bg-slate-200 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-1.5 w-full border border-slate-300"
+                                                    >
+                                                        <span className="material-symbols-outlined text-sm text-emerald-600 font-extrabold">check_circle</span>
+                                                        <span>✓ ĐÃ ĐĂNG KÝ HỖ TRỢ</span>
+                                                    </button>
+                                                ) : isKhanCap ? (
                                                     <button
                                                         onClick={() => handleFastTrackRegister(c)}
                                                         className="h-9 px-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black text-xs rounded-xl shadow-md shadow-red-600/30 flex items-center justify-center gap-1 transition-all active:scale-95 w-full"
@@ -673,6 +705,7 @@ export default function HomePage() {
                     {campaigns.slice(0, 4).map((campaign) => {
                         const statusInfo = getCampaignStatus(campaign);
                         const isKhanCap = campaign.mucDoUuTien === "KhanCap" || campaign.mucDoUuTien === 1;
+                        const isRegistered = registeredCampaignIds.includes(campaign.maChienDich);
 
                         return (
                             <div 
@@ -716,7 +749,14 @@ export default function HomePage() {
                                         </div>
                                     </div>
 
-                                    {isKhanCap ? (
+                                    {isRegistered ? (
+                                        <button 
+                                            disabled
+                                            className="h-11 px-6 bg-slate-200 text-slate-500 rounded-xl font-bold text-xs cursor-not-allowed w-full flex items-center justify-center gap-2 border border-slate-300">
+                                            <span className="material-symbols-outlined text-sm text-emerald-600 font-extrabold">check_circle</span>
+                                            <span>✓ BẠN ĐÃ ĐĂNG KÝ THAM GIA</span>
+                                        </button>
+                                    ) : isKhanCap ? (
                                         <button 
                                             onClick={() => handleFastTrackRegister(campaign)}
                                             className="h-11 px-6 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-red-500/20 w-full flex items-center justify-center gap-2">
