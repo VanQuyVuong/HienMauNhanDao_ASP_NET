@@ -47,8 +47,21 @@ namespace HienMauNhanDao_DaNang.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            var chienDich = await _context.ChienDichHienMaus.FindAsync(request.MaChienDich);
-            if (chienDich == null) return NotFound(new { success = false, message = "Chiến dịch không tồn tại!" });
+            var chienDich = string.IsNullOrEmpty(request.MaChienDich) ? null : await _context.ChienDichHienMaus.FindAsync(request.MaChienDich);
+            if (chienDich == null)
+            {
+                var defaultRoutine = await _context.ChienDichHienMaus
+                    .FirstOrDefaultAsync(c => c.MaChienDich == "CD00004" || c.MaChienDich == "CD00003" || c.TrangThai == TrangThaiChienDich.DangDienRa);
+                if (defaultRoutine != null)
+                {
+                    request.MaChienDich = defaultRoutine.MaChienDich;
+                    chienDich = defaultRoutine;
+                }
+                else
+                {
+                    return NotFound(new { success = false, message = "Chiến dịch không tồn tại!" });
+                }
+            }
 
             var donMoi = new DonDangKy
             {

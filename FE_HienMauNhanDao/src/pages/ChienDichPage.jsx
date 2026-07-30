@@ -231,7 +231,17 @@ export default function ChienDichPage() {
                         </p>
                     </div>
                     <button
-                        onClick={() => navigate('/khai-bao-thong-tin-ca-nhan')}
+                        onClick={() => {
+                            const defaultRoutineCampaign = {
+                                maChienDich: 'CD00004',
+                                tenChienDich: 'Hiến máu Thường xuyên tại Bệnh viện Đà Nẵng',
+                                isThuongXuyen: true,
+                                thoiGianBD: new Date().toISOString(),
+                                thoiGianKT: new Date(Date.now() + 30 * 86400000).toISOString()
+                            };
+                            localStorage.setItem('selectedCampaign', JSON.stringify(defaultRoutineCampaign));
+                            navigate('/khai-bao-thong-tin-ca-nhan');
+                        }}
                         className="h-12 px-7 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs md:text-sm uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-500/30 transition-all shrink-0 active:scale-95 flex items-center gap-2"
                     >
                         <span>🏥 ĐẶT LỊCH HIẾN THƯỜNG XUYÊN</span>
