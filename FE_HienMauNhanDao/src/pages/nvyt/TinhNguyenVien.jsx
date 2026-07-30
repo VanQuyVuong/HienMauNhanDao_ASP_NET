@@ -24,9 +24,25 @@ export default function TinhNguyenVien() {
     setLoading(true);
     try {
       const res = await tnvNvytService.getAll(page, PAGE_SIZE, keyword);
-      const content = Array.isArray(res) ? res : (res.content || []);
-      setTnvList(content);
-      setTotalPages(res.totalPages || 1);
+      const allContent = Array.isArray(res) ? res : (res.content || res.data || []);
+      
+      let filtered = allContent;
+      if (keyword.trim()) {
+        const kw = keyword.toLowerCase().trim();
+        filtered = allContent.filter(item => {
+          const hoTen = String(item.hoTen || item.hoVaTen || item.HoTen || item.maTNV || '').toLowerCase();
+          const cccd = String(item.cccd || item.soCCCD || item.Cccd || '').toLowerCase();
+          const sdt = String(item.soDienThoai || item.SoDienThoai || '').toLowerCase();
+          return hoTen.includes(kw) || cccd.includes(kw) || sdt.includes(kw);
+        });
+      }
+
+      const total = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+      setTotalPages(total);
+
+      const startIndex = page * PAGE_SIZE;
+      const paginatedList = filtered.slice(startIndex, startIndex + PAGE_SIZE);
+      setTnvList(paginatedList);
     } catch { showToast('Lỗi khi tải danh sách', 'error'); }
     finally { setLoading(false); }
   }, [page, keyword]);

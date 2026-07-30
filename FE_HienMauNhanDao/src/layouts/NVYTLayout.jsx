@@ -94,8 +94,8 @@ export default function NVYTLayout() {
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
-      {/* ── Sidebar ───────────────────────────────────────────────────── */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col shadow-lg transition-transform duration-300 md:translate-x-0 md:relative md:shadow-sm shrink-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* ── Sidebar (Fixed 100% Cố định bất động như AdminLayout) ────────── */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 h-screen bg-white border-r border-slate-200 flex flex-col shadow-lg transition-transform duration-300 shrink-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         {/* Brand */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-100">
           <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
@@ -132,7 +132,7 @@ export default function NVYTLayout() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.path}
@@ -172,7 +172,7 @@ export default function NVYTLayout() {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden md:pl-64">
         {/* Topbar */}
         <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between shrink-0 shadow-sm z-30">
           <div className="flex items-center gap-3">

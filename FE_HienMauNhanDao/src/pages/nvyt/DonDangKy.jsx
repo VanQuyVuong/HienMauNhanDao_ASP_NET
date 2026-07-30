@@ -67,6 +67,29 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
     fetchChienDich();
   }, []);
 
+  // Lọc chiến dịch theo loại hình được chọn (Phân biệt rạch ròi Chiến dịch phong trào & Đợt khẩn cấp)
+  const getFilteredChienDichs = () => {
+    return chiendichList.filter(c => {
+      const name = String(c.tenChienDich || '').toLowerCase();
+      const isEmergency = c.mucDoUuTien === 'KhanCap' || c.mucDoUuTien === 1 || name.includes('khẩn cấp') || String(c.maChienDich).includes('KC');
+      const isRoutine = c.maChienDich === 'CD00004' || c.maChienDich === 'CD00003' || name.includes('thường xuyên');
+
+      if (form.loaiHinh === 'ChienDich') {
+        // Chỉ lấy các chiến dịch đợt phong trào bình thường (Loại bỏ khẩn cấp & thường xuyên)
+        return !isEmergency && !isRoutine;
+      }
+      if (form.loaiHinh === 'KhanCap') {
+        // Chỉ lấy các đợt gọi máu khẩn cấp
+        return isEmergency;
+      }
+      if (form.loaiHinh === 'TuDo') {
+        // Lấy danh sách cơ sở hiến thường xuyên
+        return isRoutine;
+      }
+      return true;
+    });
+  };
+
   const handleSearchCCCD = async () => {
     if (!cccd.trim()) return;
     setSearching(true); setNotFound(false); setError(''); setWarning('');
@@ -116,6 +139,7 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
     }
   };
 
+  // Xử lý nộp đơn Walk-in trực tiếp: Tạo đơn + Hỏi sức khỏe + Chuyển Bác sĩ trong 1 bước duy nhất!
   const handleSubmit = async () => {
     if (form.loaiHinh === 'ChienDich' && !form.maChienDich.trim()) { 
       setError('Vui lòng chọn chiến dịch hiến máu'); 
@@ -127,12 +151,15 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
     }
     setLoading(true); setError('');
     try {
-      // Trường hợp 1: Nếu chọn loại hình KHẨN CẤP -> Gọi Fast-Track tiếp nhận khẩn cấp gửi Admin khen thưởng
+      const hoTenTnv = tnv?.hoTen || tnv?.hoVaTen || newTnv.hoVaTen;
+      const cccdTnv = tnv?.soCCCD || tnv?.cccd || newTnv.soCCCD;
+
+      // 1. Trường hợp Khẩn Cấp -> Fast-Track tiếp nhận khẩn cấp gửi Admin khen thưởng
       if (form.loaiHinh === 'KhanCap') {
         const payload = {
           maTNV: tnv?.maTNV,
-          cccd: tnv?.soCCCD || newTnv.soCCCD,
-          hoTen: tnv?.hoTen || tnv?.hoVaTen || newTnv.hoVaTen,
+          cccd: cccdTnv,
+          hoTen: hoTenTnv,
           soDienThoai: tnv?.soDienThoai || newTnv.soDienThoai,
           nhomMau: tnv?.nhomMau || newTnv.nhomMau,
           maChienDich: form.maChienDich || null,
@@ -142,7 +169,7 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
         const res = await donDangKyNvytService.tiepNhanKhanCap(payload);
         await Swal.fire({
           title: '🚨 ĐÃ LƯU TIẾP NHẬN KHẨN CẤP!',
-          html: `Đã ghi nhận đơn hiến máu khẩn cấp cho <b>${payload.hoTen}</b>.<br/><br/><span class="text-sm text-[#af101a] font-bold">Hồ sơ đã được gửi trực tiếp lên Admin để duyệt Khen Thưởng & Cấp Chứng Nhận!</span>`,
+          html: `Đã ghi nhận đơn hiến máu khẩn cấp cho <b>${hoTenTnv}</b>.<br/><br/><span class="text-sm text-[#af101a] font-bold">Hồ sơ đã được gửi trực tiếp lên Admin để duyệt Khen Thưởng & Cấp Chứng Nhận!</span>`,
           icon: 'success',
           confirmButtonColor: '#af101a',
         });
@@ -150,7 +177,7 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
         return;
       }
 
-      // Trường hợp 2: Hiến Thường Xuyên hoặc Hiến Theo Chiến Dịch
+      // 2. Trường hợp Hiến Thường Xuyên hoặc Hiến Theo Chiến Dịch
       const payload = {
         maTNV: tnv?.maTNV,
         maNV: nhanVien?.maNV,
@@ -159,7 +186,7 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
         theTich: parseInt(form.theTich) || 350,
         ghiChu: form.ghiChu,
         maPhuongXa: tnv?.maPhuongXa || newTnv.maPhuongXa || '',
-        cccd: tnv?.soCCCD || newTnv.soCCCD
+        cccd: cccdTnv
       };
 
       let savedDon = null;
@@ -169,18 +196,36 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
         savedDon = await donDangKyNvytService.update(don.maDon, payload);
       }
 
-      // Lưu tờ khai y tế sơ lược lúc tiếp nhận
+      // 3. Tự động Tiếp nhận & Lưu Tờ khai y tế sơ lược (Không bắt bấm lại ngoài bảng)
       if (savedDon?.maDon) {
         try {
+          // Gọi API tiếp nhận check-in
+          await donDangKyNvytService.tiepNhan({
+            maTNV: tnv?.maTNV || savedDon.maTNV,
+            maChienDich: savedDon.maChienDich,
+            theTich: savedDon.theTich || 350,
+            maNV: nhanVien?.maNV
+          });
+
+          // Lưu hồ sơ sức khỏe sơ lược
           await khaiBaoYTeNvytService.create({
             maDon: savedDon.maDon,
             dauHong: healthForm.ruouBia,
             khangSinh: healthForm.manTinh,
             truyenNhiem: healthForm.xamHinh,
             coThai: healthForm.coThai,
-            moTaKhac: healthForm.moTaKhac || 'Khai báo y tế trực tiếp tại quầy tiếp nhận y tế'
+            moTaKhac: healthForm.moTaKhac || 'Khai báo y tế trực tiếp tại quầy tiếp nhận lễ tân'
           });
-        } catch (e) { console.log('Tờ khai y tế đã tồn tại:', e); }
+        } catch (e) { 
+          console.log('Tự động tiếp nhận:', e); 
+        }
+
+        await Swal.fire({
+          title: '✅ ĐÃ TIẾP NHẬN TẠI QUẦY!',
+          html: `Đã tạo đơn & tiếp nhận TNV <b>${hoTenTnv}</b> (CCCD: <b>${cccdTnv}</b>).<br/><br/><span class="text-sm text-emerald-600 font-bold">Hồ sơ đã được chuyển thẳng tới Bác Sĩ Khám Lâm Sàng!</span>`,
+          icon: 'success',
+          confirmButtonColor: '#af101a',
+        });
       }
 
       onSaved(savedDon, mode);
@@ -191,6 +236,8 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
       setLoading(false); 
     }
   };
+
+  const filteredChienDichs = getFilteredChienDichs();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fadeIn">
@@ -293,7 +340,7 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
             </div>
           )}
 
-          {/* Bước 2: Chọn Loại Hình Hiến & Điền Thông Tin Tiếp Nhận */}
+          {/* Bước 2: Chọn Loại Hình Hiến, Địa điểm & Hỏi Sức Khỏe Ngay Tại Chỗ */}
           {step === 'form' && (
             <div className="space-y-4">
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
@@ -316,7 +363,7 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
                     <button
                       key={item.id}
                       type="button"
-                      onClick={() => setForm(p => ({ ...p, loaiHinh: item.id }))}
+                      onClick={() => setForm(p => ({ ...p, loaiHinh: item.id, maChienDich: '' }))}
                       className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1 ${
                         form.loaiHinh === item.id 
                           ? 'border-primary bg-red-50/50 text-primary font-black shadow-sm' 
@@ -330,17 +377,21 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
                 </div>
               </div>
 
-              {/* Chọn Chiến dịch nếu thuộc loại ChienDich */}
-              {form.loaiHinh === 'ChienDich' && (
+              {/* Danh sách Chiến dịch/Đợt khẩn cấp (ĐÃ ĐƯỢC LỌC TÁCH BIỆT CHUẨN 100%) */}
+              {form.loaiHinh !== 'TuDo' && (
                 <div>
-                  <label className="text-xs font-bold text-slate-600 block mb-1">Chọn Chiến Dịch *</label>
+                  <label className="text-xs font-bold text-slate-600 block mb-1">
+                    {form.loaiHinh === 'KhanCap' ? 'Chọn Đợt Gọi Máu Khẩn Cấp *' : 'Chọn Chiến Dịch Phong Trào *'}
+                  </label>
                   <select
                     value={form.maChienDich}
                     onChange={e => setForm(p => ({ ...p, maChienDich: e.target.value }))}
                     className="w-full h-10 border border-slate-200 rounded-lg px-3 text-xs outline-none focus:border-primary font-medium"
                   >
-                    <option value="">-- Chọn chiến dịch hiến máu --</option>
-                    {chiendichList.map(c => (
+                    <option value="">
+                      {form.loaiHinh === 'KhanCap' ? '-- Chọn đợt khẩn cấp cần máu --' : '-- Chọn chiến dịch phong trào --'}
+                    </option>
+                    {filteredChienDichs.map(c => (
                       <option key={c.maChienDich} value={c.maChienDich}>
                         {c.tenChienDich} ({c.maChienDich})
                       </option>
@@ -363,19 +414,19 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
                 </select>
               </div>
 
-              {/* Tờ khai y tế sơ lược 5 câu hỏi Bộ Y Tế (Nếu không phải Khẩn cấp) */}
+              {/* Tờ khai y tế sơ lược ngay trong Walk-in (Nếu không phải Khẩn cấp) */}
               {form.loaiHinh !== 'KhanCap' && (
                 <div className="space-y-2 pt-2 border-t border-slate-100">
                   <p className="text-xs font-extrabold text-slate-700">Hỏi sơ lược sức khỏe lúc tiếp nhận (Theo Bộ Y Tế):</p>
                   <div className="space-y-1.5">
                     {HEALTH_QUESTIONS.map(q => (
                       <label key={q.id} className="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs cursor-pointer">
-                        <span className="text-slate-600 font-medium">{q.label}</span>
+                        <span className="text-slate-600 font-medium pr-2">{q.label}</span>
                         <input
                           type="checkbox"
                           checked={healthForm[q.id]}
                           onChange={e => setHealthForm(p => ({ ...p, [q.id]: e.target.checked }))}
-                          className="w-4 h-4 accent-primary rounded"
+                          className="w-4 h-4 accent-primary rounded cursor-pointer shrink-0"
                         />
                       </label>
                     ))}
@@ -390,7 +441,7 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
                   type="text"
                   value={form.ghiChu}
                   onChange={e => setForm(p => ({ ...p, ghiChu: e.target.value }))}
-                  placeholder="Nhập ghi chú (nếu có)..."
+                  placeholder="Nhập ghi chú tiếp nhận (nếu có)..."
                   className="w-full h-10 border border-slate-200 rounded-lg px-3 text-xs outline-none focus:border-primary"
                 />
               </div>
@@ -421,7 +472,7 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
               ) : (
                 <>
                   <span className="material-symbols-outlined text-base">task_alt</span>
-                  <span>Hoàn Tất Tiếp Nhận</span>
+                  <span>Hoàn Tất Tiếp Nhận & Chuyển Bác Sĩ</span>
                 </>
               )}
             </button>
@@ -674,9 +725,26 @@ export default function DonDangKy() {
     setLoading(true);
     try {
       const res = await donDangKyNvytService.getAll(page, PAGE_SIZE, keyword);
-      const content = Array.isArray(res) ? res : (res.content || []);
-      setDons(content);
-      setTotalPages(res.totalPages || 1);
+      const allContent = Array.isArray(res) ? res : (res.content || res.data || []);
+      
+      let filtered = allContent;
+      if (keyword.trim()) {
+        const kw = keyword.toLowerCase().trim();
+        filtered = allContent.filter(item => {
+          const maDon = String(item.maDon || '').toLowerCase();
+          const hoTen = String(item.tinhNguyenVien?.hoTen || item.tinhNguyenVien?.hoVaTen || item.tinhNguyenVien?.HoTen || item.maTNV || '').toLowerCase();
+          const cccd = String(item.tinhNguyenVien?.cccd || item.tinhNguyenVien?.soCCCD || item.tinhNguyenVien?.Cccd || '').toLowerCase();
+          const tenCD = String(item.chienDich?.tenChienDich || item.maChienDich || '').toLowerCase();
+          return maDon.includes(kw) || hoTen.includes(kw) || cccd.includes(kw) || tenCD.includes(kw);
+        });
+      }
+
+      const total = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+      setTotalPages(total);
+
+      const startIndex = page * PAGE_SIZE;
+      const paginatedDons = filtered.slice(startIndex, startIndex + PAGE_SIZE);
+      setDons(paginatedDons);
     } catch { showToast('Lỗi khi tải danh sách đơn đăng ký', 'error'); }
     finally { setLoading(false); }
   }, [page, keyword]);
@@ -726,7 +794,6 @@ export default function DonDangKy() {
 
   const isEditable = (don) => !!don.maNV;
 
-  // Helper render loại hình / chiến dịch rõ ràng
   const renderChienDichBadge = (don) => {
     const isEmergency = don?.chienDich?.mucDoUuTien === 'KhanCap' || (don?.maChienDich && String(don.maChienDich).includes('KC'));
     const isRoutine = !don.maChienDich || don.maChienDich === 'CD00004' || don.maChienDich === 'CD00003';
@@ -844,7 +911,6 @@ export default function DonDangKy() {
                     <td className="px-4 py-4">
                       <span className="font-mono text-xs font-bold text-primary bg-red-50 px-2 py-1 rounded-lg">{don.maDon}</span>
                     </td>
-                    {/* Cột TÌNH NGUYỆN VIÊN (Được mở rộng diện tích) */}
                     <td className="px-5 py-4 min-w-[220px]">
                       <div className="flex flex-col gap-1">
                         <p className="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
@@ -864,7 +930,6 @@ export default function DonDangKy() {
                       </div>
                     </td>
 
-                    {/* Cột CHIẾN DỊCH / CƠ SỞ TIẾP NHẬN (Hiển thị nhãn rõ ràng) */}
                     <td className="px-5 py-4 min-w-[240px]">
                       {renderChienDichBadge(don)}
                     </td>
@@ -896,7 +961,6 @@ export default function DonDangKy() {
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
-                        {/* Nút Tiếp Nhận Duy Nhất */}
                         <button
                           onClick={() => setCheckInDon(don)}
                           className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all font-bold text-xs flex items-center gap-1 shadow-sm active:scale-95 whitespace-nowrap"
