@@ -216,6 +216,29 @@ export default function ChienDichPage() {
 
             <div className="max-w-[1280px] mx-auto px-4 md:px-8">
 
+                {/* Banner Đặt Lịch Hiến Máu Thường Xuyên Tại Bệnh Viện */}
+                <div className="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white rounded-3xl p-6 md:p-8 mb-10 shadow-xl border border-emerald-500/20 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="space-y-2 text-center md:text-left">
+                        <div className="flex items-center gap-2 justify-center md:justify-start">
+                            <span className="px-3 py-1 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider rounded-full">
+                                🏥 TIẾP NHẬN HÀNG NGÀY
+                            </span>
+                            <span className="text-xs text-emerald-300 font-bold">Bệnh viện & Trung tâm Y tế</span>
+                        </div>
+                        <h2 className="text-2xl md:text-3xl font-black text-white">Hiến Máu Thường Xuyên Tại Bệnh Viện</h2>
+                        <p className="text-xs md:text-sm text-slate-300 max-w-xl font-light">
+                            Bạn có thể chọn đặt lịch trực tuyến trước khi đến hoặc đăng ký trực tiếp tại quầy tiếp nhận lễ tân Bệnh viện.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => navigate('/khai-bao-thong-tin-ca-nhan')}
+                        className="h-12 px-7 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs md:text-sm uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-500/30 transition-all shrink-0 active:scale-95 flex items-center gap-2"
+                    >
+                        <span>🏥 ĐẶT LỊCH HIẾN THƯỜNG XUYÊN</span>
+                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                    </button>
+                </div>
+
             {/* Filter Bar */}
             <div className="w-full bento-card p-5 sm:p-7 mb-10">
                 <div className="flex gap-3 items-end">
