@@ -14,7 +14,7 @@ export default function HomePage() {
     const [campaigns, setCampaigns] = useState([]);
     const [emergencyCampaigns, setEmergencyCampaigns] = useState([]);
     const [activeEmergIndex, setActiveEmergIndex] = useState(0);
-    const [spotlightPageIndex, setSpotlightPageIndex] = useState(0);
+    const [startIndex, setStartIndex] = useState(0); // Vị trí thẻ đầu tiên đang hiển thị
     const [fastTrackCampaign, setFastTrackCampaign] = useState(null);
     const [userProfile, setUserProfile] = useState(null);
     const [registeredCampaignIds, setRegisteredCampaignIds] = useState([]);
@@ -23,8 +23,6 @@ export default function HomePage() {
     // Kéo thả chuột / Chạm vuốt tay
     const [dragStartX, setDragStartX] = useState(null);
     const isDragging = useRef(false);
-
-    const CARDS_PER_PAGE = 4; // Hiển thị 4 thẻ bài song song nằm ngang
 
     // Tải thông tin người dùng đang đăng nhập & danh sách chiến dịch đã đăng ký
     useEffect(() => {
@@ -94,8 +92,6 @@ export default function HomePage() {
         fetchCampaigns();
     }, []);
 
-    const totalPages = Math.max(1, Math.ceil(campaigns.length / CARDS_PER_PAGE));
-
     // ⏱️ Tự động xoay vòng Banner Khẩn cấp cứ mỗi 10 GIÂY
     useEffect(() => {
         if (emergencyCampaigns.length <= 1) return;
@@ -105,16 +101,16 @@ export default function HomePage() {
         return () => clearInterval(interval);
     }, [emergencyCampaigns]);
 
-    // ⏱️ Tự động chuyển Trang Bảng tin tức mỗi 10 GIÂY
+    // ⏱️ Tự động nhích 1 sự kiện liên tục mỗi 10 GIÂY
     useEffect(() => {
-        if (totalPages <= 1) return;
+        if (campaigns.length <= 1) return;
         const interval = setInterval(() => {
-            setSpotlightPageIndex(prev => (prev + 1) % totalPages);
+            setStartIndex(prev => (prev + 1) % campaigns.length);
         }, 10000); // 10 giây
         return () => clearInterval(interval);
-    }, [totalPages]);
+    }, [campaigns]);
 
-    // Xử lý vuốt tay / Kéo chuột
+    // Xử lý vuốt tay / Kéo chuột (Nhích 1 sự kiện)
     const handleDragStart = (clientX) => {
         setDragStartX(clientX);
         isDragging.current = true;
@@ -125,9 +121,11 @@ export default function HomePage() {
         const diff = clientX - dragStartX;
         if (Math.abs(diff) > 40) {
             if (diff < 0) {
-                setSpotlightPageIndex(prev => (prev + 1) % totalPages);
+                // Vuốt trái -> Nhích tiến 1 sự kiện
+                setStartIndex(prev => (prev + 1) % campaigns.length);
             } else {
-                setSpotlightPageIndex(prev => (prev - 1 + totalPages) % totalPages);
+                // Vuốt phải -> Nhích lùi 1 sự kiện
+                setStartIndex(prev => (prev - 1 + campaigns.length) % campaigns.length);
             }
         }
         setDragStartX(null);
@@ -256,11 +254,15 @@ export default function HomePage() {
 
     const currentEmergency = emergencyCampaigns.length > 0 ? emergencyCampaigns[activeEmergIndex] : null;
 
-    // Danh sách 4 thẻ bài của Trang hiện tại
-    const currentPageCards = campaigns.slice(
-        spotlightPageIndex * CARDS_PER_PAGE,
-        (spotlightPageIndex + 1) * CARDS_PER_PAGE
-    );
+    // Lấy 4 thẻ bài tính từ vị trí startIndex (tự động nhích 1 thẻ bài liên tục)
+    const visibleCards = [];
+    if (campaigns.length > 0) {
+        const count = Math.min(4, campaigns.length);
+        for (let i = 0; i < count; i++) {
+            const idx = (startIndex + i) % campaigns.length;
+            visibleCards.push(campaigns[idx]);
+        }
+    }
 
     return (
         <main className="flex-1 w-full bg-[#fdf8f9] text-[#121826] overflow-hidden select-none">
@@ -332,7 +334,7 @@ export default function HomePage() {
                                     if (currentEmergency) handleFastTrackRegister(currentEmergency);
                                     else navigate('/chiendich');
                                 }}
-                                className="h-8 px-5 bg-white text-red-600 hover:bg-amber-300 hover:text-red-950 rounded-full text-xs font-black transition-all uppercase tracking-wider flex items-center gap-1.5 shadow-md active:scale-95">
+                                className="h-8 px-5 bg-white text-red-600 hover:bg-amber-[#e62e43] hover:text-white rounded-full text-xs font-black transition-all uppercase tracking-wider flex items-center gap-1.5 shadow-md active:scale-95">
                                 <span>{currentEmergency ? "🚨 ĐĂNG KÝ HỖ TRỢ NGAY" : "Đăng ký hỗ trợ"}</span>
                                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
                             </button>
@@ -419,18 +421,18 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* 📖 🎴 SECTION TIN TỨC MỚI: 4 THẺ BÀI NẰM NGANG SONG SONG NHAU (SIDE-BY-SIDE GRID CAROUSEL) */}
+            {/* 📖 🎴 SECTION TẠP CHÍ & BẢNG TIN KHẨN CẤP: ĐẬP ĐI XÂY LẠI MÀU SẮC HÀI HÒA & NHÍCH 1 SỰ KIỆN TRÂN TRÚC */}
             <section className="w-full max-w-[1280px] mx-auto px-4 md:px-8 py-8 mb-12">
-                <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-red-950 rounded-[36px] p-6 sm:p-8 text-white shadow-2xl relative border border-white/10">
+                <div className="bg-gradient-to-br from-[#fff6f7] via-white to-[#fff0f3] rounded-[36px] p-6 sm:p-8 shadow-xl border-2 border-rose-100 relative overflow-hidden">
                     
-                    {/* Background Ambient Glow */}
-                    <div className="absolute -top-24 -right-24 w-96 h-96 bg-red-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                    {/* Soft Ruby Ambient Glow */}
+                    <div className="absolute -top-24 -right-24 w-96 h-96 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                    {/* Header Bảng Tin */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-white/10 pb-4 relative z-10">
+                    {/* Header Bảng Tin Hài Hòa Màu Tồng Thể */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-rose-200/60 pb-4 relative z-10">
                         <div>
                             <div className="flex items-center gap-2">
-                                <span className="px-3 py-1 bg-red-600 text-white font-black text-[10px] uppercase tracking-widest rounded-full shadow-sm">
+                                <span className="px-3 py-1 bg-[#e62e43] text-white font-black text-[10px] uppercase tracking-widest rounded-full shadow-sm">
                                     📖 TẠP CHÍ & BẢNG TIN KHẨN CẤP
                                 </span>
                                 {emergencyCampaigns.length > 0 && (
@@ -439,20 +441,38 @@ export default function HomePage() {
                                     </span>
                                 )}
                             </div>
-                            <h2 className="text-2xl sm:text-3xl font-black text-white mt-2">
+                            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
                                 Sự Kiện & Đợt Hiến Máu Khẩn Cấp
                             </h2>
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
-                            <span>⏱️ 10s tự đổi / Kéo vuốt tay</span>
-                            <span className="px-2.5 py-1 bg-white/10 rounded-full text-amber-300 font-bold">
-                                Trang {spotlightPageIndex + 1}/{totalPages}
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs text-slate-500 font-mono font-medium hidden sm:inline">
+                                ⏱️ Tự nhích 1 sự kiện sau 10s
                             </span>
+                            <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-rose-200 shadow-sm">
+                                <button
+                                    onClick={() => setStartIndex(prev => (prev - 1 + campaigns.length) % campaigns.length)}
+                                    className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-[#e62e43] hover:text-white flex items-center justify-center text-slate-700 text-xs transition-all active:scale-95"
+                                    title="Sự kiện trước"
+                                >
+                                    ◀
+                                </button>
+                                <span className="text-xs font-mono font-black px-2 text-[#e62e43]">
+                                    {startIndex + 1}/{campaigns.length}
+                                </span>
+                                <button
+                                    onClick={() => setStartIndex(prev => (prev + 1) % campaigns.length)}
+                                    className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-[#e62e43] hover:text-white flex items-center justify-center text-slate-700 text-xs transition-all active:scale-95"
+                                    title="Sự kiện tiếp theo"
+                                >
+                                    ▶
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Khung chứa các thẻ bài nằm ngang song song + 2 Nút Mũi Tên Nổi Mờ 2 Bên */}
+                    {/* Khung chứa các thẻ bài nằm ngang song song + Nhích 1 sự kiện liên tục */}
                     <div 
                         onMouseDown={(e) => handleDragStart(e.clientX)}
                         onMouseUp={(e) => handleDragEnd(e.clientX)}
@@ -460,44 +480,44 @@ export default function HomePage() {
                         onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
                         className="relative w-full my-2 select-none z-10"
                     >
-                        {/* ⬅️ Nút Mũi Tên Trái (Glassmorphism mờ nổi bên trái) */}
-                        {totalPages > 1 && (
+                        {/* ⬅️ Nút Mũi Tên Trái (Nổi bên trái) */}
+                        {campaigns.length > 4 && (
                             <button
-                                onClick={() => setSpotlightPageIndex(prev => (prev - 1 + totalPages) % totalPages)}
-                                className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/20 hover:bg-red-600/90 backdrop-blur-md border border-white/30 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group"
-                                title="Trang trước"
+                                onClick={() => setStartIndex(prev => (prev - 1 + campaigns.length) % campaigns.length)}
+                                className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white hover:bg-[#e62e43] hover:text-white border-2 border-rose-200 text-slate-700 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group"
+                                title="Sự kiện trước"
                             >
-                                <span className="material-symbols-outlined text-2xl group-hover:-translate-x-0.5 transition-transform">arrow_back_ios_new</span>
+                                <span className="material-symbols-outlined text-xl group-hover:-translate-x-0.5 transition-transform">arrow_back_ios_new</span>
                             </button>
                         )}
 
-                        {/* ➡️ Nút Mũi Tên Phải (Glassmorphism mờ nổi bên phải) */}
-                        {totalPages > 1 && (
+                        {/* ➡️ Nút Mũi Tên Phải (Nổi bên phải) */}
+                        {campaigns.length > 4 && (
                             <button
-                                onClick={() => setSpotlightPageIndex(prev => (prev + 1) % totalPages)}
-                                className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/20 hover:bg-red-600/90 backdrop-blur-md border border-white/30 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group"
-                                title="Trang tiếp theo"
+                                onClick={() => setStartIndex(prev => (prev + 1) % campaigns.length)}
+                                className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white hover:bg-[#e62e43] hover:text-white border-2 border-rose-200 text-slate-700 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group"
+                                title="Sự kiện tiếp theo"
                             >
-                                <span className="material-symbols-outlined text-2xl group-hover:translate-x-0.5 transition-transform">arrow_forward_ios</span>
+                                <span className="material-symbols-outlined text-xl group-hover:translate-x-0.5 transition-transform">arrow_forward_ios</span>
                             </button>
                         )}
 
-                        {/* Bố cục 4 Thẻ Bài Dọc Nằm Ngang Song Song Nhanh Gọn (Side-by-Side Grid) */}
+                        {/* Bố cục 4 Thẻ Bài Song Song - Nhích 1 sự kiện liên tục */}
                         {campaigns.length === 0 ? (
                             <div className="text-slate-400 text-sm font-medium py-12 text-center">Đang tải sự kiện...</div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5 animate-in fade-in duration-500">
-                                {currentPageCards.map((c) => {
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5 transition-all duration-500">
+                                {visibleCards.map((c) => {
                                     const isKhanCap = c.mucDoUuTien === "KhanCap" || c.mucDoUuTien === 1;
                                     const isRegistered = registeredCampaignIds.includes(c.maChienDich);
 
                                     return (
                                         <div
                                             key={c.maChienDich}
-                                            className={`bg-white text-slate-900 rounded-3xl p-4 shadow-xl border-2 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300 ${
+                                            className={`bg-white text-slate-900 rounded-3xl p-4 shadow-md border-2 flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${
                                                 isKhanCap
                                                     ? "border-red-500 ring-4 ring-red-500/20 bg-gradient-to-b from-white via-red-50/40 to-white"
-                                                    : "border-slate-200"
+                                                    : "border-slate-200/80"
                                             }`}
                                         >
                                             {/* Phần Ảnh Thẻ Dọc */}
@@ -532,7 +552,7 @@ export default function HomePage() {
                                                             🆘 CẦN GẤP MÁU: {c.nhomMauCanKhapCap ? c.nhomMauCanKhapCap.replace('_positive','+').replace('_negative','-') : "O+"}
                                                         </span>
                                                     ) : (
-                                                        <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px] uppercase tracking-wider inline-block mb-1">
+                                                        <span className="px-2 py-0.5 rounded-full bg-rose-100 text-[#e62e43] font-black text-[10px] uppercase tracking-wider inline-block mb-1">
                                                             📅 CHIẾN DỊCH CHÍNH THỨC
                                                         </span>
                                                     )}
@@ -551,7 +571,7 @@ export default function HomePage() {
                                                 {isRegistered ? (
                                                     <button
                                                         disabled
-                                                        className="h-9 px-3 bg-slate-200 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-1.5 w-full border border-slate-300"
+                                                        className="h-9 px-3 bg-slate-100 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-1.5 w-full border border-slate-200"
                                                     >
                                                         <span className="material-symbols-outlined text-sm text-emerald-600 font-extrabold">check_circle</span>
                                                         <span>✓ ĐÃ ĐĂNG KÝ HỖ TRỢ</span>
@@ -581,19 +601,19 @@ export default function HomePage() {
                         )}
                     </div>
 
-                    {/* Chấm chỉ số Trang (Pagination Dots) */}
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-2 mt-5 relative z-20">
-                            {Array.from({ length: totalPages }).map((_, i) => (
+                    {/* Chấm chỉ số Trang (Pagination Dots theo từng sự kiện) */}
+                    {campaigns.length > 1 && (
+                        <div className="flex items-center justify-center gap-1.5 mt-5 relative z-20 overflow-x-auto py-1">
+                            {campaigns.map((_, i) => (
                                 <button
                                     key={i}
-                                    onClick={() => setSpotlightPageIndex(i)}
+                                    onClick={() => setStartIndex(i)}
                                     className={`h-2.5 rounded-full transition-all duration-300 ${
-                                        spotlightPageIndex === i
-                                            ? "w-8 bg-red-500 shadow-md shadow-red-500/50"
-                                            : "w-2.5 bg-white/20 hover:bg-white/40"
+                                        startIndex === i
+                                            ? "w-7 bg-[#e62e43] shadow-md shadow-red-500/30"
+                                            : "w-2.5 bg-rose-200 hover:bg-rose-300"
                                     }`}
-                                    title={`Đến trang ${i + 1}`}
+                                    title={`Chuyển tới sự kiện ${i + 1}`}
                                 />
                             ))}
                         </div>
