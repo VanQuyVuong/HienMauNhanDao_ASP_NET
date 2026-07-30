@@ -19,23 +19,29 @@ export const tinhNguyenVienService = {
         nhomMau: data.nhomMau ? String(data.nhomMau) : "0",
         maPhuongXa: data.maPhuongXa ? String(data.maPhuongXa) : null
       };
-      await http.put('/tinhnguyenvien/me', updateData);
+      const putRes = await http.put('/tinhnguyenvien/me', updateData);
       
-      const profileResponse = await http.get('/tinhnguyenvien/me');
-      const profile = profileResponse?.data || profileResponse;
+      let profile = putRes?.data || putRes?.tnv || putRes;
+
+      if (!profile || (!profile.maTNV && !profile.maTnv)) {
+        const profileResponse = await http.get('/tinhnguyenvien/me');
+        profile = profileResponse?.data || profileResponse;
+      }
+
       if (profile) {
         return {
           ...profile,
-          hoVaTen: profile.hoTen,
-          soCCCD: profile.cccd,
-          phuongXa: profile.maPhuongXa
+          maTNV: profile.maTNV || profile.maTnv || profile.MaTNV,
+          hoVaTen: profile.hoTen || profile.HoTen,
+          soCCCD: profile.cccd || profile.Cccd,
+          phuongXa: profile.maPhuongXa || profile.MaPhuongXa
         };
       }
       return profile;
     } catch (error) {
       console.error('Error creating/updating tình nguyện viên:', error);
       throw {
-        message: error.response?.data?.message || 'Lỗi khi lưu thông tin tình nguyện viên',
+        message: error.response?.data?.message || error.message || 'Lỗi khi lưu thông tin tình nguyện viên',
         status: error.response?.status,
         data: error.response?.data
       };
