@@ -323,6 +323,188 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
   );
 }
 
+// ─── Modal Tiếp Nhận tại Quầy & Kiểm Tra Sơ Lược Sức Khỏe Lễ Tân ──────────────────
+function TiepNhanModal({ don, nhanVien, onClose, onConfirmed }) {
+  const tnv = don?.tinhNguyenVien || {};
+  const hoTen = tnv.hoTen || tnv.hoVaTen || tnv.HoTen || ('TNV: ' + (don?.maTNV || '---'));
+  const cccd = tnv.cccd || tnv.soCCCD || tnv.Cccd || 'Chưa cập nhật CCCD';
+  const sdt = tnv.soDienThoai || tnv.SoDienThoai || '---';
+
+  const [form, setForm] = useState({
+    dauHong: false,
+    khangSinh: false,
+    truyenNhiem: false,
+    coThai: false,
+    theTich: don?.theTich || 350,
+    moTaKhac: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      // 1. Gọi API tiếp nhận tại quầy (Check-in)
+      const payload = {
+        maTNV: tnv.maTNV || don.maTNV,
+        maChienDich: don.maChienDich,
+        theTich: parseInt(form.theTich) || 350,
+        maNV: nhanVien?.maNV
+      };
+      await donDangKyNvytService.tiepNhan(payload);
+
+      // 2. Tạo/Cập nhật Hồ Sơ Sức Khỏe Sơ Lược lúc Check-in
+      try {
+        await khaiBaoYTeNvytService.create({
+          maDon: don.maDon,
+          dauHong: form.dauHong,
+          khangSinh: form.khangSinh,
+          truyenNhiem: form.truyenNhiem,
+          coThai: form.coThai,
+          moTaKhac: form.moTaKhac || 'NVYT đã kiểm tra sơ lược sức khỏe lúc tiếp nhận tại quầy lễ tân.'
+        });
+      } catch (e) {
+        console.log('Hồ sơ sức khỏe có thể đã tồn tại:', e);
+      }
+
+      await Swal.fire({
+        title: '✅ ĐÃ TIẾP NHẬN TẠI QUẦY!',
+        html: `Đã xác nhận tiếp nhận TNV <b>${hoTen}</b> (CCCD: <b>${cccd}</b>).<br/><br/><span class="text-sm text-emerald-600 font-bold">Hồ sơ đã chuyển trực tiếp sang Bác Sĩ Khám Lâm Sàng!</span>`,
+        icon: 'success',
+        confirmButtonColor: '#af101a',
+      });
+      onConfirmed();
+    } catch (err) {
+      setError(err.message || 'Lỗi khi tiếp nhận tại quầy');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-rose-50 to-white">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-2xl">how_to_reg</span>
+            </div>
+            <div>
+              <h3 className="font-extrabold text-slate-800 text-base">Tiếp Nhận TNV & Kiểm Tra Sơ Lược</h3>
+              <p className="text-xs text-slate-500 font-medium">Xác nhận TNV có mặt tại quầy lễ tân & chuyển Bác sĩ</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-slate-200 flex items-center justify-center text-slate-500">
+            <span className="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto space-y-5 flex-1">
+          {error && (
+            <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs font-bold flex items-center gap-2">
+              <span className="material-symbols-outlined text-base">error</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* TNV Info Card */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mã đơn: {don.maDon}</span>
+              <span className="px-2.5 py-0.5 bg-purple-100 text-purple-700 text-xs font-bold rounded-full">TNV Đăng Ký Online</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <div>
+                <p className="text-xs text-slate-400 font-medium">Họ và tên TNV:</p>
+                <p className="font-extrabold text-slate-800 text-base">{hoTen}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 font-medium">Số CCCD:</p>
+                <p className="font-bold text-slate-700 font-mono text-sm">{cccd}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 font-medium">Số điện thoại:</p>
+                <p className="font-bold text-slate-700 text-xs">{sdt}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 font-medium">Thể tích hiến đăng ký:</p>
+                <p className="font-bold text-blue-600 text-xs">{form.theTich} ml</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Sức khỏe sơ lược lúc đến */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 border-l-4 border-primary pl-3 py-0.5">
+              <h4 className="font-extrabold text-slate-800 text-sm">Hỏi sơ lược tình trạng sức khỏe hôm nay:</h4>
+            </div>
+            <p className="text-xs text-slate-500 italic">NVYT hỏi nhanh TNV lúc đứng tại quầy để cập nhật phiếu trước khi gửi Bác sĩ:</p>
+
+            <div className="space-y-2.5">
+              {[
+                { id: 'dauHong', label: '1. Hôm nay có đang mệt mỏi, sốt hoặc đau họng không?' },
+                { id: 'khangSinh', label: '2. Có đang dùng thuốc kháng sinh điều trị bệnh không?' },
+                { id: 'truyenNhiem', label: '3. Có mắc bệnh truyền nhiễm trong 6 tháng qua không?' },
+                { id: 'coThai', label: '4. (Đối với Nữ): Có đang mang thai / cho con bú không?' },
+              ].map(q => (
+                <label key={q.id} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition-all cursor-pointer">
+                  <span className="text-xs font-semibold text-slate-700">{q.label}</span>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs font-bold ${form[q.id] ? 'text-red-600' : 'text-emerald-600'}`}>
+                      {form[q.id] ? 'CÓ (Cảnh báo)' : 'Khỏe / Không'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={form[q.id]}
+                      onChange={e => setForm(p => ({ ...p, [q.id]: e.target.checked }))}
+                      className="w-4 h-4 accent-primary rounded cursor-pointer"
+                    />
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-600 block mb-1">Ghi chú sức khỏe của Lễ tân (nếu có):</label>
+              <input
+                type="text"
+                value={form.moTaKhac}
+                onChange={e => setForm(p => ({ ...p, moTaKhac: e.target.value }))}
+                placeholder="Vd: Sức khỏe ổn định, ngủ đủ 7 tiếng, tinh thần thoải mái..."
+                className="w-full h-10 border border-slate-200 rounded-xl px-3 text-xs outline-none focus:border-primary"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-3">
+          <button onClick={onClose} disabled={loading} className="px-4 h-10 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">
+            Hủy
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={loading}
+            className="px-5 h-10 bg-primary hover:bg-red-800 text-white rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md shadow-primary/20 disabled:opacity-60"
+          >
+            {loading ? (
+              <span>Đang xử lý...</span>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-base">task_alt</span>
+                <span>Xác Nhận Tiếp Nhận & Chuyển Bác Sĩ</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Trang chính ──────────────────────────────────────────────────────────────
 export default function DonDangKy() {
   const { nhanVien } = useOutletContext();
@@ -334,6 +516,7 @@ export default function DonDangKy() {
   const [keyword, setKeyword] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [modal, setModal] = useState(null); // { mode: 'create'|'edit', don }
+  const [checkInDon, setCheckInDon] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -508,18 +691,35 @@ export default function DonDangKy() {
                 </td></tr>
               ) : dons.map(don => {
                 const editable = isEditable(don);
+                const tnvObj = don.tinhNguyenVien || {};
+                const hoTenTnv = tnvObj.hoTen || tnvObj.hoVaTen || tnvObj.HoTen || ('TNV: ' + (don.maTNV || '---'));
+                const cccdTnv = tnvObj.cccd || tnvObj.soCCCD || tnvObj.Cccd || '---';
+                const sdtTnv = tnvObj.soDienThoai || tnvObj.SoDienThoai || '';
+
                 return (
                   <tr key={don.maDon} className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors">
                     <td className="px-5 py-4">
-                      <span className="font-mono text-xs font-bold text-primary bg-red-50 px-2 py-1 rounded-lg">{don.maDon}</span>
+                      <span className="font-mono text-xs font-bold text-primary bg-red-50 px-2.5 py-1 rounded-lg">{don.maDon}</span>
                     </td>
                     <td className="px-5 py-4">
-                      <p className="font-semibold text-slate-800">{don.tinhNguyenVien?.hoVaTen || don.maTNV || '---'}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{don.tinhNguyenVien?.soCCCD || ''}</p>
+                      <div className="flex flex-col gap-0.5">
+                        <p className="font-extrabold text-slate-800 text-sm flex items-center gap-1">
+                          <span className="material-symbols-outlined text-slate-400 text-base">person</span>
+                          {hoTenTnv}
+                        </p>
+                        <p className="text-xs font-bold text-slate-500 font-mono pl-5">
+                          CCCD: {cccdTnv}
+                        </p>
+                        {sdtTnv && (
+                          <p className="text-xs font-medium text-slate-400 pl-5">
+                            SĐT: {sdtTnv}
+                          </p>
+                        )}
+                      </div>
                     </td>
                     <td className="px-5 py-4 font-mono text-xs text-slate-600">{don.maChienDich || 'Hiến Thường Xuyên'}</td>
                     <td className="px-5 py-4">
-                      <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg">{don.theTich || 350} ml</span>
+                      <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg">{don.theTich || 350} ml</span>
                     </td>
                     <td className="px-5 py-4">
                       <span className={`px-2.5 py-1 text-xs font-bold rounded-full
@@ -546,9 +746,9 @@ export default function DonDangKy() {
                       <div className="flex items-center gap-2">
                         {!editable && (
                           <button
-                            onClick={() => handleCheckIn(don)}
-                            className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all font-bold text-xs flex items-center gap-1 shadow-sm active:scale-95"
-                            title="Xác nhận tiếp nhận tại quầy & chuyển Bác sĩ khám"
+                            onClick={() => setCheckInDon(don)}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all font-bold text-xs flex items-center gap-1 shadow-sm active:scale-95"
+                            title="Xác nhận tiếp nhận tại quầy & kiểm tra sức khỏe sơ lược"
                           >
                             <span className="material-symbols-outlined text-base">how_to_reg</span>
                             <span>Tiếp nhận</span>
@@ -613,6 +813,16 @@ export default function DonDangKy() {
         <DonModal
           mode={modal.mode} don={modal.don} nhanVien={nhanVien}
           onClose={() => setModal(null)} onSaved={handleSaved}
+        />
+      )}
+
+      {/* Modal Tiếp Nhận Tại Quầy Lễ Tân */}
+      {checkInDon && (
+        <TiepNhanModal
+          don={checkInDon}
+          nhanVien={nhanVien}
+          onClose={() => setCheckInDon(null)}
+          onConfirmed={() => { setCheckInDon(null); loadData(); }}
         />
       )}
 
