@@ -103,15 +103,19 @@ export const donDangKyNvytService = {
    */
   getAll: async (page = 0, size = 10, keyword = '') => {
     try {
-      const params = new URLSearchParams({ page, size });
-      if (keyword) params.append('keyword', keyword);
-      const res = await http.get(`/dondangky?${params.toString()}`);
-      // Nếu backend trả array thẳng
+      const res = await http.get('/dondangky/tat-ca');
       const data = res?.data || res;
-      if (Array.isArray(data)) {
-        return { content: data, totalElements: data.length, totalPages: 1 };
+      let list = Array.isArray(data) ? data : (data.content || []);
+      if (keyword) {
+        const kw = keyword.toLowerCase().trim();
+        list = list.filter(d => 
+          (d.maDon && d.maDon.toLowerCase().includes(kw)) ||
+          (d.tinhNguyenVien?.hoVaTen && d.tinhNguyenVien.hoVaTen.toLowerCase().includes(kw)) ||
+          (d.tinhNguyenVien?.soCCCD && d.tinhNguyenVien.soCCCD.includes(kw)) ||
+          (d.maChienDich && d.maChienDich.toLowerCase().includes(kw))
+        );
       }
-      return data || { content: [], totalElements: 0, totalPages: 0 };
+      return { content: list, totalElements: list.length, totalPages: 1 };
     } catch (err) {
       console.error('Error fetching đơn đăng ký:', err);
       throw err;
@@ -273,8 +277,9 @@ export const khaiBaoYTeNvytService = {
    */
   getAll: async () => {
     try {
-      const res = await http.get('/hososuckhoe');
-      return res?.data || [];
+      const res = await http.get('/hososuckhoe/tat-ca');
+      const data = res?.data || res;
+      return Array.isArray(data) ? data : (data.content || []);
     } catch (err) {
       console.error('Error fetching all hồ sơ sức khỏe:', err);
       throw err;
