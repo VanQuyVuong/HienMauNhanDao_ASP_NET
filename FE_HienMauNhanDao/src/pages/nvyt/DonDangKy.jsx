@@ -394,6 +394,31 @@ export default function DonDangKy() {
     }
   };
 
+  const handleCheckIn = async (don) => {
+    try {
+      const payload = {
+        maTNV: don.tinhNguyenVien?.maTNV || don.maTNV,
+        maChienDich: don.maChienDich,
+        theTich: don.theTich || 350
+      };
+      await donDangKyNvytService.tiepNhan(payload);
+      await Swal.fire({
+        title: '✅ ĐÃ TIẾP NHẬN TẠI QUẦY!',
+        html: `Đã xác nhận tiếp nhận TNV <b>${don.tinhNguyenVien?.hoVaTen || don.maTNV}</b> cho đơn <b>${don.maDon}</b>.<br/><br/><span class="text-sm text-emerald-600 font-bold">Hồ sơ đã được đẩy trực tiếp sang Bác Sĩ Khám Lâm Sàng!</span>`,
+        icon: 'success',
+        confirmButtonColor: '#af101a',
+      });
+      loadData();
+    } catch (err) {
+      Swal.fire({
+        title: 'Lỗi tiếp nhận!',
+        text: err.message || 'Lỗi khi tiếp nhận tại quầy lễ tân',
+        icon: 'error',
+        confirmButtonColor: '#af101a',
+      });
+    }
+  };
+
   const handleSaved = (saved, mode) => {
     setModal(null);
     if (mode === 'create' && saved?.maDon) {
@@ -423,14 +448,14 @@ export default function DonDangKy() {
       {/* Page header */}
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Đơn đăng ký</h1>
-          <p className="text-slate-500 mt-1 text-sm">Quản lý các đơn đăng ký hiến máu trong hệ thống</p>
+          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Đơn đăng ký & Tiếp Nhận Lễ Tân</h1>
+          <p className="text-slate-500 mt-1 text-sm">Quản lý các đơn đăng ký hiến máu và Tiếp nhận TNV tại quầy y tế</p>
         </div>
         <button
           onClick={() => setModal({ mode: 'create', don: null })}
           className="flex items-center gap-2 h-11 px-5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-red-800 transition-all shadow-sm shadow-primary/20 active:scale-[0.98]">
           <span className="material-symbols-outlined text-xl">add</span>
-          Tạo đơn mới
+          Tạo đơn trực tiếp (Walk-in)
         </button>
       </div>
 
@@ -463,7 +488,7 @@ export default function DonDangKy() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                {['Mã đơn', 'Tình nguyện viên', 'Chiến dịch', 'Thể tích', 'Trạng thái', 'Nhân viên tạo', 'Thao tác'].map(h => (
+                {['Mã đơn', 'Tình nguyện viên', 'Chiến dịch / Địa điểm', 'Thể tích', 'Trạng thái', 'Nguồn đăng ký', 'Thao tác tiếp nhận'].map(h => (
                   <th key={h} className="text-left px-5 py-3 text-xs font-black uppercase text-slate-400 tracking-wider whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -484,7 +509,7 @@ export default function DonDangKy() {
               ) : dons.map(don => {
                 const editable = isEditable(don);
                 return (
-                  <tr key={don.maDon} className={`border-b border-slate-100 hover:bg-slate-50/80 transition-colors ${!editable ? 'opacity-60' : ''}`}>
+                  <tr key={don.maDon} className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors">
                     <td className="px-5 py-4">
                       <span className="font-mono text-xs font-bold text-primary bg-red-50 px-2 py-1 rounded-lg">{don.maDon}</span>
                     </td>
@@ -492,59 +517,64 @@ export default function DonDangKy() {
                       <p className="font-semibold text-slate-800">{don.tinhNguyenVien?.hoVaTen || don.maTNV || '---'}</p>
                       <p className="text-xs text-slate-400 mt-0.5">{don.tinhNguyenVien?.soCCCD || ''}</p>
                     </td>
-                    <td className="px-5 py-4 font-mono text-xs text-slate-600">{don.maChienDich || '---'}</td>
+                    <td className="px-5 py-4 font-mono text-xs text-slate-600">{don.maChienDich || 'Hiến Thường Xuyên'}</td>
                     <td className="px-5 py-4">
-                      <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg">{don.theTich || '---'} ml</span>
+                      <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg">{don.theTich || 350} ml</span>
                     </td>
                     <td className="px-5 py-4">
                       <span className={`px-2.5 py-1 text-xs font-bold rounded-full
                         ${don.trangThai === 'DA_KHAM' ? 'bg-green-100 text-green-700' :
-                          don.trangThai === 'CHO_KHAM' ? 'bg-amber-100 text-amber-700' :
-                            'bg-slate-100 text-slate-600'}`}>
-                        {don.trangThai || 'Chờ xử lý'}
+                          don.trangThai === 'CHO_KHAM' || don.trangThai === 'DaHien' ? 'bg-emerald-100 text-emerald-700' :
+                            'bg-blue-100 text-blue-700'}`}>
+                        {don.trangThai === 'DaHien' ? 'Đã check-in quầy' : (don.trangThai || 'Chờ tiếp nhận')}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-xs text-slate-500">
                       {editable ? (
                         <span className="flex items-center gap-1 text-blue-600 font-semibold">
                           <span className="material-symbols-outlined text-sm">badge</span>
-                          {don.maNV}
+                          NVYT tiếp nhận ({don.maNV})
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1 text-slate-400 italic">
-                          <span className="material-symbols-outlined text-sm">person</span>
-                          TNV tự đăng ký
+                        <span className="flex items-center gap-1 text-purple-600 font-semibold">
+                          <span className="material-symbols-outlined text-sm">devices</span>
+                          TNV đăng ký Online
                         </span>
                       )}
                     </td>
                     <td className="px-5 py-4">
-                      {editable ? (
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
+                        {!editable && (
+                          <button
+                            onClick={() => handleCheckIn(don)}
+                            className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all font-bold text-xs flex items-center gap-1 shadow-sm active:scale-95"
+                            title="Xác nhận tiếp nhận tại quầy & chuyển Bác sĩ khám"
+                          >
+                            <span className="material-symbols-outlined text-base">how_to_reg</span>
+                            <span>Tiếp nhận</span>
+                          </button>
+                        )}
+                        {editable && (
                           <button
                             onClick={() => setModal({ mode: 'edit', don })}
                             className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center justify-center"
                             title="Chỉnh sửa">
                             <span className="material-symbols-outlined text-base">edit</span>
                           </button>
-                          <button
-                            onClick={() => handleDelete(don)}
-                            className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors flex items-center justify-center"
-                            title="Xóa">
-                            <span className="material-symbols-outlined text-base">delete</span>
-                          </button>
-                          <button
-                            onClick={() => { localStorage.setItem('nvyt_maDon', don.maDon); navigate('/nvyt/khai-bao-y-te'); }}
-                            className="w-8 h-8 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors flex items-center justify-center"
-                            title="Khai báo y tế">
-                            <span className="material-symbols-outlined text-base">fact_check</span>
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="flex items-center gap-1 text-xs text-slate-400 px-2">
-                          <span className="material-symbols-outlined text-sm">lock</span>
-                          Không thể sửa
-                        </span>
-                      )}
+                        )}
+                        <button
+                          onClick={() => { localStorage.setItem('nvyt_maDon', don.maDon); navigate('/nvyt/khai-bao-y-te'); }}
+                          className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+                          title="Khai báo y tế">
+                          <span className="material-symbols-outlined text-base">fact_check</span>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(don)}
+                          className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors flex items-center justify-center"
+                          title="Xóa đơn">
+                          <span className="material-symbols-outlined text-base">delete</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );

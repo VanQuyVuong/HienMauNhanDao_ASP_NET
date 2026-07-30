@@ -139,7 +139,7 @@ export const donDangKyNvytService = {
 
   /**
    * Tạo đơn đăng ký (NVYT tạo cho TNV).
-   * Backend: POST /dondangky
+   * Backend: POST /dondangky/tiep-nhan
    */
   create: async (data) => {
     try {
@@ -152,6 +152,22 @@ export const donDangKyNvytService = {
       if (err.isBusinessError) throw err;
       throw {
         message: err.response?.data?.message || err.message || 'Lỗi khi tạo đơn đăng ký',
+        status: err.response?.status,
+      };
+    }
+  },
+
+  /**
+   * Tiếp nhận tại quầy lễ tân (Check-in cho TNV tự đăng ký).
+   * Backend: POST /dondangky/tiep-nhan
+   */
+  tiepNhan: async (data) => {
+    try {
+      const res = await http.post('/dondangky/tiep-nhan', data);
+      return res?.data || res;
+    } catch (err) {
+      throw {
+        message: err.response?.data?.message || err.message || 'Lỗi khi tiếp nhận tại quầy',
         status: err.response?.status,
       };
     }
