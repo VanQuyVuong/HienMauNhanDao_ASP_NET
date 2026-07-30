@@ -178,6 +178,22 @@ export const donDangKyNvytService = {
   },
 
   /**
+   * Tiếp nhận Hiến Máu Khẩn Cấp Fast-Track (Lưu vết trực tiếp & gửi Admin khen thưởng).
+   * Backend: POST /dondangky/tiep-nhan-khan-cap
+   */
+  tiepNhanKhanCap: async (data) => {
+    try {
+      const res = await http.post('/dondangky/tiep-nhan-khan-cap', data);
+      return res?.data || res;
+    } catch (err) {
+      throw {
+        message: err.response?.data?.message || err.message || 'Lỗi khi tiếp nhận hiến máu khẩn cấp',
+        status: err.response?.status,
+      };
+    }
+  },
+
+  /**
    * Cập nhật đơn đăng ký (chỉ đơn do NVYT tạo).
    * Backend: PUT /dondangky/{maDon}
    */
