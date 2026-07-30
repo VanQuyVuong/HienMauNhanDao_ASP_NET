@@ -103,15 +103,19 @@ export const donDangKyNvytService = {
    */
   getAll: async (page = 0, size = 10, keyword = '') => {
     try {
-      const params = new URLSearchParams({ page, size });
-      if (keyword) params.append('keyword', keyword);
-      const res = await http.get(`/dondangky?${params.toString()}`);
-      // Nếu backend trả array thẳng
+      const res = await http.get('/dondangky/tat-ca');
       const data = res?.data || res;
-      if (Array.isArray(data)) {
-        return { content: data, totalElements: data.length, totalPages: 1 };
+      let list = Array.isArray(data) ? data : (data.content || []);
+      if (keyword) {
+        const kw = keyword.toLowerCase().trim();
+        list = list.filter(d => 
+          (d.maDon && d.maDon.toLowerCase().includes(kw)) ||
+          (d.tinhNguyenVien?.hoVaTen && d.tinhNguyenVien.hoVaTen.toLowerCase().includes(kw)) ||
+          (d.tinhNguyenVien?.soCCCD && d.tinhNguyenVien.soCCCD.includes(kw)) ||
+          (d.maChienDich && d.maChienDich.toLowerCase().includes(kw))
+        );
       }
-      return data || { content: [], totalElements: 0, totalPages: 0 };
+      return { content: list, totalElements: list.length, totalPages: 1 };
     } catch (err) {
       console.error('Error fetching đơn đăng ký:', err);
       throw err;
@@ -139,7 +143,7 @@ export const donDangKyNvytService = {
 
   /**
    * Tạo đơn đăng ký (NVYT tạo cho TNV).
-   * Backend: POST /dondangky
+   * Backend: POST /dondangky/tiep-nhan
    */
   create: async (data) => {
     try {
@@ -152,6 +156,38 @@ export const donDangKyNvytService = {
       if (err.isBusinessError) throw err;
       throw {
         message: err.response?.data?.message || err.message || 'Lỗi khi tạo đơn đăng ký',
+        status: err.response?.status,
+      };
+    }
+  },
+
+  /**
+   * Tiếp nhận tại quầy lễ tân (Check-in cho TNV tự đăng ký).
+   * Backend: POST /dondangky/tiep-nhan
+   */
+  tiepNhan: async (data) => {
+    try {
+      const res = await http.post('/dondangky/tiep-nhan', data);
+      return res?.data || res;
+    } catch (err) {
+      throw {
+        message: err.response?.data?.message || err.message || 'Lỗi khi tiếp nhận tại quầy',
+        status: err.response?.status,
+      };
+    }
+  },
+
+  /**
+   * Tiếp nhận Hiến Máu Khẩn Cấp Fast-Track (Lưu vết trực tiếp & gửi Admin khen thưởng).
+   * Backend: POST /dondangky/tiep-nhan-khan-cap
+   */
+  tiepNhanKhanCap: async (data) => {
+    try {
+      const res = await http.post('/dondangky/tiep-nhan-khan-cap', data);
+      return res?.data || res;
+    } catch (err) {
+      throw {
+        message: err.response?.data?.message || err.message || 'Lỗi khi tiếp nhận hiến máu khẩn cấp',
         status: err.response?.status,
       };
     }
@@ -257,8 +293,9 @@ export const khaiBaoYTeNvytService = {
    */
   getAll: async () => {
     try {
-      const res = await http.get('/hososuckhoe');
-      return res?.data || [];
+      const res = await http.get('/hososuckhoe/tat-ca');
+      const data = res?.data || res;
+      return Array.isArray(data) ? data : (data.content || []);
     } catch (err) {
       console.error('Error fetching all hồ sơ sức khỏe:', err);
       throw err;

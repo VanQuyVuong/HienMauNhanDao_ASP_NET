@@ -102,7 +102,7 @@ export default function ThongTinCaNhan() {
       };
 
       const tnvResponse = await tinhNguyenVienService.createOrUpdate(tinhNguyenVienData);
-      const maTNV = tnvResponse?.maTNV;
+      const maTNV = tnvResponse?.maTNV || tnvResponse?.maTnv || tnvResponse?.MaTNV;
 
       if (!maTNV) {
         throw new Error('Không lấy được mã tình nguyện viên từ server.');

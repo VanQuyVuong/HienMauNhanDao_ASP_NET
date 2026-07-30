@@ -47,8 +47,21 @@ namespace HienMauNhanDao_DaNang.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            var chienDich = await _context.ChienDichHienMaus.FindAsync(request.MaChienDich);
-            if (chienDich == null) return NotFound(new { success = false, message = "Chiến dịch không tồn tại!" });
+            var chienDich = string.IsNullOrEmpty(request.MaChienDich) ? null : await _context.ChienDichHienMaus.FindAsync(request.MaChienDich);
+            if (chienDich == null)
+            {
+                var defaultRoutine = await _context.ChienDichHienMaus
+                    .FirstOrDefaultAsync(c => c.MaChienDich == "CD00004" || c.MaChienDich == "CD00003" || c.TrangThai == TrangThaiChienDich.DangDienRa);
+                if (defaultRoutine != null)
+                {
+                    request.MaChienDich = defaultRoutine.MaChienDich;
+                    chienDich = defaultRoutine;
+                }
+                else
+                {
+                    return NotFound(new { success = false, message = "Chiến dịch không tồn tại!" });
+                }
+            }
 
             var donMoi = new DonDangKy
             {
@@ -102,6 +115,84 @@ namespace HienMauNhanDao_DaNang.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { success = true, message = "Tiếp nhận hiến máu thành công!", maDon = donMoi.MaDon });
+        }
+
+        public class TiepNhanKhanCapRequest
+        {
+            public string? MaTNV { get; set; }
+            public string? Cccd { get; set; }
+            public string? HoTen { get; set; }
+            public string? SoDienThoai { get; set; }
+            public string? NhomMau { get; set; }
+            public string? MaChienDich { get; set; }
+            public int TheTich { get; set; } = 350;
+            public string? GhiChu { get; set; }
+        }
+
+        // API Tiếp nhận Hiến Máu Khẩn Cấp Fast-Track (Dành cho Lễ tân / NVYT tiếp nhận ca cấp cứu khẩn)
+        [HttpPost("tiep-nhan-khan-cap")]
+        [Authorize(Roles = "NVYT, AD")]
+        public async Task<IActionResult> TiepNhanKhanCap([FromBody] TiepNhanKhanCapRequest request)
+        {
+            var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value;
+            var nhanVien = await _context.NhanViens.FirstOrDefaultAsync(n => n.MaTaiKhoan == maTaiKhoan);
+
+            TinhNguyenVien? tnv = null;
+            if (!string.IsNullOrEmpty(request.MaTNV))
+            {
+                tnv = await _context.TinhNguyenViens.FindAsync(request.MaTNV);
+            }
+            else if (!string.IsNullOrEmpty(request.Cccd))
+            {
+                tnv = await _context.TinhNguyenViens.FirstOrDefaultAsync(t => t.Cccd == request.Cccd);
+            }
+
+            if (tnv == null && !string.IsNullOrEmpty(request.HoTen))
+            {
+                tnv = new TinhNguyenVien
+                {
+                    maTNV = "TN" + DateTime.Now.ToString("HHmmss"),
+                    HoTen = request.HoTen,
+                    Cccd = string.IsNullOrEmpty(request.Cccd) ? "000000000000" : request.Cccd,
+                    SoDienThoai = string.IsNullOrEmpty(request.SoDienThoai) ? "0000000000" : request.SoDienThoai,
+                    NgaySinh = new DateOnly(2000, 1, 1)
+                };
+                if (!string.IsNullOrEmpty(request.NhomMau) && Enum.TryParse<NhomMau>(request.NhomMau, out var nm))
+                {
+                    tnv.NhomMau = nm;
+                }
+                _context.TinhNguyenViens.Add(tnv);
+                await _context.SaveChangesAsync();
+            }
+
+            if (tnv == null)
+            {
+                return BadRequest(new { success = false, message = "Vui lòng cung cấp thông tin Tình nguyện viên!" });
+            }
+
+            var maChienDich = request.MaChienDich;
+            if (string.IsNullOrEmpty(maChienDich))
+            {
+                var defaultEmergency = await _context.ChienDichHienMaus
+                    .FirstOrDefaultAsync(c => c.MucDoUuTien == MucDoUuTienChienDich.KhanCap && c.TrangThai == TrangThaiChienDich.DangDienRa);
+                maChienDich = defaultEmergency?.MaChienDich ?? "CD00004";
+            }
+
+            var donMoi = new DonDangKy
+            {
+                MaDon = "DON" + DateTime.Now.ToString("HHmmss"),
+                MaTNV = tnv.maTNV,
+                MaChienDich = maChienDich,
+                MaNhanVien = nhanVien?.MaNhanVien,
+                ThoiGianDangKy = DateTime.Now,
+                TrangThai = TrangThaiDonDangKy.DaHoanThanh, // Khẩn cấp hoàn thành trực tiếp để Admin khen thưởng
+                TheTich = request.TheTich
+            };
+
+            _context.DonDangKys.Add(donMoi);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Đã tiếp nhận khẩn cấp thành công và chuyển dữ liệu Admin khen thưởng!", maDon = donMoi.MaDon });
         }
 
         [HttpGet]

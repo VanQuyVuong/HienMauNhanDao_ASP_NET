@@ -1,25 +1,41 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { donDangKyNvytService, tnvNvytService} from '../../services/nvytService';
+import { donDangKyNvytService, tnvNvytService, khaiBaoYTeNvytService } from '../../services/nvytService';
 import { phuongXaService } from '../../services/phuongXaService';
 import { chienDichService } from '../../services/chienDichService';
 import Swal from 'sweetalert2';
 
 const PAGE_SIZE = 10;
 
-// ─── Modal Tạo/Sửa đơn ───────────────────────────────────────────────────────
+const HEALTH_QUESTIONS = [
+  { id: 'daTungHien', label: '1. Bạn đã từng tham gia hiến máu lần nào chưa?' },
+  { id: 'xamHinh', label: '2. Trong 12 tháng qua có xăm hình, xỏ lỗ, tiêm vắc xin hay phẫu thuật không?' },
+  { id: 'ruouBia', label: '3. Trong 24 giờ qua có uống rượu bia, sụt cân bất thường hay thức khuya mệt mỏi không?' },
+  { id: 'manTinh', label: '4. Có tiền sử mắc các bệnh mạn tính (Tim mạch, Huyết áp, Gan, Thận, Tiểu đường...)?' },
+  { id: 'coThai', label: '5. (Đối với Nữ): Có đang trong kỳ kinh nguyệt, mang thai hoặc cho con bú không?' },
+];
+
+// ─── Modal Tạo/Sửa Đơn Trực Tiếp (Walk-in) ───────────────────────────────────
 function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
   const [step, setStep] = useState(mode === 'create' ? 'search' : 'form');
   const [cccd, setCccd] = useState('');
   const [tnv, setTnv] = useState(mode === 'edit' ? don?.tinhNguyenVien : null);
   const [searching, setSearching] = useState(false);
   const [notFound, setNotFound] = useState(false);
-  const [newTnv, setNewTnv] = useState({ hoVaTen: '', ngaySinh: '', gioiTinh: 'Nam', soDienThoai: '', diaChi: '', soCCCD: '', maPhuongXa: '' });
+  const [newTnv, setNewTnv] = useState({ hoVaTen: '', ngaySinh: '', gioiTinh: 'Nam', soDienThoai: '', diaChi: '', soCCCD: '', maPhuongXa: '', nhomMau: 'O_positive' });
   const [form, setForm] = useState({
-    loaiHinh: 'ChienDich',
+    loaiHinh: 'ChienDich', // 'ChienDich' | 'TuDo' (Thường xuyên) | 'KhanCap'
     maChienDich: don?.maChienDich || '',
-    theTich: String(don?.theTich || 250),
+    theTich: String(don?.theTich || 350),
     ghiChu: don?.ghiChu || '',
+  });
+  const [healthForm, setHealthForm] = useState({
+    daTungHien: false,
+    xamHinh: false,
+    ruouBia: false,
+    manTinh: false,
+    coThai: false,
+    moTaKhac: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,7 +51,6 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
         const list = await phuongXaService.getAll();
         const sortedList = [...list].sort((a, b) => (a.tenPhuongXa || '').localeCompare(b.tenPhuongXa || '', 'vi', { sensitivity: 'base' }));
         setPhuongXaList(sortedList);
-        console.log('Phường/xã list:', sortedList);
       } catch (e) { console.error('Error fetching phường/xã list:', e); }
     };
     fetchPhuongXa();
@@ -45,44 +60,61 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
     const fetchChienDich = async () => {
       try {
         const response = await chienDichService.getChienDichs();
-        // Xử lý cấu trúc response - có thể là { data: [...] } hoặc { content: [...] } hoặc trực tiếp array
         let list = Array.isArray(response) ? response : (response?.data || response?.content || []);
         setChienDichList(list);
-        console.log('Chiến dịch list:', list);
       } catch (e) { console.error('Error fetching chiến dịch list:', e); }
     };
     fetchChienDich();
   }, []);
 
+  // Lọc chiến dịch theo loại hình được chọn (Phân biệt rạch ròi Chiến dịch phong trào & Đợt khẩn cấp)
+  const getFilteredChienDichs = () => {
+    return chiendichList.filter(c => {
+      const name = String(c.tenChienDich || '').toLowerCase();
+      const isEmergency = c.mucDoUuTien === 'KhanCap' || c.mucDoUuTien === 1 || name.includes('khẩn cấp') || String(c.maChienDich).includes('KC');
+      const isRoutine = c.maChienDich === 'CD00004' || c.maChienDich === 'CD00003' || name.includes('thường xuyên');
+
+      if (form.loaiHinh === 'ChienDich') {
+        // Chỉ lấy các chiến dịch đợt phong trào bình thường (Loại bỏ khẩn cấp & thường xuyên)
+        return !isEmergency && !isRoutine;
+      }
+      if (form.loaiHinh === 'KhanCap') {
+        // Chỉ lấy các đợt gọi máu khẩn cấp
+        return isEmergency;
+      }
+      if (form.loaiHinh === 'TuDo') {
+        // Lấy danh sách cơ sở hiến thường xuyên
+        return isRoutine;
+      }
+      return true;
+    });
+  };
 
   const handleSearchCCCD = async () => {
     if (!cccd.trim()) return;
-    setSearching(true); setNotFound(false); setError('');
+    setSearching(true); setNotFound(false); setError(''); setWarning('');
     try {
-      console.log('Tìm kiếm CCCD:', cccd.trim());
       const found = await tnvNvytService.findByCCCD(cccd.trim());
-      console.log('Kết quả tìm kiếm:', found);
       if (found && found.data) { 
         setTnv(found.data); 
         if (found.duDieuKien === false) {
-          setWarning(found.thongBao || 'Tình nguyện viên chưa đủ điều kiện thời gian hiến máu.');
-        } else {
-          setWarning('');
+          setWarning(found.thongBao || '⚠️ Tình nguyện viên chưa đủ thời gian 3 tháng (84 ngày) kể từ lần hiến máu gần nhất!');
         }
         setStep('form'); 
+      } else { 
+        setNotFound(true); 
+        setNewTnv(p => ({ ...p, soCCCD: cccd.trim() })); 
       }
-      else { setNotFound(true); setNewTnv(p => ({ ...p, soCCCD: cccd.trim() })); }
     } catch (err) { 
-      console.error('Error tìm kiếm CCCD:', err);
-      // Nếu không tìm thấy (404 hoặc message có chứa "không tìm" hoặc "not found")
       if (err.response?.status === 404 || err.message?.toLowerCase().includes('không tìm') || err.message?.toLowerCase().includes('not found')) {
         setNotFound(true); 
         setNewTnv(p => ({ ...p, soCCCD: cccd.trim() }));
       } else {
         setError(err.message || 'Lỗi khi tìm kiếm. Vui lòng thử lại.'); 
       }
+    } finally { 
+      setSearching(false); 
     }
-    finally { setSearching(false); }
   };
 
   const handleCreateTnv = async () => {
@@ -90,102 +122,180 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
     if (!newTnv.ngaySinh) { setError('Vui lòng chọn ngày sinh'); return; }
     if (!newTnv.soCCCD.trim() || newTnv.soCCCD.trim().length !== 12) { setError('CCCD phải đúng 12 số'); return; }
     if (!newTnv.soDienThoai.trim()) { setError('Vui lòng nhập số điện thoại'); return; }
-    if (!isValidPhone(newTnv.soDienThoai)) { setError('SĐT không hợp lệ. Định dạng: 03/05/07/08/09 + 8 số (vd: 0987654321)'); return; }
+    if (!isValidPhone(newTnv.soDienThoai)) { setError('SĐT không hợp lệ. Định dạng: 03/05/07/08/09 + 8 số'); return; }
     if (!newTnv.maPhuongXa) { setError('Vui lòng chọn phường/xã'); return; }
     setLoading(true); setError('');
     try {
       const created = await tnvNvytService.create(newTnv);
-      console.log('Tình nguyện viên vừa tạo:', created);
       if (!created || !created.maTNV) {
-        setError('Lỗi: Server không trả về mã tình nguyện viên. Vui lòng thử lại.');
+        setError('Lỗi: Server không trả về mã tình nguyện viên.');
         return;
       }
       setTnv(created); setStep('form');
     } catch (e) { 
-      console.error('Error creating TNV:', e);
       setError(e.message || 'Lỗi khi tạo tình nguyện viên'); 
+    } finally { 
+      setLoading(false); 
     }
-    finally { setLoading(false); }
   };
 
+  // Xử lý nộp đơn Walk-in trực tiếp: Tạo đơn + Hỏi sức khỏe + Chuyển Bác sĩ trong 1 bước duy nhất!
   const handleSubmit = async () => {
-    if (form.loaiHinh === 'ChienDich' && !form.maChienDich.trim()) { setError('Vui lòng chọn mã chiến dịch'); return; }
-    if (!tnv?.maTNV && !newTnv.soCCCD) { setError('Vui lòng tìm hoặc tạo tình nguyện viên trước'); return; }
+    if (form.loaiHinh === 'ChienDich' && !form.maChienDich.trim()) { 
+      setError('Vui lòng chọn chiến dịch hiến máu'); 
+      return; 
+    }
+    if (!tnv?.maTNV && !newTnv.soCCCD) { 
+      setError('Vui lòng tìm hoặc khởi tạo tình nguyện viên trước'); 
+      return; 
+    }
     setLoading(true); setError('');
     try {
+      const hoTenTnv = tnv?.hoTen || tnv?.hoVaTen || newTnv.hoVaTen;
+      const cccdTnv = tnv?.soCCCD || tnv?.cccd || newTnv.soCCCD;
+
+      // 1. Trường hợp Khẩn Cấp -> Fast-Track tiếp nhận khẩn cấp gửi Admin khen thưởng
+      if (form.loaiHinh === 'KhanCap') {
+        const payload = {
+          maTNV: tnv?.maTNV,
+          cccd: cccdTnv,
+          hoTen: hoTenTnv,
+          soDienThoai: tnv?.soDienThoai || newTnv.soDienThoai,
+          nhomMau: tnv?.nhomMau || newTnv.nhomMau,
+          maChienDich: form.maChienDich || null,
+          theTich: parseInt(form.theTich) || 350,
+          ghiChu: 'Hiến máu khẩn cấp tại chỗ - Lưu vết gửi Admin khen thưởng'
+        };
+        const res = await donDangKyNvytService.tiepNhanKhanCap(payload);
+        await Swal.fire({
+          title: '🚨 ĐÃ LƯU TIẾP NHẬN KHẨN CẤP!',
+          html: `Đã ghi nhận đơn hiến máu khẩn cấp cho <b>${hoTenTnv}</b>.<br/><br/><span class="text-sm text-[#af101a] font-bold">Hồ sơ đã được gửi trực tiếp lên Admin để duyệt Khen Thưởng & Cấp Chứng Nhận!</span>`,
+          icon: 'success',
+          confirmButtonColor: '#af101a',
+        });
+        onSaved(res, 'create');
+        return;
+      }
+
+      // 2. Trường hợp Hiến Thường Xuyên hoặc Hiến Theo Chiến Dịch
       const payload = {
         maTNV: tnv?.maTNV,
         maNV: nhanVien?.maNV,
         emailNhanVien: localStorage.getItem('email') || '',
-        maChienDich: form.loaiHinh === 'TuDo' ? null : form.maChienDich,
-        theTich: parseInt(form.theTich) || 250,
+        maChienDich: form.loaiHinh === 'TuDo' ? 'CD00004' : form.maChienDich,
+        theTich: parseInt(form.theTich) || 350,
         ghiChu: form.ghiChu,
         maPhuongXa: tnv?.maPhuongXa || newTnv.maPhuongXa || '',
-        cccd: tnv?.soCCCD || newTnv.soCCCD
+        cccd: cccdTnv
       };
-      console.log('Payload gửi lên:', payload);
+
+      let savedDon = null;
       if (mode === 'create') {
-        const saved = await donDangKyNvytService.create(payload);
-        onSaved(saved, 'create');
+        savedDon = await donDangKyNvytService.create(payload);
       } else {
-        const updated = await donDangKyNvytService.update(don.maDon, payload);
-        onSaved(updated, 'update');
+        savedDon = await donDangKyNvytService.update(don.maDon, payload);
       }
+
+      // 3. Tự động Tiếp nhận & Lưu Tờ khai y tế sơ lược (Không bắt bấm lại ngoài bảng)
+      if (savedDon?.maDon) {
+        try {
+          // Gọi API tiếp nhận check-in
+          await donDangKyNvytService.tiepNhan({
+            maTNV: tnv?.maTNV || savedDon.maTNV,
+            maChienDich: savedDon.maChienDich,
+            theTich: savedDon.theTich || 350,
+            maNV: nhanVien?.maNV
+          });
+
+          // Lưu hồ sơ sức khỏe sơ lược
+          await khaiBaoYTeNvytService.create({
+            maDon: savedDon.maDon,
+            dauHong: healthForm.ruouBia,
+            khangSinh: healthForm.manTinh,
+            truyenNhiem: healthForm.xamHinh,
+            coThai: healthForm.coThai,
+            moTaKhac: healthForm.moTaKhac || 'Khai báo y tế trực tiếp tại quầy tiếp nhận lễ tân'
+          });
+        } catch (e) { 
+          console.log('Tự động tiếp nhận:', e); 
+        }
+
+        await Swal.fire({
+          title: '✅ ĐÃ TIẾP NHẬN TẠI QUẦY!',
+          html: `Đã tạo đơn & tiếp nhận TNV <b>${hoTenTnv}</b> (CCCD: <b>${cccdTnv}</b>).<br/><br/><span class="text-sm text-emerald-600 font-bold">Hồ sơ đã được chuyển thẳng tới Bác Sĩ Khám Lâm Sàng!</span>`,
+          icon: 'success',
+          confirmButtonColor: '#af101a',
+        });
+      }
+
+      onSaved(savedDon, mode);
     } catch (e) { 
       console.error('Error submit:', e);
-      setError(e.message || 'Lỗi khi lưu đơn'); 
+      setError(e.message || 'Lỗi khi lưu đơn đăng ký'); 
+    } finally { 
+      setLoading(false); 
     }
-    finally { setLoading(false); }
   };
 
+  const filteredChienDichs = getFilteredChienDichs();
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fadeIn">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">description</span>
+            <span className="material-symbols-outlined text-primary">post_add</span>
             <h3 className="font-bold text-slate-800">
-              {mode === 'create' ? 'Tạo đơn đăng ký mới' : 'Cập nhật đơn đăng ký'}
+              {mode === 'create' ? 'Tạo Đơn Tiếp Nhận Trực Tiếp (Walk-in)' : 'Cập Nhật Đơn Đăng Ký'}
             </h3>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-slate-200 flex items-center justify-center transition-colors">
-            <span className="material-symbols-outlined text-slate-500 text-xl">close</span>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-slate-200 flex items-center justify-center text-slate-500">
+            <span className="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
-        <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+        <div className="p-6 space-y-4 overflow-y-auto flex-1">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">{error}</div>
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs font-bold">{error}</div>
           )}
 
-          {/* Step 1: Tìm kiếm CCCD */}
+          {/* Cảnh báo 3 tháng / 84 ngày */}
+          {warning && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs font-bold flex items-center gap-2">
+              <span className="material-symbols-outlined text-base">warning</span>
+              <span>{warning}</span>
+            </div>
+          )}
+
+          {/* Bước 1: Tra cứu CCCD */}
           {step === 'search' && (
             <div className="space-y-4">
-              <p className="text-sm text-slate-600 font-medium">Tìm kiếm tình nguyện viên theo số CCCD:</p>
+              <p className="text-xs text-slate-600 font-semibold">Tra cứu thông tin Tình nguyện viên theo số CCCD (12 số):</p>
               <div className="flex gap-2">
                 <input
                   value={cccd} onChange={e => setCccd(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSearchCCCD()}
-                  placeholder="Nhập số CCCD..."
-                  className="flex-1 h-11 border border-slate-200 rounded-xl px-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  placeholder="Nhập số CCCD (12 số)..."
+                  className="flex-1 h-11 border border-slate-200 rounded-xl px-4 text-sm outline-none focus:border-primary font-mono"
                 />
                 <button
                   onClick={handleSearchCCCD} disabled={searching}
-                  className="h-11 px-5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-red-800 transition-colors disabled:opacity-60"
+                  className="h-11 px-5 bg-primary text-white rounded-xl font-bold text-xs uppercase hover:bg-red-800 transition-colors disabled:opacity-60"
                 >
-                  {searching ? '...' : 'Tìm'}
+                  {searching ? '...' : 'Tìm CCCD'}
                 </button>
               </div>
+
               {notFound && (
                 <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-3">
-                  <p className="text-sm font-bold text-amber-800">Chưa có trong hệ thống. Thêm tình nguyện viên mới:</p>
+                  <p className="text-xs font-bold text-amber-800">Chưa có hồ sơ trong hệ thống. Nhập nhanh thông tin TNV mới:</p>
                   {[
                     { label: 'Họ và tên *', key: 'hoVaTen', type: 'text' },
                     { label: 'Ngày sinh *', key: 'ngaySinh', type: 'date' },
-                    { label: 'Số điện thoại', key: 'soDienThoai', type: 'tel' },
-                    { label: 'Phường xã', key: 'maPhuongXa', type: 'select', options: phuongXaList },
-                    { label: 'Địa chỉ', key: 'diaChi', type: 'text' },
+                    { label: 'Số điện thoại *', key: 'soDienThoai', type: 'tel' },
+                    { label: 'Phường/Xã *', key: 'maPhuongXa', type: 'select', options: phuongXaList },
+                    { label: 'Địa chỉ cư trú', key: 'diaChi', type: 'text' },
                   ].map(f => (
                     <div key={f.key}>
                       <label className="text-xs font-semibold text-slate-600 block mb-1">{f.label}</label>
@@ -193,9 +303,9 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
                         <select
                           value={newTnv[f.key]}
                           onChange={e => setNewTnv(p => ({ ...p, [f.key]: e.target.value }))}
-                          className="w-full h-10 border border-slate-200 rounded-lg px-3 text-sm outline-none focus:border-primary"
+                          className="w-full h-10 border border-slate-200 rounded-lg px-3 text-xs outline-none focus:border-primary"
                         >
-                          <option value="">Chọn phường/xã</option>
+                          <option value="">-- Chọn phường/xã --</option>
                           {f.options.map((option) => (
                             <option key={option.maPhuongXa} value={option.maPhuongXa}>
                               {option.tenPhuongXa}
@@ -206,7 +316,7 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
                         <input
                           type={f.type} value={newTnv[f.key]}
                           onChange={e => setNewTnv(p => ({ ...p, [f.key]: e.target.value }))}
-                          className="w-full h-10 border border-slate-200 rounded-lg px-3 text-sm outline-none focus:border-primary"
+                          className="w-full h-10 border border-slate-200 rounded-lg px-3 text-xs outline-none focus:border-primary"
                         />
                       )}
                     </div>
@@ -214,109 +324,378 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
                   <div>
                     <label className="text-xs font-semibold text-slate-600 block mb-1">Giới tính</label>
                     <select value={newTnv.gioiTinh} onChange={e => setNewTnv(p => ({ ...p, gioiTinh: e.target.value }))}
-                      className="w-full h-10 border border-slate-200 rounded-lg px-3 text-sm outline-none focus:border-primary">
-                      <option>Nam</option><option>Nữ</option><option>Khác</option>
+                      className="w-full h-10 border border-slate-200 rounded-lg px-3 text-xs outline-none focus:border-primary">
+                      <option value="Nam">Nam</option>
+                      <option value="Nữ">Nữ</option>
                     </select>
                   </div>
                   <button
                     onClick={handleCreateTnv} disabled={loading}
-                    className="w-full h-10 bg-amber-600 text-white rounded-lg font-bold text-sm hover:bg-amber-700 transition-colors disabled:opacity-60"
+                    className="w-full h-10 bg-primary text-white rounded-lg font-bold text-xs uppercase hover:bg-red-800 transition-colors"
                   >
-                    {loading ? 'Đang thêm...' : 'Thêm & Tiếp tục'}
+                    {loading ? 'Đang tạo hồ sơ...' : 'Khởi tạo Hồ sơ TNV'}
                   </button>
                 </div>
               )}
             </div>
           )}
 
-          {/* Step 2: Form đơn */}
+          {/* Bước 2: Chọn Loại Hình Hiến, Địa điểm & Hỏi Sức Khỏe Ngay Tại Chỗ */}
           {step === 'form' && (
             <div className="space-y-4">
-              {tnv && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                  <p className="text-xs font-bold text-green-700 uppercase mb-1">Tình nguyện viên</p>
-                  <p className="font-bold text-green-900">{tnv.hoVaTen}</p>
-                  <p className="text-xs text-green-700 mt-0.5">CCCD: {tnv.soCCCD} &nbsp;|&nbsp; {tnv.gioiTinh}</p>
-                  <p className="text-xs text-green-700 mt-1">Mã Phường/xã: {tnv?.maPhuongXa || newTnv?.maPhuongXa || '---'}</p>
-                  <p className="text-xs text-green-700">Địa chỉ: {tnv.diaChi || '---'}</p>
-                </div>
-              )}
-              {warning && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex gap-2 items-start text-amber-800">
-                  <span className="material-symbols-outlined text-amber-600 text-[20px]">warning</span>
-                  <div className="text-sm font-medium">
-                    <p className="font-bold text-amber-900 mb-0.5">Cảnh báo khoảng cách hiến máu</p>
-                    <p>{warning}</p>
-                    <p className="text-[11px] mt-1 text-amber-700 font-semibold italic">Y tá có thể cân nhắc và chịu trách nhiệm nếu vẫn quyết định tiếp nhận.</p>
-                  </div>
-                </div>
-              )}
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                <p className="text-xs font-bold text-blue-700">Nhân viên phụ trách: {nhanVien?.hoVaTen || '---'}</p>
-                <p className="text-xs text-blue-600 font-mono">Mã NV: {nhanVien?.maNV || '---'}</p>
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <p className="text-xs text-slate-400 font-semibold">Tình nguyện viên:</p>
+                <p className="font-extrabold text-slate-800 text-sm">
+                  {tnv?.hoTen || tnv?.hoVaTen || newTnv.hoVaTen} 
+                  <span className="font-mono text-xs font-bold text-slate-500 ml-2">(CCCD: {tnv?.soCCCD || tnv?.cccd || newTnv.soCCCD})</span>
+                </p>
               </div>
+
+              {/* Chọn Loại Hình Hiến Máu */}
               <div>
-                <label className="text-sm font-semibold text-slate-700 block mb-1">Loại hình tiếp nhận *</label>
-                <div className="flex gap-4 mb-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="loaiHinh" checked={form.loaiHinh === 'ChienDich'} onChange={() => setForm({ ...form, loaiHinh: 'ChienDich' })} />
-                    <span className="text-sm font-medium">Theo chiến dịch</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="loaiHinh" checked={form.loaiHinh === 'TuDo'} onChange={() => setForm({ ...form, loaiHinh: 'TuDo', maChienDich: '' })} />
-                    <span className="text-sm font-medium">Hiến máu tự do (Walk-in)</span>
-                  </label>
+                <label className="text-xs font-extrabold text-slate-700 block mb-2">Chọn Loại Hình Hiến Máu *</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'TuDo', label: '🏥 Thường Xuyên', sub: 'Tại Bệnh viện' },
+                    { id: 'ChienDich', label: '📅 Chiến Dịch', sub: 'Đợt phong trào' },
+                    { id: 'KhanCap', label: '🚨 Khẩn Cấp', sub: 'Cấp cứu tại chỗ' },
+                  ].map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setForm(p => ({ ...p, loaiHinh: item.id, maChienDich: '' }))}
+                      className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1 ${
+                        form.loaiHinh === item.id 
+                          ? 'border-primary bg-red-50/50 text-primary font-black shadow-sm' 
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 font-medium'
+                      }`}
+                    >
+                      <span className="text-xs font-bold">{item.label}</span>
+                      <span className="text-[10px] opacity-75">{item.sub}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
-              
-              {form.loaiHinh === 'ChienDich' && (
+
+              {/* Danh sách Chiến dịch/Đợt khẩn cấp (ĐÃ ĐƯỢC LỌC TÁCH BIỆT CHUẨN 100%) */}
+              {form.loaiHinh !== 'TuDo' && (
                 <div>
-                  <label className="text-sm font-semibold text-slate-700 block mb-1">Mã chiến dịch *</label>
+                  <label className="text-xs font-bold text-slate-600 block mb-1">
+                    {form.loaiHinh === 'KhanCap' ? 'Chọn Đợt Gọi Máu Khẩn Cấp *' : 'Chọn Chiến Dịch Phong Trào *'}
+                  </label>
                   <select
                     value={form.maChienDich}
                     onChange={e => setForm(p => ({ ...p, maChienDich: e.target.value }))}
-                    className="w-full h-11 border border-slate-200 rounded-xl px-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white cursor-pointer"
+                    className="w-full h-10 border border-slate-200 rounded-lg px-3 text-xs outline-none focus:border-primary font-medium"
                   >
-                    <option value="">-- Chọn chiến dịch --</option>
-                    {chiendichList.map((cd) => (
-                      <option key={cd.maChienDich} value={cd.maChienDich}>
-                        {cd.maChienDich} - {cd.tenChienDich}
+                    <option value="">
+                      {form.loaiHinh === 'KhanCap' ? '-- Chọn đợt khẩn cấp cần máu --' : '-- Chọn chiến dịch phong trào --'}
+                    </option>
+                    {filteredChienDichs.map(c => (
+                      <option key={c.maChienDich} value={c.maChienDich}>
+                        {c.tenChienDich} ({c.maChienDich})
                       </option>
                     ))}
                   </select>
                 </div>
               )}
+
+              {/* Thể tích máu */}
               <div>
-                <label className="text-sm font-semibold text-slate-700 block mb-1">Thể tích máu hiến</label>
-                <select value={form.theTich} onChange={e => setForm(p => ({ ...p, theTich: e.target.value }))}
-                  className="w-full h-11 border border-slate-200 rounded-xl px-4 text-sm outline-none focus:border-primary bg-white">
-                  <option value={250}>250 ml</option>
-                  <option value={350}>350 ml</option>
-                  <option value={450}>450 ml</option>
+                <label className="text-xs font-bold text-slate-600 block mb-1">Thể tích máu dự kiến hiến (ml)</label>
+                <select
+                  value={form.theTich}
+                  onChange={e => setForm(p => ({ ...p, theTich: e.target.value }))}
+                  className="w-full h-10 border border-slate-200 rounded-lg px-3 text-xs outline-none focus:border-primary font-bold"
+                >
+                  <option value="250">250 ml</option>
+                  <option value="350">350 ml</option>
+                  <option value="450">450 ml</option>
                 </select>
               </div>
+
+              {/* Tờ khai y tế sơ lược ngay trong Walk-in (Nếu không phải Khẩn cấp) */}
+              {form.loaiHinh !== 'KhanCap' && (
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <p className="text-xs font-extrabold text-slate-700">Hỏi sơ lược sức khỏe lúc tiếp nhận (Theo Bộ Y Tế):</p>
+                  <div className="space-y-1.5">
+                    {HEALTH_QUESTIONS.map(q => (
+                      <label key={q.id} className="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs cursor-pointer">
+                        <span className="text-slate-600 font-medium pr-2">{q.label}</span>
+                        <input
+                          type="checkbox"
+                          checked={healthForm[q.id]}
+                          onChange={e => setHealthForm(p => ({ ...p, [q.id]: e.target.checked }))}
+                          className="w-4 h-4 accent-primary rounded cursor-pointer shrink-0"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Ghi chú */}
               <div>
-                <label className="text-sm font-semibold text-slate-700 block mb-1">Ghi chú</label>
-                <textarea
-                  value={form.ghiChu} onChange={e => setForm(p => ({ ...p, ghiChu: e.target.value }))}
-                  rows={3} placeholder="Ghi chú thêm (nếu có)..."
-                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary resize-none"
+                <label className="text-xs font-bold text-slate-600 block mb-1">Ghi chú tiếp nhận</label>
+                <input
+                  type="text"
+                  value={form.ghiChu}
+                  onChange={e => setForm(p => ({ ...p, ghiChu: e.target.value }))}
+                  placeholder="Nhập ghi chú tiếp nhận (nếu có)..."
+                  className="w-full h-10 border border-slate-200 rounded-lg px-3 text-xs outline-none focus:border-primary"
                 />
-              </div>
-              <div className="flex gap-3 pt-2">
-                {mode === 'create' && (
-                  <button onClick={() => setStep('search')}
-                    className="flex-1 h-11 border border-slate-200 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors">
-                    Quay lại
-                  </button>
-                )}
-                <button onClick={handleSubmit} disabled={loading}
-                  className="flex-1 h-11 bg-primary text-white rounded-xl font-bold text-sm hover:bg-red-800 transition-colors shadow-sm disabled:opacity-60">
-                  {loading ? 'Đang lưu...' : mode === 'create' ? 'Tạo đơn' : 'Cập nhật'}
-                </button>
               </div>
             </div>
           )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-2">
+          <button onClick={onClose} disabled={loading} className="px-4 h-10 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">
+            Hủy
+          </button>
+          {step === 'form' && (
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className={`px-5 h-10 text-white rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md ${
+                form.loaiHinh === 'KhanCap' ? 'bg-[#af101a] hover:bg-red-800' : 'bg-primary hover:bg-red-800'
+              }`}
+            >
+              {loading ? (
+                <span>Đang lưu...</span>
+              ) : form.loaiHinh === 'KhanCap' ? (
+                <>
+                  <span className="material-symbols-outlined text-base">emergency</span>
+                  <span>Lưu Khẩn Cấp & Gửi Admin Khen Thưởng</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-base">task_alt</span>
+                  <span>Hoàn Tất Tiếp Nhận & Chuyển Bác Sĩ</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Modal Tiếp Nhận tại Quầy & Kiểm Tra Sơ Lược Sức Khỏe Lễ Tân ──────────────────
+function TiepNhanModal({ don, nhanVien, onClose, onConfirmed }) {
+  const tnv = don?.tinhNguyenVien || {};
+  const hoTen = tnv.hoTen || tnv.hoVaTen || tnv.HoTen || ('TNV: ' + (don?.maTNV || '---'));
+  const cccd = tnv.cccd || tnv.soCCCD || tnv.Cccd || 'Chưa cập nhật CCCD';
+  const sdt = tnv.soDienThoai || tnv.SoDienThoai || '---';
+
+  const isEmergency = don?.chienDich?.mucDoUuTien === 'KhanCap' || (don?.maChienDich && String(don.maChienDich).includes('KC'));
+
+  const [form, setForm] = useState({
+    daTungHien: false,
+    xamHinh: false,
+    ruouBia: false,
+    manTinh: false,
+    coThai: false,
+    theTich: don?.theTich || 350,
+    moTaKhac: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      if (isEmergency) {
+        // Luồng Hiến Máu Khẩn Cấp: Hoàn thành trực tiếp & gửi Admin khen thưởng
+        const payload = {
+          maTNV: tnv.maTNV || don.maTNV,
+          cccd: cccd,
+          hoTen: hoTen,
+          soDienThoai: sdt,
+          maChienDich: don.maChienDich,
+          theTich: parseInt(form.theTich) || 350
+        };
+        await donDangKyNvytService.tiepNhanKhanCap(payload);
+        await Swal.fire({
+          title: '🚨 ĐÃ XÁC NHẬN HIẾN KHẨN CẤP!',
+          html: `Đã xác nhận hiến máu khẩn cấp cho <b>${hoTen}</b>.<br/><br/><span class="text-sm text-[#af101a] font-bold">Thông tin đã được chuyển trực tiếp lên Admin để duyệt Khen Thưởng & Cấp Giấy Chứng Nhận!</span>`,
+          icon: 'success',
+          confirmButtonColor: '#af101a',
+        });
+      } else {
+        // Luồng Thường Xuyên / Chiến Dịch
+        const payload = {
+          maTNV: tnv.maTNV || don.maTNV,
+          maChienDich: don.maChienDich,
+          theTich: parseInt(form.theTich) || 350,
+          maNV: nhanVien?.maNV
+        };
+        await donDangKyNvytService.tiepNhan(payload);
+
+        try {
+          await khaiBaoYTeNvytService.create({
+            maDon: don.maDon,
+            dauHong: form.ruouBia,
+            khangSinh: form.manTinh,
+            truyenNhiem: form.xamHinh,
+            coThai: form.coThai,
+            moTaKhac: form.moTaKhac || 'NVYT đã kiểm tra sơ lược sức khỏe lúc tiếp nhận tại quầy lễ tân.'
+          });
+        } catch (e) {
+          console.log('Hồ sơ sức khỏe có thể đã tồn tại:', e);
+        }
+
+        await Swal.fire({
+          title: '✅ ĐÃ TIẾP NHẬN TẠI QUẦY!',
+          html: `Đã xác nhận tiếp nhận TNV <b>${hoTen}</b> (CCCD: <b>${cccd}</b>).<br/><br/><span class="text-sm text-emerald-600 font-bold">Hồ sơ đã chuyển trực tiếp sang Bác Sĩ Khám Lâm Sàng!</span>`,
+          icon: 'success',
+          confirmButtonColor: '#af101a',
+        });
+      }
+
+      onConfirmed();
+    } catch (err) {
+      setError(err.message || 'Lỗi khi tiếp nhận tại quầy');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className={`flex items-center justify-between px-6 py-4 border-b border-slate-100 ${isEmergency ? 'bg-gradient-to-r from-red-50 via-rose-50 to-white' : 'bg-gradient-to-r from-emerald-50 to-white'}`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isEmergency ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
+              <span className="material-symbols-outlined text-2xl">{isEmergency ? 'emergency' : 'how_to_reg'}</span>
+            </div>
+            <div>
+              <h3 className="font-extrabold text-slate-800 text-base">
+                {isEmergency ? '🚨 Tiếp Nhận Hiến Máu Khẩn Cấp Fast-Track' : 'Tiếp Nhận TNV & Kiểm Tra Sơ Lược'}
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                {isEmergency ? 'Xác nhận hiến khẩn cấp cứu người & gửi Admin khen thưởng' : 'Xác nhận TNV có mặt tại quầy lễ tân & chuyển Bác sĩ'}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-slate-200 flex items-center justify-center text-slate-500">
+            <span className="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto space-y-5 flex-1">
+          {error && (
+            <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs font-bold flex items-center gap-2">
+              <span className="material-symbols-outlined text-base">error</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* TNV Info Card */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mã đơn: {don.maDon}</span>
+              <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full ${isEmergency ? 'bg-red-100 text-red-700 animate-pulse' : 'bg-purple-100 text-purple-700'}`}>
+                {isEmergency ? '🚨 Hiến Khẩn Cấp' : 'TNV Đăng Ký Online'}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <div>
+                <p className="text-xs text-slate-400 font-medium">Họ và tên TNV:</p>
+                <p className="font-extrabold text-slate-800 text-base">{hoTen}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 font-medium">Số CCCD:</p>
+                <p className="font-bold text-slate-700 font-mono text-sm">{cccd}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 font-medium">Số điện thoại:</p>
+                <p className="font-bold text-slate-700 text-xs">{sdt}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 font-medium">Thể tích hiến:</p>
+                <p className="font-bold text-blue-600 text-xs">{form.theTich} ml</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Nếu không phải khẩn cấp -> Hỏi 5 câu hỏi sơ lược sức khỏe */}
+          {!isEmergency ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 border-l-4 border-primary pl-3 py-0.5">
+                <h4 className="font-extrabold text-slate-800 text-sm">Hỏi sơ lược tình trạng sức khỏe hôm nay (Theo Bộ Y Tế):</h4>
+              </div>
+
+              <div className="space-y-2">
+                {HEALTH_QUESTIONS.map(q => (
+                  <label key={q.id} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition-all cursor-pointer">
+                    <span className="text-xs font-semibold text-slate-700 pr-2">{q.label}</span>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className={`text-xs font-bold ${form[q.id] ? 'text-red-600' : 'text-emerald-600'}`}>
+                        {form[q.id] ? 'CÓ (Cảnh báo)' : 'Khỏe / Không'}
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={form[q.id]}
+                        onChange={e => setForm(p => ({ ...p, [q.id]: e.target.checked }))}
+                        className="w-4 h-4 accent-primary rounded cursor-pointer"
+                      />
+                    </div>
+                  </label>
+                ))}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-600 block mb-1">Ghi chú sức khỏe của Lễ tân (nếu có):</label>
+                <input
+                  type="text"
+                  value={form.moTaKhac}
+                  onChange={e => setForm(p => ({ ...p, moTaKhac: e.target.value }))}
+                  placeholder="Vd: Sức khỏe tốt, ngủ đủ 7 tiếng, tinh thần thoải mái..."
+                  className="w-full h-10 border border-slate-200 rounded-xl px-3 text-xs outline-none focus:border-primary"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-xl space-y-2 text-center">
+              <span className="material-symbols-outlined text-4xl text-red-600 block">emergency_home</span>
+              <p className="text-sm font-extrabold text-red-800">Trường Hợp Hiến Máu Cấp Cứu Khẩn Cấp!</p>
+              <p className="text-xs text-slate-600">Bỏ qua các thủ tục khám sàng lọc rườm rà. Tiếp nhận máu ngay để cứu người. Hệ thống sẽ lập tức lưu thông tin và gửi yêu cầu lên Admin xét duyệt Khen Thưởng & Cấp Giấy Chứng Nhận.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-3">
+          <button onClick={onClose} disabled={loading} className="px-4 h-10 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">
+            Hủy
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={loading}
+            className={`px-5 h-10 text-white rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md disabled:opacity-60 ${
+              isEmergency ? 'bg-[#af101a] hover:bg-red-800' : 'bg-primary hover:bg-red-800'
+            }`}
+          >
+            {loading ? (
+              <span>Đang xử lý...</span>
+            ) : isEmergency ? (
+              <>
+                <span className="material-symbols-outlined text-base">card_membership</span>
+                <span>🚨 XÁC NHẬN KHẨN CẤP & GỬI ADMIN KHEN THƯỞNG</span>
+              </>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-base">task_alt</span>
+                <span>Xác Nhận Tiếp Nhận & Chuyển Bác Sĩ</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>
@@ -334,7 +713,7 @@ export default function DonDangKy() {
   const [keyword, setKeyword] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [modal, setModal] = useState(null); // { mode: 'create'|'edit', don }
-  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [checkInDon, setCheckInDon] = useState(null);
   const [toast, setToast] = useState(null);
 
   const showToast = (msg, type = 'success') => {
@@ -346,9 +725,26 @@ export default function DonDangKy() {
     setLoading(true);
     try {
       const res = await donDangKyNvytService.getAll(page, PAGE_SIZE, keyword);
-      const content = Array.isArray(res) ? res : (res.content || []);
-      setDons(content);
-      setTotalPages(res.totalPages || 1);
+      const allContent = Array.isArray(res) ? res : (res.content || res.data || []);
+      
+      let filtered = allContent;
+      if (keyword.trim()) {
+        const kw = keyword.toLowerCase().trim();
+        filtered = allContent.filter(item => {
+          const maDon = String(item.maDon || '').toLowerCase();
+          const hoTen = String(item.tinhNguyenVien?.hoTen || item.tinhNguyenVien?.hoVaTen || item.tinhNguyenVien?.HoTen || item.maTNV || '').toLowerCase();
+          const cccd = String(item.tinhNguyenVien?.cccd || item.tinhNguyenVien?.soCCCD || item.tinhNguyenVien?.Cccd || '').toLowerCase();
+          const tenCD = String(item.chienDich?.tenChienDich || item.maChienDich || '').toLowerCase();
+          return maDon.includes(kw) || hoTen.includes(kw) || cccd.includes(kw) || tenCD.includes(kw);
+        });
+      }
+
+      const total = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+      setTotalPages(total);
+
+      const startIndex = page * PAGE_SIZE;
+      const paginatedDons = filtered.slice(startIndex, startIndex + PAGE_SIZE);
+      setDons(paginatedDons);
     } catch { showToast('Lỗi khi tải danh sách đơn đăng ký', 'error'); }
     finally { setLoading(false); }
   }, [page, keyword]);
@@ -359,7 +755,6 @@ export default function DonDangKy() {
 
   const handleDelete = async (don) => {
     if (!don) return;
-    // Bước 1: Hỏi xác nhận xóa đơn
     const result = await Swal.fire({
       title: 'Bạn có muốn xóa Đơn đăng ký này không?',
       text: `Đơn ${don.maDon} sẽ bị xóa cùng hồ sơ sức khỏe liên quan (nếu có).`,
@@ -373,7 +768,6 @@ export default function DonDangKy() {
     if (!result.isConfirmed) return;
     try {
       await donDangKyNvytService.delete(don.maDon);
-      // Bước 2: Thông báo đã xóa hồ sơ sức khỏe (nếu có)
       await Swal.fire({
         title: 'Đã xóa thành công!',
         html: `Đã xóa hồ sơ sức khỏe và đơn đăng ký <b>${don.maDon}</b>.`,
@@ -381,7 +775,6 @@ export default function DonDangKy() {
         confirmButtonColor: '#af101a',
         confirmButtonText: 'OK',
       });
-      setDeleteTarget(null);
       loadData();
     } catch (e) {
       Swal.fire({
@@ -390,24 +783,45 @@ export default function DonDangKy() {
         icon: 'error',
         confirmButtonColor: '#af101a',
       });
-      setDeleteTarget(null);
     }
   };
 
   const handleSaved = (saved, mode) => {
     setModal(null);
-    if (mode === 'create' && saved?.maDon) {
-      showToast('Tạo đơn thành công! Chuyển đến khai báo y tế...');
-      localStorage.setItem('nvyt_maDon', saved.maDon);
-      localStorage.setItem('nvyt_maTNV', saved.maTNV || '');
-      setTimeout(() => navigate('/nvyt/khai-bao-y-te'), 1200);
-    } else {
-      showToast('Cập nhật đơn thành công'); loadData();
-    }
+    showToast('Thao tác đơn đăng ký thành công'); 
+    loadData();
   };
 
-  // Kiểm tra đơn có do nhân viên tạo không (có maNV)
   const isEditable = (don) => !!don.maNV;
+
+  const renderChienDichBadge = (don) => {
+    const isEmergency = don?.chienDich?.mucDoUuTien === 'KhanCap' || (don?.maChienDich && String(don.maChienDich).includes('KC'));
+    const isRoutine = !don.maChienDich || don.maChienDich === 'CD00004' || don.maChienDich === 'CD00003';
+    const tenChienDich = don?.chienDich?.tenChienDich || (isRoutine ? 'Hiến Thường Xuyên tại Bệnh viện' : don.maChienDich);
+
+    if (isEmergency) {
+      return (
+        <span className="px-3 py-1 bg-[#fff0f3] text-[#af101a] border border-rose-200 rounded-xl text-xs font-black flex items-center gap-1.5 w-fit animate-pulse">
+          <span className="material-symbols-outlined text-sm text-[#af101a]">emergency</span>
+          <span>[KHẨN CẤP] {tenChienDich}</span>
+        </span>
+      );
+    }
+    if (isRoutine) {
+      return (
+        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5 w-fit">
+          <span className="material-symbols-outlined text-sm text-emerald-600">local_hospital</span>
+          <span>[Thường Xuyên] {tenChienDich}</span>
+        </span>
+      );
+    }
+    return (
+      <span className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold flex items-center gap-1.5 w-fit">
+        <span className="material-symbols-outlined text-sm text-blue-600">event</span>
+        <span>[Chiến Dịch] {tenChienDich}</span>
+      </span>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -423,14 +837,14 @@ export default function DonDangKy() {
       {/* Page header */}
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Đơn đăng ký</h1>
-          <p className="text-slate-500 mt-1 text-sm">Quản lý các đơn đăng ký hiến máu trong hệ thống</p>
+          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Đơn đăng ký & Tiếp Nhận Lễ Tân</h1>
+          <p className="text-slate-500 mt-1 text-sm">Quản lý tiếp nhận TNV tại quầy (Thường xuyên, Chiến dịch & Khẩn cấp)</p>
         </div>
         <button
           onClick={() => setModal({ mode: 'create', don: null })}
           className="flex items-center gap-2 h-11 px-5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-red-800 transition-all shadow-sm shadow-primary/20 active:scale-[0.98]">
           <span className="material-symbols-outlined text-xl">add</span>
-          Tạo đơn mới
+          Tạo đơn trực tiếp (Walk-in)
         </button>
       </div>
 
@@ -441,7 +855,7 @@ export default function DonDangKy() {
           <input
             value={searchInput} onChange={e => setSearchInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            placeholder="Tìm theo mã đơn, tên TNV, mã chiến dịch..."
+            placeholder="Tìm theo mã đơn, tên TNV, CCCD, tên chiến dịch..."
             className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
           />
         </div>
@@ -463,9 +877,13 @@ export default function DonDangKy() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                {['Mã đơn', 'Tình nguyện viên', 'Chiến dịch', 'Thể tích', 'Trạng thái', 'Nhân viên tạo', 'Thao tác'].map(h => (
-                  <th key={h} className="text-left px-5 py-3 text-xs font-black uppercase text-slate-400 tracking-wider whitespace-nowrap">{h}</th>
-                ))}
+                <th className="text-left px-4 py-3 text-xs font-black uppercase text-slate-400 tracking-wider w-[100px]">Mã đơn</th>
+                <th className="text-left px-5 py-3 text-xs font-black uppercase text-slate-400 tracking-wider">Tình nguyện viên</th>
+                <th className="text-left px-5 py-3 text-xs font-black uppercase text-slate-400 tracking-wider">Chiến dịch / Cơ sở tiếp nhận</th>
+                <th className="text-left px-3 py-3 text-xs font-black uppercase text-slate-400 tracking-wider w-[90px]">Thể tích</th>
+                <th className="text-left px-4 py-3 text-xs font-black uppercase text-slate-400 tracking-wider w-[120px]">Trạng thái</th>
+                <th className="text-left px-4 py-3 text-xs font-black uppercase text-slate-400 tracking-wider w-[130px]">Nguồn</th>
+                <th className="text-left px-4 py-3 text-xs font-black uppercase text-slate-400 tracking-wider w-[130px]">Thao tác tiếp nhận</th>
               </tr>
             </thead>
             <tbody>
@@ -483,68 +901,89 @@ export default function DonDangKy() {
                 </td></tr>
               ) : dons.map(don => {
                 const editable = isEditable(don);
+                const tnvObj = don.tinhNguyenVien || {};
+                const hoTenTnv = tnvObj.hoTen || tnvObj.hoVaTen || tnvObj.HoTen || ('TNV: ' + (don.maTNV || '---'));
+                const cccdTnv = tnvObj.cccd || tnvObj.soCCCD || tnvObj.Cccd || '---';
+                const sdtTnv = tnvObj.soDienThoai || tnvObj.SoDienThoai || '';
+
                 return (
-                  <tr key={don.maDon} className={`border-b border-slate-100 hover:bg-slate-50/80 transition-colors ${!editable ? 'opacity-60' : ''}`}>
-                    <td className="px-5 py-4">
+                  <tr key={don.maDon} className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors">
+                    <td className="px-4 py-4">
                       <span className="font-mono text-xs font-bold text-primary bg-red-50 px-2 py-1 rounded-lg">{don.maDon}</span>
                     </td>
-                    <td className="px-5 py-4">
-                      <p className="font-semibold text-slate-800">{don.tinhNguyenVien?.hoVaTen || don.maTNV || '---'}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{don.tinhNguyenVien?.soCCCD || ''}</p>
+                    <td className="px-5 py-4 min-w-[220px]">
+                      <div className="flex flex-col gap-1">
+                        <p className="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-slate-400 text-base">person</span>
+                          {hoTenTnv}
+                        </p>
+                        <p className="text-xs font-bold text-slate-500 font-mono flex items-center gap-1 pl-5">
+                          <span className="material-symbols-outlined text-slate-400 text-xs">badge</span>
+                          CCCD: {cccdTnv}
+                        </p>
+                        {sdtTnv && (
+                          <p className="text-xs font-medium text-slate-400 flex items-center gap-1 pl-5">
+                            <span className="material-symbols-outlined text-slate-400 text-xs">call</span>
+                            SĐT: {sdtTnv}
+                          </p>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-5 py-4 font-mono text-xs text-slate-600">{don.maChienDich || '---'}</td>
-                    <td className="px-5 py-4">
-                      <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg">{don.theTich || '---'} ml</span>
+
+                    <td className="px-5 py-4 min-w-[240px]">
+                      {renderChienDichBadge(don)}
                     </td>
-                    <td className="px-5 py-4">
-                      <span className={`px-2.5 py-1 text-xs font-bold rounded-full
-                        ${don.trangThai === 'DA_KHAM' ? 'bg-green-100 text-green-700' :
-                          don.trangThai === 'CHO_KHAM' ? 'bg-amber-100 text-amber-700' :
-                            'bg-slate-100 text-slate-600'}`}>
-                        {don.trangThai || 'Chờ xử lý'}
+
+                    <td className="px-3 py-4">
+                      <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg">{don.theTich || 350} ml</span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className={`px-2.5 py-1 text-xs font-bold rounded-full whitespace-nowrap
+                        ${don.trangThai === 'DA_KHAM' || don.trangThai === 'DaHoanThanh' ? 'bg-green-100 text-green-700' :
+                          don.trangThai === 'CHO_KHAM' || don.trangThai === 'DaHien' ? 'bg-emerald-100 text-emerald-700' :
+                            'bg-blue-100 text-blue-700'}`}>
+                        {don.trangThai === 'DaHien' ? 'Đã check-in quầy' : 
+                         don.trangThai === 'DaHoanThanh' ? 'Đã hoàn thành' : (don.trangThai || 'Chờ tiếp nhận')}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-xs text-slate-500">
+                    <td className="px-4 py-4 text-xs text-slate-500">
                       {editable ? (
-                        <span className="flex items-center gap-1 text-blue-600 font-semibold">
+                        <span className="flex items-center gap-1 text-blue-600 font-semibold whitespace-nowrap">
                           <span className="material-symbols-outlined text-sm">badge</span>
-                          {don.maNV}
+                          Lễ tân tạo
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1 text-slate-400 italic">
-                          <span className="material-symbols-outlined text-sm">person</span>
-                          TNV tự đăng ký
+                        <span className="flex items-center gap-1 text-purple-600 font-semibold whitespace-nowrap">
+                          <span className="material-symbols-outlined text-sm">devices</span>
+                          Đăng ký App
                         </span>
                       )}
                     </td>
-                    <td className="px-5 py-4">
-                      {editable ? (
-                        <div className="flex items-center gap-2">
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setCheckInDon(don)}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all font-bold text-xs flex items-center gap-1 shadow-sm active:scale-95 whitespace-nowrap"
+                          title="Tiếp nhận TNV & Kiểm tra sức khỏe"
+                        >
+                          <span className="material-symbols-outlined text-base">how_to_reg</span>
+                          <span>Tiếp nhận</span>
+                        </button>
+                        {editable && (
                           <button
                             onClick={() => setModal({ mode: 'edit', don })}
-                            className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center justify-center"
+                            className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center justify-center shrink-0"
                             title="Chỉnh sửa">
                             <span className="material-symbols-outlined text-base">edit</span>
                           </button>
-                          <button
-                            onClick={() => handleDelete(don)}
-                            className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors flex items-center justify-center"
-                            title="Xóa">
-                            <span className="material-symbols-outlined text-base">delete</span>
-                          </button>
-                          <button
-                            onClick={() => { localStorage.setItem('nvyt_maDon', don.maDon); navigate('/nvyt/khai-bao-y-te'); }}
-                            className="w-8 h-8 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors flex items-center justify-center"
-                            title="Khai báo y tế">
-                            <span className="material-symbols-outlined text-base">fact_check</span>
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="flex items-center gap-1 text-xs text-slate-400 px-2">
-                          <span className="material-symbols-outlined text-sm">lock</span>
-                          Không thể sửa
-                        </span>
-                      )}
+                        )}
+                        <button
+                          onClick={() => handleDelete(don)}
+                          className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors flex items-center justify-center shrink-0"
+                          title="Xóa đơn">
+                          <span className="material-symbols-outlined text-base">delete</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -583,6 +1022,16 @@ export default function DonDangKy() {
         <DonModal
           mode={modal.mode} don={modal.don} nhanVien={nhanVien}
           onClose={() => setModal(null)} onSaved={handleSaved}
+        />
+      )}
+
+      {/* Modal Tiếp Nhận Tại Quầy Lễ Tân */}
+      {checkInDon && (
+        <TiepNhanModal
+          don={checkInDon}
+          nhanVien={nhanVien}
+          onClose={() => setCheckInDon(null)}
+          onConfirmed={() => { setCheckInDon(null); loadData(); }}
         />
       )}
 

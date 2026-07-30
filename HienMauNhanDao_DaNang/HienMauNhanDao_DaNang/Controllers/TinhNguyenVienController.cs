@@ -26,6 +26,15 @@ namespace HienMauNhanDao_DaNang.Controllers
         public async Task<IActionResult> GetMyProfile()
         {
             var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value;
+            if (string.IsNullOrEmpty(maTaiKhoan))
+            {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? User.FindFirst("email")?.Value ?? User.Identity?.Name;
+                if (!string.IsNullOrEmpty(email))
+                {
+                    var tk = await _context.TaiKhoans.FirstOrDefaultAsync(t => t.Email == email);
+                    if (tk != null) maTaiKhoan = tk.MaTaiKhoan;
+                }
+            }
 
             var tnv = await _context.TinhNguyenViens.FirstOrDefaultAsync(t => t.MaTaiKhoan == maTaiKhoan);
 
@@ -59,13 +68,23 @@ namespace HienMauNhanDao_DaNang.Controllers
         {
 
             var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value;
+            if (string.IsNullOrEmpty(maTaiKhoan))
+            {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? User.FindFirst("email")?.Value ?? User.Identity?.Name;
+                if (!string.IsNullOrEmpty(email))
+                {
+                    var tk = await _context.TaiKhoans.FirstOrDefaultAsync(t => t.Email == email);
+                    if (tk != null) maTaiKhoan = tk.MaTaiKhoan;
+                }
+            }
+
             var tnv = await _context.TinhNguyenViens.FirstOrDefaultAsync(t => t.MaTaiKhoan == maTaiKhoan);
 
             if (tnv == null)
             {
                 tnv = new TinhNguyenVien
                 {
-                    maTNV = "TNV" + DateTime.Now.ToString("HHmmss"),
+                    maTNV = "TN" + DateTime.Now.ToString("HHmmss"),
                     MaTaiKhoan = maTaiKhoan
                 };
                 _context.TinhNguyenViens.Add(tnv);
@@ -79,11 +98,19 @@ namespace HienMauNhanDao_DaNang.Controllers
             tnv.DiaChi = request.DiaChi;
             tnv.MaPhuongXa = request.MaPhuongXa;
 
-            //Xử lý chuyển đổi chuỗi  sáng DateOnly 
-            if (DateOnly.TryParse(request.NgaySinh, out var parsedDate))
+            //Xử lý chuyển đổi chuỗi sang DateOnly 
+            if (!string.IsNullOrEmpty(request.NgaySinh))
             {
-                tnv.NgaySinh = parsedDate;
+                if (DateOnly.TryParse(request.NgaySinh, out var parsedDate))
+                {
+                    tnv.NgaySinh = parsedDate;
+                }
+                else if (DateTime.TryParse(request.NgaySinh, out var parsedDt))
+                {
+                    tnv.NgaySinh = DateOnly.FromDateTime(parsedDt);
+                }
             }
+
             //xử lý ép kiểu chuỗi chữ sang Enum chuẩn 
             if (Enum.TryParse<GioiTinh>(request.GioiTinh, out var parsedGioiTinh))
             {
@@ -97,7 +124,7 @@ namespace HienMauNhanDao_DaNang.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return Ok(new { success = true, message = "Đã lưu hồ sơ thành côg !" });
+            return Ok(new { success = true, message = "Đã lưu hồ sơ thành công!", data = tnv });
 
         }
 

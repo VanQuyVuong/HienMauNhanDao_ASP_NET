@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Data;
+using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -50,8 +50,19 @@ namespace HienMauNhanDao_DaNang.Controllers
             }
 
             //Tạo mã hồ sơ tăng dạng HS00001, HS00002,...
-            var count = await _context.HoSoSucKhoes.CountAsync();
-            var maHoSo = $"HS{(count+1):DS}";
+            var allIds = await _context.HoSoSucKhoes.Select(h => h.MaHoSo).ToListAsync();
+            int maxNum = 0;
+            foreach (var id in allIds)
+            {
+                if (!string.IsNullOrEmpty(id) && id.StartsWith("HS"))
+                {
+                    if (int.TryParse(id.Substring(2), out int num))
+                    {
+                        if (num > maxNum) maxNum = num;
+                    }
+                }
+            }
+            var maHoSo = $"HS{(maxNum + 1):D5}";
 
             var hoSo = new HoSoSucKhoe
             {
