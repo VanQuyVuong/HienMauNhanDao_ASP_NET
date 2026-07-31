@@ -70,7 +70,7 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 TokenType = "Bearer",
-                ExpiresIn = 900,
+                ExpiresIn = 2592000,
                 UserId = taiKhoan.MaTaiKhoan,
                 Email = taiKhoan.Email,
                 MaVaiTro = maVaiTro,

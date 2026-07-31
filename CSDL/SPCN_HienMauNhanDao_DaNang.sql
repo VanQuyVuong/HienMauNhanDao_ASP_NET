@@ -260,11 +260,13 @@ ALTER TABLE TINNHAN          ADD FOREIGN KEY (maTaiKhoanNhan)   REFERENCES TAIKH
 
 -- 3.1 VAI TRÒ
 INSERT INTO VAITRO VALUES
-('AD',   'Quản trị hệ thống'),
-('BS',   'Bác sĩ chuyên khoa'),
-('NVYT', 'Nhân viên y tế'),
-('QLK',  'Quản lý kho máu'),
-('TNV',  'Tình nguyện viên');
+('AD',      'Quản trị hệ thống'),
+('BS',      'Bác sĩ chuyên khoa'),
+('NVYT',    'Nhân viên y tế chung'),
+('NVYT_LT', 'Nhân viên y tế Lễ tân'),
+('NVYT_XN', 'Nhân viên y tế Xét nghiệm & Lấy máu'),
+('QLK',     'Quản lý kho máu'),
+('TNV',     'Tình nguyện viên');
 
 -- 3.2 PHƯỜNG XÃ (TP. Đà Nẵng)
 INSERT INTO PHUONGXA VALUES

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { nhanVienService } from '../services/nvytService';
 
-// ─── Sidebar nav items ────────────────────────────────────────────────────────
-const NAV_ITEMS = [
+// ─── Sidebar nav items cho Lễ Tân (3 trang) ─────────────────────────
+const LE_TAN_NAV_ITEMS = [
   {
-    label: 'Đơn đăng ký',
+    label: 'Đơn đăng ký & Tiếp nhận',
     icon: 'description',
     path: '/nvyt/don-dang-ky',
   },
@@ -19,15 +19,19 @@ const NAV_ITEMS = [
     icon: 'fact_check',
     path: '/nvyt/khai-bao-y-te',
   },
+];
+
+// ─── Sidebar nav items cho Xét Nghiệm (2 trang) ──────────────────────
+const XET_NGHIEM_NAV_ITEMS = [
   {
-    label: 'Cập nhật XN',
-    icon: 'biotech',
-    path: '/nvyt/cap-nhat-xet-nghiem',
-  },
-  {
-    label: 'Thu nhận máu',
+    label: 'Thu nhận & Sinh mã túi máu',
     icon: 'vaccines',
     path: '/nvyt/thu-nhan-mau',
+  },
+  {
+    label: 'Cập nhật XN & Re-test Kho',
+    icon: 'biotech',
+    path: '/nvyt/cap-nhat-xet-nghiem',
   },
 ];
 
@@ -131,33 +135,37 @@ export default function NVYTLayout() {
           </div>
         </div>
 
-        {/* Nav */}
+        {/* Nav (Phân chia động 3 trang Lễ Tân / 2 trang Xét Nghiệm) */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all group
-                ${isActive
-                  ? 'bg-primary text-white shadow-sm shadow-primary/30'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-primary'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <span
-                    className="material-symbols-outlined text-xl shrink-0"
-                    style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
-                  >
-                    {item.icon}
-                  </span>
-                  <span className="truncate">{item.label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
+          {(() => {
+            const role = (localStorage.getItem('role') || '').trim();
+            const navItems = role === 'NVYT_XN' ? XET_NGHIEM_NAV_ITEMS : LE_TAN_NAV_ITEMS;
+            return navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all group
+                  ${isActive
+                    ? 'bg-primary text-white shadow-sm shadow-primary/30'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-primary'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <span
+                      className="material-symbols-outlined text-xl shrink-0"
+                      style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
+                    >
+                      {item.icon}
+                    </span>
+                    <span className="truncate">{item.label}</span>
+                  </>
+                )}
+              </NavLink>
+            ));
+          })()}
         </nav>
 
         {/* Footer */}
