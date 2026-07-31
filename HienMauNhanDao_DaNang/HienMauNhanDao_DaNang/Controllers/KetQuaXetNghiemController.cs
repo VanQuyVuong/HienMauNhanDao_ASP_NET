@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Data;
+using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +10,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles ="BS/ADD")]
+    [Authorize(Roles = "NVYT, NVYT_XN, BS, QLK, AD")]
     public class KetQuaXetNghiemController : ControllerBase
     {
         private readonly AppDbContext _context;
