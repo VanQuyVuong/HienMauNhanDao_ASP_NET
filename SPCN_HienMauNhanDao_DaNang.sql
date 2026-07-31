@@ -259,12 +259,17 @@ ALTER TABLE TINNHAN          ADD FOREIGN KEY (maTaiKhoanNhan)   REFERENCES TAIKH
 -- =============================================================
 
 -- 3.1 VAI TRÒ
-INSERT INTO VAITRO VALUES
-('AD',   'Quản trị hệ thống'),
-('BS',   'Bác sĩ chuyên khoa'),
-('NVYT', 'Nhân viên y tế'),
-('QLK',  'Quản lý kho máu'),
-('TNV',  'Tình nguyện viên');
+INSERT INTO VAITRO (maVaiTro, tenVaiTro) VALUES 
+('AD',      'Quản trị hệ thống'),
+('BS',      'Bác sĩ chuyên khoa'),
+('NVYT',    'Nhân viên y tế Lễ tân'),
+('NVYT_LT', 'Nhân viên y tế Lễ tân'),
+('NVYT-LT', 'Nhân viên y tế Lễ tân'),
+('NVYT_XN', 'Nhân viên y tế Xét nghiệm & Lấy máu'),
+('NVYT-XN', 'Nhân viên y tế Xét nghiệm & Lấy máu'),
+('QLK',     'Quản lý kho máu'),
+('TNV',     'Tình nguyện viên')
+ON DUPLICATE KEY UPDATE tenVaiTro = VALUES(tenVaiTro);
 
 -- 3.2 PHƯỜNG XÃ (TP. Đà Nẵng)
 INSERT INTO PHUONGXA VALUES
@@ -320,13 +325,14 @@ INSERT INTO KHOMAU VALUES
 -- =============================================================
 
 INSERT INTO TAIKHOAN (maTaiKhoan, maVaiTro, email, matKhau, trangThai) VALUES 
-('TK00001', 'AD',   'admin@gmail.com',   '$2a$11$xk13z0u79iV/rzW89z/8uuQS36NE.fKNLwA9PG3MKtTScVKpKTufK', 1), -- Mật khẩu: Abc123!@#
-('TK00002', 'NVYT', 'nvyt1@gmail.com',   '$2a$11$t5e4TrPnBYrCVqxP8QDzOumOo9n2MboFAtbM8cu6HQzzx.JxPvQP2', 1), -- Mật khẩu: Abc123!@#
-('TK00003', 'NVYT', 'nvyt2@gmail.com',   '$2a$11$fJYOh9KSCyXttefr8NarOuB9I8.c.JKw5OcAjNlqoVSw5JU0tnAZG', 1), -- Mật khẩu: Abc123!@#
-('TK00004', 'BS',   'doctor1@gmail.com', '$2a$11$dcgltimlogByLALH9P8hPOy6Yf0hImynlzF0UkqNqNTJOQiUY6Z5G', 1), -- Mật khẩu: Abc123!@#
-('TK00005', 'BS',   'doctor2@gmail.com', '$2a$11$7v0Jg8k1Cf94UxKke.hVpOGWx5HC1pcj0L7nx1nexd3mojzcyI1IK', 1), -- Mật khẩu: Abc123!@#
-('TK00006', 'QLK',  'qlk@gmail.com',     '$2a$11$SoPa7XGP3InPdakUcjNC2ex2OmOZfyhGUQq1Erv2lnmN9g0VoPNvS', 1); -- Mật khẩu: Abc123!@#
-
+('TK00001', 'AD',      'admin@gmail.com',  '$2a$11$xk13z0u79iV/rzW89z/8uuQS36NE.fKNLwA9PG3MKtTScVKpKTufK', 1),
+('TK00002', 'NVYT',    'nvyt1@gmail.com',  '$2a$11$t5e4TrPnBYrCVqxP8QDzOumOo9n2MboFAtbM8cu6HQzzx.JxPvQP2', 1),
+('TK00003', 'NVYT',    'nvyt2@gmail.com',  '$2a$11$fJYOh9KSCyXttefr8NarOuB9I8.c.JKw5OcAjNlqoVSw5JU0tnAZG', 1),
+('TK00004', 'BS',      'doctor1@gmail.com','$2a$11$dcgltimlogByLALH9P8hPOy6Yf0hImynlzF0UkqNqNTJOQiUY6Z5G', 1),
+('TK00005', 'BS',      'doctor2@gmail.com','$2a$11$7v0Jg8k1Cf94UxKke.hVpOGWx5HC1pcj0L7nx1nexd3mojzcyI1IK', 1),
+('TK00006', 'QLK',     'qlk@gmail.com',    '$2a$11$SoPa7XGP3InPdakUcjNC2ex2OmOZfyhGUQq1Erv2lnmN9g0VoPNvS', 1),
+('TK00007', 'NVYT-XN', 'nvxn1@gmail.com',  '$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy', 1)
+ON DUPLICATE KEY UPDATE matKhau = VALUES(matKhau), maVaiTro = VALUES(maVaiTro);
 -- HỒ SƠ NHÂN VIÊN TƯƠNG ỨNG
 INSERT INTO NHANVIEN (maNhanVien, maTaiKhoan, maKhoa, maDiaDiem, hoTen, CCCD, gioiTinh, soDienThoai) VALUES 
 ('NV00001', 'TK00001', 'KC00006', 'DD00001', 'Admin Hệ Thống', '048075000001', 'Nam', '0905000001'),

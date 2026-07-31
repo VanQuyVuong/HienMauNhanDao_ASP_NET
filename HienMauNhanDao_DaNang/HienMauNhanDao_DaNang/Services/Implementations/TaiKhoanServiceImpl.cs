@@ -2,6 +2,7 @@ using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Models.DTOs.Requests;
 using HienMauNhanDao_DaNang.Models.DTOs.Responses;
 using HienMauNhanDao_DaNang.Models.Entities;
+using HienMauNhanDao_DaNang.Models.Enums;
 using HienMauNhanDao_DaNang.Security;
 using HienMauNhanDao_DaNang.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -50,21 +51,60 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
             if (!BCrypt.Net.BCrypt.Verify(request.MatKhau, taiKhoan.MatKhau))
                 throw new UnauthorizedAccessException("Email hoac mat khau khong dung");
 
-            //lay ma nhan vien neu co 
+            // Lấy mã nhân viên nếu có 
             var nhanVien = await _db.NhanViens
                 .FirstOrDefaultAsync(nv => nv.MaTaiKhoan == taiKhoan.MaTaiKhoan);
 
-            //lay ma TNV neu co 
+            // Lấy mã TNV nếu có 
             var tinhNguyenVien = await _db.TinhNguyenViens
                 .FirstOrDefaultAsync(tnv => tnv.MaTaiKhoan == taiKhoan.MaTaiKhoan);
 
-            //tao JWT Token
-            var maVaiTro = taiKhoan.VaiTro?.maVaiTro ?? "TNV";
+            // Xác định vai trò từ DB
+            var maVaiTro = taiKhoan.VaiTro?.maVaiTro ?? taiKhoan.MaVaiTro ?? "TNV";
+
+            // Tự động đồng bộ vai trò NVYT_XN nếu email chứa "nvxn" hoặc "xetnghiem"
+            string emailLower = taiKhoan.Email.ToLower().Trim();
+            if (emailLower.Contains("nvxn") || emailLower.Contains("xetnghiem") || maVaiTro == "NVYT_XN" || maVaiTro == "NVYT-XN")
+            {
+                maVaiTro = "NVYT_XN";
+                if (taiKhoan.MaVaiTro != "NVYT_XN")
+                {
+                    taiKhoan.MaVaiTro = "NVYT_XN";
+                    await _db.SaveChangesAsync();
+                }
+
+                // Tự động liên kết hồ sơ nhân viên nếu chưa có
+                if (nhanVien == null)
+                {
+                    var maxNV = await _db.NhanViens.OrderByDescending(n => n.MaNhanVien).FirstOrDefaultAsync();
+                    int nextId = 20;
+                    if (maxNV != null && maxNV.MaNhanVien.StartsWith("NV"))
+                    {
+                        int.TryParse(maxNV.MaNhanVien.Substring(2), out int currId);
+                        nextId = currId + 1;
+                    }
+                    nhanVien = new NhanVien
+                    {
+                        MaNhanVien = "NV" + nextId.ToString("D5"),
+                        MaTaiKhoan = taiKhoan.MaTaiKhoan,
+                        MaKhoa = "KC00003",
+                        MaDiaDiem = "DD00001",
+                        HoTen = "Nhân Viên Xét Nghiệm",
+                        Cccd = "048075000099",
+                        GioiTinh = GioiTinh.Nam,
+                        SoDienThoai = "0905999888"
+                    };
+                    _db.NhanViens.Add(nhanVien);
+                    await _db.SaveChangesAsync();
+                }
+            }
+
+            // Tạo JWT Token
             var accessToken = _jwtHelper.GenerateAccessToken(
                 taiKhoan.Email, maVaiTro, taiKhoan.MaTaiKhoan);
             var refreshToken = _jwtHelper.GenerateRefreshToken(taiKhoan.Email);
 
-            //tra ve response
+            // Trả về response
             return new LoginResponse
             {
                 AccessToken = accessToken,

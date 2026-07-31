@@ -45,10 +45,11 @@ import CapGiayChungNhan from "./pages/admin/CapGiayChungNhan";
 
 const queryClient = new QueryClient();
 
-// Guard: chỉ cho phép role NVYT truy cập
+// Guard: cho phép các vai trò NVYT (Lễ Tân & Xét Nghiệm) truy cập
 function NvytGuard({ children }) {
-  const role = localStorage.getItem("role");
-  if (role !== "NVYT") return <Navigate to="/login" replace />;
+  const role = (localStorage.getItem("role") || "").trim();
+  const isNvytRole = ["NVYT", "NVYT_LT", "NVYT-LT", "NVYT_XN", "NVYT-XN"].includes(role);
+  if (!isNvytRole) return <Navigate to="/login" replace />;
   return children;
 }
 

@@ -262,9 +262,11 @@ ALTER TABLE TINNHAN          ADD FOREIGN KEY (maTaiKhoanNhan)   REFERENCES TAIKH
 INSERT INTO VAITRO VALUES
 ('AD',      'Quản trị hệ thống'),
 ('BS',      'Bác sĩ chuyên khoa'),
-('NVYT',    'Nhân viên y tế chung'),
+('NVYT',    'Nhân viên y tế Lễ tân'),
 ('NVYT_LT', 'Nhân viên y tế Lễ tân'),
+('NVYT-LT', 'Nhân viên y tế Lễ tân'),
 ('NVYT_XN', 'Nhân viên y tế Xét nghiệm & Lấy máu'),
+('NVYT-XN', 'Nhân viên y tế Xét nghiệm & Lấy máu'),
 ('QLK',     'Quản lý kho máu'),
 ('TNV',     'Tình nguyện viên');
 
@@ -1042,13 +1044,17 @@ INSERT INTO TAIKHOAN (maTaiKhoan, maVaiTro, email, matKhau, trangThai) VALUES
 ('TK00031','NVYT','huy@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
 ('TK00032','QLK','quanlykho@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
 ('TK00033','BS','bacsi@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
-('TK00034','AD','admin@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1);
+('TK00034','AD','admin@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
+('TK00035','NVYT_XN','nvxn1@gmail.com','$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy',1),
+('TK00036','NVYT_LT','nvletan1@gmail.com','$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy',1);
 
 INSERT INTO NHANVIEN (maNhanVien, maTaiKhoan, maKhoa, maDiaDiem, hoTen, CCCD, gioiTinh, soDienThoai) VALUES 
 ('NV00016', 'TK00031', 'KC00001', 'DD00001', 'Huy', '000000000000', 'Nam', '0000000000'),
 ('NV00017', 'TK00033', 'KC00001', 'DD00001', 'Bác sĩ','000000000001', 'Nam', '0000000001'),
 ('NV00018', 'TK00009', 'KC00001', 'DD00001', 'Hoàng Thị Huy', '000000000002', 'Nữ', '0000000002'),
-('NV00019', 'TK00010', 'KC00001', 'DD00001', 'Nguyễn Tuyết Mai', '000000000003', 'Nữ', '0000000003');
+('NV00019', 'TK00010', 'KC00001', 'DD00001', 'Nguyễn Tuyết Mai', '000000000003', 'Nữ', '0000000003'),
+('NV00020', 'TK00035', 'KC00001', 'DD00001', 'Nhân Viên Xét Nghiệm 1', '000000000004', 'Nam', '0000000004'),
+('NV00021', 'TK00036', 'KC00001', 'DD00001', 'Nhân Viên Lễ Tân 1', '000000000005', 'Nữ', '0000000005');
 
 UPDATE CHIENDICHHIENMAU SET trangThai = 'DaKetThuc' WHERE maChienDich = 'CD00002';
 
