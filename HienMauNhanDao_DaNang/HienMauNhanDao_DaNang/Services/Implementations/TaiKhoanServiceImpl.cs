@@ -47,64 +47,26 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
             }
 
             //kiem tra mat khau
-            // BCrypt.Verify = so sánh mật khẩu gõ vào với mật khẩu đã hash
+            // 1. Kiểm tra mật khẩu BCrypt
             if (!BCrypt.Net.BCrypt.Verify(request.MatKhau, taiKhoan.MatKhau))
                 throw new UnauthorizedAccessException("Email hoac mat khau khong dung");
 
-            // Lấy mã nhân viên nếu có 
+            // 2. Truy vấn động 100% từ CSDL SQL (Bảng NHANVIEN, TINHNGUYENVIEN, VAITRO)
             var nhanVien = await _db.NhanViens
                 .FirstOrDefaultAsync(nv => nv.MaTaiKhoan == taiKhoan.MaTaiKhoan);
 
-            // Lấy mã TNV nếu có 
             var tinhNguyenVien = await _db.TinhNguyenViens
                 .FirstOrDefaultAsync(tnv => tnv.MaTaiKhoan == taiKhoan.MaTaiKhoan);
 
-            // Xác định vai trò từ DB
-            var maVaiTro = taiKhoan.VaiTro?.maVaiTro ?? taiKhoan.MaVaiTro ?? "TNV";
+            // Lấy mã vai trò chuẩn trực tiếp từ CSDL SQL
+            var maVaiTro = (taiKhoan.VaiTro?.maVaiTro ?? taiKhoan.MaVaiTro ?? "TNV").Trim();
 
-            // Tự động đồng bộ vai trò NVYT_XN nếu email chứa "nvxn" hoặc "xetnghiem"
-            string emailLower = taiKhoan.Email.ToLower().Trim();
-            if (emailLower.Contains("nvxn") || emailLower.Contains("xetnghiem") || maVaiTro == "NVYT_XN" || maVaiTro == "NVYT-XN")
-            {
-                maVaiTro = "NVYT_XN";
-                if (taiKhoan.MaVaiTro != "NVYT_XN")
-                {
-                    taiKhoan.MaVaiTro = "NVYT_XN";
-                    await _db.SaveChangesAsync();
-                }
-
-                // Tự động liên kết hồ sơ nhân viên nếu chưa có
-                if (nhanVien == null)
-                {
-                    var maxNV = await _db.NhanViens.OrderByDescending(n => n.MaNhanVien).FirstOrDefaultAsync();
-                    int nextId = 20;
-                    if (maxNV != null && maxNV.MaNhanVien.StartsWith("NV"))
-                    {
-                        int.TryParse(maxNV.MaNhanVien.Substring(2), out int currId);
-                        nextId = currId + 1;
-                    }
-                    nhanVien = new NhanVien
-                    {
-                        MaNhanVien = "NV" + nextId.ToString("D5"),
-                        MaTaiKhoan = taiKhoan.MaTaiKhoan,
-                        MaKhoa = "KC00003",
-                        MaDiaDiem = "DD00001",
-                        HoTen = "Nhân Viên Xét Nghiệm",
-                        Cccd = "048075000099",
-                        GioiTinh = GioiTinh.Nam,
-                        SoDienThoai = "0905999888"
-                    };
-                    _db.NhanViens.Add(nhanVien);
-                    await _db.SaveChangesAsync();
-                }
-            }
-
-            // Tạo JWT Token
+            // 3. Tạo JWT Token theo đúng thông tin từ CSDL SQL
             var accessToken = _jwtHelper.GenerateAccessToken(
                 taiKhoan.Email, maVaiTro, taiKhoan.MaTaiKhoan);
             var refreshToken = _jwtHelper.GenerateRefreshToken(taiKhoan.Email);
 
-            // Trả về response
+            // 4. Trả về Response DTO truy vấn hoàn toàn từ CSDL SQL
             return new LoginResponse
             {
                 AccessToken = accessToken,
