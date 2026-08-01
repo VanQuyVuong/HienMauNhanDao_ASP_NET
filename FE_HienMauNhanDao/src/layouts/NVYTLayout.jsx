@@ -21,10 +21,10 @@ const LE_TAN_NAV_ITEMS = [
   },
 ];
 
-// ─── Sidebar nav items cho Xét Nghiệm (Đầy đủ tất cả các trang NVYT) ───
+// ─── Sidebar nav items cho Xét Nghiệm & Lấy Máu (Đúng 2 trang chuyên trách) ───
 const XET_NGHIEM_NAV_ITEMS = [
   {
-    label: 'Thu nhận & Sinh mã túi máu',
+    label: 'Thu nhận & Sinh mã barcode túi máu',
     icon: 'vaccines',
     path: '/nvyt/thu-nhan-mau',
   },
@@ -32,21 +32,6 @@ const XET_NGHIEM_NAV_ITEMS = [
     label: 'Cập nhật XN & Re-test Kho',
     icon: 'biotech',
     path: '/nvyt/cap-nhat-xet-nghiem',
-  },
-  {
-    label: 'Đơn đăng ký',
-    icon: 'description',
-    path: '/nvyt/don-dang-ky',
-  },
-  {
-    label: 'Tình nguyện viên',
-    icon: 'group',
-    path: '/nvyt/tinh-nguyen-vien',
-  },
-  {
-    label: 'Khai báo y tế',
-    icon: 'fact_check',
-    path: '/nvyt/khai-bao-y-te',
   },
 ];
 
