@@ -145,11 +145,22 @@ namespace HienMauNhanDao_DaNang.Controllers
                 }
 
 
-                // 2.tạo mã otp và gửi qua email bất đồng bộ 
+                // 2. Tạo mã OTP, in ra Terminal và trả về response để test trên Scalar
                 var otp = _otpService.GenerateOtp(request.Email);
-                await _emailService.SendOtpEmailAsync(request.Email, otp);
+                try
+                {
+                    await _emailService.SendOtpEmailAsync(request.Email, otp);
+                }
+                catch (Exception emailEx)
+                {
+                    Console.WriteLine($"[WARNING SMTP]: Không thể gửi email tới {request.Email} - {emailEx.Message}");
+                }
 
-                return Ok(ApiResponse<object>.Ok("Gửi OTP thành công"));
+                Console.WriteLine($"\n========================================================");
+                Console.WriteLine($"🔑 [MÃ OTP TEST SCALAR DÀNH CHO {request.Email}]: {otp}");
+                Console.WriteLine($"========================================================\n");
+
+                return Ok(ApiResponse<object>.Ok(new { otp = otp }, $"Gửi OTP thành công! Mã OTP test trên Scalar: {otp}"));
             }catch(Exception ex)
             {
                 return StatusCode(500, ApiResponse<object>.Fail(ex.Message));

@@ -260,11 +260,15 @@ ALTER TABLE TINNHAN          ADD FOREIGN KEY (maTaiKhoanNhan)   REFERENCES TAIKH
 
 -- 3.1 VAI TRÒ
 INSERT INTO VAITRO VALUES
-('AD',   'Quản trị hệ thống'),
-('BS',   'Bác sĩ chuyên khoa'),
-('NVYT', 'Nhân viên y tế'),
-('QLK',  'Quản lý kho máu'),
-('TNV',  'Tình nguyện viên');
+('AD',      'Quản trị hệ thống'),
+('BS',      'Bác sĩ chuyên khoa'),
+('NVYT',    'Nhân viên y tế Lễ tân'),
+('NVYT_LT', 'Nhân viên y tế Lễ tân'),
+('NVYT-LT', 'Nhân viên y tế Lễ tân'),
+('NVYT_XN', 'Nhân viên y tế Xét nghiệm & Lấy máu'),
+('NVYT-XN', 'Nhân viên y tế Xét nghiệm & Lấy máu'),
+('QLK',     'Quản lý kho máu'),
+('TNV',     'Tình nguyện viên');
 
 -- 3.2 PHƯỜNG XÃ (TP. Đà Nẵng)
 INSERT INTO PHUONGXA VALUES
@@ -320,21 +324,25 @@ INSERT INTO KHOMAU VALUES
 -- =============================================================
 
 INSERT INTO TAIKHOAN (maTaiKhoan, maVaiTro, email, matKhau, trangThai) VALUES 
-('TK00001', 'AD',   'admin@gmail.com',   '$2a$11$xk13z0u79iV/rzW89z/8uuQS36NE.fKNLwA9PG3MKtTScVKpKTufK', 1), -- Mật khẩu: Abc123!@#
-('TK00002', 'NVYT', 'nvyt1@gmail.com',   '$2a$11$t5e4TrPnBYrCVqxP8QDzOumOo9n2MboFAtbM8cu6HQzzx.JxPvQP2', 1), -- Mật khẩu: Abc123!@#
-('TK00003', 'NVYT', 'nvyt2@gmail.com',   '$2a$11$fJYOh9KSCyXttefr8NarOuB9I8.c.JKw5OcAjNlqoVSw5JU0tnAZG', 1), -- Mật khẩu: Abc123!@#
-('TK00004', 'BS',   'doctor1@gmail.com', '$2a$11$dcgltimlogByLALH9P8hPOy6Yf0hImynlzF0UkqNqNTJOQiUY6Z5G', 1), -- Mật khẩu: Abc123!@#
-('TK00005', 'BS',   'doctor2@gmail.com', '$2a$11$7v0Jg8k1Cf94UxKke.hVpOGWx5HC1pcj0L7nx1nexd3mojzcyI1IK', 1), -- Mật khẩu: Abc123!@#
-('TK00006', 'QLK',  'qlk@gmail.com',     '$2a$11$SoPa7XGP3InPdakUcjNC2ex2OmOZfyhGUQq1Erv2lnmN9g0VoPNvS', 1); -- Mật khẩu: Abc123!@#
+('TK00001', 'AD',      'admin@gmail.com',  '$2a$11$xk13z0u79iV/rzW89z/8uuQS36NE.fKNLwA9PG3MKtTScVKpKTufK', 1), -- Mật khẩu: Abc123!@#
+('TK00002', 'NVYT',    'nvyt1@gmail.com',  '$2a$11$t5e4TrPnBYrCVqxP8QDzOumOo9n2MboFAtbM8cu6HQzzx.JxPvQP2', 1), -- Mật khẩu: Abc123!@#
+('TK00003', 'NVYT',    'nvyt2@gmail.com',  '$2a$11$fJYOh9KSCyXttefr8NarOuB9I8.c.JKw5OcAjNlqoVSw5JU0tnAZG', 1), -- Mật khẩu: Abc123!@#
+('TK00004', 'BS',      'doctor1@gmail.com','$2a$11$dcgltimlogByLALH9P8hPOy6Yf0hImynlzF0UkqNqNTJOQiUY6Z5G', 1), -- Mật khẩu: Abc123!@#
+('TK00005', 'BS',      'doctor2@gmail.com','$2a$11$7v0Jg8k1Cf94UxKke.hVpOGWx5HC1pcj0L7nx1nexd3mojzcyI1IK', 1), -- Mật khẩu: Abc123!@#
+('TK00006', 'QLK',     'qlk@gmail.com',    '$2a$11$SoPa7XGP3InPdakUcjNC2ex2OmOZfyhGUQq1Erv2lnmN9g0VoPNvS', 1), -- Mật khẩu: Abc123!@#
+('TK00007', 'NVYT-XN', 'nvxn1@gmail.com',  '$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy', 1)
+ON DUPLICATE KEY UPDATE matKhau = VALUES(matKhau), maVaiTro = VALUES(maVaiTro);
 
 -- HỒ SƠ NHÂN VIÊN TƯƠNG ỨNG
 INSERT INTO NHANVIEN (maNhanVien, maTaiKhoan, maKhoa, maDiaDiem, hoTen, CCCD, gioiTinh, soDienThoai) VALUES 
-('NV00001', 'TK00001', 'KC00006', 'DD00001', 'Admin Hệ Thống', '048075000001', 'Nam', '0905000001'),
-('NV00002', 'TK00002', 'KC00002', 'DD00001', 'Nguyễn NVYT 1',  '048075000002', 'Nữ',  '0905000002'),
-('NV00003', 'TK00003', 'KC00002', 'DD00001', 'Trần NVYT 2',    '048075000003', 'Nữ',  '0905000003'),
-('NV00004', 'TK00004', 'KC00001', 'DD00001', 'Bác Sĩ Một',     '048075000004', 'Nam', '0905000004'),
-('NV00005', 'TK00005', 'KC00001', 'DD00001', 'Bác Sĩ Hai',     '048075000005', 'Nam', '0905000005'),
-('NV00006', 'TK00006', 'KC00003', 'DD00001', 'Quản Lý Kho',    '048075000006', 'Nam', '0905000006');
+('NV00001', 'TK00001', 'KC00006', 'DD00001', 'Admin Hệ Thống',        '048075000001', 'Nam', '0905000001'),
+('NV00002', 'TK00002', 'KC00002', 'DD00001', 'Nguyễn NVYT 1',         '048075000002', 'Nữ',  '0905000002'),
+('NV00003', 'TK00003', 'KC00002', 'DD00001', 'Trần NVYT 2',           '048075000003', 'Nữ',  '0905000003'),
+('NV00004', 'TK00004', 'KC00001', 'DD00001', 'Bác Sĩ Một',            '048075000004', 'Nam', '0905000004'),
+('NV00005', 'TK00005', 'KC00001', 'DD00001', 'Bác Sĩ Hai',            '048075000005', 'Nam', '0905000005'),
+('NV00006', 'TK00006', 'KC00003', 'DD00001', 'Quản Lý Kho',           '048075000006', 'Nam', '0905000006'),
+('NV00007', 'TK00007', 'KC00003', 'DD00001', 'Nguyễn Văn Xét Nghiệm', '048075000007', 'Nam', '0905000007')
+ON DUPLICATE KEY UPDATE hoTen = VALUES(hoTen);
 
 -- =============================================================
 -- ✅ XONG! DATABASE ĐÃ ĐƯỢC CHUẨN BỊ ĐẦY ĐỦ
@@ -1040,13 +1048,17 @@ INSERT INTO TAIKHOAN (maTaiKhoan, maVaiTro, email, matKhau, trangThai) VALUES
 ('TK00031','NVYT','huy@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
 ('TK00032','QLK','quanlykho@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
 ('TK00033','BS','bacsi@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
-('TK00034','AD','admin@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1);
+('TK00034','AD','admin@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
+('TK00035','NVYT_XN','nvxn1@gmail.com','$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy',1),
+('TK00036','NVYT_LT','nvletan1@gmail.com','$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy',1);
 
 INSERT INTO NHANVIEN (maNhanVien, maTaiKhoan, maKhoa, maDiaDiem, hoTen, CCCD, gioiTinh, soDienThoai) VALUES 
 ('NV00016', 'TK00031', 'KC00001', 'DD00001', 'Huy', '000000000000', 'Nam', '0000000000'),
 ('NV00017', 'TK00033', 'KC00001', 'DD00001', 'Bác sĩ','000000000001', 'Nam', '0000000001'),
 ('NV00018', 'TK00009', 'KC00001', 'DD00001', 'Hoàng Thị Huy', '000000000002', 'Nữ', '0000000002'),
-('NV00019', 'TK00010', 'KC00001', 'DD00001', 'Nguyễn Tuyết Mai', '000000000003', 'Nữ', '0000000003');
+('NV00019', 'TK00010', 'KC00001', 'DD00001', 'Nguyễn Tuyết Mai', '000000000003', 'Nữ', '0000000003'),
+('NV00020', 'TK00035', 'KC00001', 'DD00001', 'Nhân Viên Xét Nghiệm 1', '000000000004', 'Nam', '0000000004'),
+('NV00021', 'TK00036', 'KC00001', 'DD00001', 'Nhân Viên Lễ Tân 1', '000000000005', 'Nữ', '0000000005');
 
 UPDATE CHIENDICHHIENMAU SET trangThai = 'DaKetThuc' WHERE maChienDich = 'CD00002';
 

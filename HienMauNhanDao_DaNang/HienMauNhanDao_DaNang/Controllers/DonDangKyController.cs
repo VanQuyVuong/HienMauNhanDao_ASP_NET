@@ -213,9 +213,9 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
 
-        //API 3 :Dành cho nhân viên y tế xem toàn bộ danh sách đơn 
+        //API 3 :Dành cho nhân viên y tế lễ tân xem toàn bộ danh sách đơn 
         [HttpGet("tat-ca")]
-        [Authorize(Roles = "NVYT, AD")]  //đây là ổ  khóa kép: Vừa phải có Thẻ, vừa phải có quyền NVYT hoặc Admin
+        [Authorize(Roles = "NVYT, NVYT_LT, AD")]  // Khóa kép: NVYT Lễ Tân, NVYT và Admin
         public async Task<IActionResult> LayTatCaDon()
         {
             //Lấy tất cả mọi tờ đơn trong cơ sở dữ liệu 

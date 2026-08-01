@@ -11,6 +11,15 @@ export default function Login() {
 
   const [loading, setLoading] = useState(false);
 
+  React.useEffect(() => {
+    // Tự động dọn dẹp token và role cũ khi vào lại trang Đăng Nhập
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('email');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('maNV');
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -41,7 +50,9 @@ export default function Login() {
       // Redirect ngay theo vai trò
       if (role === 'BS') {
         window.location.href = '/bac-si/danh-sach-cho-kham';
-      } else if (role === 'NVYT') {
+      } else if (role === 'NVYT_XN' || role === 'NVYT-XN') {
+        window.location.href = '/nvyt/thu-nhan-mau';
+      } else if (role === 'NVYT' || role === 'NVYT_LT' || role === 'NVYT-LT') {
         window.location.href = '/nvyt/don-dang-ky';
       } else if (role === 'QLK') {
         window.location.href = '/quan-ly-kho/thong-ke';

@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace HienMauNhanDao_DaNang.Models.DTOs.Responses
 {
@@ -18,7 +18,7 @@ namespace HienMauNhanDao_DaNang.Models.DTOs.Responses
         public string TokenType { get; set; } = "Bearer";
 
         [JsonPropertyName("expires_in")]
-        public long ExpiresIn { set; get; } = 900; // 15 phút = 900 giây
+        public long ExpiresIn { set; get; } = 2592000; // 30 ngày = 2.592.000 giây
 
         [JsonPropertyName("user_id")]
         public string UserId { set; get; } = string.Empty;

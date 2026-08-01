@@ -2,6 +2,7 @@ using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Models.DTOs.Requests;
 using HienMauNhanDao_DaNang.Models.DTOs.Responses;
 using HienMauNhanDao_DaNang.Models.Entities;
+using HienMauNhanDao_DaNang.Models.Enums;
 using HienMauNhanDao_DaNang.Security;
 using HienMauNhanDao_DaNang.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -46,31 +47,32 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
             }
 
             //kiem tra mat khau
-            // BCrypt.Verify = so sánh mật khẩu gõ vào với mật khẩu đã hash
+            // 1. Kiểm tra mật khẩu BCrypt
             if (!BCrypt.Net.BCrypt.Verify(request.MatKhau, taiKhoan.MatKhau))
                 throw new UnauthorizedAccessException("Email hoac mat khau khong dung");
 
-            //lay ma nhan vien neu co 
+            // 2. Truy vấn động 100% từ CSDL SQL (Bảng NHANVIEN, TINHNGUYENVIEN, VAITRO)
             var nhanVien = await _db.NhanViens
                 .FirstOrDefaultAsync(nv => nv.MaTaiKhoan == taiKhoan.MaTaiKhoan);
 
-            //lay ma TNV neu co 
             var tinhNguyenVien = await _db.TinhNguyenViens
                 .FirstOrDefaultAsync(tnv => tnv.MaTaiKhoan == taiKhoan.MaTaiKhoan);
 
-            //tao JWT Token
-            var maVaiTro = taiKhoan.VaiTro?.maVaiTro ?? "TNV";
+            // Lấy mã vai trò chuẩn trực tiếp từ CSDL SQL
+            var maVaiTro = (taiKhoan.VaiTro?.maVaiTro ?? taiKhoan.MaVaiTro ?? "TNV").Trim();
+
+            // 3. Tạo JWT Token theo đúng thông tin từ CSDL SQL
             var accessToken = _jwtHelper.GenerateAccessToken(
                 taiKhoan.Email, maVaiTro, taiKhoan.MaTaiKhoan);
             var refreshToken = _jwtHelper.GenerateRefreshToken(taiKhoan.Email);
 
-            //tra ve response
+            // 4. Trả về Response DTO truy vấn hoàn toàn từ CSDL SQL
             return new LoginResponse
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 TokenType = "Bearer",
-                ExpiresIn = 900,
+                ExpiresIn = 2592000,
                 UserId = taiKhoan.MaTaiKhoan,
                 Email = taiKhoan.Email,
                 MaVaiTro = maVaiTro,

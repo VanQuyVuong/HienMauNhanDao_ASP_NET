@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -23,11 +23,11 @@ namespace HienMauNhanDao_DaNang.Security
             return new SymmetricSecurityKey(keyBytes);
         }
 
-        //Tao Aaccess Token (Het han sau 15 phut)
+        //Tao Aaccess Token (Het han sau 30 ngay - 43200 phut)
         public string GenerateAccessToken(string email, string role, string maTaiKhoan)
         {
             var expiratioMinutes = int.Parse(
-                _configuration["Jwt:AccessTokenExprirationMinutes"] ?? "15");
+                _configuration["Jwt:AccessTokenExpirationMinutes"] ?? "43200");
 
             var claims = new[]
             {
@@ -53,11 +53,11 @@ namespace HienMauNhanDao_DaNang.Security
             }
 
 
-        //Taoj refresh Token(Het han sau 12 thang)
+        //Taoj refresh Token(Het han sau 90 ngay - 2160 gio)
         public string GenerateRefreshToken(string email)
         {
             var expirationHours = int.Parse(
-                _configuration["Jwt:RefreshTokenEpirationHours"] ?? "2");
+                _configuration["Jwt:RefreshTokenExpirationHours"] ?? "2160");
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name,email ),
