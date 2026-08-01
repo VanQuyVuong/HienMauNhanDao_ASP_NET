@@ -213,20 +213,43 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
 
-        //API 3 :Dành cho nhân viên y tế lễ tân xem toàn bộ danh sách đơn 
+        // API 3: Dành cho nhân viên y tế lễ tân xem toàn bộ danh sách đơn 
         [HttpGet("tat-ca")]
-        [Authorize(Roles = "NVYT, NVYT_LT, AD")]  // Khóa kép: NVYT Lễ Tân, NVYT và Admin
+        [Authorize(Roles = "NVYT, NVYT_LT, NVYT-LT, NVYT_XN, NVYT-XN, AD")]  // Khóa kép: NVYT Lễ Tân, NVYT Xét Nghiệm và Admin
         public async Task<IActionResult> LayTatCaDon()
         {
-            //Lấy tất cả mọi tờ đơn trong cơ sở dữ liệu 
+            // Lấy tất cả mọi tờ đơn trong cơ sở dữ liệu 
             var danhSach = await _context.DonDangKys
-                .Include(d => d.ChienDich) //LẤY TÊN CHIẾN DỊCH
-                .Include(D => D.TinhNguyenVien)   //lấy thông tin Tình nguyện viên nộp đơn
+                .Include(d => d.ChienDich) // LẤY TÊN CHIẾN DỊCH
+                .Include(D => D.TinhNguyenVien)   // lấy thông tin Tình nguyện viên nộp đơn
                 .OrderByDescending(d => d.ThoiGianDangKy)
                 .ToListAsync();
 
             return Ok(new { success = true, data = danhSach });
+        }
 
+        // API 3.1: Dành cho NVYT Xét Nghiệm lấy danh sách đơn chờ thu nhận máu (Đã khám lâm sàng đạt)
+        [HttpGet("cho-thu-nhan")]
+        [Authorize(Roles = "NVYT, NVYT_XN, NVYT-XN, AD")]
+        public async Task<IActionResult> LayDanhSachChoThuNhan([FromQuery] int page = 0, [FromQuery] int size = 10)
+        {
+            var query = _context.DonDangKys
+                .Include(d => d.TinhNguyenVien)
+                .Include(d => d.ChienDich)
+                .Where(d => d.TrangThai == TrangThaiDonDangKy.DaDuyet || d.TrangThai == TrangThaiDonDangKy.DaHoanThanh)
+                .OrderByDescending(d => d.ThoiGianDangKy);
+
+            var totalElements = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalElements / (double)(size > 0 ? size : 10));
+            var content = await query.Skip(page * (size > 0 ? size : 10)).Take(size > 0 ? size : 10).ToListAsync();
+
+            return Ok(new
+            {
+                success = true,
+                content = content,
+                totalElements = totalElements,
+                totalPages = totalPages
+            });
         }
 
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+// ─── Issue #67: Trang Thu Nhận & Sinh Mã Barcode Túi Máu (NVYT Xét Nghiệm) ───
 import { useOutletContext } from 'react-router-dom';
 import { thuNhanMauService, ketQuaXetNghiemService } from '../../services/khamLamSangService';
 import { donDangKyNvytService } from '../../services/nvytService';
