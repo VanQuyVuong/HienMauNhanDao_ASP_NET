@@ -116,12 +116,53 @@ namespace HienMauNhanDao_DaNang.Controllers
             }
 
             // 2. Trường hợp tạo mới đơn khi tiếp nhận tại quầy (Walk-in)
+            var maTNV = request.MaTNV;
+            if (!string.IsNullOrEmpty(maTNV) && maTNV.Length > 10)
+            {
+                maTNV = maTNV.Substring(0, 10);
+            }
+
+            // Kiểm tra MaTNV có tồn tại trong CSDL chưa
+            var existTNV = await _context.TinhNguyenViens.AnyAsync(t => t.maTNV == maTNV);
+            if (!existTNV)
+            {
+                var tnvMoi = new TinhNguyenVien
+                {
+                    maTNV = maTNV,
+                    HoTen = "TNV Tiếp Nhận Quầy",
+                    Cccd = "000000000000",
+                    SoDienThoai = "0000000000",
+                    NgaySinh = new DateOnly(2000, 1, 1)
+                };
+                _context.TinhNguyenViens.Add(tnvMoi);
+                await _context.SaveChangesAsync();
+            }
+
+            // Kiểm tra MaChienDich có hợp lệ không (tối đa 10 ký tự)
+            string? validMaChienDich = null;
+            if (!string.IsNullOrEmpty(request.MaChienDich) && request.MaChienDich.Length <= 10)
+            {
+                var existCD = await _context.ChienDichHienMaus.AnyAsync(c => c.MaChienDich == request.MaChienDich);
+                if (existCD) validMaChienDich = request.MaChienDich;
+            }
+
+            // Kiểm tra MaNhanVien có hợp lệ không (tối đa 10 ký tự)
+            string? validMaNhanVien = null;
+            if (nhanVien != null && !string.IsNullOrEmpty(nhanVien.MaNhanVien) && nhanVien.MaNhanVien.Length <= 10)
+            {
+                var existNV = await _context.NhanViens.AnyAsync(n => n.MaNhanVien == nhanVien.MaNhanVien);
+                if (existNV) validMaNhanVien = nhanVien.MaNhanVien;
+            }
+
+            // Sinh maDon chuẩn 9 ký tự "DK" + mmssfff (Tuân thủ strictly [MaxLength(10)])
+            var maDonMoi = "DK" + DateTime.Now.ToString("mmssfff");
+
             var donMoi = new DonDangKy
             {
-                MaDon = "DON" + DateTime.Now.ToString("HHmmss"),
-                MaTNV = request.MaTNV,
-                MaChienDich = string.IsNullOrEmpty(request.MaChienDich) ? null : request.MaChienDich,
-                MaNhanVien = nhanVien?.MaNhanVien,
+                MaDon = maDonMoi,
+                MaTNV = maTNV,
+                MaChienDich = validMaChienDich,
+                MaNhanVien = validMaNhanVien,
                 ThoiGianDangKy = DateTime.Now,
                 TrangThai = TrangThaiDonDangKy.ChoDuyet,
                 TheTich = request.TheTich
@@ -246,13 +287,15 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         // API 3.1: Dành cho NVYT Xét Nghiệm lấy danh sách đơn chờ thu nhận máu (Đã khám lâm sàng đạt)
         [HttpGet("cho-thu-nhan")]
+        [HttpGet("ready-for-collection")]
         [Authorize(Roles = "NVYT, NVYT_XN, NVYT-XN, AD")]
         public async Task<IActionResult> LayDanhSachChoThuNhan([FromQuery] int page = 0, [FromQuery] int size = 10)
         {
             var query = _context.DonDangKys
                 .Include(d => d.TinhNguyenVien)
                 .Include(d => d.ChienDich)
-                .Where(d => d.TrangThai == TrangThaiDonDangKy.DaDuyet || d.TrangThai == TrangThaiDonDangKy.DaHoanThanh)
+                .Where(d => d.TrangThai == TrangThaiDonDangKy.DaDuyet)
+                .Where(d => !_context.TuiMaus.Any(t => t.MaDon == d.MaDon))
                 .OrderByDescending(d => d.ThoiGianDangKy);
 
             var totalElements = await query.CountAsync();
