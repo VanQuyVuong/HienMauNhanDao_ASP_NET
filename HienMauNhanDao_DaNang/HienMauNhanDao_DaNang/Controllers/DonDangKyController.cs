@@ -81,25 +81,41 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         public class TiepNhanRequest
         {
+            public string? MaDon { get; set; }
             public string? MaTNV { get; set; }
             public string? MaChienDich { get; set; }
             public int TheTich { get; set; } = 250;
             public string? GhiChu { get; set; }
         }
 
-        // API dành cho Lễ tân / Y tá tạo đơn (kể cả tự do không có chiến dịch)
+        // API dành cho Lễ tân / Y tá tạo đơn hoặc tiếp nhận đơn tại quầy
         [HttpPost("tiep-nhan")]
-        [Authorize(Roles = "NVYT, AD")]
+        [Authorize(Roles = "NVYT, NVYT_LT, NVYT-LT, AD")]
         public async Task<IActionResult> TiepNhanHienMau([FromBody] TiepNhanRequest request)
         {
             var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value;
             var nhanVien = await _context.NhanViens.FirstOrDefaultAsync(n => n.MaTaiKhoan == maTaiKhoan);
+
+            // 1. Trường hợp tiếp nhận tờ đơn sẵn có
+            if (!string.IsNullOrEmpty(request.MaDon))
+            {
+                var don = await _context.DonDangKys.FindAsync(request.MaDon);
+                if (don != null)
+                {
+                    don.TrangThai = TrangThaiDonDangKy.ChoDuyet;
+                    don.TheTich = request.TheTich;
+                    if (nhanVien != null) don.MaNhanVien = nhanVien.MaNhanVien;
+                    await _context.SaveChangesAsync();
+                    return Ok(new { success = true, message = "Đã tiếp nhận và chuyển đơn sang Bác sĩ thành công!", maDon = don.MaDon });
+                }
+            }
 
             if (string.IsNullOrEmpty(request.MaTNV))
             {
                 return BadRequest(new { success = false, message = "Cần mã Tình nguyện viên để tiếp nhận!" });
             }
 
+            // 2. Trường hợp tạo mới đơn khi tiếp nhận tại quầy (Walk-in)
             var donMoi = new DonDangKy
             {
                 MaDon = "DON" + DateTime.Now.ToString("HHmmss"),

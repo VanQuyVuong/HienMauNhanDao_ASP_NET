@@ -939,11 +939,13 @@ export default function DonDangKy() {
                     </td>
                     <td className="px-4 py-4">
                       <span className={`px-2.5 py-1 text-xs font-bold rounded-full whitespace-nowrap
-                        ${don.trangThai === 'DA_KHAM' || don.trangThai === 'DaHoanThanh' ? 'bg-green-100 text-green-700' :
-                          don.trangThai === 'CHO_KHAM' || don.trangThai === 'DaHien' ? 'bg-emerald-100 text-emerald-700' :
-                            'bg-blue-100 text-blue-700'}`}>
-                        {don.trangThai === 'DaHien' ? 'Đã check-in quầy' : 
-                         don.trangThai === 'DaHoanThanh' ? 'Đã hoàn thành' : (don.trangThai || 'Chờ tiếp nhận')}
+                        ${don.trangThai === 'ChoDuyet' || don.trangThai === 'DaDuyet' || don.trangThai === 'DaHoanThanh' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                          don.trangThai === 'DaTuChoi' ? 'bg-red-100 text-red-700 border border-red-200' :
+                            'bg-blue-100 text-blue-700 border border-blue-200'}`}>
+                        {don.trangThai === 'ChoDuyet' ? '⏳ Chờ khám bác sĩ' : 
+                         don.trangThai === 'DaDuyet' ? '✅ Bác sĩ đã duyệt' :
+                         don.trangThai === 'DaHoanThanh' ? '🩸 Đã hoàn thành' :
+                         don.trangThai === 'DaTuChoi' ? '❌ Đã từ chối' : (don.trangThai || 'Chờ tiếp nhận')}
                       </span>
                     </td>
                     <td className="px-4 py-4 text-xs text-slate-500">
@@ -961,14 +963,21 @@ export default function DonDangKy() {
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setCheckInDon(don)}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all font-bold text-xs flex items-center gap-1 shadow-sm active:scale-95 whitespace-nowrap"
-                          title="Tiếp nhận TNV & Kiểm tra sức khỏe"
-                        >
-                          <span className="material-symbols-outlined text-base">how_to_reg</span>
-                          <span>Tiếp nhận</span>
-                        </button>
+                        {don.trangThai === 'ChoDuyet' || don.trangThai === 'DaDuyet' || don.trangThai === 'DaHoanThanh' ? (
+                          <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-xs flex items-center gap-1 border border-emerald-200 shadow-sm whitespace-nowrap">
+                            <span className="material-symbols-outlined text-base text-emerald-600">check_circle</span>
+                            <span>Đã tiếp nhận</span>
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => setCheckInDon(don)}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all font-bold text-xs flex items-center gap-1 shadow-sm active:scale-95 whitespace-nowrap"
+                            title="Tiếp nhận TNV & Kiểm tra sức khỏe"
+                          >
+                            <span className="material-symbols-outlined text-base">how_to_reg</span>
+                            <span>Tiếp nhận</span>
+                          </button>
+                        )}
                         {editable && (
                           <button
                             onClick={() => setModal({ mode: 'edit', don })}
