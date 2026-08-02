@@ -54,12 +54,26 @@ namespace HienMauNhanDao_DaNang.Data
                 v => string.IsNullOrEmpty(v) ? null : (v == "Nữ" || v == "Nu" ? GioiTinh.Nu : v == "Nam" ? GioiTinh.Nam : GioiTinh.Khac)
             );
 
+            // Custom converter cho NhomMau để đọc mượt mà cả 'A+', 'B+', 'O+', 'AB+', 'A-', 'B-', 'O-', 'AB-' và 'A_positive' v.v...
+            var nhomMauConverter = new ValueConverter<NhomMau?, string?>(
+                v => v == null ? null : v.ToString(),
+                v => string.IsNullOrEmpty(v) ? null :
+                     (v == "A+" || v == "A_positive") ? NhomMau.A_positive :
+                     (v == "A-" || v == "A_negative") ? NhomMau.A_negative :
+                     (v == "B+" || v == "B_positive") ? NhomMau.B_positive :
+                     (v == "B-" || v == "B_negative") ? NhomMau.B_negative :
+                     (v == "O+" || v == "O_positive") ? NhomMau.O_positive :
+                     (v == "O-" || v == "O_negative") ? NhomMau.O_negative :
+                     (v == "AB+" || v == "AB_positive") ? NhomMau.AB_positive :
+                     (v == "AB-" || v == "AB_negative") ? NhomMau.AB_negative : NhomMau.O_positive
+            );
+
             //Lưu enum dưới dạng chuỗi 
             modelBuilder.Entity<TinhNguyenVien>()
                 .Property(t => t.GioiTinh).HasConversion(gioiTinhConverter);
 
             modelBuilder.Entity<TinhNguyenVien>()
-                .Property(t => t.NhomMau).HasConversion<string>();
+                .Property(t => t.NhomMau).HasConversion(nhomMauConverter);
 
             modelBuilder.Entity<NhanVien>().Property(n => n.GioiTinh).HasConversion(gioiTinhConverter);
 
@@ -93,9 +107,9 @@ namespace HienMauNhanDao_DaNang.Data
 
             modelBuilder.Entity<TuiMau>().Property(t => t.TrangThai).HasConversion(trangThaiTuiMauConverter);
 
-            modelBuilder.Entity<KhoMau>().Property(k => k.NhomMau).HasConversion<string>();
+            modelBuilder.Entity<KhoMau>().Property(k => k.NhomMau).HasConversion(nhomMauConverter);
 
-            modelBuilder.Entity<KetQuaXetNghiem>().Property(k => k.NhomMau).HasConversion<string>();
+            modelBuilder.Entity<KetQuaXetNghiem>().Property(k => k.NhomMau).HasConversion(nhomMauConverter);
 
             modelBuilder.Entity<DiaDiem>().Property(d => d.LoaiDiaDiem).HasConversion<string>();
 
