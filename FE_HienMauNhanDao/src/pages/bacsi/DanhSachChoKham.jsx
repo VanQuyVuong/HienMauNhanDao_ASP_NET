@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+// ─── Phân Hệ Bác Sĩ: Trang Danh Sách Chờ Khám Lâm Sàng ─────────────────────────
 import { useNavigate } from 'react-router-dom';
 import { donDangKyNvytService } from '../../services/nvytService';
 import { khamLamSangService } from '../../services/khamLamSangService';
