@@ -79,7 +79,19 @@ namespace HienMauNhanDao_DaNang.Data
 
             modelBuilder.Entity<DonDangKy>().Property(d => d.TrangThai).HasConversion(trangThaiDonConverter);
 
-            modelBuilder.Entity<TuiMau>().Property(t => t.TrangThai).HasConversion<string>();
+            // Custom converter cho TrangThaiTuiMau để đọc mượt mà mọi giá trị tiếng Việt/tiếng Anh từ CSDL SQL ('Nhập kho', 'Chờ xét nghiệm', 'DaLuuKho', 'DaXetNghiem'...)
+            var trangThaiTuiMauConverter = new ValueConverter<TrangThaiTuiMau, string>(
+                v => v.ToString(),
+                v => string.IsNullOrEmpty(v) ? TrangThaiTuiMau.ChuaXuLy :
+                     (v == "Nhập kho" || v == "DaLuuKho" || v == "Da_Luu_Kho") ? TrangThaiTuiMau.DaLuuKho :
+                     (v == "Chờ xét nghiệm" || v == "ChuaXuLy" || v == "Chua_Xu_Ly") ? TrangThaiTuiMau.ChuaXuLy :
+                     (v == "Đã xét nghiệm" || v == "Yêu cầu nhập kho" || v == "DaXetNghiem") ? TrangThaiTuiMau.DaXetNghiem :
+                     (v == "Đã sử dụng" || v == "DaSuDung") ? TrangThaiTuiMau.DaSuDung :
+                     (v == "Hết hạn" || v == "HetHan") ? TrangThaiTuiMau.HetHan :
+                     (v == "Đã hủy" || v == "DaHuy" || v == "Hủy") ? TrangThaiTuiMau.DaHuy : TrangThaiTuiMau.ChuaXuLy
+            );
+
+            modelBuilder.Entity<TuiMau>().Property(t => t.TrangThai).HasConversion(trangThaiTuiMauConverter);
 
             modelBuilder.Entity<KhoMau>().Property(k => k.NhomMau).HasConversion<string>();
 
