@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+// ─── Phân Hệ Bác Sĩ: Trang Danh Sách Chờ Khám Lâm Sàng ─────────────────────────
 import { useNavigate } from 'react-router-dom';
 import { donDangKyNvytService } from '../../services/nvytService';
 import { khamLamSangService } from '../../services/khamLamSangService';
@@ -39,20 +40,43 @@ export default function DanhSachChoKham() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [res, khamRes] = await Promise.all([
-        donDangKyNvytService.getAll(0, FETCH_CHUNK, keyword),
-        khamLamSangService.getAll()
-      ]);
-      const raw = Array.isArray(res) ? res : (res.content || []);
-      const khamData = Array.isArray(khamRes) ? khamRes : (khamRes?.data || []);
-      
-      const khamMaDonSet = new Set(khamData.map(k => k.maDon));
-      setMaDonDaKham(Array.from(khamMaDonSet));
-      
-      // Lọc bỏ những đơn đã có kết quả khám sàng lọc
-      setFilteredAll(raw.filter((don) => !laTrangThaiDaHien(don.trangThai) && !khamMaDonSet.has(don.maDon)));
-    } catch {
-      showToast('Lỗi khi tải danh sách đơn đăng ký', 'error');
+      let list = [];
+      try {
+        const res = await khamLamSangService.getWaiting();
+        list = Array.isArray(res) ? res : (res?.data || []);
+      } catch (err) {
+        console.warn('Gửi API cho-kham lỗi, thử fallback getAll:', err);
+        const fallbackRes = await donDangKyNvytService.getAll(0, FETCH_CHUNK, keyword);
+        const raw = Array.isArray(fallbackRes) ? fallbackRes : (fallbackRes?.content || []);
+        list = raw.map(d => ({
+          maDon: d.maDon,
+          maTNV: d.maTNV,
+          tenTinhNguyenVien: d.tinhNguyenVien?.hoTen || d.tinhNguyenVien?.hoVaTen || '---',
+          ngaySinh: d.tinhNguyenVien?.ngaySinh ? String(d.tinhNguyenVien.ngaySinh) : '---',
+          gioiTinh: d.tinhNguyenVien?.gioiTinh || '---',
+          nhomMau: d.tinhNguyenVien?.nhomMau || 'Chưa rõ',
+          soDienThoai: d.tinhNguyenVien?.soDienThoai || '---',
+          cccd: d.tinhNguyenVien?.soCCCD || d.tinhNguyenVien?.cccd || '---',
+          tenChienDich: d.maChienDich || 'Hiến máu thường xuyên',
+          theTich: d.theTich || 350
+        }));
+      }
+
+      if (keyword) {
+        const kw = keyword.toLowerCase().trim();
+        list = list.filter(d => 
+          (d.maDon && d.maDon.toLowerCase().includes(kw)) ||
+          (d.tenTinhNguyenVien && d.tenTinhNguyenVien.toLowerCase().includes(kw)) ||
+          (d.cccd && d.cccd.includes(kw)) ||
+          (d.soDienThoai && d.soDienThoai.includes(kw)) ||
+          (d.tenChienDich && d.tenChienDich.toLowerCase().includes(kw))
+        );
+      }
+
+      setFilteredAll(list);
+    } catch (err) {
+      console.error(err);
+      showToast('Lỗi khi tải danh sách đơn chờ khám', 'error');
     } finally {
       setLoading(false);
     }
@@ -186,25 +210,25 @@ export default function DanhSachChoKham() {
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <p className="font-semibold text-slate-800">{don.tinhNguyenVien?.hoVaTen || don.maTNV || '---'}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{don.tinhNguyenVien?.soCCCD || ''}</p>
+                        <p className="font-semibold text-slate-800">{don.tenTinhNguyenVien || don.tinhNguyenVien?.hoVaTen || don.tinhNguyenVien?.hoTen || don.maTNV || '---'}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{don.cccd || don.tinhNguyenVien?.soCCCD || don.tinhNguyenVien?.cccd || ''}</p>
                       </td>
-                      <td className="px-5 py-4 font-mono text-xs text-slate-600">{don.maChienDich || '---'}</td>
+                      <td className="px-5 py-4 font-mono text-xs text-slate-600">{don.tenChienDich || don.maChienDich || 'Hiến máu thường xuyên'}</td>
                       <td className="px-5 py-4">
                         <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg">
-                          {don.theTich || '---'} ml
+                          {don.theTich || 350} ml
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${trangThaiBadgeClass(don)}`}>
-                          {don.trangThai || 'Chờ xử lý'}
+                        <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                          ⏳ Chờ khám bác sĩ
                         </span>
                       </td>
                       <td className="px-5 py-4 text-xs text-slate-500">
                         {editable ? (
                           <span className="flex items-center gap-1 text-blue-600 font-semibold">
                             <span className="material-symbols-outlined text-sm">badge</span>
-                            {don.maNV}
+                            {don.maNV || 'Lễ tân tiếp nhận'}
                           </span>
                         ) : (
                           <span className="flex items-center gap-1 text-slate-400 italic">
@@ -214,22 +238,15 @@ export default function DanhSachChoKham() {
                         )}
                       </td>
                       <td className="px-5 py-4">
-                        {maDonDaKham.includes(don.maDon) ? (
-                          <span className="h-9 px-3 rounded-lg bg-slate-100 text-slate-400 text-xs font-bold inline-flex items-center gap-1 cursor-not-allowed">
-                            <span className="material-symbols-outlined text-base">check_circle</span>
-                            Đã khám
-                          </span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => goKham(don.maDon)}
-                            className="h-9 px-3 rounded-lg bg-primary text-white text-xs font-bold hover:bg-red-800 transition-colors inline-flex items-center gap-1"
-                            title="Khám lâm sàng"
-                          >
-                            <span className="material-symbols-outlined text-base">clinical_notes</span>
-                            Khám
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => goKham(don.maDon)}
+                          className="h-9 px-3.5 rounded-xl bg-primary hover:bg-red-800 text-white text-xs font-bold transition-all shadow-sm active:scale-95 inline-flex items-center gap-1.5"
+                          title="Khám lâm sàng cho TNV này"
+                        >
+                          <span className="material-symbols-outlined text-base">clinical_notes</span>
+                          <span>Bắt đầu khám</span>
+                        </button>
                       </td>
                     </tr>
                   );

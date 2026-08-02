@@ -324,12 +324,12 @@ INSERT INTO KHOMAU VALUES
 -- =============================================================
 
 INSERT INTO TAIKHOAN (maTaiKhoan, maVaiTro, email, matKhau, trangThai) VALUES 
-('TK00001', 'AD',      'admin@gmail.com',  '$2a$11$xk13z0u79iV/rzW89z/8uuQS36NE.fKNLwA9PG3MKtTScVKpKTufK', 1), -- Mật khẩu: Abc123!@#
-('TK00002', 'NVYT',    'nvyt1@gmail.com',  '$2a$11$t5e4TrPnBYrCVqxP8QDzOumOo9n2MboFAtbM8cu6HQzzx.JxPvQP2', 1), -- Mật khẩu: Abc123!@#
-('TK00003', 'NVYT',    'nvyt2@gmail.com',  '$2a$11$fJYOh9KSCyXttefr8NarOuB9I8.c.JKw5OcAjNlqoVSw5JU0tnAZG', 1), -- Mật khẩu: Abc123!@#
-('TK00004', 'BS',      'doctor1@gmail.com','$2a$11$dcgltimlogByLALH9P8hPOy6Yf0hImynlzF0UkqNqNTJOQiUY6Z5G', 1), -- Mật khẩu: Abc123!@#
-('TK00005', 'BS',      'doctor2@gmail.com','$2a$11$7v0Jg8k1Cf94UxKke.hVpOGWx5HC1pcj0L7nx1nexd3mojzcyI1IK', 1), -- Mật khẩu: Abc123!@#
-('TK00006', 'QLK',     'qlk@gmail.com',    '$2a$11$SoPa7XGP3InPdakUcjNC2ex2OmOZfyhGUQq1Erv2lnmN9g0VoPNvS', 1), -- Mật khẩu: Abc123!@#
+('TK00001', 'AD',      'admin@gmail.com',  '$2a$11$xk13z0u79iV/rzW89z/8uuQS36NE.fKNLwA9PG3MKtTScVKpKTufK', 1),
+('TK00002', 'NVYT',    'nvyt1@gmail.com',  '$2a$11$t5e4TrPnBYrCVqxP8QDzOumOo9n2MboFAtbM8cu6HQzzx.JxPvQP2', 1),
+('TK00003', 'NVYT',    'nvyt2@gmail.com',  '$2a$11$fJYOh9KSCyXttefr8NarOuB9I8.c.JKw5OcAjNlqoVSw5JU0tnAZG', 1),
+('TK00004', 'BS',      'doctor1@gmail.com','$2a$11$dcgltimlogByLALH9P8hPOy6Yf0hImynlzF0UkqNqNTJOQiUY6Z5G', 1),
+('TK00005', 'BS',      'doctor2@gmail.com','$2a$11$7v0Jg8k1Cf94UxKke.hVpOGWx5HC1pcj0L7nx1nexd3mojzcyI1IK', 1),
+('TK00006', 'QLK',     'qlk@gmail.com',    '$2a$11$SoPa7XGP3InPdakUcjNC2ex2OmOZfyhGUQq1Erv2lnmN9g0VoPNvS', 1),
 ('TK00007', 'NVYT-XN', 'nvxn1@gmail.com',  '$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy', 1)
 ON DUPLICATE KEY UPDATE matKhau = VALUES(matKhau), maVaiTro = VALUES(maVaiTro);
 

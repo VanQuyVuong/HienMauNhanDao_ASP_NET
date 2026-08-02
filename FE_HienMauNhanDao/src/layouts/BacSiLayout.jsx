@@ -14,11 +14,6 @@ const NAV_ITEMS = [
     icon: 'clinical_notes',
     path: '/bac-si/kham-lam-sang',
   },
-  {
-    label: 'Kết quả xét nghiệm máu',
-    icon: 'biotech',
-    path: '/bac-si/ket-qua-xet-nghiem',
-  },
 ];
 
 export default function BacSiLayout() {

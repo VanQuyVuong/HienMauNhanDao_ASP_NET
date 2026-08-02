@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-// ─── Issue #67: Trang Thu Nhận & Sinh Mã Barcode Túi Máu (NVYT Xét Nghiệm) ───
+// ─── Issue #67: Trang Thu Nhận Túi Máu & Chuyển Xét Nghiệm (NVYT Xét Nghiệm) ───
 import { useOutletContext } from 'react-router-dom';
 import { thuNhanMauService, ketQuaXetNghiemService } from '../../services/khamLamSangService';
 import { donDangKyNvytService } from '../../services/nvytService';
@@ -25,17 +25,20 @@ function TuiMauModal({ don, item, nhanVien, onClose, onSaved }) {
         thoiGianLayMau: form.thoiGianLayMau.length === 16 ? form.thoiGianLayMau + ':00' : form.thoiGianLayMau
       };
       
+      let maTuiMauCreated = null;
       if (isEdit) {
         await thuNhanMauService.update(item.maTuiMau, data);
+        maTuiMauCreated = item.maTuiMau;
       } else {
         // Tạo túi máu → nhận lại maTuiMau mới
         const res = await thuNhanMauService.create(data);
-        const maTuiMauMoi = res?.data?.maTuiMau || res?.maTuiMau;
+        maTuiMauCreated = res?.data?.maTuiMau || res?.data?.data?.maTuiMau || res?.maTuiMau;
+        
         // Tự động tạo kết quả xét nghiệm với mã khóa ngoại đã có
-        if (maTuiMauMoi && data.maNV) {
+        if (maTuiMauCreated && data.maNV) {
           try {
             await ketQuaXetNghiemService.create({
-              maTuiMau: maTuiMauMoi,
+              maTuiMau: maTuiMauCreated,
               maNhanVien: data.maNV,
             });
           } catch (xnErr) {
@@ -43,7 +46,7 @@ function TuiMauModal({ don, item, nhanVien, onClose, onSaved }) {
           }
         }
       }
-      onSaved();
+      onSaved(maTuiMauCreated, don || item);
     } catch (e) {
       console.log("Lỗi từ đây : "+e.response || e.message || e);
       setError(e.response?.data?.message || e.message || 'Lỗi khi lưu thông tin túi máu');
@@ -144,6 +147,7 @@ export default function ThuNhanMau() {
   const [pendingTotalPages, setPendingTotalPages] = useState(1);
   const [modalDon, setModalDon] = useState(null);
   const [editItem, setEditItem] = useState(null);
+  const [barcodeModalData, setBarcodeModalData] = useState(null); // { maTuiMau, don }
 
   // Collected
   const [collectionList, setCollectionList] = useState([]);
@@ -211,12 +215,14 @@ export default function ThuNhanMau() {
     else fetchCollectionList();
   }, [activeTab, fetchPendingList, fetchCollectionList]);
 
-  const handleSaved = () => {
-    showToast(editItem ? 'Cập nhật thành công!' : 'Thu nhận túi máu thành công!');
+  const handleSaved = (maTuiMauCreated) => {
+    const maMsg = maTuiMauCreated ? ` (${maTuiMauCreated})` : '';
+    showToast(editItem ? 'Cập nhật thành công!' : `✅ Tạo túi máu${maMsg} thành công! Dữ liệu đã tự động chuyển sang Trang Cập Nhật Kết Quả Xét Nghiệm.`);
     setModalDon(null);
     setEditItem(null);
-    if (activeTab === 'pending') fetchPendingList();
-    else fetchCollectionList();
+
+    fetchPendingList();
+    fetchCollectionList();
   };
 
   const handleCancelDon = (maDon) => {
