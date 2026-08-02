@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// ─── Phân Hệ Bác Sĩ: Trang Khám Lâm Sàng & Đo Sinh Hiệu ─────────────────────────
 import { useOutletContext, useLocation } from 'react-router-dom';
 import { khamLamSangService, ketQuaXetNghiemService, thuNhanMauService } from '../../services/khamLamSangService';
 import Swal from 'sweetalert2';
