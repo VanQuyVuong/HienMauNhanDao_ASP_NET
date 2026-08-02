@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { thuNhanMauService, ketQuaXetNghiemService } from '../../services/khamLamSangService';
 import { donDangKyNvytService } from '../../services/nvytService';
+import Swal from 'sweetalert2';
 
 // ─── Modal Thu Nhận Máu ─────────────────────────────────────────────────────
 function TuiMauModal({ don, item, nhanVien, onClose, onSaved }) {
@@ -216,10 +217,24 @@ export default function ThuNhanMau() {
   }, [activeTab, fetchPendingList, fetchCollectionList]);
 
   const handleSaved = (maTuiMauCreated) => {
-    const maMsg = maTuiMauCreated ? ` (${maTuiMauCreated})` : '';
-    showToast(editItem ? 'Cập nhật thành công!' : `✅ Tạo túi máu${maMsg} thành công! Dữ liệu đã tự động chuyển sang Trang Cập Nhật Kết Quả Xét Nghiệm.`);
     setModalDon(null);
     setEditItem(null);
+
+    if (maTuiMauCreated && !editItem) {
+      Swal.fire({
+        title: '✅ ĐÃ TẠO MÃ TÚI MÁU THÀNH CÔNG!',
+        html: `<div style="text-align: center;">
+                 <p style="font-size: 15px; color: #475569; margin-bottom: 8px;">Mã túi máu vừa khởi tạo:</p>
+                 <span style="font-family: monospace; font-size: 24px; font-weight: 900; color: #dc2626; background-color: #fef2f2; padding: 6px 16px; border-radius: 12px; border: 1px border-red-200; display: inline-block; margin-bottom: 16px;">${maTuiMauCreated}</span>
+                 <p style="font-size: 13px; color: #059669; font-weight: 700;">✅ Đã tự động thay đổi trạng thái đơn và chuyển thông tin sang Trang "Cập Nhật Kết Quả Xét Nghiệm"!</p>
+               </div>`,
+        icon: 'success',
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'Hiểu rồi'
+      });
+    } else {
+      showToast(editItem ? 'Cập nhật thành công!' : 'Tạo túi máu thành công!');
+    }
 
     fetchPendingList();
     fetchCollectionList();
