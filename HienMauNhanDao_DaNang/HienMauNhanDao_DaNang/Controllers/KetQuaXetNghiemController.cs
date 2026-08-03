@@ -37,14 +37,14 @@ namespace HienMauNhanDao_DaNang.Controllers
                 .OrderByDescending(k => k.MaKQ)
                 .ToListAsync();
 
-            // B. Lấy các túi máu mới sinh mã (TrangThai = ChuaXuLy) chưa có kết quả xét nghiệm
+            // B. Lấy tất cả các túi máu mới sinh mã chưa có kết quả xét nghiệm (và chưa nhập kho / chưa hủy)
             var tuiChuaTest = await _context.TuiMaus
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
-                .Where(t => t.TrangThai == TrangThaiTuiMau.ChuaXuLy)
                 .Where(t => !_context.KetQuaXetNghiems.Any(k => k.MaTuiMau == t.MaTuiMau))
+                .Where(t => t.TrangThai != TrangThaiTuiMau.DaLuuKho && t.TrangThai != TrangThaiTuiMau.DaHuy)
                 .OrderByDescending(t => t.ThoiGianLayMau)
                 .ToListAsync();
 
