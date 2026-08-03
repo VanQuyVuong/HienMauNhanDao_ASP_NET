@@ -10,7 +10,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "NVYT, NVYT_XN, BS, QLK, AD")]
+    [Authorize(Roles = "NVYT, NVYT_XN, NVYT-XN, BS, QLK, AD")]
     public class KetQuaXetNghiemController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -19,7 +19,6 @@ namespace HienMauNhanDao_DaNang.Controllers
             _context = context;
         }
 
-        //API 1 .lấy danh sách kết quả xét nghiệm(bao gồm cả túi máu chờ sét nghiệm 
         //API 1. Lấy danh sách túi máu cần xét nghiệm ở Trang 2 (chưa xét nghiệm hoặc có yêu cầu Re-test từ Quản lý kho)
         [HttpGet]
         [HttpGet("danh-sach")]
@@ -37,16 +36,24 @@ namespace HienMauNhanDao_DaNang.Controllers
                 .OrderByDescending(k => k.MaKQ)
                 .ToListAsync();
 
-            // B. Lấy tất cả các túi máu mới sinh mã chưa có kết quả xét nghiệm (và chưa nhập kho / chưa hủy)
-            var tuiChuaTest = await _context.TuiMaus
+            // B. Lấy tất cả các túi máu trong CSDL
+            var allTuiMaus = await _context.TuiMaus
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
-                .Where(t => !_context.KetQuaXetNghiems.Any(k => k.MaTuiMau == t.MaTuiMau))
-                .Where(t => t.TrangThai != TrangThaiTuiMau.DaLuuKho && t.TrangThai != TrangThaiTuiMau.DaHuy)
                 .OrderByDescending(t => t.ThoiGianLayMau)
                 .ToListAsync();
+
+            var daCoKQIds = await _context.KetQuaXetNghiems
+                .Select(k => k.MaTuiMau)
+                .ToListAsync();
+
+            // Lọc ra các túi máu chưa có kết quả xét nghiệm (và chưa bị nhập kho/hủy)
+            var tuiChuaTest = allTuiMaus
+                .Where(t => !daCoKQIds.Contains(t.MaTuiMau))
+                .Where(t => t.TrangThai != TrangThaiTuiMau.DaLuuKho && t.TrangThai != TrangThaiTuiMau.DaHuy)
+                .ToList();
 
             var ketQuaTraVe = new List<object>();
 

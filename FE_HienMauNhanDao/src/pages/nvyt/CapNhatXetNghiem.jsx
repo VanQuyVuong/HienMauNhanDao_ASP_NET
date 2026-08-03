@@ -234,12 +234,15 @@ export default function CapNhatXetNghiem() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resData, resStats] = await Promise.all([
-        ketQuaXetNghiemService.getDanhSach(),
-        ketQuaXetNghiemService.getStats()
-      ]);
+      const resData = await ketQuaXetNghiemService.getDanhSach();
+      let resStats = null;
+      try {
+        resStats = await ketQuaXetNghiemService.getStats();
+      } catch (errStats) {
+        console.warn('Stats load warning:', errStats);
+      }
 
-      const items = Array.isArray(resData) ? resData : (resData?.data || []);
+      const items = Array.isArray(resData) ? resData : (resData?.data || resData?.content || []);
       setList(items);
 
       // Thống kê số ca Re-test từ kho
@@ -252,6 +255,7 @@ export default function CapNhatXetNghiem() {
       });
     } catch (e) {
       console.error('Error load xet nghiem:', e);
+      setList([]);
     } finally {
       setLoading(false);
     }
