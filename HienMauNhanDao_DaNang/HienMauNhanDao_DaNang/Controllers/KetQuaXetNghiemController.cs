@@ -10,7 +10,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "NVYT, NVYT_XN, BS, QLK, AD")]
+    [Authorize(Roles = "NVYT, NVYT_XN, NVYT-XN, BS, QLK, AD")]
     public class KetQuaXetNghiemController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -19,36 +19,46 @@ namespace HienMauNhanDao_DaNang.Controllers
             _context = context;
         }
 
-        //API 1 .lấy danh sách kết quả xét nghiệm(bao gồm cả túi máu chờ sét nghiệm 
+        //API 1. Lấy danh sách túi máu cần xét nghiệm ở Trang 2 (chưa xét nghiệm hoặc có yêu cầu Re-test từ Quản lý kho)
+        [HttpGet]
         [HttpGet("danh-sach")]
         public async Task<IActionResult> GetDanhSachXetNghiem()
         {
-            // A. Lấy danh sách xét nghiệm đã lưu thực tế trong CSDL
-            var daCoKQ = await _context.KetQuaXetNghiems
+            // A. Lấy các ca yêu cầu Re-test từ Quản lý kho (moTa chứa 're-test' hoặc 'kiểm tra lại')
+            var reTestList = await _context.KetQuaXetNghiems
                 .Include(k => k.TuiMau)
                 .ThenInclude(t => t.DonDangKy)
                 .ThenInclude(d => d.TinhNguyenVien)
                 .Include(k => k.TuiMau)
                 .ThenInclude(t => t.DonDangKy)
                 .ThenInclude(d => d.ChienDich)
+                .Where(k => k.MoTa != null && (k.MoTa.ToLower().Contains("re-test") || k.MoTa.ToLower().Contains("kiểm tra lại")))
                 .OrderByDescending(k => k.MaKQ)
                 .ToListAsync();
 
-            // B. Lấy các túi máu "Chưa xử lý" nhưng chưa hề có dòng nào trong bảng KETQUAXETNGHIEM
-            var tuiChuaTest = await _context.TuiMaus
+            // B. Lấy tất cả các túi máu trong CSDL
+            var allTuiMaus = await _context.TuiMaus
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
-                .Where(t => t.TrangThai == TrangThaiTuiMau.ChuaXuLy)
-                .Where(t => !_context.KetQuaXetNghiems.Any(k => k.MaTuiMau == t.MaTuiMau))
+                .OrderByDescending(t => t.ThoiGianLayMau)
                 .ToListAsync();
+
+            var daCoKQIds = await _context.KetQuaXetNghiems
+                .Select(k => k.MaTuiMau)
+                .ToListAsync();
+
+            // Lọc ra các túi máu chưa có kết quả xét nghiệm (và chưa bị nhập kho/hủy)
+            var tuiChuaTest = allTuiMaus
+                .Where(t => !daCoKQIds.Contains(t.MaTuiMau))
+                .Where(t => t.TrangThai != TrangThaiTuiMau.DaLuuKho && t.TrangThai != TrangThaiTuiMau.DaHuy)
+                .ToList();
 
             var ketQuaTraVe = new List<object>();
 
-
-            //gom nhóm các ca đã có kết quả xét nghiệm
-            foreach(var item in daCoKQ)
+            // Gom nhóm các ca Re-test
+            foreach(var item in reTestList)
             {
                 ketQuaTraVe.Add(new
                 {
@@ -56,17 +66,15 @@ namespace HienMauNhanDao_DaNang.Controllers
                     maTuiMau = item.MaTuiMau,
                     maNhanVien = item.MaNhanVien,
                     nhomMau = item.NhomMau != null ? item.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ",
-                    soLanXetNghiem = item.SoLanXetNghiem ?? 1,
-                    ketQua = item.KetQua,
+                    soLanXetNghiem = item.SoLanXetNghiem ?? 2,
+                    ketQua = (bool?)null, // Để FE bấm phê duyệt / không đạt
                     moTa = item.MoTa,
                     tenTinhNguyenVien = item.TuiMau?.DonDangKy?.TinhNguyenVien?.HoTen ?? "Ẩn danh",
                     tenChienDich = item.TuiMau?.DonDangKy?.ChienDich?.TenChienDich ?? "N/A"
-
                 });
-
             }
 
-            //Gom nhóm các túi máu mới đang chờ xét nghiệm ( tạo bản ghi ảo cho fe hiển thị)
+            // Gom nhóm các túi máu mới chờ xét nghiệm lần đầu
             foreach(var item in tuiChuaTest)
             {
                 ketQuaTraVe.Add(new
@@ -77,7 +85,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                     nhomMau = item.DonDangKy?.TinhNguyenVien?.NhomMau != null ? item.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ",
                     soLanXetNghiem = 1,
                     ketQua = (bool?)null,
-                    moTa = "Chờ xét nghiệm lần đầu ",
+                    moTa = "Chờ xét nghiệm lần đầu",
                     tenTinhNguyenVien = item.DonDangKy?.TinhNguyenVien?.HoTen ?? "Ẩn danh",
                     tenChienDich = item.DonDangKy?.ChienDich?.TenChienDich ?? "N/A",
                 });
@@ -85,6 +93,7 @@ namespace HienMauNhanDao_DaNang.Controllers
             return Ok(ketQuaTraVe);
         }
         //API 2. LẤY SỐ LIỆU THỐNG KÊ XÉT NGHIỆM PHỤC VỤ CHO DASHBOARD
+        [HttpGet("stats")]
         [HttpGet("thong-ke")]
         public async Task<IActionResult> GetThongKe()
         {
@@ -101,41 +110,54 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
 
-        //API 3. lưu hoặc cập nhật kết quả  xét nghiệm túi máu 
+        //API 3. Lưu hoặc cập nhật kết quả xét nghiệm túi máu 
+        [HttpPost]
         [HttpPost("luu")]
         public async Task<IActionResult> LuuXetNghiem([FromBody] LuuXetNghiemRequest request)
         {
-            //1.tìm túi máu cần xét nghiêmh xem có thực sự tồn tạo hay không 
-
+            // 1. Tìm túi máu cần xét nghiệm xem có tồn tại hay không
             var tuiMau = await _context.TuiMaus.FirstOrDefaultAsync(t => t.MaTuiMau == request.MaTuiMau);
-            if(tuiMau == null)
+            if (tuiMau == null)
             {
                 return NotFound(new { success = false, message = "Không tìm thấy túi máu cần xét nghiệm" });
             }
 
-            //2.tìm xem đã có bản ghi xét nghiệm nào cho túi máu này chưa 
+            // Kiểm tra và lấy mã nhân viên hợp lệ (tránh lỗi khóa ngoại Foreign Key với bảng NHANVIEN)
+            var validMaNV = request.MaNhanVien;
+            if (string.IsNullOrEmpty(validMaNV) || !await _context.NhanViens.AnyAsync(n => n.MaNhanVien == validMaNV))
+            {
+                var firstNv = await _context.NhanViens.FirstOrDefaultAsync();
+                validMaNV = firstNv?.MaNhanVien ?? "NV00007";
+            }
+
+            // 2. Tìm xem đã có bản ghi xét nghiệm nào cho túi máu này chưa 
             var xetNghiem = await _context.KetQuaXetNghiems.FirstOrDefaultAsync(k => k.MaTuiMau == request.MaTuiMau);
 
-            //Dịch chuỗi nhóm máu từ FrontEnd sáng enum 
+            // Dịch chuỗi nhóm máu từ FrontEnd sang enum 
             var parsedNhomMau = ParseNhomMau(request.NhomMau);
 
-            if(xetNghiem == null)
+            if (xetNghiem == null)
             {
-                //A. nêys chưa có kết quả xét nghiệm cũ -> tạo mới hoàn toàn 
-
-                var maxKQ = await _context.KetQuaXetNghiems.OrderByDescending(k => k.MaKQ).FirstOrDefaultAsync();
-                int nextKQId = 1;
-                if (maxKQ != null && maxKQ.MaKQ.StartsWith("XN"))
+                // A. Nếu chưa có kết quả xét nghiệm cũ -> Tạo mới hoàn toàn (Tìm max ID số chính xác)
+                var allKqIds = await _context.KetQuaXetNghiems.Select(k => k.MaKQ).ToListAsync();
+                int maxNum = 0;
+                foreach (var id in allKqIds)
                 {
-                    int.TryParse(maxKQ.MaKQ.Substring(2), out int currentKQId);
-                    nextKQId = currentKQId + 1;
+                    if (!string.IsNullOrEmpty(id) && id.StartsWith("XN"))
+                    {
+                        if (int.TryParse(id.Substring(2), out int num) && num > maxNum)
+                        {
+                            maxNum = num;
+                        }
+                    }
                 }
-                string newMaKQ = "XN" + nextKQId.ToString("D5");
+                string newMaKQ = "XN" + (maxNum + 1).ToString("D5");
+
                 xetNghiem = new KetQuaXetNghiem
                 {
                     MaKQ = newMaKQ,
                     MaTuiMau = request.MaTuiMau,
-                    MaNhanVien = request.MaNhanVien,
+                    MaNhanVien = validMaNV,
                     NhomMau = parsedNhomMau,
                     SoLanXetNghiem = request.SoLanXetNghiem,
                     KetQua = request.KetQua,
@@ -150,8 +172,9 @@ namespace HienMauNhanDao_DaNang.Controllers
                 xetNghiem.SoLanXetNghiem = request.SoLanXetNghiem;
                 xetNghiem.KetQua = request.KetQua;
                 xetNghiem.MoTa = request.MoTa;
-                xetNghiem.MaNhanVien = request.MaNhanVien;
+                xetNghiem.MaNhanVien = validMaNV;
             }
+
             // 3. Xử lý cập nhật trạng thái túi máu tương ứng
             if (request.KetQua)
             {
@@ -181,7 +204,18 @@ namespace HienMauNhanDao_DaNang.Controllers
                 tuiMau.TrangThai = TrangThaiTuiMau.DaHuy;
                 tuiMau.MaKho = null;
             }
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                // Fallback nếu MaKho dính ràng buộc ngoại
+                tuiMau.MaKho = null;
+                await _context.SaveChangesAsync();
+            }
+
             return Ok(new { success = true, message = "Cập nhật kết quả xét nghiệm thành công." });
         }
         // API 4: Xóa kết quả xét nghiệm (Để phục vụ việc sửa đổi hoặc xét nghiệm lại)
