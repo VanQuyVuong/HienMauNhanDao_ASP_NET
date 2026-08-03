@@ -9,7 +9,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "QLK,AD")]
+    [Authorize(Roles = "NVYT, NVYT_XN, NVYT-XN, QLK, AD")]
     public class TuiMauController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -17,6 +17,86 @@ namespace HienMauNhanDao_DaNang.Controllers
         public TuiMauController(AppDbContext context)
         {
             _context = context;
+        }
+
+        public class TaoTuiMauRequest
+        {
+            public string MaDon { get; set; } = string.Empty;
+            public int TheTich { get; set; } = 350;
+            public string? MaNhanVien { get; set; }
+            public DateTime? ThoiGianLayMau { get; set; }
+            public double? NhietDoVanChuyen { get; set; } = 4.0;
+        }
+
+        // API 0: NVYT Xét nghiệm thu nhận máu & sinh mã túi máu barcode
+        // POST /api/tuimau
+        [HttpPost]
+        public async Task<IActionResult> TaoTuiMau([FromBody] TaoTuiMauRequest request)
+        {
+            var don = await _context.DonDangKys.FirstOrDefaultAsync(d => d.MaDon == request.MaDon);
+            if (don == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy đơn đăng ký này." });
+            }
+
+            // Sinh mã túi máu chuẩn 9 ký tự (TM + mmssfff) tuân thủ [MaxLength(10)]
+            string newMaTM = "TM" + DateTime.Now.ToString("mmssfff");
+
+            // Kiểm tra mã nhân viên hợp lệ
+            var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value;
+            var nhanVien = await _context.NhanViens.FirstOrDefaultAsync(n => n.MaTaiKhoan == maTaiKhoan);
+            string? validMaNV = nhanVien?.MaNhanVien ?? request.MaNhanVien;
+            if (!string.IsNullOrEmpty(validMaNV))
+            {
+                var existNV = await _context.NhanViens.AnyAsync(n => n.MaNhanVien == validMaNV);
+                if (!existNV) validMaNV = null;
+            }
+
+            var tuiMau = new TuiMau
+            {
+                MaTuiMau = newMaTM,
+                MaDon = request.MaDon,
+                MaNhanVien = validMaNV,
+                TheTich = request.TheTich,
+                ThoiGianLayMau = request.ThoiGianLayMau ?? DateTime.Now,
+                TrangThai = TrangThaiTuiMau.ChuaXuLy,
+                NhietDoVanChuyen = request.NhietDoVanChuyen ?? 4.0
+            };
+
+            _context.TuiMaus.Add(tuiMau);
+
+            don.TheTich = request.TheTich;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = $"Đã thu nhận thành công! Mã túi máu: {newMaTM}",
+                data = new
+                {
+                    maTuiMau = newMaTM,
+                    maDon = request.MaDon,
+                    theTich = request.TheTich,
+                    thoiGianLayMau = tuiMau.ThoiGianLayMau,
+                    trangThai = "Chờ xét nghiệm"
+                }
+            });
+        }
+
+        // API lấy số liệu thống kê tổng quát túi máu cho Frontend
+        [HttpGet("stats")]
+        public async Task<IActionResult> GetStats()
+        {
+            var tongSoTui = await _context.TuiMaus.CountAsync();
+            var tongTheTich = await _context.TuiMaus.SumAsync(t => t.TheTich ?? 0);
+            return Ok(new
+            {
+                tongSoTui,
+                tongTheTich,
+                theoNhomMau = new { },
+                theoTheTich = new { }
+            });
         }
 
         // 1. API lấy số liệu thống kê hạn dùng

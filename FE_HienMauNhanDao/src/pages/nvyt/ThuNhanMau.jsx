@@ -88,12 +88,12 @@ function TuiMauModal({ don, item, nhanVien, onClose, onSaved }) {
             {!isEdit && (
                <div className="flex justify-between">
                 <span className="text-xs font-bold text-slate-500 uppercase">Người hiến:</span>
-                <span className="text-xs font-bold text-slate-800">{don.tinhNguyenVien?.hoVaTen}</span>
+                <span className="text-xs font-bold text-slate-800">{don.hoTen || don.hoVaTen || don.tenTinhNguyenVien || don.tinhNguyenVien?.hoTen || don.tinhNguyenVien?.hoVaTen || 'TNV Hiến Máu'}</span>
               </div>
             )}
             <div className="flex justify-between">
               <span className="text-xs font-bold text-slate-500 uppercase">Nhóm máu:</span>
-              <span className="text-xs font-bold text-red-600">{isEdit ? item.nhomMau : don.tinhNguyenVien?.nhomMau}</span>
+              <span className="text-xs font-bold text-red-600">{isEdit ? item.nhomMau : (don.nhomMau || don.tinhNguyenVien?.nhomMau || 'Chưa rõ')}</span>
             </div>
           </div>
 
@@ -238,6 +238,10 @@ export default function ThuNhanMau() {
 
     fetchPendingList();
     fetchCollectionList();
+
+    if (maTuiMauCreated && !editItem) {
+      setActiveTab('collected');
+    }
   };
 
   const handleCancelDon = (maDon) => {
@@ -341,11 +345,14 @@ export default function ThuNhanMau() {
                   <tr key={don.maDon} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-4 font-mono text-xs font-bold text-primary">{don.maDon}</td>
                     <td className="px-5 py-4">
-                      <p className="font-semibold text-slate-800">{don.tinhNguyenVien?.hoVaTen}</p>
-                      <p className="text-xs text-slate-400">{don.tinhNguyenVien?.soCCCD}</p>
+                      <p className="font-semibold text-slate-800">{don.hoTen || don.hoVaTen || don.tenTinhNguyenVien || don.tinhNguyenVien?.hoTen || don.tinhNguyenVien?.hoVaTen || 'TNV Hiến Máu'}</p>
+                      <p className="text-xs text-slate-400">{don.cccd || don.soCCCD || don.tinhNguyenVien?.cccd || don.tinhNguyenVien?.soCCCD || '---'}</p>
                     </td>
-                    <td className="px-5 py-4 font-bold text-red-600">{don.tinhNguyenVien?.nhomMau || '---'}</td>
-                    <td className="px-5 py-4 font-mono text-xs text-slate-600">{don.maChienDich || '---'}</td>
+                    <td className="px-5 py-4 font-bold text-red-600">{don.nhomMau || don.tinhNguyenVien?.nhomMau || 'Chưa rõ'}</td>
+                    <td className="px-5 py-4 text-xs text-slate-600">
+                      <p className="font-semibold text-slate-700">{don.tenChienDich || 'Hiến máu thường xuyên'}</p>
+                      <p className="font-mono text-[10px] text-slate-400">{don.maChienDich || 'CD00004'}</p>
+                    </td>
                     <td className="px-5 py-4"><span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg">{don.theTich || 0} ml</span></td>
                     <td className="px-5 py-4 text-xs font-semibold text-slate-600">
                       {don.tenBacSi ? (
