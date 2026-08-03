@@ -152,6 +152,11 @@ export default function ThuNhanMau() {
 
   // Collected
   const [collectionList, setCollectionList] = useState([]);
+  const [collectedPage, setCollectedPage] = useState(0);
+  const collectedPageSize = 10;
+  const totalCollectedPages = Math.ceil(collectionList.length / collectedPageSize) || 1;
+  const paginatedCollectedList = collectionList.slice(collectedPage * collectedPageSize, (collectedPage + 1) * collectedPageSize);
+
   const [stats, setStats] = useState({
     tongSoTui: 0, tongTheTich: 0, theoNhomMau: {}, theoTheTich: {}
   });
@@ -476,8 +481,8 @@ export default function ThuNhanMau() {
                     </tr>
                   </thead>
                   <tbody>
-                    {collectionList.length > 0 ? (
-                      collectionList.map((item, idx) => (
+                    {paginatedCollectedList.length > 0 ? (
+                      paginatedCollectedList.map((item, idx) => (
                         <tr key={item.maTuiMau} className={`border-b border-slate-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'} 
                           ${(item.trangThai === 'Nhập kho' || item.trangThai === 'Đã xuất') ? 'opacity-60 grayscale-[0.5]' : 'hover:bg-slate-100/50'} transition-colors`}>
                           <td className="px-5 py-4 font-mono text-xs font-bold text-slate-700">{item.maTuiMau}</td>
@@ -550,11 +555,20 @@ export default function ThuNhanMau() {
                         </tr>
                       ))
                     ) : (
-                      <tr><td colSpan="8" className="px-5 py-12 text-center text-slate-400">Không có dữ liệu túi máu</td></tr>
+                      <tr><td colSpan="8" className="px-5 py-12 text-center text-slate-400">Không có dữ liệu túi máu đã hoàn tất xét nghiệm</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
+              {totalCollectedPages > 1 && (
+                <div className="flex justify-between items-center px-5 py-3 border-t border-slate-100 bg-slate-50">
+                  <span className="text-xs text-slate-500">Trang {collectedPage + 1} / {totalCollectedPages} ({collectionList.length} túi máu)</span>
+                  <div className="flex gap-2">
+                    <button onClick={() => setCollectedPage(p => Math.max(0, p - 1))} disabled={collectedPage === 0} className="w-8 h-8 rounded border border-slate-200 flex justify-center items-center hover:bg-slate-100 disabled:opacity-50"><span className="material-symbols-outlined text-sm">chevron_left</span></button>
+                    <button onClick={() => setCollectedPage(p => Math.min(totalCollectedPages - 1, p + 1))} disabled={collectedPage === totalCollectedPages - 1} className="w-8 h-8 rounded border border-slate-200 flex justify-center items-center hover:bg-slate-100 disabled:opacity-50"><span className="material-symbols-outlined text-sm">chevron_right</span></button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

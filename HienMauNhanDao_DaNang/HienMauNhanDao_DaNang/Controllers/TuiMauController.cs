@@ -257,16 +257,25 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
 
-        //AI 5 . Lấy danh sách tất cả các túi máu phục vụ nghiệp vụ nhập kho (QLK)
+        // API 5: Lấy danh sách túi máu đã có kết quả xét nghiệm (Phê duyệt, Không đạt, Re-test) cho Tab 2 & QLK (Sắp xếp mới nhất lên đầu)
         [HttpGet]
         public async Task<IActionResult> GetDanhSachTuiMauChoQLK()
         {
+            var testedMaTuiMaus = await _context.KetQuaXetNghiems
+                .Select(k => k.MaTuiMau)
+                .Distinct()
+                .ToListAsync();
+
             var danhSach = await _context.TuiMaus
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
+                .Where(t => testedMaTuiMaus.Contains(t.MaTuiMau) || t.TrangThai == TrangThaiTuiMau.DaXetNghiem || t.TrangThai == TrangThaiTuiMau.DaLuuKho || t.TrangThai == TrangThaiTuiMau.DaHuy)
+                .OrderByDescending(t => t.ThoiGianLayMau)
+                .ThenByDescending(t => t.MaTuiMau)
                 .ToListAsync();
+
             var ketQua = danhSach.Select(t =>
             {
                 string trangThaiString = "Chờ xét nghiệm";
@@ -276,6 +285,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                     trangThaiString = "Nhập kho";
                 else if (t.TrangThai == TrangThaiTuiMau.DaHuy)
                     trangThaiString = "Đã hủy";
+
                 return new
                 {
                     maTuiMau = t.MaTuiMau,
@@ -290,6 +300,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                         : "Chưa rõ"
                 };
             }).ToList();
+
             return Ok(ketQua);
         }
         // API 6: Thay đổi trạng thái túi máu (QLK trả túi máu về để kiểm tra lại)
