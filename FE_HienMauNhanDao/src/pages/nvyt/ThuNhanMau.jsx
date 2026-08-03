@@ -264,11 +264,13 @@ export default function ThuNhanMau() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Chờ xét nghiệm': return 'bg-yellow-100 text-yellow-700';
-      case 'Nhập kho': return 'bg-blue-100 text-blue-700';
-      case 'Đã xuất': return 'bg-green-100 text-green-700';
-      case 'Hủy': return 'bg-red-100 text-red-700';
-      default: return 'bg-slate-100 text-slate-700';
+      case 'Chờ xét nghiệm': return 'bg-amber-100 text-amber-700 border border-amber-200';
+      case 'Yêu cầu nhập kho': return 'bg-blue-100 text-blue-700 border border-blue-200';
+      case 'Nhập kho': return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+      case 'Đã xuất': return 'bg-indigo-100 text-indigo-700 border border-indigo-200';
+      case 'Hủy':
+      case 'Đã hủy': return 'bg-red-100 text-red-700 border border-red-200';
+      default: return 'bg-slate-100 text-slate-700 border border-slate-200';
     }
   };
 
@@ -364,28 +366,47 @@ export default function ThuNhanMau() {
                     <td className="px-5 py-4"><span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg">{don.theTich || 0} ml</span></td>
                     <td className="px-5 py-4 text-xs">
                       {don.daCapMa ? (
-                        <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold rounded-full border border-indigo-100 flex items-center gap-1 w-fit">
-                          <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                          🧪 Đã sinh mã - Chờ XN Trang 2
+                        <span className="px-2.5 py-1 bg-blue-50 text-blue-700 font-bold rounded-full border border-blue-100 flex items-center gap-1 w-fit">
+                          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                          ⏳ Đang chờ kết quả
                         </span>
                       ) : (
                         <span className="px-2.5 py-1 bg-amber-50 text-amber-700 font-semibold rounded-full border border-amber-100">
-                          ⏳ Chờ sinh mã túi máu
+                          ⏳ Đang chờ tạo túi máu
                         </span>
                       )}
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setModalDon(don)}
-                          className={`flex items-center justify-center h-9 px-3 text-white rounded-xl transition-all shadow-md group active:scale-90 font-medium text-xs gap-1 ${
-                            don.daCapMa ? 'bg-slate-700 hover:bg-slate-800 shadow-slate-200' : 'bg-red-600 hover:bg-red-700 shadow-red-100'
-                          }`}
-                          title={don.daCapMa ? "Chỉnh sửa mã / thể tích" : "Tạo mã túi máu"}
-                        >
-                          <span className="material-symbols-outlined text-lg">{don.daCapMa ? 'edit' : 'add_circle'}</span>
-                          <span>{don.daCapMa ? 'Sửa' : 'Cấp mã'}</span>
-                        </button>
+                        {don.daCapMa ? (
+                          <>
+                            <button
+                              onClick={() => setModalDon(don)}
+                              className="flex items-center justify-center h-9 px-3 bg-slate-600 text-white hover:bg-slate-700 rounded-xl transition-all shadow-sm font-medium text-xs gap-1"
+                              title="Chỉnh sửa thể tích túi máu"
+                            >
+                              <span className="material-symbols-outlined text-base">edit</span>
+                              <span>Sửa</span>
+                            </button>
+                            <a
+                              href="/nvyt/cap-nhat-xet-nghiem"
+                              className="flex items-center justify-center h-9 px-3 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl transition-all shadow-md font-bold text-xs gap-1"
+                              title="Đi đến Trang 2 Cập nhật kết quả xét nghiệm"
+                            >
+                              <span className="material-symbols-outlined text-base">biotech</span>
+                              <span>Sang Trang 2</span>
+                            </a>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => setModalDon(don)}
+                            className="flex items-center justify-center h-9 px-3.5 bg-red-600 text-white hover:bg-red-700 rounded-xl transition-all shadow-md shadow-red-100 font-bold text-xs gap-1"
+                            title="Tạo mã túi máu"
+                          >
+                            <span className="material-symbols-outlined text-lg">add_circle</span>
+                            <span>+ Cấp mã</span>
+                          </button>
+                        )}
 
                         <button
                           onClick={() => handleCancelDon(don.maDon)}

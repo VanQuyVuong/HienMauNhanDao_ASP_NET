@@ -20,21 +20,24 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
         //API 1 .lấy danh sách kết quả xét nghiệm(bao gồm cả túi máu chờ sét nghiệm 
+        //API 1. Lấy danh sách túi máu cần xét nghiệm ở Trang 2 (chưa xét nghiệm hoặc có yêu cầu Re-test từ Quản lý kho)
+        [HttpGet]
         [HttpGet("danh-sach")]
         public async Task<IActionResult> GetDanhSachXetNghiem()
         {
-            // A. Lấy danh sách xét nghiệm đã lưu thực tế trong CSDL
-            var daCoKQ = await _context.KetQuaXetNghiems
+            // A. Lấy các ca yêu cầu Re-test từ Quản lý kho (moTa chứa 're-test' hoặc 'kiểm tra lại')
+            var reTestList = await _context.KetQuaXetNghiems
                 .Include(k => k.TuiMau)
                 .ThenInclude(t => t.DonDangKy)
                 .ThenInclude(d => d.TinhNguyenVien)
                 .Include(k => k.TuiMau)
                 .ThenInclude(t => t.DonDangKy)
                 .ThenInclude(d => d.ChienDich)
+                .Where(k => k.MoTa != null && (k.MoTa.ToLower().Contains("re-test") || k.MoTa.ToLower().Contains("kiểm tra lại")))
                 .OrderByDescending(k => k.MaKQ)
                 .ToListAsync();
 
-            // B. Lấy các túi máu "Chưa xử lý" nhưng chưa hề có dòng nào trong bảng KETQUAXETNGHIEM
+            // B. Lấy các túi máu mới sinh mã (TrangThai = ChuaXuLy) chưa có kết quả xét nghiệm
             var tuiChuaTest = await _context.TuiMaus
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
@@ -42,13 +45,13 @@ namespace HienMauNhanDao_DaNang.Controllers
                     .ThenInclude(d => d.ChienDich)
                 .Where(t => t.TrangThai == TrangThaiTuiMau.ChuaXuLy)
                 .Where(t => !_context.KetQuaXetNghiems.Any(k => k.MaTuiMau == t.MaTuiMau))
+                .OrderByDescending(t => t.ThoiGianLayMau)
                 .ToListAsync();
 
             var ketQuaTraVe = new List<object>();
 
-
-            //gom nhóm các ca đã có kết quả xét nghiệm
-            foreach(var item in daCoKQ)
+            // Gom nhóm các ca Re-test
+            foreach(var item in reTestList)
             {
                 ketQuaTraVe.Add(new
                 {
@@ -56,17 +59,15 @@ namespace HienMauNhanDao_DaNang.Controllers
                     maTuiMau = item.MaTuiMau,
                     maNhanVien = item.MaNhanVien,
                     nhomMau = item.NhomMau != null ? item.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ",
-                    soLanXetNghiem = item.SoLanXetNghiem ?? 1,
-                    ketQua = item.KetQua,
+                    soLanXetNghiem = item.SoLanXetNghiem ?? 2,
+                    ketQua = (bool?)null, // Để FE bấm phê duyệt / không đạt
                     moTa = item.MoTa,
                     tenTinhNguyenVien = item.TuiMau?.DonDangKy?.TinhNguyenVien?.HoTen ?? "Ẩn danh",
                     tenChienDich = item.TuiMau?.DonDangKy?.ChienDich?.TenChienDich ?? "N/A"
-
                 });
-
             }
 
-            //Gom nhóm các túi máu mới đang chờ xét nghiệm ( tạo bản ghi ảo cho fe hiển thị)
+            // Gom nhóm các túi máu mới chờ xét nghiệm lần đầu
             foreach(var item in tuiChuaTest)
             {
                 ketQuaTraVe.Add(new
@@ -77,7 +78,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                     nhomMau = item.DonDangKy?.TinhNguyenVien?.NhomMau != null ? item.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ",
                     soLanXetNghiem = 1,
                     ketQua = (bool?)null,
-                    moTa = "Chờ xét nghiệm lần đầu ",
+                    moTa = "Chờ xét nghiệm lần đầu",
                     tenTinhNguyenVien = item.DonDangKy?.TinhNguyenVien?.HoTen ?? "Ẩn danh",
                     tenChienDich = item.DonDangKy?.ChienDich?.TenChienDich ?? "N/A",
                 });
@@ -85,6 +86,7 @@ namespace HienMauNhanDao_DaNang.Controllers
             return Ok(ketQuaTraVe);
         }
         //API 2. LẤY SỐ LIỆU THỐNG KÊ XÉT NGHIỆM PHỤC VỤ CHO DASHBOARD
+        [HttpGet("stats")]
         [HttpGet("thong-ke")]
         public async Task<IActionResult> GetThongKe()
         {
@@ -101,7 +103,8 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
 
-        //API 3. lưu hoặc cập nhật kết quả  xét nghiệm túi máu 
+        //API 3. lưu hoặc cập nhật kết quả xét nghiệm túi máu 
+        [HttpPost]
         [HttpPost("luu")]
         public async Task<IActionResult> LuuXetNghiem([FromBody] LuuXetNghiemRequest request)
         {

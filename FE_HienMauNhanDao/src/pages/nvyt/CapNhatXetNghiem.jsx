@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { ketQuaXetNghiemService } from '../../services/khamLamSangService';
 import Swal from 'sweetalert2';
 
+// ─── Issue #67: Trang Cập Nhật Kết Quả Xét Nghiệm & Re-test Kho Máu (NVYT Xét Nghiệm) ───
 // ─── Modal Cập Nhật Kết Quả Xét Nghiệm (Lần 1 & Re-test Lần 2) ──────────────────
 function XetNghiemModal({ item, nhanVien, isReTest, onClose, onSaved }) {
   const [form, setForm] = useState({
@@ -31,25 +32,33 @@ function XetNghiemModal({ item, nhanVien, isReTest, onClose, onSaved }) {
     });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (overrideKetQua = null) => {
     setLoading(true); setError('');
+    const finalKetQua = overrideKetQua !== null ? overrideKetQua : form.ketQua;
     try {
       const payload = {
         maTuiMau: form.maTuiMau,
         maNhanVien: nhanVien?.maNV || localStorage.getItem('maNV') || '',
         nhomMau: form.nhomMau,
         soLanXetNghiem: parseInt(form.soLanXetNghiem) || 1,
-        ketQua: form.ketQua,
+        ketQua: finalKetQua,
         moTa: `${form.moTa} | HBV: ${form.hbv ? 'dương tính' : 'âm tính'}, HCV: ${form.hcv ? 'dương tính' : 'âm tính'}, HIV: ${form.hiv ? 'dương tính' : 'âm tính'}, Giang Mai: ${form.giangMai ? 'dương tính' : 'âm tính'}`
       };
 
       await ketQuaXetNghiemService.save(payload);
 
       await Swal.fire({
-        title: isReTest ? '🚨 ĐÃ CẬP NHẬT XÉT NGHIỆM LẦN 2!' : '✅ ĐÃ LƯU KẾT QUẢ XÉT NGHIỆM!',
-        html: `Túi máu <b>${form.maTuiMau}</b> (Nhóm máu <b>${form.nhomMau}</b>) đã được đánh giá <b>${form.ketQua ? 'ĐẠT TIÊU CHUẨN' : 'KHÔNG ĐẠT (HỦY)'}</b>.<br/><br/><span class="text-sm text-emerald-600 font-bold">Thông tin đã được chuyển lại sang Quản Lý Kho Máu!</span>`,
-        icon: form.ketQua ? 'success' : 'warning',
-        confirmButtonColor: '#af101a',
+        title: finalKetQua ? '✅ ĐÃ PHÊ DUYỆT XÉT NGHIỆM!' : '❌ ĐÃ ĐÁNH GIÁ KHÔNG ĐẠT (HỦY)!',
+        html: `<div style="text-align: center;">
+                 <p style="font-size: 14px; color: #475569; margin-bottom: 8px;">Mã túi máu: <b style="font-family: monospace; color: #dc2626;">${form.maTuiMau}</b> (Nhóm: <b>${form.nhomMau}</b>)</p>
+                 <p style="font-size: 13px; color: ${finalKetQua ? '#059669' : '#dc2626'}; font-weight: 700; margin-bottom: 10px;">
+                   ${finalKetQua ? '✅ Đã phê duyệt ĐẠT TIÊU CHUẨN. Trạng thái chuyển thành: CHỜ NHẬP KHO' : '❌ Đã đánh giá KHÔNG ĐẠT. Trạng thái chuyển thành: ĐÃ HỦY'}
+                 </p>
+                 <span style="font-size: 12px; color: #64748b;">Thông tin túi máu đã biến mất khỏi Trang 2 và chuyển về <b>Trang Thu Nhận Máu (Tab 2: Túi máu hoàn tất xét nghiệm)</b>.</span>
+               </div>`,
+        icon: finalKetQua ? 'success' : 'error',
+        confirmButtonColor: finalKetQua ? '#059669' : '#dc2626',
+        confirmButtonText: 'Đồng ý'
       });
 
       onSaved();
@@ -183,24 +192,30 @@ function XetNghiemModal({ item, nhanVien, isReTest, onClose, onSaved }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-2">
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-2">
           <button onClick={onClose} disabled={loading} className="px-4 h-10 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">
-            Hủy
+            Đóng
           </button>
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className={`px-5 h-10 text-white rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center gap-2 transition-all shadow-md ${
-              isReTest ? 'bg-purple-600 hover:bg-purple-700' : 'bg-primary hover:bg-red-800'
-            }`}
-          >
-            {loading ? 'Đang lưu...' : (
-              <>
-                <span className="material-symbols-outlined text-base">send</span>
-                <span>{isReTest ? 'Gửi Lại Kết Quả Re-test Cho Kho' : 'Lưu Kết Quả & Gửi Kho'}</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleSubmit(false)}
+              disabled={loading}
+              className="px-4 h-10 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 rounded-xl text-xs font-extrabold flex items-center gap-1 transition-all"
+              title="Đánh giá không đạt - Hủy túi máu"
+            >
+              <span className="material-symbols-outlined text-base">cancel</span>
+              <span>❌ Không Đạt (Hủy)</span>
+            </button>
+            <button
+              onClick={() => handleSubmit(true)}
+              disabled={loading}
+              className="px-5 h-10 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center gap-1 transition-all shadow-md shadow-emerald-100"
+              title="Phê duyệt đạt tiêu chuẩn - Chuyển chờ nhập kho"
+            >
+              <span className="material-symbols-outlined text-base">task_alt</span>
+              <span>✅ Phê Duyệt (Đạt)</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
