@@ -238,10 +238,6 @@ export default function ThuNhanMau() {
 
     fetchPendingList();
     fetchCollectionList();
-
-    if (maTuiMauCreated && !editItem) {
-      setActiveTab('collected');
-    }
   };
 
   const handleCancelDon = (maDon) => {
@@ -306,32 +302,35 @@ export default function ThuNhanMau() {
           className={`pb-3 px-2 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'pending' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
         >
-          <span className="material-symbols-outlined text-xl">hourglass_top</span>
-          Danh sách chờ thu nhận
+          <span className="material-symbols-outlined text-xl">qr_code_2</span>
+          📋 Chờ tiếp nhận & Sinh mã túi máu
         </button>
         <button
           onClick={() => setActiveTab('collected')}
           className={`pb-3 px-2 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'collected' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
         >
-          <span className="material-symbols-outlined text-xl">bloodtype</span>
-          Túi máu đã thu
+          <span className="material-symbols-outlined text-xl">fact_check</span>
+          🩸 Túi máu đã hoàn tất xét nghiệm
         </button>
       </div>
 
       {activeTab === 'pending' && (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-4 bg-slate-50 border-b border-slate-200">
+          <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
             <h3 className="font-bold text-slate-800 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary">person_check</span>
-              Tình nguyện viên đủ điều kiện lấy máu
+              Tình nguyện viên đủ điều kiện lấy máu & Sinh mã túi
             </h3>
+            <span className="text-xs font-semibold text-slate-500">
+              💡 Bấm dấu <b className="text-red-600">+</b> để cấp mã túi máu trước khi lấy máu
+            </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-white border-b border-slate-200">
-                  {['Mã đơn', 'Tình nguyện viên', 'Nhóm máu', 'Chiến dịch', 'Thể tích ĐK', 'Bác sĩ khám', 'Thao tác'].map(h => (
+                  {['Mã đơn / Mã túi', 'Tình nguyện viên', 'Nhóm máu', 'Chiến dịch', 'Thể tích', 'Trạng thái xử lý', 'Thao tác'].map(h => (
                     <th key={h} className="text-left px-5 py-3 text-xs font-black uppercase text-slate-400 tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -343,7 +342,16 @@ export default function ThuNhanMau() {
                   <tr><td colSpan={7} className="text-center py-8 text-slate-400">Không có đơn nào chờ thu nhận máu.</td></tr>
                 ) : pendingList.map(don => (
                   <tr key={don.maDon} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                    <td className="px-5 py-4 font-mono text-xs font-bold text-primary">{don.maDon}</td>
+                    <td className="px-5 py-4">
+                      <p className="font-mono text-xs font-bold text-primary">{don.maDon}</p>
+                      {don.maTuiMau ? (
+                        <span className="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-700 font-mono font-bold text-xs rounded border border-red-200 shadow-sm">
+                          🏷️ {don.maTuiMau}
+                        </span>
+                      ) : (
+                        <span className="inline-block mt-1 text-[11px] text-slate-400 italic">Chưa cấp mã</span>
+                      )}
+                    </td>
                     <td className="px-5 py-4">
                       <p className="font-semibold text-slate-800">{don.hoTen || don.hoVaTen || don.tenTinhNguyenVien || don.tinhNguyenVien?.hoTen || don.tinhNguyenVien?.hoVaTen || 'TNV Hiến Máu'}</p>
                       <p className="text-xs text-slate-400">{don.cccd || don.soCCCD || don.tinhNguyenVien?.cccd || don.tinhNguyenVien?.soCCCD || '---'}</p>
@@ -354,23 +362,31 @@ export default function ThuNhanMau() {
                       <p className="font-mono text-[10px] text-slate-400">{don.maChienDich || 'CD00004'}</p>
                     </td>
                     <td className="px-5 py-4"><span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg">{don.theTich || 0} ml</span></td>
-                    <td className="px-5 py-4 text-xs font-semibold text-slate-600">
-                      {don.tenBacSi ? (
-                        <div>
-                          <p>{don.tenBacSi}</p>
-                          <p className="text-[10px] text-slate-400 font-mono">{don.maBacSi}</p>
-                        </div>
-                      ) : '---'}
+                    <td className="px-5 py-4 text-xs">
+                      {don.daCapMa ? (
+                        <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold rounded-full border border-indigo-100 flex items-center gap-1 w-fit">
+                          <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                          🧪 Đã sinh mã - Chờ XN Trang 2
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-1 bg-amber-50 text-amber-700 font-semibold rounded-full border border-amber-100">
+                          ⏳ Chờ sinh mã túi máu
+                        </span>
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setModalDon(don)}
-                          className="flex items-center justify-center w-9 h-9 bg-red-600 text-white hover:bg-red-700 rounded-xl transition-all shadow-md shadow-red-100 group active:scale-90"
-                          title="Tạo túi máu"
+                          className={`flex items-center justify-center h-9 px-3 text-white rounded-xl transition-all shadow-md group active:scale-90 font-medium text-xs gap-1 ${
+                            don.daCapMa ? 'bg-slate-700 hover:bg-slate-800 shadow-slate-200' : 'bg-red-600 hover:bg-red-700 shadow-red-100'
+                          }`}
+                          title={don.daCapMa ? "Chỉnh sửa mã / thể tích" : "Tạo mã túi máu"}
                         >
-                          <span className="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">add_circle</span>
+                          <span className="material-symbols-outlined text-lg">{don.daCapMa ? 'edit' : 'add_circle'}</span>
+                          <span>{don.daCapMa ? 'Sửa' : 'Cấp mã'}</span>
                         </button>
+
                         <button
                           onClick={() => handleCancelDon(don.maDon)}
                           className="flex items-center justify-center w-9 h-9 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl transition-all border border-red-100 group active:scale-90"

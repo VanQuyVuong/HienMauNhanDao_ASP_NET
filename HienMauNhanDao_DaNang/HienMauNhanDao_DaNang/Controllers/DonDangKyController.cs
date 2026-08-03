@@ -295,12 +295,50 @@ namespace HienMauNhanDao_DaNang.Controllers
                 .Include(d => d.TinhNguyenVien)
                 .Include(d => d.ChienDich)
                 .Where(d => d.TrangThai == TrangThaiDonDangKy.DaDuyet)
-                .Where(d => !_context.TuiMaus.Any(t => t.MaDon == d.MaDon))
+                .Where(d => !_context.TuiMaus.Any(t => t.MaDon == d.MaDon && (t.TrangThai == TrangThaiTuiMau.DaXetNghiem || t.TrangThai == TrangThaiTuiMau.DaLuuKho || t.TrangThai == TrangThaiTuiMau.DaHuy)))
                 .OrderByDescending(d => d.ThoiGianDangKy);
 
             var totalElements = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalElements / (double)(size > 0 ? size : 10));
-            var content = await query.Skip(page * (size > 0 ? size : 10)).Take(size > 0 ? size : 10).ToListAsync();
+            var rawList = await query.Skip(page * (size > 0 ? size : 10)).Take(size > 0 ? size : 10).ToListAsync();
+
+            var rawMaDons = rawList.Select(r => r.MaDon).ToList();
+            var allTuiMaus = await _context.TuiMaus
+                .Where(t => rawMaDons.Contains(t.MaDon))
+                .ToListAsync();
+
+            var content = rawList.Select(d =>
+            {
+                var tui = allTuiMaus.FirstOrDefault(t => t.MaDon == d.MaDon);
+                return new
+                {
+                    maDon = d.MaDon,
+                    maTNV = d.MaTNV,
+                    maTuiMau = tui?.MaTuiMau,
+                    daCapMa = tui != null,
+                    trangThaiTuiMau = tui != null ? "Đã cấp mã (Chờ XN Trang 2)" : "Chưa sinh mã",
+                    hoTen = d.TinhNguyenVien?.HoTen ?? "TNV Hiến Máu",
+                    hoVaTen = d.TinhNguyenVien?.HoTen ?? "TNV Hiến Máu",
+                    tenTinhNguyenVien = d.TinhNguyenVien?.HoTen ?? "TNV Hiến Máu",
+                    cccd = d.TinhNguyenVien?.Cccd ?? "---",
+                    soCCCD = d.TinhNguyenVien?.Cccd ?? "---",
+                    nhomMau = d.TinhNguyenVien?.NhomMau != null ? d.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ",
+                    maChienDich = d.MaChienDich ?? "N/A",
+                    tenChienDich = d.ChienDich?.TenChienDich ?? "Hiến máu thường xuyên",
+                    theTich = tui?.TheTich ?? d.TheTich ?? 350,
+                    tenBacSi = "Bác Sĩ Khám Sàng Lọc",
+                    maBacSi = d.MaNhanVien ?? "NV00004",
+                    tinhNguyenVien = d.TinhNguyenVien != null ? new
+                    {
+                        maTNV = d.TinhNguyenVien.maTNV,
+                        hoTen = d.TinhNguyenVien.HoTen,
+                        hoVaTen = d.TinhNguyenVien.HoTen,
+                        cccd = d.TinhNguyenVien.Cccd,
+                        soCCCD = d.TinhNguyenVien.Cccd,
+                        nhomMau = d.TinhNguyenVien.NhomMau != null ? d.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ"
+                    } : null
+                };
+            });
 
             return Ok(new
             {
