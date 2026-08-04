@@ -69,34 +69,50 @@ export default function TinhNguyenVien() {
         </div>
       )}
 
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Tình nguyện viên</h1>
-          <p className="text-slate-500 mt-1 text-sm">Danh sách tình nguyện viên đã đăng ký trong hệ thống</p>
+      {/* Ruby Blood Life Le Tan Donor Directory Hero Banner */}
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 p-6 md:p-8 text-white shadow-xl shadow-rose-600/15 border border-white/20">
+        <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/20 backdrop-blur-md rounded-full text-[11px] font-black text-rose-50 border border-white/20 mb-3">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+              👥 DANH MỤC HỒ SƠ TÌNH NGUYỆN VIÊN HIẾN MÁU
+            </div>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
+              Quản Lý Hồ Sơ Tình Nguyện Viên
+            </h1>
+            <p className="text-rose-100 text-xs md:text-sm mt-1.5 max-w-2xl font-medium leading-relaxed">
+              Tra cứu thông tin cá nhân, số lần hiến máu, lịch sử đóng góp & cập nhật dữ liệu liên lạc của tình nguyện viên
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Search */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex gap-3">
+      {/* Toolbar & Search Bar */}
+      <div className="bg-white border border-rose-100 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+          <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
           <input
             value={searchInput} onChange={e => setSearchInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
             placeholder="Tìm theo tên, CCCD, số điện thoại..."
-            className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+            className="w-full h-11 bg-rose-50/30 border border-rose-100 rounded-xl pl-10 pr-4 text-xs font-medium outline-none focus:border-rose-500 focus:bg-white transition-all"
           />
         </div>
-        <button onClick={handleSearch}
-          className="h-11 px-6 bg-primary text-white rounded-xl font-bold text-sm hover:bg-red-800 transition-colors">
-          Tìm kiếm
-        </button>
-        {keyword && (
-          <button onClick={() => { setKeyword(''); setSearchInput(''); setPage(0); }}
-            className="h-11 px-4 border border-slate-200 text-slate-500 rounded-xl text-sm hover:bg-slate-50 transition-colors">
-            Xóa lọc
+        <div className="flex gap-2">
+          <button onClick={handleSearch}
+            className="h-11 px-5 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-700 hover:to-red-700 text-white rounded-xl font-black text-xs transition-all shadow-md shadow-rose-500/20 active:scale-95 flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-base">search</span>
+            <span>Tìm kiếm</span>
           </button>
-        )}
+          {keyword && (
+            <button onClick={() => { setKeyword(''); setSearchInput(''); setPage(0); }}
+              className="h-11 px-4 border border-rose-200 text-slate-600 hover:bg-rose-50 rounded-xl text-xs font-extrabold transition-all">
+              Xóa lọc
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Table */}

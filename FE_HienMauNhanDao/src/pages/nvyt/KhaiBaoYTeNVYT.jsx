@@ -277,29 +277,49 @@ export default function KhaiBaoYTeNVYT() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto w-full">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Khai báo y tế</h1>
-        <p className="text-slate-500 mt-1 text-sm">Nhập thông tin sức khỏe cho tình nguyện viên theo mã đơn đăng ký</p>
+      {/* Ruby Blood Life Medical Declaration Hero Banner */}
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 p-6 md:p-8 text-white shadow-xl shadow-rose-600/15 border border-white/20">
+        <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/20 backdrop-blur-md rounded-full text-[11px] font-black text-rose-50 border border-white/20 mb-3">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+              📋 TỜ KHAI Y TẾ & TIỀN SỬ SỨC KHỎE TNV
+            </div>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
+              Hồ Sơ Khai Báo Y Tế & Tiền Sử Sức Khỏe
+            </h1>
+            <p className="text-rose-100 text-xs md:text-sm mt-1.5 max-w-2xl font-medium leading-relaxed">
+              Lập tờ khai 5 câu hỏi y tế Bộ Y Tế, rà soát tiền sử sức khỏe & quản lý danh sách hồ sơ khai báo y tế tình nguyện viên
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Tab navigation */}
-      <div className="flex gap-1 border-b border-slate-200">
+      {/* Tab Navigation */}
+      <div className="flex gap-2 border-b border-rose-100 bg-white p-2 rounded-2xl border shadow-2xs">
         <button
           onClick={() => setActiveTab('khai-bao')}
-          className={`px-5 py-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2
-            ${activeTab === 'khai-bao' ? 'text-primary border-primary' : 'text-slate-500 border-transparent hover:text-slate-700'}`}
+          className={`px-5 py-2.5 font-black text-xs transition-all rounded-xl flex items-center gap-2 ${
+            activeTab === 'khai-bao'
+              ? 'bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-md shadow-rose-500/20'
+              : 'text-slate-600 hover:bg-rose-50 hover:text-rose-600'
+          }`}
         >
           <span className="material-symbols-outlined text-lg">fact_check</span>
-          Khai báo y tế
+          Khai Báo Y Tế Mới
         </button>
         <button
           onClick={() => setActiveTab('danh-sach')}
-          className={`px-5 py-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2
-            ${activeTab === 'danh-sach' ? 'text-primary border-primary' : 'text-slate-500 border-transparent hover:text-slate-700'}`}
+          className={`px-5 py-2.5 font-black text-xs transition-all rounded-xl flex items-center gap-2 ${
+            activeTab === 'danh-sach'
+              ? 'bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-md shadow-rose-500/20'
+              : 'text-slate-600 hover:bg-rose-50 hover:text-rose-600'
+          }`}
         >
           <span className="material-symbols-outlined text-lg">list_alt</span>
-          Danh sách khai báo y tế
+          Danh Sách Hồ Sơ Đã Khai Báo
         </button>
       </div>
 

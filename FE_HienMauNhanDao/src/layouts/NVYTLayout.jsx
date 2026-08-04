@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { nhanVienService } from '../services/nvytService';
+import { nhanVienService, donDangKyNvytService } from '../services/nvytService';
+import { ketQuaXetNghiemService } from '../services/khamLamSangService';
 
 // ─── Sidebar nav items cho Lễ Tân (3 trang) ─────────────────────────
 const LE_TAN_NAV_ITEMS = [
@@ -21,7 +22,7 @@ const LE_TAN_NAV_ITEMS = [
   },
 ];
 
-// ─── Sidebar nav items cho Xét Nghiệm & Lấy Máu (Đúng 2 trang chuyên trách) ───
+// ─── Sidebar nav items cho Xét Nghiệm & Lấy Máu ───────────────────────
 const XET_NGHIEM_NAV_ITEMS = [
   {
     label: 'Thu nhận & Sinh mã barcode túi máu',
@@ -35,17 +36,57 @@ const XET_NGHIEM_NAV_ITEMS = [
   },
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function NVYTLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [nhanVien, setNhanVien] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Lấy thông tin nhân viên từ localStorage → API
+  // Live Notification Badge Counters
+  const [pendingDonCount, setPendingDonCount] = useState(0);
+  const [pendingBarcodeCount, setPendingBarcodeCount] = useState(0);
+  const [pendingTestCount, setPendingTestCount] = useState(0);
+
+  const fetchBadgeCounts = async () => {
+    try {
+      // 1. Un-checked-in donor registrations count for Le Tan
+      try {
+        const resDon = await donDangKyNvytService.getAll(0, 1000);
+        const dons = Array.isArray(resDon) ? resDon : (resDon?.content || resDon?.data || []);
+        const pendingDons = dons.filter(d => 
+          !d.maNhanVien && !d.maNV && (d.trangThai === 'DA_DANG_KY' || d.trangThai === 'Đã đăng ký' || d.trangThai === 'Pending' || d.trangThai === 'CHO_DUYET')
+        ).length;
+        setPendingDonCount(pendingDons);
+      } catch (e) { console.warn('Lỗi lấy đếm đơn tiếp nhận:', e); }
+
+      // 2. Un-barcoded blood bag registrations count for NVXN
+      try {
+        const resColl = await donDangKyNvytService.getReadyForCollection();
+        const colls = Array.isArray(resColl) ? resColl : (resColl?.data || []);
+        const pendingBarcodes = colls.filter(d => !d.daCapMa).length;
+        setPendingBarcodeCount(pendingBarcodes);
+      } catch (e) { console.warn('Lỗi lấy đếm sinh mã barcode:', e); }
+
+      // 3. Pending lab microbiology tests count for NVXN
+      try {
+        const resXn = await ketQuaXetNghiemService.getAll();
+        const xns = Array.isArray(resXn) ? resXn : (resXn?.data || []);
+        const pendingTests = xns.filter(xn => xn.ketQua === null || xn.ketQua === undefined).length;
+        setPendingTestCount(pendingTests);
+      } catch (e) { console.warn('Lỗi lấy đếm chờ xét nghiệm:', e); }
+
+    } catch (err) {
+      console.error('Lỗi khi fetch badge counts:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchBadgeCounts();
+    const interval = setInterval(fetchBadgeCounts, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auth & Personnel Info Fetch
   useEffect(() => {
     const role = localStorage.getItem('role');
     const userId = (localStorage.getItem('userId') || '').trim();
@@ -88,93 +129,118 @@ export default function NVYTLayout() {
 
   const initials = nhanVien
     ? (nhanVien.hoVaTen || '').split(' ').slice(-2).map((w) => w[0]).join('').toUpperCase()
-    : '?';
+    : 'NV';
+
+  const role = (localStorage.getItem('role') || '').trim();
+  const isXn = role === 'NVYT_XN' || role === 'NVYT-XN';
 
   return (
-    <div className="w-full min-h-screen flex bg-[#F3F4F6] font-sans antialiased">
-      {/* Sidebar mobile overlay backdrop */}
+    <div className="w-full min-h-screen flex bg-rose-50/40 font-sans antialiased">
+      {/* Mobile Backdrop */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
-      {/* ── Sidebar (Fixed 100% Cố định bất động như AdminLayout) ────────── */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 h-screen bg-white border-r border-slate-200 flex flex-col shadow-lg transition-transform duration-300 shrink-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-        {/* Brand */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-100">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-              favorite
+
+      {/* Ruby Blood Life Sidebar for NVYT */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 h-screen bg-white text-slate-800 border-r border-rose-100 flex flex-col shadow-sm transition-transform duration-300 shrink-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        
+        {/* Brand Header */}
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-rose-100 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 text-white">
+          <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0 shadow-sm border border-white/20">
+            <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              water_drop
             </span>
           </div>
           <div>
-            <p className="text-[11px] font-black uppercase text-primary tracking-wider leading-tight">
-              Hệ thống Hiến máu
+            <p className="text-[11px] font-black uppercase text-rose-100 tracking-wider leading-tight">
+              Hiến Máu Nhân Đạo
             </p>
-            <p className="text-[10px] text-slate-400 font-medium">TP. Đà Nẵng</p>
+            <h2 className="text-sm font-black text-white tracking-tight">
+              {isXn ? '🔬 NVYT Xét Nghiệm' : '📋 NVYT Lễ Tân'}
+            </h2>
           </div>
         </div>
 
-        {/* User card */}
-        <div className="px-4 py-4 border-b border-slate-100">
-          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white text-sm font-black shrink-0 shadow">
-              {initials}
+        {/* User Card */}
+        <div className="px-4 py-4 border-b border-rose-100/60 bg-rose-50/30">
+          <div className="flex items-center gap-3 p-3 bg-white border border-rose-100 rounded-2xl shadow-2xs">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-sm">
+                {initials}
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white animate-pulse"></span>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-800 truncate">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-black text-slate-800 truncate">
                 {nhanVien ? (nhanVien.hoVaTen || 'Nhân viên') : 'Đang tải...'}
               </p>
-              <p className="text-[10px] font-extrabold uppercase text-primary tracking-wider">
-                {(localStorage.getItem('role') === 'NVYT_XN' || localStorage.getItem('role') === 'NVYT-XN') ? '🔬 NVYT Xét Nghiệm' : '📋 NVYT Lễ Tân'}
+              <p className="text-[10px] font-black uppercase text-rose-600 tracking-wider">
+                {isXn ? '🔬 Cán bộ Xét Nghiệm' : '📋 Cán bộ Lễ Tân'}
               </p>
-              <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+              <p className="text-[10px] text-slate-400 font-medium">
                 Mã NV: {nhanVien?.maNV || '---'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Nav (Phân chia động 3 trang Lễ Tân / 2 trang Xét Nghiệm) */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {/* Dynamic Navigation Items with Live Badge Counter Pills */}
+        <nav className="flex-1 px-3.5 py-4 space-y-1.5 overflow-y-auto">
           {(() => {
-            const role = (localStorage.getItem('role') || '').trim();
-            const isXn = role === 'NVYT_XN' || role === 'NVYT-XN';
             const navItems = isXn ? XET_NGHIEM_NAV_ITEMS : LE_TAN_NAV_ITEMS;
-            return navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all group
-                  ${isActive
-                    ? 'bg-primary text-white shadow-sm shadow-primary/30'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-primary'
-                  }`
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <span
-                      className="material-symbols-outlined text-xl shrink-0"
-                      style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
-                    >
-                      {item.icon}
-                    </span>
-                    <span className="truncate">{item.label}</span>
-                  </>
-                )}
-              </NavLink>
-            ));
+            return navItems.map((item) => {
+              let count = 0;
+              if (item.path === '/nvyt/don-dang-ky') count = pendingDonCount;
+              else if (item.path === '/nvyt/thu-nhan-mau') count = pendingBarcodeCount;
+              else if (item.path === '/nvyt/cap-nhat-xet-nghiem') count = pendingTestCount;
+
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-black transition-all group relative ${
+                      isActive
+                        ? 'bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 text-white shadow-md shadow-rose-500/20 scale-[1.02]'
+                        : 'text-slate-600 hover:bg-rose-50 hover:text-rose-600'
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <span
+                        className="material-symbols-outlined text-xl shrink-0"
+                        style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
+                      >
+                        {item.icon}
+                      </span>
+                      <span className="truncate flex-1">{item.label}</span>
+
+                      {count > 0 && (
+                        <span className={`px-2.5 py-0.5 text-xs font-black rounded-full shadow-sm border transition-all ${
+                          isActive
+                            ? 'bg-white text-rose-700 shadow-rose-900/20 border-white scale-105'
+                            : 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-rose-500/30 border-rose-400'
+                        }`}>
+                          {count}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              );
+            });
           })()}
         </nav>
 
-        {/* Footer */}
-        <div className="px-3 py-4 border-t border-slate-100">
+        {/* Logout Button */}
+        <div className="px-3.5 py-4 border-t border-rose-100">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-primary transition-all group"
+            className="flex items-center gap-3 px-3.5 py-2.5 w-full rounded-2xl text-xs font-extrabold text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-all border border-transparent hover:border-rose-100 active:scale-95"
           >
             <span className="material-symbols-outlined text-xl shrink-0">logout</span>
             Đăng xuất
@@ -182,106 +248,37 @@ export default function NVYTLayout() {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden md:pl-64">
-        {/* Topbar */}
-        <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between shrink-0 shadow-sm z-30">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg md:hidden"
-            >
-              <span className="material-symbols-outlined">menu</span>
-            </button>
-            {/* Search */}
-            <div className="relative w-48 sm:w-80">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">
-                search
-              </span>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm nhanh..."
-                className="w-full h-10 bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-              />
-            </div>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 md:pl-64">
+        {/* Top Mobile Navbar Toggle */}
+        <header className="h-16 bg-white border-b border-rose-100 px-4 md:px-8 flex items-center justify-between shadow-2xs">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 text-slate-600 hover:bg-rose-50 rounded-xl md:hidden"
+          >
+            <span className="material-symbols-outlined text-2xl">menu</span>
+          </button>
+
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">
+              {isXn ? 'Khoa Xét Nghiệm & Quản Lý Túi Máu' : 'Bàn Lễ Tân Tiếp Nhận Tình Nguyện Viên'}
+            </span>
           </div>
 
-          {/* Right side */}
-          <div className="flex items-center gap-3">
-            {/* Notification bell */}
-            <div className="relative">
-              <button
-                onClick={() => { setNotifOpen(!notifOpen); setUserMenuOpen(false); }}
-                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-50 transition-colors relative"
-              >
-                <span className="material-symbols-outlined text-slate-500 text-xl">notifications</span>
-                <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-white" />
-              </button>
-              {notifOpen && (
-                <div className="absolute right-0 top-12 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-4">
-                  <p className="text-sm font-bold text-slate-700 mb-3">Thông báo</p>
-                  <p className="text-xs text-slate-400 text-center py-4">Không có thông báo mới</p>
-                </div>
-              )}
-            </div>
-
-            {/* User menu */}
-            <div className="relative">
-              <button
-                onClick={() => { setUserMenuOpen(!userMenuOpen); setNotifOpen(false); }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-slate-50 transition-colors"
-              >
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-black">
-                  {initials}
-                </div>
-                <div className="text-left hidden md:block">
-                  <p className="text-sm font-bold text-slate-800 leading-tight">
-                    {nhanVien ? (nhanVien.hoVaTen || 'BS.') : 'Đang tải...'}
-                  </p>
-                  <p className="text-[10px] font-bold uppercase text-primary tracking-widest">
-                    Nhân viên y tế
-                  </p>
-                  <p className="text-[9px] text-slate-400 font-medium">
-                    ID: {nhanVien?.maNV || '---'}
-                  </p>
-                </div>
-                <span className="material-symbols-outlined text-slate-400 text-base">expand_more</span>
-              </button>
-              {userMenuOpen && (
-                <div className="absolute right-0 top-12 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-2">
-                  <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="text-xs text-slate-500">Đăng nhập với</p>
-                    <p className="text-sm font-bold text-slate-800 truncate">
-                      {localStorage.getItem('email') || ''}
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-semibold"
-                  >
-                    <span className="material-symbols-outlined text-base">logout</span>
-                    Đăng xuất
-                  </button>
-                </div>
-              )}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black text-slate-800">{nhanVien?.hoVaTen || 'Cán bộ NVYT'}</span>
+            <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 font-black text-xs flex items-center justify-center">
+              {initials}
             </div>
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 p-4 md:p-8 flex flex-col gap-6 overflow-y-auto">
-          <Outlet context={{ nhanVien, searchQuery }} />
+        {/* Page Content Render */}
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+          <Outlet context={{ nhanVien }} />
         </main>
       </div>
-
-      {/* Click outside to close menus */}
-      {(notifOpen || userMenuOpen) && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => { setNotifOpen(false); setUserMenuOpen(false); }}
-        />
-      )}
     </div>
   );
 }
