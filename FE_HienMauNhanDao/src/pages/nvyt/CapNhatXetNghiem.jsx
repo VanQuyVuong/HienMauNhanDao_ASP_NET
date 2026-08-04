@@ -291,21 +291,20 @@ export default function CapNhatXetNghiem() {
 
   return (
     <div className="space-y-6">
-      {/* Cyber Hero Diagnostic Header Banner */}
-      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-950 p-6 md:p-8 text-white shadow-2xl shadow-indigo-950/40 border border-slate-800">
-        <div className="absolute -right-12 -bottom-12 w-80 h-80 bg-rose-600/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute left-1/3 -top-10 w-60 h-60 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Bright Crimson & Rose Medical Hero Header Banner */}
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 p-6 md:p-8 text-white shadow-xl shadow-rose-600/15 border border-white/20">
+        <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/10 backdrop-blur-lg rounded-full text-[11px] font-extrabold text-cyan-300 border border-white/15 mb-3">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/20 backdrop-blur-md rounded-full text-[11px] font-black text-rose-50 border border-white/20 mb-3">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
               🔬 PHÒNG XÉT NGHIỆM VI SINH & BẢO QUẢN KHO
             </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-rose-200 bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
               Cập Nhật Kết Quả Xét Nghiệm & Quản Lý Kho
             </h1>
-            <p className="text-slate-300 text-xs md:text-sm mt-1.5 max-w-2xl font-medium leading-relaxed">
+            <p className="text-rose-100 text-xs md:text-sm mt-1.5 max-w-2xl font-medium leading-relaxed">
               Kiểm tra sàng lọc vi sinh phẩm túi máu (HBV, HCV, HIV, Syphilis), đánh giá chất lượng & xử lý Re-test với Quản lý kho
             </p>
           </div>
