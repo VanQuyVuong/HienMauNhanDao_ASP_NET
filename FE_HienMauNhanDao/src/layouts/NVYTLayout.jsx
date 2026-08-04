@@ -126,8 +126,8 @@ export default function NVYTLayout() {
               <p className="text-sm font-bold text-slate-800 truncate">
                 {nhanVien ? (nhanVien.hoVaTen || 'Nhân viên') : 'Đang tải...'}
               </p>
-              <p className="text-[10px] font-bold uppercase text-primary tracking-widest">
-                Nhân viên y tế
+              <p className="text-[10px] font-extrabold uppercase text-primary tracking-wider">
+                {(localStorage.getItem('role') === 'NVYT_XN' || localStorage.getItem('role') === 'NVYT-XN') ? '🔬 NVYT Xét Nghiệm' : '📋 NVYT Lễ Tân'}
               </p>
               <p className="text-[10px] text-slate-400 font-medium mt-0.5">
                 Mã NV: {nhanVien?.maNV || '---'}
