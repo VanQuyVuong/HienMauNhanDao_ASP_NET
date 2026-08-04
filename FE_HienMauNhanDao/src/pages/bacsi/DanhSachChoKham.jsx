@@ -71,7 +71,6 @@ export default function DanhSachChoKham() {
     loadData();
   }, [loadData]);
 
-  // Apply blood filter
   const displayedList = useMemo(() => {
     return filteredAll.filter(item => {
       const matchesBlood = bloodFilter === 'ALL' || String(item.nhomMau || '').includes(bloodFilter);
@@ -113,45 +112,44 @@ export default function DanhSachChoKham() {
         </div>
       )}
 
-      {/* Hero Doctor Header Banner */}
-      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-950 via-teal-950 to-slate-950 p-6 md:p-8 text-white shadow-2xl shadow-teal-950/40 border border-slate-800">
-        <div className="absolute -right-12 -bottom-12 w-80 h-80 bg-teal-500/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute left-1/3 -top-10 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Ruby Blood Life Doctor Header Banner */}
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 p-6 md:p-8 text-white shadow-xl shadow-rose-600/15 border border-white/20">
+        <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/10 backdrop-blur-lg rounded-full text-[11px] font-extrabold text-teal-300 border border-white/15 mb-3">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              🩺 HỆ THỐNG KHÁM LÂM SÀNG & ĐO SINH HIỆU BÁC SĨ
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/20 backdrop-blur-md rounded-full text-[11px] font-black text-rose-50 border border-white/20 mb-3">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+              🩸 DÒNG MÁU NHÂN ĐẠO - KHÁM LÂM SÀNG BÁC SĨ
             </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-teal-200 bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
               Danh Sách Tình Nguyện Viên Chờ Khám Lâm Sàng
             </h1>
-            <p className="text-slate-300 text-xs md:text-sm mt-1.5 max-w-2xl font-medium leading-relaxed">
+            <p className="text-rose-100 text-xs md:text-sm mt-1.5 max-w-2xl font-medium leading-relaxed">
               Tiếp nhận tình nguyện viên đã check-in qua bàn Lễ tân, tiến hành đo 4 chỉ số sinh hiệu (Huyết áp, nhịp tim, cân nặng, nhiệt độ) và quyết định cấp phép hiến máu
             </p>
           </div>
 
           {/* Quick Doctor Live KPI Stats Cards */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/90 rounded-2xl p-3.5 px-4 text-center shadow-lg">
-              <p className="text-[10px] font-black uppercase text-teal-400 tracking-wider">Chờ Khám Ngay</p>
-              <p className="text-2xl font-black text-teal-300 mt-1">{filteredAll.length}</p>
+            <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl p-3.5 px-4 text-center shadow-sm">
+              <p className="text-[10px] font-black uppercase text-rose-100 tracking-wider">Chờ Khám Ngay</p>
+              <p className="text-2xl font-black text-white mt-1">{filteredAll.length}</p>
             </div>
-            <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/90 rounded-2xl p-3.5 px-4 text-center shadow-lg">
-              <p className="text-[10px] font-black uppercase text-cyan-400 tracking-wider">Lễ Tân Đã Duyệt</p>
-              <p className="text-2xl font-black text-cyan-300 mt-1">{registeredByLeTanCount}</p>
+            <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl p-3.5 px-4 text-center shadow-sm">
+              <p className="text-[10px] font-black uppercase text-rose-100 tracking-wider">Lễ Tân Đã Duyệt</p>
+              <p className="text-2xl font-black text-white mt-1">{registeredByLeTanCount}</p>
             </div>
-            <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/90 rounded-2xl p-3.5 px-4 text-center shadow-lg">
-              <p className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">Tự Đăng Ký</p>
-              <p className="text-2xl font-black text-emerald-300 mt-1">{filteredAll.length - registeredByLeTanCount}</p>
+            <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl p-3.5 px-4 text-center shadow-sm">
+              <p className="text-[10px] font-black uppercase text-rose-100 tracking-wider">Tự Đăng Ký</p>
+              <p className="text-2xl font-black text-white mt-1">{filteredAll.length - registeredByLeTanCount}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Toolbar: Search Bar & Filters */}
-      <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-white border border-rose-100 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-1">
           <div className="relative flex-1">
             <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
@@ -160,13 +158,13 @@ export default function DanhSachChoKham() {
               onChange={e => setSearchInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
               placeholder="Tìm theo mã đơn, họ tên TNV, CCCD, SĐT..."
-              className="w-full h-11 bg-slate-50 border border-slate-200/80 rounded-xl pl-10 pr-4 text-xs outline-none focus:border-teal-500 focus:bg-white transition-all font-medium"
+              className="w-full h-11 bg-rose-50/30 border border-rose-100 rounded-xl pl-10 pr-4 text-xs outline-none focus:border-rose-500 focus:bg-white transition-all font-medium"
             />
           </div>
 
           <button
             onClick={handleSearch}
-            className="h-11 px-5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-teal-500/20 active:scale-95 flex items-center gap-1.5"
+            className="h-11 px-5 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-700 hover:to-red-700 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-rose-500/20 active:scale-95 flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-base">search</span>
             <span>Tìm Kiếm</span>
@@ -177,7 +175,7 @@ export default function DanhSachChoKham() {
           <select
             value={bloodFilter}
             onChange={e => setBloodFilter(e.target.value)}
-            className="h-11 border border-slate-200/80 rounded-xl px-4 text-xs font-extrabold text-slate-700 outline-none bg-slate-50 focus:border-teal-500 cursor-pointer shadow-2xs"
+            className="h-11 border border-rose-100 rounded-xl px-4 text-xs font-extrabold text-slate-700 outline-none bg-rose-50/30 focus:border-rose-500 cursor-pointer shadow-2xs"
           >
             <option value="ALL">Tất cả nhóm máu</option>
             <option value="A">Nhóm A</option>
@@ -189,7 +187,7 @@ export default function DanhSachChoKham() {
           <button
             onClick={loadData}
             disabled={loading}
-            className="h-11 w-11 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl flex items-center justify-center transition-all border border-slate-200 active:scale-95"
+            className="h-11 w-11 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl flex items-center justify-center transition-all border border-rose-200 active:scale-95"
             title="Làm mới danh sách"
           >
             <span className={`material-symbols-outlined text-lg ${loading ? 'animate-spin' : ''}`}>refresh</span>
@@ -198,21 +196,21 @@ export default function DanhSachChoKham() {
       </div>
 
       {/* Main Waiting Table */}
-      <div className="bg-white border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden">
-        <div className="p-4 bg-slate-50/90 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="bg-white border border-rose-100 rounded-3xl shadow-sm overflow-hidden">
+        <div className="p-4 bg-rose-50/50 border-b border-rose-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <h3 className="font-black text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
-            <span className="material-symbols-outlined text-teal-600 text-lg">queue</span>
+            <span className="material-symbols-outlined text-rose-600 text-lg">queue</span>
             Danh Sách Tình Nguyện Viên Đang Chờ Tại Phòng Khám
           </h3>
-          <span className="text-[11px] font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-xl border border-teal-200/60 shadow-2xs">
-            💡 Bấm nút <b className="text-teal-700 font-black">🩺 Gọi Khám Lâm Sàng</b> để đo 4 chỉ số sinh hiệu
+          <span className="text-[11px] font-bold text-rose-700 bg-rose-100/70 px-3 py-1 rounded-xl border border-rose-200 shadow-2xs">
+            💡 Bấm nút <b className="text-rose-700 font-black">🩺 Gọi Khám Lâm Sàng</b> để đo 4 chỉ số sinh hiệu
           </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="bg-slate-100/80 border-b border-slate-200">
+              <tr className="bg-rose-50/30 border-b border-rose-100">
                 {['Mã Đơn Đăng Ký', 'Tình Nguyện Viên', 'Căn Cước / SĐT', 'Nhóm Máu', 'Nguồn Tiếp Nhận', 'Chiến Dịch', 'Thao Tác'].map(h => (
                   <th key={h} className="text-left px-5 py-3.5 text-[11px] font-black uppercase text-slate-400 tracking-wider whitespace-nowrap">{h}</th>
                 ))}
@@ -226,9 +224,9 @@ export default function DanhSachChoKham() {
               ) : dons.map(don => {
                 const isFromLeTan = !!(don.maNhanVien || don.maNV);
                 return (
-                  <tr key={don.maDon} className="border-b border-slate-100 hover:bg-teal-50/20 transition-colors">
+                  <tr key={don.maDon} className="border-b border-slate-100 hover:bg-rose-50/30 transition-colors">
                     <td className="px-5 py-4">
-                      <span className="font-mono text-xs font-black text-teal-800 bg-teal-50 px-3 py-1 rounded-xl border border-teal-200/80 shadow-2xs">
+                      <span className="font-mono text-xs font-black text-rose-800 bg-rose-50 px-3 py-1 rounded-xl border border-rose-200/80 shadow-2xs">
                         {don.maDon}
                       </span>
                     </td>
@@ -241,7 +239,7 @@ export default function DanhSachChoKham() {
                       <p className="text-[10px] font-mono text-slate-400">{don.soDienThoai || '---'}</p>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="px-3 py-1 bg-gradient-to-r from-red-600 to-rose-600 text-white font-black text-xs rounded-xl shadow-sm shadow-rose-200">
+                      <span className="px-3 py-1 bg-gradient-to-r from-rose-600 to-red-600 text-white font-black text-xs rounded-xl shadow-sm shadow-rose-200">
                         {don.nhomMau || 'Chưa rõ'}
                       </span>
                     </td>
@@ -263,7 +261,7 @@ export default function DanhSachChoKham() {
                     <td className="px-5 py-4">
                       <button
                         onClick={() => handleGoKham(don)}
-                        className="h-10 px-4 bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-xl font-black text-xs flex items-center gap-1.5 shadow-md shadow-teal-500/25 active:scale-95 transition-all"
+                        className="h-10 px-4 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-700 hover:to-red-700 text-white rounded-xl font-black text-xs flex items-center gap-1.5 shadow-md shadow-rose-500/25 active:scale-95 transition-all"
                       >
                         <span className="material-symbols-outlined text-lg">clinical_notes</span>
                         <span>🩺 Gọi Khám Lâm Sàng</span>
@@ -278,7 +276,7 @@ export default function DanhSachChoKham() {
 
         {/* Pagination Bar */}
         {totalPages > 1 && (
-          <div className="flex justify-between items-center px-5 py-3.5 border-t border-slate-100 bg-slate-50/90">
+          <div className="flex justify-between items-center px-5 py-3.5 border-t border-rose-100 bg-rose-50/40">
             <span className="text-xs font-bold text-slate-500">Trang {page + 1} / {totalPages} ({displayedList.length} ca chờ)</span>
             <div className="flex gap-2">
               <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} className="w-8 h-8 rounded-xl border border-slate-200 flex justify-center items-center hover:bg-slate-100 disabled:opacity-40 font-bold"><span className="material-symbols-outlined text-sm">chevron_left</span></button>
