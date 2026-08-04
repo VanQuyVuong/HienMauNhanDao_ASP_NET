@@ -379,38 +379,37 @@ export default function ThuNhanMau() {
         </div>
       )}
 
-      {/* Cyber Hero Diagnostic Header */}
-      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-950 p-6 md:p-8 text-white shadow-2xl shadow-indigo-950/40 border border-slate-800">
-        <div className="absolute -right-12 -bottom-12 w-80 h-80 bg-rose-600/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute left-1/3 -top-10 w-60 h-60 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Bright Crimson & Rose Medical Hero Header */}
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 p-6 md:p-8 text-white shadow-xl shadow-rose-600/15 border border-white/20">
+        <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/10 backdrop-blur-lg rounded-full text-[11px] font-extrabold text-cyan-300 border border-white/15 mb-3">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/20 backdrop-blur-md rounded-full text-[11px] font-black text-rose-50 border border-white/20 mb-3">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
               🔬 KHOA XÉT NGHIỆM & THU NHẬN TÚI MÁU (NVXN)
             </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-rose-200 bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
               Thu Nhận & Sinh Mã Barcode Túi Máu
             </h1>
-            <p className="text-slate-300 text-xs md:text-sm mt-1.5 max-w-2xl font-medium leading-relaxed">
+            <p className="text-rose-100 text-xs md:text-sm mt-1.5 max-w-2xl font-medium leading-relaxed">
               Khai thác túi máu từ tình nguyện viên đã qua khám sàng lọc, dán nhãn định danh Barcode & chuyển thông tin sang phòng Xét Nghiệm Vi Sinh
             </p>
           </div>
 
-          {/* Glowing KPI Stats Cards */}
+          {/* Clean White Frosted KPI Stats Cards */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/90 rounded-2xl p-3.5 px-4 text-center shadow-lg">
-              <p className="text-[10px] font-black uppercase text-amber-400 tracking-wider">Chờ Cấp Mã</p>
-              <p className="text-2xl font-black text-amber-300 mt-1">{choCapMaCount}</p>
+            <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl p-3.5 px-4 text-center shadow-sm">
+              <p className="text-[10px] font-black uppercase text-rose-100 tracking-wider">Chờ Cấp Mã</p>
+              <p className="text-2xl font-black text-white mt-1">{choCapMaCount}</p>
             </div>
-            <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/90 rounded-2xl p-3.5 px-4 text-center shadow-lg">
-              <p className="text-[10px] font-black uppercase text-cyan-400 tracking-wider">Đã Sinh Mã</p>
-              <p className="text-2xl font-black text-cyan-300 mt-1">{daCapMaCount}</p>
+            <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl p-3.5 px-4 text-center shadow-sm">
+              <p className="text-[10px] font-black uppercase text-rose-100 tracking-wider">Đã Sinh Mã</p>
+              <p className="text-2xl font-black text-white mt-1">{daCapMaCount}</p>
             </div>
-            <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/90 rounded-2xl p-3.5 px-4 text-center shadow-lg">
-              <p className="text-[10px] font-black uppercase text-rose-400 tracking-wider">Tổng Thu (ml)</p>
-              <p className="text-2xl font-black text-rose-300 mt-1">{Math.round(stats.tongTheTich || 0)}</p>
+            <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl p-3.5 px-4 text-center shadow-sm">
+              <p className="text-[10px] font-black uppercase text-rose-100 tracking-wider">Tổng Thu (ml)</p>
+              <p className="text-2xl font-black text-white mt-1">{Math.round(stats.tongTheTich || 0)}</p>
             </div>
           </div>
         </div>
