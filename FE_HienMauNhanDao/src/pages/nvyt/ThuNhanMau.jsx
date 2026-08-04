@@ -417,20 +417,24 @@ export default function ThuNhanMau() {
 
       {/* Tabs & Search Navigation Bar */}
       <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3.5 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        {/* Segmented Control Tabs */}
-        <div className="flex bg-slate-100/80 p-1.5 rounded-2xl gap-1.5 border border-slate-200/60">
+        {/* Segmented Control Sub-Tabs (High Visibility Ruby Badges) */}
+        <div className="flex bg-rose-50/60 p-1.5 rounded-2xl gap-2 border border-rose-100 shadow-2xs">
           <button
             onClick={() => setActiveTab('pending')}
-            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
+            className={`px-5 py-3 rounded-xl text-xs md:text-sm font-black transition-all flex items-center gap-2.5 ${
               activeTab === 'pending'
-                ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-md shadow-rose-500/25 scale-[1.02]'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                ? 'bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 text-white shadow-md shadow-rose-500/25 scale-[1.02]'
+                : 'text-slate-700 hover:text-rose-700 hover:bg-white'
             }`}
           >
-            <span className="material-symbols-outlined text-lg">qr_code_2</span>
+            <span className="material-symbols-outlined text-xl">qr_code_2</span>
             <span>📋 Chờ Tiếp Nhận & Sinh Mã Túi</span>
             {pendingList.length > 0 && (
-              <span className={`px-2 py-0.5 text-[10px] font-black rounded-full ${activeTab === 'pending' ? 'bg-white/20 text-white' : 'bg-red-100 text-red-700'}`}>
+              <span className={`px-2.5 py-0.5 text-xs font-mono font-black rounded-full shadow-sm border transition-all ${
+                activeTab === 'pending'
+                  ? 'bg-white text-rose-700 border-white shadow-rose-900/20 scale-105'
+                  : 'bg-gradient-to-r from-red-600 to-rose-600 text-white border-rose-400 shadow-rose-500/30'
+              }`}>
                 {pendingList.length}
               </span>
             )}
@@ -438,16 +442,20 @@ export default function ThuNhanMau() {
 
           <button
             onClick={() => setActiveTab('collected')}
-            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
+            className={`px-5 py-3 rounded-xl text-xs md:text-sm font-black transition-all flex items-center gap-2.5 ${
               activeTab === 'collected'
-                ? 'bg-gradient-to-r from-slate-900 to-indigo-950 text-white shadow-md shadow-indigo-950/25 scale-[1.02]'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                ? 'bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 text-white shadow-md shadow-rose-500/25 scale-[1.02]'
+                : 'text-slate-700 hover:text-rose-700 hover:bg-white'
             }`}
           >
-            <span className="material-symbols-outlined text-lg">fact_check</span>
+            <span className="material-symbols-outlined text-xl">fact_check</span>
             <span>🩸 Túi Máu Đã Hoàn Tất Xét Nghiệm</span>
             {collectionList.length > 0 && (
-              <span className={`px-2 py-0.5 text-[10px] font-black rounded-full ${activeTab === 'collected' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'}`}>
+              <span className={`px-2.5 py-0.5 text-xs font-mono font-black rounded-full shadow-sm border transition-all ${
+                activeTab === 'collected'
+                  ? 'bg-white text-rose-700 border-white shadow-rose-900/20 scale-105'
+                  : 'bg-gradient-to-r from-red-600 to-rose-600 text-white border-rose-400 shadow-rose-500/30'
+              }`}>
                 {collectionList.length}
               </span>
             )}
