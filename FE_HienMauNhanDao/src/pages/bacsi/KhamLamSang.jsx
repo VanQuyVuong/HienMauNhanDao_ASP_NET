@@ -32,18 +32,6 @@ export default function KhamLamSang() {
   const [loading, setLoading] = useState(false);
   const [showList, setShowList] = useState(false);
 
-  // Edit Modal State
-  const [editTarget, setEditTarget] = useState(null);
-  const [editForm, setEditForm] = useState({
-    huyetAp: '',
-    nhipTim: '',
-    canNang: '',
-    nhietDo: '',
-    ketQua: true,
-    lyDoTuChoi: '',
-  });
-  const [editSaving, setEditSaving] = useState(false);
-
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
@@ -122,13 +110,6 @@ export default function KhamLamSang() {
     }
   };
 
-  const getVolumeAllowed = (weight) => {
-    const w = parseFloat(weight);
-    if (!w || w < 42) return { allowed: [250], max: 0 };
-    if (w < 45) return { allowed: [250], max: 250 };
-    return { allowed: [250, 350, 450], max: 450 };
-  };
-
   const handleWeightChange = (val) => {
     setForm(p => ({ ...p, canNang: val }));
     const w = parseFloat(val);
@@ -191,13 +172,13 @@ export default function KhamLamSang() {
       await Swal.fire({
         title: isApproved ? '✅ ĐÃ PHÊ DUYỆT ĐỦ ĐIỀU KIỆN HIẾN MÁU!' : '❌ ĐÃ TỪ CHỐI HIẾN MÁU!',
         html: `<div style="text-align: center;">
-                 <p style="font-size: 14px; color: #475569; margin-bottom: 8px;">Tình nguyện viên: <b>${donorInfo.hoVaTen}</b> (Mã đơn: <b style="font-family: monospace; color: #0d9488;">${donorInfo.maDon}</b>)</p>
+                 <p style="font-size: 14px; color: #475569; margin-bottom: 8px;">Tình nguyện viên: <b>${donorInfo.hoVaTen}</b> (Mã đơn: <b style="font-family: monospace; color: #e11d48;">${donorInfo.maDon}</b>)</p>
                  <p style="font-size: 13px; color: ${isApproved ? '#059669' : '#dc2626'}; font-weight: 900; margin-bottom: 10px;">
                    ${isApproved ? '✅ Đủ điều kiện sức khỏe. Đã chuyển thông tin sang Trang 1 Thu Nhận & Sinh Mã Barcode Túi Máu!' : '❌ Từ chối hiến máu do không đủ tiêu chuẩn sức khỏe.'}
                  </p>
                </div>`,
         icon: isApproved ? 'success' : 'warning',
-        confirmButtonColor: isApproved ? '#0d9488' : '#dc2626',
+        confirmButtonColor: isApproved ? '#e11d48' : '#dc2626',
         confirmButtonText: 'Đồng Ý'
       });
 
@@ -236,7 +217,6 @@ export default function KhamLamSang() {
     if (showList) fetchScreeningList();
   }, [showList]);
 
-  // Vitals Auto Validator Check
   const isVitalsNormal = form.huyetAp && form.nhipTim && form.canNang && form.nhietDo &&
     parseFloat(form.canNang) >= 45 &&
     parseInt(form.nhipTim) >= 60 && parseInt(form.nhipTim) <= 100 &&
@@ -254,31 +234,31 @@ export default function KhamLamSang() {
         </div>
       )}
 
-      {/* Hero Doctor Workstation Header */}
-      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-950 via-teal-950 to-slate-950 p-6 md:p-8 text-white shadow-2xl shadow-teal-950/40 border border-slate-800">
-        <div className="absolute -right-12 -bottom-12 w-80 h-80 bg-teal-500/15 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Ruby Blood Life Doctor Workstation Header */}
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 p-6 md:p-8 text-white shadow-xl shadow-rose-600/15 border border-white/20">
+        <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/10 backdrop-blur-lg rounded-full text-[11px] font-extrabold text-teal-300 border border-white/15 mb-3">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              🩺 BÁC SĨ CHUYÊN KHOA KHÁM LÂM SÀNG
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/20 backdrop-blur-md rounded-full text-[11px] font-black text-rose-50 border border-white/20 mb-3">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+              🩸 BÁC SĨ CHUYÊN KHOA KHÁM LÂM SÀNG
             </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-teal-200 bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
               Trạm Đo Sinh Hiệu & Phê Duyệt Sức Khỏe Hiến Máu
             </h1>
-            <p className="text-slate-300 text-xs md:text-sm mt-1.5 max-w-2xl font-medium leading-relaxed">
+            <p className="text-rose-100 text-xs md:text-sm mt-1.5 max-w-2xl font-medium leading-relaxed">
               Nhập 4 chỉ số sinh hiệu y tế, đánh giá điều kiện thể trạng TNV & chuyển đơn đủ điều kiện sang phòng thu nhận túi máu
             </p>
           </div>
 
-          <div className="flex bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800">
+          <div className="flex bg-white/20 backdrop-blur-md p-1.5 rounded-2xl border border-white/30">
             <button
               onClick={() => setShowList(false)}
               className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
                 !showList
-                  ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-500/25 scale-[1.02]'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white text-rose-700 shadow-md shadow-rose-900/10 scale-[1.02]'
+                  : 'text-white hover:bg-white/10'
               }`}
             >
               <span className="material-symbols-outlined text-lg">medical_services</span>
@@ -289,8 +269,8 @@ export default function KhamLamSang() {
               onClick={() => setShowList(true)}
               className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
                 showList
-                  ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-500/25 scale-[1.02]'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white text-rose-700 shadow-md shadow-rose-900/10 scale-[1.02]'
+                  : 'text-white hover:bg-white/10'
               }`}
             >
               <span className="material-symbols-outlined text-lg">history</span>
@@ -308,7 +288,7 @@ export default function KhamLamSang() {
           <div className="lg:col-span-5 space-y-6">
             
             {/* Quick Call Donor Scanner */}
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-sm space-y-3">
+            <div className="bg-white border border-rose-100 rounded-3xl p-5 shadow-sm space-y-3">
               <label className="text-xs font-black uppercase text-slate-700 tracking-wider block">
                 🔍 Gọi Hồ Sơ Tình Nguyện Viên (Mã Đơn / QR Code)
               </label>
@@ -320,13 +300,13 @@ export default function KhamLamSang() {
                     onChange={e => setQrInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleScanQR()}
                     placeholder="Nhập mã đơn (VD: DK00001)..."
-                    className="w-full h-11 bg-slate-50 border border-slate-200/80 rounded-xl pl-10 pr-3 text-xs outline-none focus:border-teal-500 font-mono font-bold"
+                    className="w-full h-11 bg-rose-50/30 border border-rose-100 rounded-xl pl-10 pr-3 text-xs outline-none focus:border-rose-500 font-mono font-bold"
                   />
                 </div>
                 <button
                   onClick={handleScanQR}
                   disabled={pulsing}
-                  className="h-11 px-5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-teal-500/20 active:scale-95 flex items-center gap-1.5"
+                  className="h-11 px-5 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-700 hover:to-red-700 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-rose-500/20 active:scale-95 flex items-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-lg">{pulsing ? 'sync' : 'search'}</span>
                   <span>{pulsing ? 'Đang Gọi...' : 'Gọi Đơn'}</span>
@@ -336,38 +316,38 @@ export default function KhamLamSang() {
 
             {/* Donor Dossier Detail Card */}
             {isCheckedIn && donorInfo ? (
-              <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden space-y-4">
-                <div className="absolute right-0 top-0 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none"></div>
+              <div className="bg-gradient-to-b from-rose-600 via-red-600 to-rose-700 text-white border border-rose-500/30 rounded-3xl p-6 shadow-xl relative overflow-hidden space-y-4">
+                <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
 
-                <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div className="flex items-center justify-between border-b border-white/20 pb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white font-black text-lg flex items-center justify-center shadow-lg shadow-teal-500/30">
+                    <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md text-white font-black text-lg flex items-center justify-center shadow-inner">
                       {donorInfo.hoVaTen.split(' ').slice(-1)[0][0]}
                     </div>
                     <div>
                       <h3 className="font-black text-base text-white">{donorInfo.hoVaTen}</h3>
-                      <p className="text-xs text-teal-400 font-mono font-bold">Mã đơn: {donorInfo.maDon}</p>
+                      <p className="text-xs text-rose-100 font-mono font-bold">Mã đơn: {donorInfo.maDon}</p>
                     </div>
                   </div>
-                  <span className="px-3 py-1 bg-gradient-to-r from-red-600 to-rose-600 text-white font-black text-xs rounded-xl shadow-sm">
+                  <span className="px-3.5 py-1 bg-white text-rose-700 font-black text-xs rounded-xl shadow-sm">
                     {donorInfo.nhomMau}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="bg-slate-800/60 p-3 rounded-2xl border border-slate-700/60">
-                    <span className="text-[10px] font-bold uppercase text-slate-400 block">Căn Cước CD:</span>
+                  <div className="bg-white/15 backdrop-blur-md p-3 rounded-2xl border border-white/20">
+                    <span className="text-[10px] font-bold uppercase text-rose-100 block">Căn Cước CD:</span>
                     <span className="font-extrabold text-white">{donorInfo.cccd || '---'}</span>
                   </div>
-                  <div className="bg-slate-800/60 p-3 rounded-2xl border border-slate-700/60">
-                    <span className="text-[10px] font-bold uppercase text-slate-400 block">Giới Tính / Ngày Sinh:</span>
+                  <div className="bg-white/15 backdrop-blur-md p-3 rounded-2xl border border-white/20">
+                    <span className="text-[10px] font-bold uppercase text-rose-100 block">Giới Tính / Ngày Sinh:</span>
                     <span className="font-extrabold text-white">{donorInfo.gioiTinh} | {donorInfo.ngaySinh}</span>
                   </div>
                 </div>
 
                 {/* Volume Selector */}
-                <div className="bg-slate-800/40 p-4 rounded-2xl border border-slate-700/60 space-y-2">
-                  <label className="text-xs font-black uppercase text-slate-300 block tracking-wider">
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 space-y-2">
+                  <label className="text-xs font-black uppercase text-rose-100 block tracking-wider">
                     Dự Kiến Thể Tích Lấy Máu (ml)
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -378,8 +358,8 @@ export default function KhamLamSang() {
                         onClick={() => setVolumeSelect(String(vol))}
                         className={`h-10 rounded-xl text-xs font-black transition-all border flex items-center justify-center gap-1 ${
                           volumeSelect === String(vol)
-                            ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white border-teal-500 shadow-md shadow-teal-500/30 scale-[1.02]'
-                            : 'bg-slate-900/60 text-slate-400 border-slate-700/80 hover:bg-slate-800'
+                            ? 'bg-white text-rose-700 border-white shadow-md scale-[1.02]'
+                            : 'bg-white/15 text-white border-white/20 hover:bg-white/25'
                         }`}
                       >
                         <span className="material-symbols-outlined text-base">water_drop</span>
@@ -390,8 +370,8 @@ export default function KhamLamSang() {
                 </div>
               </div>
             ) : (
-              <div className="bg-slate-100 border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center text-slate-400 font-bold space-y-2">
-                <span className="material-symbols-outlined text-4xl text-slate-300">person_search</span>
+              <div className="bg-rose-50/40 border-2 border-dashed border-rose-200 rounded-3xl p-8 text-center text-slate-400 font-bold space-y-2">
+                <span className="material-symbols-outlined text-4xl text-rose-300">person_search</span>
                 <p className="text-xs">Vui lòng nhập mã đơn hoặc chọn TNV từ danh sách chờ ở Trang 1 để tiến hành khám.</p>
               </div>
             )}
@@ -399,14 +379,14 @@ export default function KhamLamSang() {
 
           {/* Right Column (4 Vitals Measurement & Approval Panel - 7 Cols) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-6">
+            <div className="bg-white border border-rose-100 rounded-3xl p-6 shadow-sm space-y-6">
               
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center justify-between border-b border-rose-100 pb-3">
                 <h3 className="font-black text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
-                  <span className="material-symbols-outlined text-teal-600 text-lg">ecg</span>
+                  <span className="material-symbols-outlined text-rose-600 text-lg">ecg</span>
                   Đo 4 Chỉ Số Sinh Hiệu Y Tế Thực Tế
                 </h3>
-                <span className="text-[10px] font-extrabold text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200">
+                <span className="text-[10px] font-extrabold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
                   Chuẩn Bộ Y Tế
                 </span>
               </div>
@@ -415,7 +395,7 @@ export default function KhamLamSang() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
                 {/* Vital 1: Huyết áp */}
-                <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-2 hover:border-teal-500/50 transition-all">
+                <div className="p-4 rounded-2xl border border-rose-100 bg-rose-50/30 space-y-2 hover:border-rose-300 transition-all">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-black text-slate-700 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-rose-600 text-base">blood_pressure</span>
@@ -427,12 +407,12 @@ export default function KhamLamSang() {
                     value={form.huyetAp}
                     onChange={e => handleBPChange(e.target.value)}
                     placeholder="VD: 120/80"
-                    className="w-full h-11 bg-white border border-slate-200 rounded-xl px-4 text-xs font-black text-slate-900 outline-none focus:border-teal-500"
+                    className="w-full h-11 bg-white border border-rose-200 rounded-xl px-4 text-xs font-black text-slate-900 outline-none focus:border-rose-500"
                   />
                 </div>
 
                 {/* Vital 2: Nhịp tim */}
-                <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-2 hover:border-teal-500/50 transition-all">
+                <div className="p-4 rounded-2xl border border-rose-100 bg-rose-50/30 space-y-2 hover:border-rose-300 transition-all">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-black text-slate-700 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-red-600 text-base animate-pulse">favorite</span>
@@ -445,12 +425,12 @@ export default function KhamLamSang() {
                     value={form.nhipTim}
                     onChange={e => setForm(p => ({ ...p, nhipTim: e.target.value }))}
                     placeholder="VD: 75"
-                    className="w-full h-11 bg-white border border-slate-200 rounded-xl px-4 text-xs font-black text-slate-900 outline-none focus:border-teal-500"
+                    className="w-full h-11 bg-white border border-rose-200 rounded-xl px-4 text-xs font-black text-slate-900 outline-none focus:border-rose-500"
                   />
                 </div>
 
                 {/* Vital 3: Cân nặng */}
-                <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-2 hover:border-teal-500/50 transition-all">
+                <div className="p-4 rounded-2xl border border-rose-100 bg-rose-50/30 space-y-2 hover:border-rose-300 transition-all">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-black text-slate-700 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-amber-600 text-base">monitor_weight</span>
@@ -463,12 +443,12 @@ export default function KhamLamSang() {
                     value={form.canNang}
                     onChange={e => handleWeightChange(e.target.value)}
                     placeholder="VD: 60"
-                    className="w-full h-11 bg-white border border-slate-200 rounded-xl px-4 text-xs font-black text-slate-900 outline-none focus:border-teal-500"
+                    className="w-full h-11 bg-white border border-rose-200 rounded-xl px-4 text-xs font-black text-slate-900 outline-none focus:border-rose-500"
                   />
                 </div>
 
                 {/* Vital 4: Nhiệt độ */}
-                <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-2 hover:border-teal-500/50 transition-all">
+                <div className="p-4 rounded-2xl border border-rose-100 bg-rose-50/30 space-y-2 hover:border-rose-300 transition-all">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-black text-slate-700 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-orange-600 text-base">thermostat</span>
@@ -481,7 +461,7 @@ export default function KhamLamSang() {
                     value={form.nhietDo}
                     onChange={e => setForm(p => ({ ...p, nhietDo: e.target.value }))}
                     placeholder="VD: 36.8"
-                    className="w-full h-11 bg-white border border-slate-200 rounded-xl px-4 text-xs font-black text-slate-900 outline-none focus:border-teal-500"
+                    className="w-full h-11 bg-white border border-rose-200 rounded-xl px-4 text-xs font-black text-slate-900 outline-none focus:border-rose-500"
                   />
                 </div>
               </div>
@@ -498,7 +478,7 @@ export default function KhamLamSang() {
                 </p>
               </div>
 
-              {/* Refusal Reason Input (Only shown if refusal) */}
+              {/* Refusal Reason Input */}
               {form.ketQua === 'khong_dat' && (
                 <div className="space-y-1.5 bg-rose-50 border border-rose-200 p-4 rounded-2xl">
                   <label className="text-xs font-black text-rose-800 block uppercase">Lý Do Từ Chối Hiến Máu *</label>
@@ -534,7 +514,7 @@ export default function KhamLamSang() {
                     handleSave(true);
                   }}
                   disabled={saving || !isCheckedIn}
-                  className="h-12 bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-teal-500/25 disabled:opacity-50 active:scale-95"
+                  className="h-12 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-700 hover:to-red-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-rose-500/25 disabled:opacity-50 active:scale-95"
                 >
                   {saving ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -551,10 +531,10 @@ export default function KhamLamSang() {
         </div>
       ) : (
         /* Tab 2: Lịch Sử Kết Quả Khám Đã Thực Hiện */
-        <div className="bg-white border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden">
-          <div className="p-4 bg-slate-50/90 border-b border-slate-200 flex items-center justify-between">
+        <div className="bg-white border border-rose-100 rounded-3xl shadow-sm overflow-hidden">
+          <div className="p-4 bg-rose-50/50 border-b border-rose-100 flex items-center justify-between">
             <h3 className="font-black text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
-              <span className="material-symbols-outlined text-teal-600 text-lg">history</span>
+              <span className="material-symbols-outlined text-rose-600 text-lg">history</span>
               Lịch Sử Đánh Giá Sức Khỏe Lâm Sàng Đã Thực Hiện
             </h3>
             <span className="text-xs font-bold text-slate-500">Tổng số: {stats.tongSo || screeningList.length} ca</span>
@@ -563,7 +543,7 @@ export default function KhamLamSang() {
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-slate-100/80 border-b border-slate-200">
+                <tr className="bg-rose-50/30 border-b border-rose-100">
                   {['Mã KQ / Mã Đơn', 'Tình Nguyện Viên', 'Huyết Áp', 'Nhịp Tim', 'Cân Nặng', 'Nhiệt Độ', 'Kết Quả Khám'].map(h => (
                     <th key={h} className="text-left px-5 py-3.5 text-[11px] font-black uppercase text-slate-400 tracking-wider whitespace-nowrap">{h}</th>
                   ))}
@@ -575,9 +555,9 @@ export default function KhamLamSang() {
                 ) : screeningList.length === 0 ? (
                   <tr><td colSpan={7} className="text-center py-12 text-slate-400 font-bold">Chưa có lịch sử khám lâm sàng nào.</td></tr>
                 ) : screeningList.map(item => (
-                  <tr key={item.maKQ} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <tr key={item.maKQ} className="border-b border-slate-100 hover:bg-rose-50/30 transition-colors">
                     <td className="px-5 py-4">
-                      <span className="font-mono text-xs font-black text-teal-800 bg-teal-50 px-2.5 py-1 rounded-xl border border-teal-200">
+                      <span className="font-mono text-xs font-black text-rose-800 bg-rose-50 px-2.5 py-1 rounded-xl border border-rose-200">
                         {item.maKQ}
                       </span>
                       <p className="text-[10px] text-slate-400 font-mono mt-0.5">{item.maDon}</p>
