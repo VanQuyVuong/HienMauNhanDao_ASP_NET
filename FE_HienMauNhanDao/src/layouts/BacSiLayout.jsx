@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { nhanVienService } from '../services/nvytService';
-import { ketQuaXetNghiemService } from '../services/khamLamSangService';
+import { khamLamSangService } from '../services/khamLamSangService';
 
 const NAV_ITEMS = [
   {
@@ -19,26 +19,22 @@ const NAV_ITEMS = [
 export default function BacSiLayout() {
   const navigate = useNavigate();
   const [nhanVien, setNhanVien] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const fetchPendingCount = async () => {
     try {
-      const res = await ketQuaXetNghiemService.getAll();
-      const data = Array.isArray(res) ? res : (res?.data || []);
-      const count = data.filter(xn => xn.ketQua === null || xn.ketQua === undefined).length;
-      setPendingCount(count);
+      const res = await khamLamSangService.getWaiting();
+      const list = Array.isArray(res) ? res : (res?.data || []);
+      setPendingCount(list.length);
     } catch (err) {
-      console.error('Lỗi khi lấy số lượng chờ xét nghiệm:', err);
+      console.error('Lỗi khi lấy số lượng chờ khám:', err);
     }
   };
 
   useEffect(() => {
     fetchPendingCount();
-    const interval = setInterval(fetchPendingCount, 5000);
+    const interval = setInterval(fetchPendingCount, 4000);
     return () => clearInterval(interval);
   }, []);
 
@@ -60,10 +56,10 @@ export default function BacSiLayout() {
         setNhanVien({
           ...data,
           maNV: (data.maNV && String(data.maNV).trim()) || cachedMaNV || undefined,
-          hoVaTen: data.hoVaTen || email || 'Bác sĩ',
+          hoVaTen: data.hoVaTen || email || 'Bác sĩ chuyên khoa',
         });
       } else {
-        setNhanVien({ hoVaTen: 'Bác sĩ', maNV: cachedMaNV || '---' });
+        setNhanVien({ hoVaTen: 'Bác sĩ chuyên khoa', maNV: cachedMaNV || '---' });
       }
     };
     load();
@@ -76,95 +72,105 @@ export default function BacSiLayout() {
 
   const initials = nhanVien
     ? (nhanVien.hoVaTen || '').split(' ').slice(-2).map((w) => w[0]).join('').toUpperCase()
-    : '?';
+    : 'BS';
 
   return (
-    <div className="w-full min-h-screen flex bg-[#F3F4F6] font-sans antialiased">
-      {/* Sidebar mobile overlay backdrop */}
+    <div className="w-full min-h-screen flex bg-rose-50/40 font-sans antialiased">
+      {/* Mobile Backdrop */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col shadow-lg transition-transform duration-300 md:translate-x-0 md:relative md:shadow-sm shrink-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-100">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-              favorite
+
+      {/* Ruby Blood Life Sidebar for Doctor */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white text-slate-800 border-r border-rose-100 flex flex-col shadow-sm transition-transform duration-300 md:translate-x-0 shrink-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        
+        {/* Brand Header */}
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-rose-100 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 text-white">
+          <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0 shadow-sm border border-white/20">
+            <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              water_drop
             </span>
           </div>
           <div>
-            <p className="text-[11px] font-black uppercase text-primary tracking-wider leading-tight">
-              Hệ thống Hiến máu
+            <p className="text-[11px] font-black uppercase text-rose-100 tracking-wider leading-tight">
+              Hiến Máu Nhân Đạo
             </p>
-            <p className="text-[10px] text-slate-400 font-medium">TP. Đà Nẵng · Bác sĩ</p>
+            <h2 className="text-sm font-black text-white tracking-tight">
+              🩺 BS. Khám Lâm Sàng
+            </h2>
           </div>
         </div>
 
-        <div className="px-4 py-4 border-b border-slate-100">
-          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white text-sm font-black shrink-0 shadow">
-              {initials}
+        {/* Doctor Profile Card */}
+        <div className="px-4 py-4 border-b border-rose-100/60 bg-rose-50/30">
+          <div className="flex items-center gap-3 p-3 bg-white border border-rose-100 rounded-2xl shadow-2xs">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-sm">
+                {initials}
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white animate-pulse"></span>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-800 truncate">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-black text-slate-800 truncate">
                 {nhanVien ? (nhanVien.hoVaTen || 'Bác sĩ') : 'Đang tải...'}
               </p>
-              <p className="text-[10px] font-bold uppercase text-primary tracking-widest">
-                Bác sĩ
+              <p className="text-[10px] font-black uppercase text-rose-600 tracking-wider">
+                🩺 BS. Chuyên Khoa
               </p>
-              <p className="text-[10px] text-slate-400 font-medium mt-0.5">
-                Mã NV: {nhanVien?.maNV || '---'}
+              <p className="text-[10px] text-slate-400 font-medium">
+                Mã BS: {nhanVien?.maNV || '---'}
               </p>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        {/* Navigation Items */}
+        <nav className="flex-1 px-3.5 py-4 space-y-1.5 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all group
-                ${isActive
-                  ? 'bg-primary text-white shadow-sm shadow-primary/30'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-primary'
+                `flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-black transition-all group relative ${
+                  isActive
+                    ? 'bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 text-white shadow-md shadow-rose-500/20 scale-[1.02]'
+                    : 'text-slate-600 hover:bg-rose-50 hover:text-rose-600'
                 }`
               }
             >
-              {({ isActive }) => {
-                const isXetNghiem = item.path === '/bac-si/ket-qua-xet-nghiem';
-                return (
-                  <>
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="material-symbols-outlined text-xl shrink-0"
-                        style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
-                      >
-                        {item.icon}
-                      </span>
-                      <span className="truncate">{item.label}</span>
-                    </div>
-                    {isXetNghiem && pendingCount > 0 && (
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm animate-pulse ${
-                        isActive ? 'bg-white text-primary' : 'bg-amber-500 text-white'
-                      }`}>
-                        {pendingCount}
-                      </span>
-                    )}
-                  </>
-                );
-              }}
+              {({ isActive }) => (
+                <>
+                  <span
+                    className="material-symbols-outlined text-xl shrink-0"
+                    style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
+                  >
+                    {item.icon}
+                  </span>
+                  <span className="truncate flex-1">{item.label}</span>
+
+                  {item.path === '/bac-si/danh-sach-cho-kham' && pendingCount > 0 && (
+                    <span className={`px-2.5 py-0.5 text-xs font-black rounded-full shadow-sm border transition-all ${
+                      isActive
+                        ? 'bg-white text-rose-700 shadow-rose-900/20 border-white font-black scale-105'
+                        : 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-rose-500/30 border-rose-400'
+                    }`}>
+                      {pendingCount}
+                    </span>
+                  )}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
 
-        <div className="px-3 py-4 border-t border-slate-100">
+        {/* Logout Button */}
+        <div className="px-3.5 py-4 border-t border-rose-100">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-primary transition-all group"
+            className="flex items-center gap-3 px-3.5 py-2.5 w-full rounded-2xl text-xs font-extrabold text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-all border border-transparent hover:border-rose-100 active:scale-95"
           >
             <span className="material-symbols-outlined text-xl shrink-0">logout</span>
             Đăng xuất
@@ -172,99 +178,35 @@ export default function BacSiLayout() {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
-        <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between shrink-0 shadow-sm z-30">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg md:hidden"
-            >
-              <span className="material-symbols-outlined">menu</span>
-            </button>
-            <div className="relative w-48 sm:w-80">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">
-                search
-              </span>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm nhanh..."
-                className="w-full h-10 bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-              />
-            </div>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 md:pl-64">
+        {/* Top Mobile Navbar Toggle */}
+        <header className="h-16 bg-white border-b border-rose-100 px-4 md:px-8 flex items-center justify-between shadow-2xs">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 text-slate-600 hover:bg-rose-50 rounded-xl md:hidden"
+          >
+            <span className="material-symbols-outlined text-2xl">menu</span>
+          </button>
+
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Trạm Khám Lâm Sàng Hiến Máu</span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <button
-                onClick={() => { setNotifOpen(!notifOpen); setUserMenuOpen(false); }}
-                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-50 transition-colors relative"
-              >
-                <span className="material-symbols-outlined text-slate-500 text-xl">notifications</span>
-                <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-white" />
-              </button>
-              {notifOpen && (
-                <div className="absolute right-0 top-12 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-4">
-                  <p className="text-sm font-bold text-slate-700 mb-3">Thông báo</p>
-                  <p className="text-xs text-slate-400 text-center py-4">Không có thông báo mới</p>
-                </div>
-              )}
-            </div>
-
-            <div className="relative">
-              <button
-                onClick={() => { setUserMenuOpen(!userMenuOpen); setNotifOpen(false); }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-slate-50 transition-colors"
-              >
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-black">
-                  {initials}
-                </div>
-                <div className="text-left hidden md:block">
-                  <p className="text-sm font-bold text-slate-800 leading-tight">
-                    {nhanVien ? (nhanVien.hoVaTen || 'BS.') : 'Đang tải...'}
-                  </p>
-                  <p className="text-[10px] font-bold uppercase text-primary tracking-widest">
-                    Bác sĩ
-                  </p>
-                  <p className="text-[9px] text-slate-400 font-medium">
-                    ID: {nhanVien?.maNV || '---'}
-                  </p>
-                </div>
-                <span className="material-symbols-outlined text-slate-400 text-base">expand_more</span>
-              </button>
-              {userMenuOpen && (
-                <div className="absolute right-0 top-12 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-2">
-                  <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="text-xs text-slate-500">Đăng nhập với</p>
-                    <p className="text-sm font-bold text-slate-800 truncate">
-                      {localStorage.getItem('email') || ''}
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-semibold"
-                  >
-                    <span className="material-symbols-outlined text-base">logout</span>
-                    Đăng xuất
-                  </button>
-                </div>
-              )}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black text-slate-800">{nhanVien?.hoVaTen || 'Bác sĩ chuyên khoa'}</span>
+            <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 font-black text-xs flex items-center justify-center">
+              {initials}
             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 flex flex-col gap-6 overflow-y-auto">
-          <Outlet context={{ nhanVien, searchQuery }} />
+        {/* Page Content Render */}
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+          <Outlet context={{ nhanVien }} />
         </main>
       </div>
-
-      {(notifOpen || userMenuOpen) && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => { setNotifOpen(false); setUserMenuOpen(false); }}
-        />
-      )}
     </div>
   );
 }
