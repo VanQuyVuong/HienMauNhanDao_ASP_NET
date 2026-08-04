@@ -3,19 +3,18 @@ import { useOutletContext } from 'react-router-dom';
 import { ketQuaXetNghiemService } from '../../services/khamLamSangService';
 import Swal from 'sweetalert2';
 
-// ─── Issue #67: Trang Cập Nhật Kết Quả Xét Nghiệm & Re-test Kho Máu (NVYT Xét Nghiệm) ───
-// ─── Modal Cập Nhật Kết Quả Xét Nghiệm (Lần 1 & Re-test Lần 2) ──────────────────
+// ─── Modal Diagnostic Panel Cập Nhật Kết Quả Xét Nghiệm (Cyber Clinical Theme) ───
 function XetNghiemModal({ item, nhanVien, isReTest, onClose, onSaved }) {
   const [form, setForm] = useState({
     maTuiMau: item?.maTuiMau || '',
     nhomMau: item?.nhomMau || 'O+',
     soLanXetNghiem: isReTest ? 2 : (item?.soLanXetNghiem || 1),
-    hbv: false, // false = âm tính (đạt), true = dương tính (bệnh)
+    hbv: false,      // false = âm tính (đạt), true = dương tính (bệnh)
     hcv: false,
     hiv: false,
     giangMai: false,
     ketQua: item?.ketQua !== false, // true = đạt, false = không đạt
-    moTa: item?.moTa || (isReTest ? 'Thực hiện xét nghiệm lại lần 2 theo yêu cầu từ Quản Lý Kho.' : 'Đã xét nghiệm vi sinh phẩm máu đầy đủ.'),
+    moTa: item?.moTa || (isReTest ? 'Thực hiện xét nghiệm lại lần 2 theo yêu cầu từ Quản Lý Kho.' : 'Đã xét nghiệm vi sinh phẩm máu đầy đủ (Âm tính 4 bệnh).'),
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,7 +22,6 @@ function XetNghiemModal({ item, nhanVien, isReTest, onClose, onSaved }) {
   const handleToggleDisease = (key) => {
     setForm(prev => {
       const updated = { ...prev, [key]: !prev[key] };
-      // Nếu có bất kỳ bệnh nào dương tính -> Tự động đánh giá Không Đạt
       const hasDisease = updated.hbv || updated.hcv || updated.hiv || updated.giangMai;
       return {
         ...updated,
@@ -48,17 +46,17 @@ function XetNghiemModal({ item, nhanVien, isReTest, onClose, onSaved }) {
       await ketQuaXetNghiemService.save(payload);
 
       await Swal.fire({
-        title: finalKetQua ? '✅ ĐÃ PHÊ DUYỆT XÉT NGHIỆM!' : '❌ ĐÃ ĐÁNH GIÁ KHÔNG ĐẠT (HỦY)!',
+        title: finalKetQua ? '✅ ĐÃ PHÊ DUYỆT XÉT NGHIỆM!' : '❌ ĐÁNH GIÁ KHÔNG ĐẠT (HỦY)!',
         html: `<div style="text-align: center;">
                  <p style="font-size: 14px; color: #475569; margin-bottom: 8px;">Mã túi máu: <b style="font-family: monospace; color: #dc2626;">${form.maTuiMau}</b> (Nhóm: <b>${form.nhomMau}</b>)</p>
-                 <p style="font-size: 13px; color: ${finalKetQua ? '#059669' : '#dc2626'}; font-weight: 700; margin-bottom: 10px;">
+                 <p style="font-size: 13px; color: ${finalKetQua ? '#059669' : '#dc2626'}; font-weight: 900; margin-bottom: 10px;">
                    ${finalKetQua ? '✅ Đã phê duyệt ĐẠT TIÊU CHUẨN. Trạng thái chuyển thành: CHỜ NHẬP KHO' : '❌ Đã đánh giá KHÔNG ĐẠT. Trạng thái chuyển thành: ĐÃ HỦY'}
                  </p>
-                 <span style="font-size: 12px; color: #64748b;">Thông tin túi máu đã biến mất khỏi Trang 2 và chuyển về <b>Trang Thu Nhận Máu (Tab 2: Túi máu hoàn tất xét nghiệm)</b>.</span>
+                 <span style="font-size: 12px; color: #64748b;">Thông tin túi máu đã rời khỏi Trang 2 và chuyển về <b>Trang Thu Nhận Máu (Tab 2: Túi máu hoàn tất xét nghiệm)</b>.</span>
                </div>`,
         icon: finalKetQua ? 'success' : 'error',
         confirmButtonColor: finalKetQua ? '#059669' : '#dc2626',
-        confirmButtonText: 'Đồng ý'
+        confirmButtonText: 'Đồng Ý'
       });
 
       onSaved();
@@ -69,147 +67,163 @@ function XetNghiemModal({ item, nhanVien, isReTest, onClose, onSaved }) {
     }
   };
 
+  const PATHOGENS = [
+    { key: 'hbv', label: 'HBV', desc: 'Viêm gan siêu vi B (HBsAg)' },
+    { key: 'hcv', label: 'HCV', desc: 'Viêm gan siêu vi C (Anti-HCV)' },
+    { key: 'hiv', label: 'HIV', desc: 'Kháng thể HIV 1/2 Ab/Ag' },
+    { key: 'giangMai', label: 'Giang Mai', desc: 'Syphilis Treponema Ab' },
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-lg p-4 animate-fadeIn">
+      <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white rounded-[32px] shadow-2xl shadow-rose-950/50 w-full max-w-xl border border-slate-800 overflow-hidden flex flex-col max-h-[94vh]">
+        
         {/* Header */}
-        <div className={`flex items-center justify-between px-6 py-4 border-b border-slate-100 ${isReTest ? 'bg-gradient-to-r from-purple-50 to-white' : 'bg-gradient-to-r from-rose-50 to-white'}`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isReTest ? 'bg-purple-100 text-purple-600' : 'bg-primary/10 text-primary'}`}>
+        <div className={`px-6 py-5 flex items-center justify-between border-b border-white/10 ${
+          isReTest ? 'bg-gradient-to-r from-purple-700 via-indigo-800 to-slate-900' : 'bg-gradient-to-r from-slate-950 via-indigo-950 to-rose-950'
+        }`}>
+          <div className="flex items-center gap-3.5">
+            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-inner border border-white/20 ${
+              isReTest ? 'bg-purple-500/20 text-purple-200' : 'bg-rose-500/20 text-rose-300'
+            }`}>
               <span className="material-symbols-outlined text-2xl">{isReTest ? 'replay' : 'biotech'}</span>
             </div>
             <div>
-              <h3 className="font-extrabold text-slate-800 text-base">
-                {isReTest ? '🚨 Cập Nhật Xét Nghiệm Lần 2 (Re-test Kho)' : 'Cập Nhật Kết Quả Xét Nghiệm'}
+              <h3 className="font-black text-base tracking-tight text-white">
+                {isReTest ? '🚨 Cập Nhật Xét Nghiệm Lần 2 (Re-test Kho)' : 'Đánh Giá Vi Sinh Túi Máu'}
               </h3>
-              <p className="text-xs text-slate-500 font-medium">Mã túi máu: <span className="font-mono font-bold text-primary">{item.maTuiMau}</span></p>
+              <p className="text-xs text-slate-300 font-medium">Mã định danh: <span className="font-mono font-black text-rose-400">{item.maTuiMau}</span></p>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-slate-200 flex items-center justify-center text-slate-500">
+          <button onClick={onClose} className="w-9 h-9 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all active:scale-90">
             <span className="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto space-y-4 flex-1">
+        {/* Body */}
+        <div className="p-6 overflow-y-auto space-y-5 flex-1 bg-slate-900/40">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs font-bold">{error}</div>
+            <div className="p-4 bg-rose-950/60 border border-rose-500/50 rounded-2xl text-rose-200 text-xs font-bold flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-lg text-rose-400">warning</span>
+              <span>{error}</span>
+            </div>
           )}
 
-          {/* Thông tin túi máu & người hiến */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-400 font-medium">Tình nguyện viên:</span>
-              <span className="text-xs font-extrabold text-slate-800">{item.tenTinhNguyenVien || 'Chưa cập nhật'}</span>
+          {/* Quick Info Box */}
+          <div className="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-4 space-y-2.5 text-xs">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-700/50">
+              <span className="font-bold text-slate-400 uppercase">Tình Nguyện Viên:</span>
+              <span className="font-extrabold text-white text-sm">{item.tenTinhNguyenVien || 'Ẩn danh'}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-400 font-medium">Đợt hiến / Cơ sở:</span>
-              <span className="text-xs font-bold text-slate-600">{item.tenChienDich || 'Hiến Thường Xuyên'}</span>
+            <div className="flex justify-between items-center">
+              <span className="font-bold text-slate-400 uppercase">Đợt Hiến Máu:</span>
+              <span className="font-extrabold text-slate-300">{item.tenChienDich || 'Hiến Thường Xuyên'}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-400 font-medium">Số lần xét nghiệm:</span>
-              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[11px] font-black rounded-md">Lần {form.soLanXetNghiem}</span>
-            </div>
-          </div>
-
-          {/* Chọn Nhóm máu chính thức */}
-          <div>
-            <label className="text-xs font-extrabold text-slate-700 block mb-1.5">Xác Nhận Nhóm Máu ABO / Rh *</label>
-            <select
-              value={form.nhomMau}
-              onChange={e => setForm(p => ({ ...p, nhomMau: e.target.value }))}
-              className="w-full h-11 border border-slate-200 rounded-xl px-4 text-sm font-bold text-primary outline-none focus:border-primary"
-            >
-              {['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(type => (
-                <option key={type} value={type}>Nhóm máu {type}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Kiểm tra 4 chỉ số bệnh truyền nhiễm */}
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            <label className="text-xs font-extrabold text-slate-700 block">Xét Nghiệm Vi Sinh Phẩm Máu (Bộ Y Tế):</label>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { key: 'hbv', name: 'HBV (Viêm gan B)' },
-                { key: 'hcv', name: 'HCV (Viêm gan C)' },
-                { key: 'hiv', name: 'HIV 1/2' },
-                { key: 'giangMai', name: 'Giang Mai (Syphilis)' },
-              ].map(dis => (
-                <button
-                  key={dis.key}
-                  type="button"
-                  onClick={() => handleToggleDisease(dis.key)}
-                  className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
-                    form[dis.key] ? 'border-red-500 bg-red-50 text-red-700 font-bold' : 'border-slate-200 bg-white text-slate-700 font-medium hover:border-slate-300'
-                  }`}
-                >
-                  <span className="text-xs">{dis.name}</span>
-                  <span className={`text-[11px] font-black px-2 py-0.5 rounded-md ${form[dis.key] ? 'bg-red-200 text-red-800' : 'bg-emerald-100 text-emerald-700'}`}>
-                    {form[dis.key] ? 'Dương (+)' : 'Âm (-)'}
-                  </span>
-                </button>
-              ))}
+            <div className="flex justify-between items-center">
+              <span className="font-bold text-slate-400 uppercase">Nhóm Máu Xác Định:</span>
+              <select
+                value={form.nhomMau}
+                onChange={e => setForm(p => ({ ...p, nhomMau: e.target.value }))}
+                className="h-9 border border-rose-500/40 bg-rose-950/60 text-white font-black text-xs rounded-xl px-3.5 outline-none focus:border-rose-400 cursor-pointer"
+              >
+                {['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(b => (
+                  <option key={b} value={b} className="bg-slate-900 text-white">{b}</option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* Đánh giá kết quả */}
-          <div>
-            <label className="text-xs font-extrabold text-slate-700 block mb-1.5">Đánh Giá Chất Lượng Túi Máu *</label>
+          {/* Interactive 4 Pathogen Diagnostic Switches */}
+          <div className="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-4 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-700/50 pb-2.5">
+              <span className="text-xs font-black uppercase text-slate-300 tracking-wider">Bảng Kiểm Tra Sàng Lọc 4 Bệnh Máu</span>
+              <span className="text-[10px] font-bold text-cyan-400">Click chọn gạt đổi Âm Tính / Dương Tính</span>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setForm(p => ({ ...p, ketQua: true }))}
-                className={`h-11 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all border ${
-                  form.ketQua ? 'bg-emerald-600 text-white border-emerald-600 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                ✅ ĐẠT TIÊU CHUẨN
-              </button>
-              <button
-                type="button"
-                onClick={() => setForm(p => ({ ...p, ketQua: false }))}
-                className={`h-11 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all border ${
-                  !form.ketQua ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                ❌ KHÔNG ĐẠT (HỦY)
-              </button>
+              {PATHOGENS.map(p => {
+                const isPositive = form[p.key]; // true = bệnh (Dương tính), false = sạch (Âm tính)
+                return (
+                  <div
+                    key={p.key}
+                    onClick={() => handleToggleDisease(p.key)}
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                      isPositive
+                        ? 'bg-rose-950/60 border-rose-500/80 text-rose-100 shadow-lg shadow-rose-950/40 scale-[1.02]'
+                        : 'bg-emerald-950/40 border-emerald-500/60 text-emerald-100 hover:bg-emerald-950/60'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-black text-sm">{p.label}</p>
+                      <p className="text-[10px] opacity-75 mt-0.5">{p.desc}</p>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${
+                        isPositive ? 'bg-rose-600 text-white shadow-md' : 'bg-emerald-600 text-white shadow-md'
+                      }`}>
+                        {isPositive ? 'DƯƠNG TÍNH ❌' : 'ÂM TÍNH ✅'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Ghi chú */}
-          <div>
-            <label className="text-xs font-bold text-slate-600 block mb-1">Ghi chú xét nghiệm / Re-test</label>
+          {/* Dynamic Auto Evaluation Panel */}
+          <div className={`p-4.5 rounded-2xl border text-center transition-all ${
+            form.ketQua
+              ? 'bg-emerald-950/60 border-emerald-500/70 text-emerald-200 shadow-lg shadow-emerald-950/30'
+              : 'bg-rose-950/60 border-rose-500/70 text-rose-200 shadow-lg shadow-rose-950/30 animate-pulse'
+          }`}>
+            <p className="text-[11px] font-black uppercase tracking-widest opacity-80">Kết Quả Đánh Giá Tự Động</p>
+            <p className="text-base font-black mt-1">
+              {form.ketQua ? '✅ PHÊ DUYỆT: ĐẠT TIÊU CHUẨN KHO MÁU' : '❌ KHÔNG ĐẠT: MẪU MÁU BỊ NHIỄM BỆNH (HỦY)'}
+            </p>
+            <p className="text-[11px] mt-1 opacity-80 font-medium">
+              {form.ketQua
+                ? 'Túi máu an toàn vi sinh 100%. Khi duyệt sẽ chuyển trạng thái Yêu Cầu Nhập Kho gửi Quản Lý Kho.'
+                : 'Phát hiện chỉ số vi sinh dương tính. Khi bấm xác nhận sẽ đánh dấu là Đã Hủy túi máu.'}
+            </p>
+          </div>
+
+          {/* Note Area */}
+          <div className="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-4">
+            <label className="text-xs font-black uppercase text-slate-300 block mb-1.5 tracking-wider">Ghi Chú Chi Tiết Xét Nghiệm</label>
             <textarea
               rows={2}
               value={form.moTa}
               onChange={e => setForm(p => ({ ...p, moTa: e.target.value }))}
               placeholder="Nhập chi tiết xét nghiệm..."
-              className="w-full border border-slate-200 rounded-xl p-3 text-xs outline-none focus:border-primary"
+              className="w-full border border-slate-700 rounded-xl p-3 text-xs outline-none focus:border-cyan-500 bg-slate-900/80 text-white"
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-2">
-          <button onClick={onClose} disabled={loading} className="px-4 h-10 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">
+        <div className="px-6 py-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-3">
+          <button onClick={onClose} disabled={loading} className="px-4 h-11 border border-slate-700 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 hover:text-white transition-all active:scale-95">
             Đóng
           </button>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2.5">
             <button
+              type="button"
               onClick={() => handleSubmit(false)}
               disabled={loading}
-              className="px-4 h-10 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 rounded-xl text-xs font-extrabold flex items-center gap-1 transition-all"
+              className="px-4 h-11 bg-rose-950/80 text-rose-300 hover:bg-rose-600 hover:text-white border border-rose-600/50 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all active:scale-95 shadow-md shadow-rose-950/50"
               title="Đánh giá không đạt - Hủy túi máu"
             >
               <span className="material-symbols-outlined text-base">cancel</span>
               <span>❌ Không Đạt (Hủy)</span>
             </button>
+
             <button
+              type="button"
               onClick={() => handleSubmit(true)}
               disabled={loading}
-              className="px-5 h-10 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center gap-1 transition-all shadow-md shadow-emerald-100"
+              className="px-5 h-11 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg shadow-emerald-600/30 active:scale-95"
               title="Phê duyệt đạt tiêu chuẩn - Chuyển chờ nhập kho"
             >
               <span className="material-symbols-outlined text-base">task_alt</span>
@@ -222,13 +236,14 @@ function XetNghiemModal({ item, nhanVien, isReTest, onClose, onSaved }) {
   );
 }
 
-// ─── Trang Chính Cập Nhật Xét Nghiệm ─────────────────────────────────────────
+// ─── Trang Chính Cập Nhật Xét Nghiệm (Cyber-Clinical Redesign) ──────────────────────
 export default function CapNhatXetNghiem() {
   const { nhanVien } = useOutletContext();
   const [list, setList] = useState([]);
   const [stats, setStats] = useState({ tongSo: 0, datYeuCau: 0, khongDat: 0, reTestCount: 0 });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [bloodFilter, setBloodFilter] = useState('ALL');
   const [modalItem, setModalItem] = useState(null); // { item, isReTest }
 
   const loadData = useCallback(async () => {
@@ -245,7 +260,6 @@ export default function CapNhatXetNghiem() {
       const items = Array.isArray(resData) ? resData : (resData?.data || resData?.content || []);
       setList(items);
 
-      // Thống kê số ca Re-test từ kho
       const reTests = items.filter(i => String(i.moTa || '').toLowerCase().includes('re-test') || String(i.moTa || '').toLowerCase().includes('kiểm tra lại'));
       setStats({
         tongSo: resStats?.tongSo || items.length,
@@ -261,159 +275,184 @@ export default function CapNhatXetNghiem() {
     }
   }, []);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const filteredList = list.filter(item => {
-    if (!search.trim()) return true;
     const kw = search.toLowerCase().trim();
     const maTui = String(item.maTuiMau || '').toLowerCase();
     const tnv = String(item.tenTinhNguyenVien || '').toLowerCase();
     const cd = String(item.tenChienDich || '').toLowerCase();
-    return maTui.includes(kw) || tnv.includes(kw) || cd.includes(kw);
+    const matchesSearch = !kw || maTui.includes(kw) || tnv.includes(kw) || cd.includes(kw);
+    const matchesBlood = bloodFilter === 'ALL' || String(item.nhomMau || '').includes(bloodFilter);
+    return matchesSearch && matchesBlood;
   });
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Cập Nhật Kết Quả Xét Nghiệm & Quản Lý Kho</h1>
-          <p className="text-slate-500 mt-1 text-sm">Xét nghiệm vi sinh phẩm túi máu, đánh giá chất lượng & xử lý Re-test với Quản lý kho</p>
+      {/* Cyber Hero Diagnostic Header Banner */}
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-950 p-6 md:p-8 text-white shadow-2xl shadow-indigo-950/40 border border-slate-800">
+        <div className="absolute -right-12 -bottom-12 w-80 h-80 bg-rose-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute left-1/3 -top-10 w-60 h-60 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/10 backdrop-blur-lg rounded-full text-[11px] font-extrabold text-cyan-300 border border-white/15 mb-3">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+              🔬 PHÒNG XÉT NGHIỆM VI SINH & BẢO QUẢN KHO
+            </div>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-rose-200 bg-clip-text text-transparent">
+              Cập Nhật Kết Quả Xét Nghiệm & Quản Lý Kho
+            </h1>
+            <p className="text-slate-300 text-xs md:text-sm mt-1.5 max-w-2xl font-medium leading-relaxed">
+              Kiểm tra sàng lọc vi sinh phẩm túi máu (HBV, HCV, HIV, Syphilis), đánh giá chất lượng & xử lý Re-test với Quản lý kho
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+      {/* 4 Holographic Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30 border border-slate-200/80 rounded-3xl p-5 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-xs font-black uppercase text-slate-400 tracking-wider">Tổng Ca Chờ XN</p>
+            <p className="text-3xl font-black text-slate-900 mt-1">{stats.tongSo}</p>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-inner">
             <span className="material-symbols-outlined text-2xl">biotech</span>
           </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-white via-slate-50/50 to-emerald-50/30 border border-slate-200/80 rounded-3xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Tổng Ca XN</p>
-            <p className="text-xl font-extrabold text-slate-800">{stats.tongSo}</p>
+            <p className="text-xs font-black uppercase text-slate-400 tracking-wider">Đạt Tiêu Chuẩn</p>
+            <p className="text-3xl font-black text-emerald-600 mt-1">{stats.datYeuCau}</p>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-inner">
+            <span className="material-symbols-outlined text-2xl">verified</span>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-            <span className="material-symbols-outlined text-2xl">task_alt</span>
-          </div>
+        <div className="bg-gradient-to-br from-white via-slate-50/50 to-rose-50/30 border border-slate-200/80 rounded-3xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Đạt Tiêu Chuẩn</p>
-            <p className="text-xl font-extrabold text-emerald-600">{stats.datYeuCau}</p>
+            <p className="text-xs font-black uppercase text-slate-400 tracking-wider">Không Đạt (Hủy)</p>
+            <p className="text-3xl font-black text-rose-600 mt-1">{stats.khongDat}</p>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shadow-inner">
+            <span className="material-symbols-outlined text-2xl">dangerous</span>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-bold">
-            <span className="material-symbols-outlined text-2xl">cancel</span>
-          </div>
+        <div className="bg-gradient-to-br from-purple-50/80 via-indigo-50/40 to-white border border-purple-200/80 rounded-3xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Không Đạt (Hủy)</p>
-            <p className="text-xl font-extrabold text-red-600">{stats.khongDat}</p>
+            <p className="text-xs font-black uppercase text-purple-700 tracking-wider">Re-Test Kho Máu</p>
+            <p className="text-3xl font-black text-purple-900 mt-1">{stats.reTestCount}</p>
           </div>
-        </div>
-
-        <div className="bg-white border border-purple-200 rounded-2xl p-4 shadow-sm flex items-center gap-3 bg-purple-50/40">
-          <div className="w-11 h-11 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
-            <span className="material-symbols-outlined text-2xl">replay</span>
-          </div>
-          <div>
-            <p className="text-xs font-bold text-purple-600 uppercase">Re-test Kho Máu</p>
-            <p className="text-xl font-extrabold text-purple-800">{stats.reTestCount}</p>
+          <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center shadow-inner">
+            <span className="material-symbols-outlined text-2xl animate-pulse">replay</span>
           </div>
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex gap-3">
+      {/* Toolbar: Search Bar & Blood Type Selector */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="relative flex-1">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+          <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
           <input
             value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Tìm theo mã túi máu, tên TNV, đợt hiến..."
-            className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 text-sm outline-none focus:border-primary"
+            placeholder="Tìm theo mã túi máu, tên tình nguyện viên, đợt hiến..."
+            className="w-full h-11 bg-slate-50 border border-slate-200/80 rounded-xl pl-10 pr-4 text-xs outline-none focus:border-rose-500 transition-colors font-medium"
           />
         </div>
+
+        <select
+          value={bloodFilter}
+          onChange={e => setBloodFilter(e.target.value)}
+          className="h-11 border border-slate-200/80 rounded-xl px-4 text-xs font-extrabold text-slate-700 outline-none bg-slate-50 focus:border-rose-500 cursor-pointer shadow-2xs"
+        >
+          <option value="ALL">Tất cả nhóm máu</option>
+          <option value="A">Nhóm A</option>
+          <option value="B">Nhóm B</option>
+          <option value="O">Nhóm O</option>
+          <option value="AB">Nhóm AB</option>
+        </select>
       </div>
 
-      {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      {/* Testing Table */}
+      <div className="bg-white border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-xs">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="text-left px-4 py-3 text-xs font-black uppercase text-slate-400">Mã Túi Máu</th>
-                <th className="text-left px-5 py-3 text-xs font-black uppercase text-slate-400">Tình Nguyện Viên</th>
-                <th className="text-left px-4 py-3 text-xs font-black uppercase text-slate-400">Nhóm Máu</th>
-                <th className="text-left px-4 py-3 text-xs font-black uppercase text-slate-400">Số Lần XN</th>
-                <th className="text-left px-4 py-3 text-xs font-black uppercase text-slate-400">Đánh Giá XN</th>
-                <th className="text-left px-4 py-3 text-xs font-black uppercase text-slate-400">Ghi Chú / Trạng Thái Kho</th>
-                <th className="text-left px-4 py-3 text-xs font-black uppercase text-slate-400">Thao Tác</th>
+              <tr className="bg-slate-100/80 border-b border-slate-200">
+                {['Mã Túi Máu', 'Tình Nguyện Viên', 'Nhóm Máu', 'Số Lần XN', 'Đánh Giá XN', 'Ghi Chú / Trạng Thái Kho', 'Thao Tác'].map(h => (
+                  <th key={h} className="text-left px-5 py-3.5 text-[11px] font-black uppercase text-slate-400 tracking-wider whitespace-nowrap">{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} className="text-center py-16 text-slate-400">Đang tải danh sách xét nghiệm...</td></tr>
+                <tr><td colSpan={7} className="text-center py-12 text-slate-400 font-bold">Đang tải danh sách xét nghiệm...</td></tr>
               ) : filteredList.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-16 text-slate-400">Chưa có dữ liệu xét nghiệm nào</td></tr>
+                <tr><td colSpan={7} className="text-center py-12 text-slate-400 font-bold">Hiện không có túi máu nào chờ xét nghiệm ở Trang 2.</td></tr>
               ) : filteredList.map(item => {
                 const isReTestReq = String(item.moTa || '').toLowerCase().includes('re-test') || String(item.moTa || '').toLowerCase().includes('kiểm tra lại');
                 const isPending = item.ketQua === null;
                 const isPassed = item.ketQua === true;
 
                 return (
-                  <tr key={item.maTuiMau} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-4">
-                      <span className="font-mono text-xs font-extrabold text-primary bg-red-50 px-2.5 py-1 rounded-lg">
+                  <tr key={item.maTuiMau} className="border-b border-slate-100 hover:bg-rose-50/20 transition-colors">
+                    <td className="px-5 py-4">
+                      <span className="font-mono text-xs font-black text-rose-700 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200 shadow-2xs">
                         {item.maTuiMau}
                       </span>
                     </td>
-                    <td className="px-5 py-4 font-bold text-slate-800">
-                      {item.tenTinhNguyenVien}
-                      <span className="block text-xs font-normal text-slate-400 mt-0.5">{item.tenChienDich}</span>
+                    <td className="px-5 py-4">
+                      <p className="font-extrabold text-slate-800 text-sm">{item.tenTinhNguyenVien}</p>
+                      <p className="text-[10px] font-medium text-slate-400 mt-0.5">{item.tenChienDich}</p>
                     </td>
-                    <td className="px-4 py-4">
-                      <span className="px-2.5 py-1 bg-red-100 text-red-700 font-black text-xs rounded-lg">
+                    <td className="px-5 py-4">
+                      <span className="px-3 py-1 bg-gradient-to-r from-red-600 to-rose-600 text-white font-black text-xs rounded-xl shadow-sm shadow-rose-200">
                         {item.nhomMau || 'Chưa rõ'}
                       </span>
                     </td>
-                    <td className="px-4 py-4">
-                      <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-xs font-bold rounded">
+                    <td className="px-5 py-4">
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-black rounded-lg border border-slate-200">
                         Lần {item.soLanXetNghiem || 1}
                       </span>
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-5 py-4">
                       {isPending ? (
-                        <span className="px-2.5 py-1 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-full">Chờ XN lần đầu</span>
+                        <span className="px-3 py-1 bg-amber-50 text-amber-700 font-black text-xs rounded-full border border-amber-200 flex items-center gap-1.5 w-fit">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                          ⏳ Chờ XN vi sinh
+                        </span>
                       ) : isPassed ? (
-                        <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">✅ Đạt Tiêu Chuẩn</span>
+                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 font-black text-xs rounded-full border border-emerald-200">✅ Đạt Tiêu Chuẩn</span>
                       ) : (
-                        <span className="px-2.5 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">❌ Không Đạt (Hủy)</span>
+                        <span className="px-3 py-1 bg-rose-50 text-rose-700 font-black text-xs rounded-full border border-rose-200">❌ Không Đạt (Hủy)</span>
                       )}
                     </td>
-                    <td className="px-4 py-4 text-xs text-slate-600 max-w-xs truncate">
+                    <td className="px-5 py-4 text-xs font-medium text-slate-600 max-w-xs truncate">
                       {isReTestReq ? (
-                        <span className="px-2 py-1 bg-purple-100 text-purple-700 font-extrabold rounded-lg flex items-center gap-1 w-fit animate-pulse">
+                        <span className="px-2.5 py-1 bg-purple-100 text-purple-800 font-black text-xs rounded-xl border border-purple-200 flex items-center gap-1 w-fit animate-pulse">
                           <span className="material-symbols-outlined text-sm">replay</span>
                           Yêu cầu Re-test lần 2
                         </span>
                       ) : (
-                        item.moTa || 'Đã xét nghiệm'
+                        item.moTa || 'Đang chờ xét nghiệm'
                       )}
                     </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setModalItem({ item, isReTest: isReTestReq })}
-                          className={`px-3 py-1.5 rounded-xl text-white font-bold text-xs flex items-center gap-1 shadow-sm transition-all active:scale-95 whitespace-nowrap ${
-                            isReTestReq ? 'bg-purple-600 hover:bg-purple-700' : 'bg-primary hover:bg-red-800'
-                          }`}
-                        >
-                          <span className="material-symbols-outlined text-base">{isReTestReq ? 'replay' : 'biotech'}</span>
-                          <span>{isReTestReq ? 'Xét Nghiệm Lại Lần 2' : 'Cập Nhật XN'}</span>
-                        </button>
-                      </div>
+                    <td className="px-5 py-4">
+                      <button
+                        onClick={() => setModalItem({ item, isReTest: isReTestReq })}
+                        className={`h-9 px-4 rounded-xl text-white font-black text-xs flex items-center gap-1.5 shadow-md transition-all active:scale-95 whitespace-nowrap ${
+                          isReTestReq ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-200' : 'bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 hover:from-red-700 hover:to-pink-700 shadow-rose-500/25'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-base">{isReTestReq ? 'replay' : 'biotech'}</span>
+                        <span>{isReTestReq ? 'Xét Nghiệm Lại Lần 2' : '🧪 Nhập Kết Quả XN'}</span>
+                      </button>
                     </td>
                   </tr>
                 );
@@ -423,14 +462,17 @@ export default function CapNhatXetNghiem() {
         </div>
       </div>
 
-      {/* Modal Cập nhật / Re-test */}
+      {/* Modal Diagnostic Panel */}
       {modalItem && (
         <XetNghiemModal
           item={modalItem.item}
           isReTest={modalItem.isReTest}
           nhanVien={nhanVien}
           onClose={() => setModalItem(null)}
-          onSaved={() => { setModalItem(null); loadData(); }}
+          onSaved={() => {
+            setModalItem(null);
+            loadData();
+          }}
         />
       )}
     </div>
