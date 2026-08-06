@@ -10,25 +10,27 @@ export const thuNhanMauService = {
 };
 
 export const khamLamSangService = {
-  getAll: () => http.get('/ketqualamsang'),
-  getWaiting: () => http.get('/ketqualamsang/waiting'),
-  getStats: () => http.get('/ketqualamsang/stats'),
-  save: (data) => http.post('/ketqualamsang', data),
+  getAll: () => http.get('/khamlamsang/lich-su'),
+  getWaiting: async () => {
+    const res = await http.get('/khamlamsang/cho-kham');
+    return res?.data || res;
+  },
+  getStats: () => http.get('/khamlamsang/stats'),
+  save: (data) => http.post('/khamlamsang/kham', data),
   update: (maKQ, data) =>
-    http.post(`/ketqualamsang/${encodeURIComponent(String(maKQ).trim())}/cap-nhat`, data),
-  delete: (id) => http.delete(`/ketqualamsang/${id}`),
+    http.post(`/khamlamsang/${encodeURIComponent(String(maKQ).trim())}/cap-nhat`, data),
+  delete: (id) => http.delete(`/khamlamsang/${id}`),
 };
 
 export const ketQuaXetNghiemService = {
-  // Lấy tất cả kết quả xét nghiệm
-  getAll: () => http.get('/ketquaxetnghiem'),
-  // Tạo kết quả xét nghiệm mới khi có túi máu (mã KQ tự sinh)
-  create: (data) => http.post('/ketquaxetnghiem', data),
-  // Lấy kết quả xét nghiệm theo mã túi máu
+  // Lấy tất cả kết quả xét nghiệm (hỗ trợ cả getDanhSach lẫn getAll)
+  getAll: () => http.get('/ketquaxetnghiem/danh-sach'),
+  getDanhSach: () => http.get('/ketquaxetnghiem/danh-sach'),
+  getStats: () => http.get('/ketquaxetnghiem/thong-ke'),
+  create: (data) => http.post('/ketquaxetnghiem/luu', data),
+  save: (data) => http.post('/ketquaxetnghiem/luu', data),
   getByMaTuiMau: (maTuiMau) => http.get(`/ketquaxetnghiem/tui-mau/${encodeURIComponent(maTuiMau)}`),
-  // Bác sĩ cập nhật kết quả: nhóm máu, số lần xét nghiệm, mô tả
   update: (maKQ, data) => http.put(`/ketquaxetnghiem/${encodeURIComponent(maKQ)}`, data),
-  // Xóa kết quả xét nghiệm
   delete: (maKQ) => http.delete(`/ketquaxetnghiem/${encodeURIComponent(maKQ)}`),
 };
 
