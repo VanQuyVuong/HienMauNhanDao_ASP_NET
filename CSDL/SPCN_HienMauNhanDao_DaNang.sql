@@ -343,9 +343,9 @@ INSERT INTO NHANVIEN (maNhanVien, maTaiKhoan, maKhoa, maDiaDiem, hoTen, CCCD, gi
 ('NV00003', 'TK00003', 'KC00002', 'DD00001', 'Trần NVYT 2',           '048075000003', 'Nữ',  '0905000003'),
 ('NV00004', 'TK00004', 'KC00001', 'DD00001', 'Bác Sĩ Một',            '048075000004', 'Nam', '0905000004'),
 ('NV00005', 'TK00005', 'KC00001', 'DD00001', 'Bác Sĩ Hai',            '048075000005', 'Nam', '0905000005'),
-('NV00006', 'TK00006', 'KC00003', 'DD00001', 'Quản Lý Kho',           '048075000006', 'Nam', '0905000006'),
+('NV00006', 'TK00006', 'BV01',    'DD00002', 'Quản Lý Kho BV C',       '048075000006', 'Nam', '0905000006'),
 ('NV00007', 'TK00007', 'KC00003', 'DD00001', 'Nguyễn Văn Xét Nghiệm', '048075000007', 'Nam', '0905000007')
-ON DUPLICATE KEY UPDATE hoTen = VALUES(hoTen);
+ON DUPLICATE KEY UPDATE hoTen = VALUES(hoTen), maKhoa = VALUES(maKhoa);
 
 -- =============================================================
 -- ✅ XONG! DATABASE ĐÃ ĐƯỢC CHUẨN BỊ ĐẦY ĐỦ
@@ -566,51 +566,8 @@ INSERT INTO KETQUALAMSANG VALUES
 ('KL00034','DK00034','NV00004','120/80',75,68,36.5,1,NULL), 
 ('KL00035','DK00035','NV00003','100/60',90,40,36.7,0,'Cân nặng dưới 40kg'); -- Rớt do thiếu cân
 
--- =============================================================
--- 8. THU NHẬN, XÉT NGHIỆM VÀ KHO MÁU 
--- Đa dạng trạng thái (Nhập kho, Chờ xét nghiệm, Đã xuất, Hủy)
--- =============================================================
--- =============================================================
--- 8. THU NHẬN, XÉT NGHIỆM VÀ KHO MÁU 
--- Đa dạng trạng thái (Nhập kho, Chờ xét nghiệm, Đã xuất, Hủy)
--- =============================================================
-
--- Xóa dữ liệu rác (nếu có) do câu lệnh lỗi vừa rồi gây ra
-
-
--- Phân tách mã kho theo từng nhóm máu chuyên biệt
-INSERT INTO KHOMAU (maKho, tenKho, nhomMau, soLuongTon, nguongAnToan, moTa) VALUES 
-('KM00001', 'Kho Nhóm O+', 'O+', 150, 50, 'Tủ lạnh chuyên dụng A1 - Khu vực Tầng 1'), 
-('KM00002', 'Kho Nhóm A+', 'A+', 30, 40, 'Tủ lạnh chuyên dụng A2 - Khu vực Tầng 1'), 
-('KM00003', 'Kho Nhóm B+', 'B+', 60, 30, 'Tủ lạnh chuyên dụng B1 - Khu vực Tầng 2'), 
-('KM00004', 'Kho Nhóm AB+', 'AB+', 10, 15, 'Tủ lạnh chuyên dụng AB1 - Khu vực Tầng 2'),
-('KM00005', 'Kho Nhóm O-', 'O-', 5, 10, 'Tủ đông hiếm O- - Phòng bảo quản đặc biệt'), 
-('KM00006', 'Kho Nhóm A-', 'A-', 5, 10, 'Tủ đông hiếm A- - Phòng bảo quản đặc biệt'), 
-('KM00007', 'Kho Nhóm B-', 'B-', 5, 10, 'Tủ đông hiếm B- - Phòng bảo quản đặc biệt'), 
-('KM00008', 'Kho Nhóm AB-', 'AB-', 2, 5, 'Tủ đông hiếm AB- - Phòng bảo quản đặc biệt');
-
--- 47 TÚI MÁU (Túi máu của TNV nhóm nào sẽ được lưu vào kho nhóm đó)
+-- 58 TÚI MÁU (Phân bổ đa dạng 8 nhóm máu cho BV01, BV02, BV03, BV04)
 INSERT INTO TUIMAU VALUES 
--- TM00001-TM00005: Tháng 1 (Chiến dịch Xuân Hồng sớm)
-('TM00001','DK00001','NV00006','KM00003',250,'2026-01-15 07:15','Nhập kho',4.5), 
-('TM00002','DK00002','NV00001','KM00001',350,'2026-01-15 07:18','Nhập kho',4.2),
-('TM00003','DK00003','NV00001','KM00002',250,'2026-01-20 07:20','Nhập kho',4.5), 
-('TM00004','DK00004','NV00006','KM00001',350,'2026-01-20 07:23','Nhập kho',4.2),
-('TM00005','DK00005','NV00001','KM00004',250,'2026-01-25 07:25','Nhập kho',4.5), 
--- TM00006-TM00012: Tháng 2 (Chiến dịch Xuân Hồng chính)
-('TM00006','DK00006','NV00001','KM00005',350,'2026-02-10 07:28','Nhập kho',4.2),
-('TM00007','DK00007','NV00006','KM00001',250,'2026-02-10 07:30','Nhập kho',4.5), 
-('TM00008','DK00008','NV00001','KM00006',350,'2026-02-10 07:33','Nhập kho',4.2),
-('TM00009','DK00009','NV00001','KM00003',250,'2026-02-10 07:35','Nhập kho',4.5), 
-('TM00010','DK00010','NV00006','KM00008',350,'2026-02-10 07:38','Hủy',4.2),
-('TM00011','DK00011','NV00001','KM00002',250,'2026-02-15 07:40','Nhập kho',4.5), 
-('TM00012','DK00012','NV00001','KM00003',350,'2026-02-20 07:43','Nhập kho',4.2),
--- TM00013-TM00016: Tháng 3
-('TM00013','DK00013','NV00006','KM00001',250,'2026-03-05 07:45','Nhập kho',4.5), 
-('TM00014','DK00014','NV00001','KM00001',350,'2026-03-10 07:48','Nhập kho',4.2),
-('TM00015','DK00016','NV00001','KM00002',350,'2026-03-15 07:53','Nhập kho',4.2), 
-('TM00016','DK00017','NV00006','KM00003',250,'2026-03-20 07:55','Nhập kho',4.5),
--- TM00017-TM00019: Tháng 4
 ('TM00017','DK00018','NV00001','KM00001',350,'2026-04-08 07:58','Nhập kho',4.2), 
 ('TM00018','DK00019','NV00001','KM00001',250,'2026-04-15 08:00','Nhập kho',4.5),
 ('TM00019','DK00020','NV00006','KM00006',350,'2026-04-22 08:03','Đã xuất',4.2),
