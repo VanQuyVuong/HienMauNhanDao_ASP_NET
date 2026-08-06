@@ -58,11 +58,18 @@ namespace HienMauNhanDao_DaNang.Controllers
             return (nv, nv.KhoaCongTac);
         }
 
-        // API 1: Xem tổng quan tồn kho của TẤT CẢ CÁC BỆNH VIỆN (Quyền Xem cho tất cả QLK)
+        // API 1: Xem tổng quan tồn kho của TẤT CẢ CÁC BỆNH VIỆN (Chi tiết 8 nhóm máu A+, A-, B+, B-, O+, O-, AB+, AB-)
         [HttpGet("all-hospitals")]
         public async Task<IActionResult> GetAllHospitalsStock()
         {
-            var danhSachKhoa = await _context.KhoaCongTacs.ToListAsync();
+            var danhSachKhoa = await _context.KhoaCongTacs
+                .Where(k => k.MaKhoa.StartsWith("BV"))
+                .ToListAsync();
+
+            if (!danhSachKhoa.Any())
+            {
+                danhSachKhoa = await _context.KhoaCongTacs.Take(4).ToListAsync();
+            }
             var danhSachKhoMau = await _context.KhoMaus.ToListAsync();
             var danhSachTuiMau = await _context.TuiMaus
                 .Include(t => t.DonDangKy)
@@ -71,17 +78,28 @@ namespace HienMauNhanDao_DaNang.Controllers
 
             var result = danhSachKhoa.Select(khoa =>
             {
-                var tuis = danhSachTuiMau.Where(t => t.MaKho == khoa.MaKhoa || t.MaKho == "KH01" || string.IsNullOrEmpty(t.MaKho)).ToList();
+                var tuis = danhSachTuiMau.Where(t => t.MaKho == khoa.MaKhoa || (khoa.MaKhoa == "BV01" && string.IsNullOrEmpty(t.MaKho))).ToList();
+                
+                int GetCount(string code) => tuis.Count(t => 
+                    t.DonDangKy?.TinhNguyenVien?.NhomMau?.ToString() == code);
+
                 return new
                 {
                     maBenhVien = khoa.MaKhoa,
                     tenBenhVien = khoa.TenKhoa,
                     tongSoTuiTon = tuis.Count,
                     tongTheTich = tuis.Sum(t => t.TheTich ?? 0),
-                    soLuongA = tuis.Count(t => t.DonDangKy?.TinhNguyenVien?.NhomMau?.ToString().StartsWith("A") == true),
-                    soLuongB = tuis.Count(t => t.DonDangKy?.TinhNguyenVien?.NhomMau?.ToString().StartsWith("B") == true),
-                    soLuongO = tuis.Count(t => t.DonDangKy?.TinhNguyenVien?.NhomMau?.ToString().StartsWith("O") == true),
-                    soLuongAB = tuis.Count(t => t.DonDangKy?.TinhNguyenVien?.NhomMau?.ToString().StartsWith("AB") == true),
+                    details = new
+                    {
+                        aPos = GetCount("A_positive"),
+                        aNeg = GetCount("A_negative"),
+                        bPos = GetCount("B_positive"),
+                        bNeg = GetCount("B_negative"),
+                        oPos = GetCount("O_positive"),
+                        oNeg = GetCount("O_negative"),
+                        abPos = GetCount("AB_positive"),
+                        abNeg = GetCount("AB_negative")
+                    }
                 };
             });
 
