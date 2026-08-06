@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Data;
+using HienMauNhanDao_DaNang.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +8,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "NVYT,AD")]
+    [Authorize(Roles = "NVYT, QLK, AD")]
     public class ThongKeController : ControllerBase
     {
 

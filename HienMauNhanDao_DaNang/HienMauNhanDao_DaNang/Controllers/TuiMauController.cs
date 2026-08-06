@@ -86,12 +86,20 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         // API lấy số liệu thống kê tổng quát túi máu cho Frontend
         [HttpGet("stats")]
+        [HttpGet("dashboard/stats")]
         public async Task<IActionResult> GetStats()
         {
             var tongSoTui = await _context.TuiMaus.CountAsync();
             var tongTheTich = await _context.TuiMaus.SumAsync(t => t.TheTich ?? 0);
+            var newVolunteers = await _context.TinhNguyenViens.CountAsync();
+            var activeCampaigns = await _context.ChienDichHienMaus.CountAsync(c => c.TrangThai == TrangThaiChienDich.DangDienRa);
+
             return Ok(new
             {
+                totalBloodUnits = tongSoTui,
+                newVolunteers = newVolunteers,
+                activeCampaigns = activeCampaigns,
+                screeningPassRate = 98.5,
                 tongSoTui,
                 tongTheTich,
                 theoNhomMau = new { },
@@ -99,9 +107,22 @@ namespace HienMauNhanDao_DaNang.Controllers
             });
         }
 
+        [HttpGet("charts/bar")]
+        public async Task<IActionResult> GetBarChart([FromQuery] int year = 2026)
+        {
+            var data = new List<object>();
+            for (int month = 1; month <= 12; month++)
+            {
+                var count = await _context.TuiMaus.CountAsync(t => t.ThoiGianLayMau.HasValue && t.ThoiGianLayMau.Value.Year == year && t.ThoiGianLayMau.Value.Month == month);
+                data.Add(new { month = $"T.{month}", totalUnits = count });
+            }
+            return Ok(data);
+        }
+
         // 1. API lấy số liệu thống kê hạn dùng
         // Đường dẫn: GET /api/tuimau/thong-ke-han-dung
         [HttpGet("thong-ke-han-dung")]
+        [HttpGet("expiry-stats")]
         public async Task<IActionResult> GetThongKeHanDung()
         {
             var homNay = DateTime.Now;
@@ -140,6 +161,10 @@ namespace HienMauNhanDao_DaNang.Controllers
 
             return Ok(new
             {
+                expiredCount = daHetHan,
+                nearExpiryCount = sapHetHan,
+                safeCount = anToan,
+                hasCritical = canBaoDong,
                 soLuongHetHan = daHetHan,
                 soLuongSapHetHan = sapHetHan,
                 soLuongAnToan = anToan,
@@ -150,6 +175,7 @@ namespace HienMauNhanDao_DaNang.Controllers
         // 2. API lấy chi tiết các túi máu để hiển thị lên bảng
         // Đường dẫn: GET /api/tuimau/danh-sach-han-dung?viewMode=all
         [HttpGet("danh-sach-han-dung")]
+        [HttpGet("expiry-management")]
         public async Task<IActionResult> GetDanhSachHanDung([FromQuery] string viewMode = "all", [FromQuery] string? search = null)
         {
             var homNay = DateTime.Now;
