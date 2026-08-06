@@ -17,12 +17,14 @@ export default function NhanYeuCauNhapKho() {
     try {
       setLoadingKho(true);
       const res = await http.get('/khomau');
-      setKhoList(res);
-      if (res.length > 0 && !selectedKho) {
-        setSelectedKho(res[0]); // Chọn kho đầu tiên làm mặc định
+      const list = Array.isArray(res) ? res : (res?.data || []);
+      setKhoList(list);
+      if (list.length > 0 && !selectedKho) {
+        setSelectedKho(list[0]); // Chọn kho đầu tiên làm mặc định
       }
     } catch (err) {
       console.error('Lỗi tải danh sách kho:', err);
+      setKhoList([]);
     } finally {
       setLoadingKho(false);
     }
@@ -33,9 +35,11 @@ export default function NhanYeuCauNhapKho() {
       setLoading(true);
       const res = await http.get('/tuimau');
       console.log('Dữ liệu túi máu đã tải về:', res);
-      setBloodUnits(res);
+      const units = Array.isArray(res) ? res : (res?.data || []);
+      setBloodUnits(units);
     } catch (err) {
       console.error('Lỗi tải dữ liệu túi máu:', err);
+      setBloodUnits([]);
     } finally {
       setLoading(false);
     }
