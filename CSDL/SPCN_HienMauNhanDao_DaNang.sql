@@ -299,17 +299,20 @@ INSERT INTO DIADIEM VALUES
 ('DD00007', 'Trường Đại học Đông Á',                '33 Xô Viết Nghệ Tĩnh, Hải Châu', 'PX00002', 'TruongHoc', 'LuuDong'),
 ('DD00008', 'Khoa Huyết học - Truyền máu (BV Đà Nẵng)', '103 Quang Trung, Hải Châu',  'PX00001', 'BenhVien', 'CoDinh');
 
--- 3.4 KHOA CÔNG TÁC
+-- 3.4 KHOA CÔNG TÁC (Các Bệnh viện công tác)
 INSERT INTO KHOACONGTAC VALUES
+('BV01', 'Bệnh viện C Đà Nẵng'),
+('BV02', 'Bệnh viện Đà Nẵng'),
+('BV03', 'Bệnh viện Phụ Sản - Nhi Đà Nẵng'),
 ('KC00001', 'Khoa Huyết học - BV Đà Nẵng'),
-('KC00002', 'Khoa Khám bệnh - BV Đà Nẵng'),
-('KC00003', 'Khoa Xét nghiệm - BV Đà Nẵng'),
 ('KC00004', 'Khoa Huyết học - BV C Đà Nẵng'),
-('KC00005', 'Khoa Cấp cứu - BV Phụ sản Nhi'),
-('KC00006', 'Phòng Hành chính - Quản trị');
+('KC00005', 'Khoa Cấp cứu - BV Phụ sản Nhi');
 
--- 3.5 KHO MÁU - 8 nhóm máu (tồn kho = 0, chờ hiến thực tế)
+-- 3.5 KHO MÁU BỆNH VIỆN
 INSERT INTO KHOMAU VALUES
+('BV01', 'Kho Máu Bệnh viện C Đà Nẵng',          'O_positive', 12, 50, 'Kho máu trung tâm Bệnh viện C Đà Nẵng'),
+('BV02', 'Kho Máu Bệnh viện Đà Nẵng',            'A_positive', 18, 80, 'Kho máu trung tâm Bệnh viện Đà Nẵng'),
+('BV03', 'Kho Máu Bệnh viện Phụ Sản - Nhi',      'B_positive', 10, 40, 'Kho máu bảo quản Bệnh viện Phụ Sản - Nhi'),
 ('K_1', 'Kho máu A+',  'A_positive',  0, 50, 'Tủ lạnh chuyên dụng - Tầng 1'),
 ('K_2', 'Kho máu B+',  'B_positive',  0, 50, 'Tủ lạnh chuyên dụng - Tầng 1'),
 ('K_3', 'Kho máu AB+', 'AB_positive', 0, 20, 'Tủ lạnh chuyên dụng - Tầng 2'),
