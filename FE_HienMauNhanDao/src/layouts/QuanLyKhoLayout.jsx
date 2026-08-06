@@ -44,6 +44,7 @@ export default function QuanLyKhoLayout() {
   const initials = session.name.substring(0, 2).toUpperCase();
 
   const menu = [
+    { page: '/quan-ly-kho/benh-vien', icon: 'local_hospital', label: 'Kho Bệnh Viện & Quét Mã' },
     { page: '/quan-ly-kho/thong-ke', icon: 'pie_chart', label: 'Thống kê tồn kho' },
     { page: '/quan-ly-kho/nhap-kho', icon: 'add_box', label: 'Quản lý nhập kho' },
     { page: '/quan-ly-kho/quan-ly-han-dung', icon: 'timer_off', label: 'Quản lý hạn dùng' },
