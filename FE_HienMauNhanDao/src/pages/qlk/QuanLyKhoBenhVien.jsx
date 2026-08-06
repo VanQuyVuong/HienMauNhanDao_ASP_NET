@@ -421,32 +421,52 @@ export default function QuanLyKhoBenhVien() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {allHospitals.map((h, i) => (
-              <div key={i} className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 shadow-2xs space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                  <h3 className="font-extrabold text-slate-800 text-sm">{h.tenBenhVien}</h3>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-black bg-rose-600 text-white">
+              <div key={i} className="bg-slate-50/80 border border-slate-200/80 rounded-3xl p-5 shadow-sm space-y-3.5 hover:shadow-md transition-all">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-rose-600 text-lg">local_hospital</span>
+                    <h3 className="font-extrabold text-slate-800 text-sm truncate max-w-[180px]">{h.tenBenhVien}</h3>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-black bg-rose-600 text-white shadow-xs">
                     {h.tongSoTuiTon} túi
                   </span>
                 </div>
 
-                <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold">
-                  <div className="bg-white p-2 rounded-xl border border-slate-100">
-                    <p className="text-[10px] text-slate-400">Nhóm A</p>
-                    <p className="text-rose-600 font-black">{h.soLuongA}</p>
+                {/* Grid 8 nhóm máu chi tiết A+, A-, B+, B-, O+, O-, AB+, AB- */}
+                <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                  <div className="bg-white p-2 rounded-2xl border border-rose-100 shadow-2xs">
+                    <p className="text-[10px] font-black text-rose-600">A+</p>
+                    <p className="text-sm font-mono font-black text-slate-800 mt-0.5">{h.details?.aPos ?? 0}</p>
                   </div>
-                  <div className="bg-white p-2 rounded-xl border border-slate-100">
-                    <p className="text-[10px] text-slate-400">Nhóm B</p>
-                    <p className="text-rose-600 font-black">{h.soLuongB}</p>
+                  <div className="bg-white p-2 rounded-2xl border border-rose-100 shadow-2xs">
+                    <p className="text-[10px] font-black text-rose-800">A-</p>
+                    <p className="text-sm font-mono font-black text-slate-800 mt-0.5">{h.details?.aNeg ?? 0}</p>
                   </div>
-                  <div className="bg-white p-2 rounded-xl border border-slate-100">
-                    <p className="text-[10px] text-slate-400">Nhóm O</p>
-                    <p className="text-rose-600 font-black">{h.soLuongO}</p>
+                  <div className="bg-white p-2 rounded-2xl border border-rose-100 shadow-2xs">
+                    <p className="text-[10px] font-black text-rose-600">B+</p>
+                    <p className="text-sm font-mono font-black text-slate-800 mt-0.5">{h.details?.bPos ?? 0}</p>
                   </div>
-                  <div className="bg-white p-2 rounded-xl border border-slate-100">
-                    <p className="text-[10px] text-slate-400">Nhóm AB</p>
-                    <p className="text-rose-600 font-black">{h.soLuongAB}</p>
+                  <div className="bg-white p-2 rounded-2xl border border-rose-100 shadow-2xs">
+                    <p className="text-[10px] font-black text-rose-800">B-</p>
+                    <p className="text-sm font-mono font-black text-slate-800 mt-0.5">{h.details?.bNeg ?? 0}</p>
+                  </div>
+                  <div className="bg-white p-2 rounded-2xl border border-rose-100 shadow-2xs">
+                    <p className="text-[10px] font-black text-rose-600">O+</p>
+                    <p className="text-sm font-mono font-black text-slate-800 mt-0.5">{h.details?.oPos ?? 0}</p>
+                  </div>
+                  <div className="bg-white p-2 rounded-2xl border border-rose-100 shadow-2xs">
+                    <p className="text-[10px] font-black text-rose-800">O-</p>
+                    <p className="text-sm font-mono font-black text-slate-800 mt-0.5">{h.details?.oNeg ?? 0}</p>
+                  </div>
+                  <div className="bg-white p-2 rounded-2xl border border-rose-100 shadow-2xs">
+                    <p className="text-[10px] font-black text-rose-600">AB+</p>
+                    <p className="text-sm font-mono font-black text-slate-800 mt-0.5">{h.details?.abPos ?? 0}</p>
+                  </div>
+                  <div className="bg-white p-2 rounded-2xl border border-rose-100 shadow-2xs">
+                    <p className="text-[10px] font-black text-rose-800">AB-</p>
+                    <p className="text-sm font-mono font-black text-slate-800 mt-0.5">{h.details?.abNeg ?? 0}</p>
                   </div>
                 </div>
               </div>
