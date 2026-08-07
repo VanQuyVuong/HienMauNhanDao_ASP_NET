@@ -1,4 +1,4 @@
-﻿using HienMauNhanDao_DaNang.Data;
+using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -26,20 +26,29 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         public async Task<IActionResult> GetCandidates()
         {
-            //1. lấy tất cả các đơn hiến máu đã hoàn thành 
-            var dons = await _context.DonDangKys.Include(d => d.TinhNguyenVien)
+            // 1. Lấy danh sách các mã đơn đã khởi tạo túi máu
+            var maDonsDaCoTuiMau = await _context.TuiMaus
+                .Where(t => t.MaDon != null)
+                .Select(t => t.MaDon!)
+                .Distinct()
+                .ToListAsync();
+
+            // 2. Lấy tất cả các đơn hiến máu đã có túi máu HOẶC đã hoàn thành / đã hiến
+            var dons = await _context.DonDangKys
+                 .Include(d => d.TinhNguyenVien)
                  .Include(d => d.ChienDich)
-                 .ThenInclude(c => c.DiaDiem)
-                 .Where(d => d.TrangThai == TrangThaiDonDangKy.DaHoanThanh)
+                     .ThenInclude(c => c.DiaDiem)
+                 .Where(d => d.TrangThai == TrangThaiDonDangKy.DaHoanThanh 
+                          || d.TrangThai == TrangThaiDonDangKy.DaHien 
+                          || maDonsDaCoTuiMau.Contains(d.MaDon))
                  .OrderByDescending(d => d.ThoiGianDangKy)
                  .ToListAsync();
 
-            //2.lấy danh sách các mã đơnc đã được cấp chứng nhận để đo khớp nhanh 
+            // 3. Lấy danh sách các mã đơn đã được cấp chứng nhận để đo khớp nhanh 
             var chungNhans = await _context.ChungNhans
                 .ToDictionaryAsync(cn => cn.MaDon, cn => cn.MaChungNhan);
 
-
-            //3. chuyển đổi sang định dạng json để gửi react dễ hiển thị 
+            // 4. Chuyển đổi sang định dạng json để gửi react dễ hiển thị 
             var result = dons.Select(don =>
             {
                 string? maChungNhan = null;
@@ -58,7 +67,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                     theTich = (don.TheTich ?? 250) + "ml",
                     tenChienDich = don.ChienDich?.TenChienDich ?? "N/A",
                     ngayHien = don.ThoiGianDangKy?.ToString("dd/MM/yyyy") ?? "N/A",
-                    trangThaiCap = isIssued ? "issued" : "pending",// "issued" là đã cấp, "pending" là đang chờ
+                    trangThaiCap = isIssued ? "issued" : "pending", // "issued" là đã cấp, "pending" là đang chờ
                     maChungNhan = maChungNhan
                 };
             });
