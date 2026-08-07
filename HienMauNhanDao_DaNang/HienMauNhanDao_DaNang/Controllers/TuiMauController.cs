@@ -66,6 +66,7 @@ namespace HienMauNhanDao_DaNang.Controllers
             _context.TuiMaus.Add(tuiMau);
 
             don.TheTich = request.TheTich;
+            don.TrangThai = TrangThaiDonDangKy.DaHoanThanh;
 
             await _context.SaveChangesAsync();
 
