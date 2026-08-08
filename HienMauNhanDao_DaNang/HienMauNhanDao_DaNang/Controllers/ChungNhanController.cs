@@ -58,7 +58,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 {
                     var tenCD = don.ChienDich.TenChienDich?.ToLower() ?? "";
                     var hinhThuc = don.ChienDich.DiaDiem?.HinhThuc?.ToLower() ?? "";
-                    var loaiDD = don.ChienDich.DiaDiem?.LoaiDiaDiem?.ToLower() ?? "";
+                    var loaiDD = don.ChienDich.DiaDiem?.LoaiDiaDiem?.ToString().ToLower() ?? "";
 
                     if (tenCD.Contains("thường xuyên") || tenCD.Contains("định kỳ"))
                     {

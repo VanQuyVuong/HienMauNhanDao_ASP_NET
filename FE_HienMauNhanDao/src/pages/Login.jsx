@@ -58,6 +58,8 @@ export default function Login() {
         window.location.href = '/quan-ly-kho/thong-ke';
       } else if (role === 'AD') {
         window.location.href = '/admin/nguoi-dung';
+      } else if (role === 'ADMIN_BV') {
+        window.location.href = '/admin-bv/dashboard';
       } else {
         window.location.href = '/';
       }

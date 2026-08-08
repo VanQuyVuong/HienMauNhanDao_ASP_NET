@@ -133,7 +133,9 @@ CREATE TABLE KHOMAU (
     nhomMau VARCHAR(50),
     soLuongTon INT DEFAULT 0,
     nguongAnToan INT DEFAULT 1000,
-    moTa VARCHAR(255)
+    moTa VARCHAR(255),
+    maKhoa VARCHAR(10),
+    FOREIGN KEY (maKhoa) REFERENCES KHOACONGTAC(maKhoa)
 );
 
 CREATE TABLE TUIMAU (
@@ -297,30 +299,46 @@ INSERT INTO DIADIEM VALUES
 ('DD00005', 'Hội Chữ Thập Đỏ TP. Đà Nẵng',         '522 Ông Ích Khiêm, Hải Châu',     'PX00003', 'CoQuan', 'CoDinh'),
 ('DD00006', 'Trường Đại học Sư phạm Kỹ thuật (UTE)','48 Cao Thắng, Hải Châu',          'PX00001', 'TruongHoc', 'LuuDong'),
 ('DD00007', 'Trường Đại học Đông Á',                '33 Xô Viết Nghệ Tĩnh, Hải Châu', 'PX00002', 'TruongHoc', 'LuuDong'),
-('DD00008', 'Khoa Huyết học - Truyền máu (BV Đà Nẵng)', '103 Quang Trung, Hải Châu',  'PX00001', 'BenhVien', 'CoDinh');
+('DD00008', 'Khoa Huyết học - Truyền máu (BV Đà Nẵng)', '103 Quang Trung, Hải Châu',  'PX00001', 'BenhVien', 'CoDinh'),
+('DD00009', 'Bệnh viện Đa khoa Tâm Trí Đà Nẵng', '64 Cách Mạng Tháng 8, Cẩm Lệ', 'PX00045', 'BenhVien', 'LuuDong'),
+('DD00010', 'Bệnh viện Đa khoa Quốc tế Vinmec Đà Nẵng', 'Đường 30 Tháng 4, Hải Châu', 'PX00001', 'BenhVien', 'LuuDong'),
+('DD00011', 'Bệnh viện Đa khoa Gia Đình', '73 Nguyễn Hữu Thọ, Hải Châu', 'PX00001', 'BenhVien', 'LuuDong'),
+('DD00012', 'Bệnh viện Hoàn Mỹ Đà Nẵng', '291 Nguyễn Văn Linh, Thanh Khê', 'PX00014', 'BenhVien', 'LuuDong');
 
 -- 3.4 KHOA CÔNG TÁC (Các Bệnh viện công tác)
 INSERT INTO KHOACONGTAC VALUES
-('BV01', 'Bệnh viện C Đà Nẵng'),
-('BV02', 'Bệnh viện Đà Nẵng'),
-('BV03', 'Bệnh viện Phụ Sản - Nhi Đà Nẵng'),
-('KC00001', 'Khoa Huyết học - BV Đà Nẵng'),
-('KC00004', 'Khoa Huyết học - BV C Đà Nẵng'),
-('KC00005', 'Khoa Cấp cứu - BV Phụ sản Nhi');
+('KC00001', 'Bệnh viện C Đà Nẵng'),
+('KC00002', 'Bệnh viện Đà Nẵng'),
+('KC00003', 'Bệnh viện Phụ Sản - Nhi Đà Nẵng'),
+('KC00004', 'Bệnh viện Quân y 17'),
+('KC00005', 'Bệnh viện 199 - Bộ Công An'),
+('KC00006', 'Bệnh viện Đa khoa Nam Liên Chiểu'),
+('KC00007', 'Trung tâm Y tế Quận Hải Châu'),
+('KC00008', 'Trung tâm Y tế Quận Thanh Khê'),
+('KC00009', 'Trung tâm Y tế Quận Sơn Trà'),
+('KC00010', 'Trung tâm Y tế Quận Ngũ Hành Sơn'),
+('KC00011', 'Trung tâm Y tế Quận Liên Chiểu'),
+('KC00012', 'Trung tâm Y tế Quận Cẩm Lệ'),
+('KC00013', 'Trung tâm Y tế Huyện Hòa Vang');
 
 -- 3.5 KHO MÁU BỆNH VIỆN
-INSERT INTO KHOMAU VALUES
-('BV01', 'Kho Máu Bệnh viện C Đà Nẵng',          'O_positive', 12, 50, 'Kho máu trung tâm Bệnh viện C Đà Nẵng'),
-('BV02', 'Kho Máu Bệnh viện Đà Nẵng',            'A_positive', 18, 80, 'Kho máu trung tâm Bệnh viện Đà Nẵng'),
-('BV03', 'Kho Máu Bệnh viện Phụ Sản - Nhi',      'B_positive', 10, 40, 'Kho máu bảo quản Bệnh viện Phụ Sản - Nhi'),
-('K_1', 'Kho máu A+',  'A_positive',  0, 50, 'Tủ lạnh chuyên dụng - Tầng 1'),
-('K_2', 'Kho máu B+',  'B_positive',  0, 50, 'Tủ lạnh chuyên dụng - Tầng 1'),
-('K_3', 'Kho máu AB+', 'AB_positive', 0, 20, 'Tủ lạnh chuyên dụng - Tầng 2'),
-('K_4', 'Kho máu O+',  'O_positive',  0, 80, 'Tủ lạnh chuyên dụng - Tầng 1'),
-('K_5', 'Kho máu A-',  'A_negative',  0, 10, 'Tủ đông hiếm - Phòng bảo quản đặc biệt'),
-('K_6', 'Kho máu B-',  'B_negative',  0, 10, 'Tủ đông hiếm - Phòng bảo quản đặc biệt'),
-('K_7', 'Kho máu AB-', 'AB_negative', 0,  5, 'Tủ đông hiếm - Phòng bảo quản đặc biệt'),
-('K_8', 'Kho máu O-',  'O_negative',  0, 20, 'Tủ đông hiếm - Phòng bảo quản đặc biệt');
+INSERT INTO KHOMAU (maKho, tenKho, nhomMau, soLuongTon, nguongAnToan, moTa, maKhoa) VALUES
+('KM00001', 'Kho máu A+ Bệnh viện C', 'A_positive', 50, 20, 'Tủ đông y tế', 'KC00001'),
+('KM00002', 'Kho máu A- Bệnh viện C', 'A_negative', 10, 5, 'Tủ đông y tế', 'KC00001'),
+('KM00003', 'Kho máu B+ Bệnh viện C', 'B_positive', 40, 20, 'Tủ đông y tế', 'KC00001'),
+('KM00004', 'Kho máu B- Bệnh viện C', 'B_negative', 5, 5, 'Tủ đông y tế', 'KC00001'),
+('KM00005', 'Kho máu AB+ Bệnh viện C', 'AB_positive', 20, 10, 'Tủ đông y tế', 'KC00001'),
+('KM00006', 'Kho máu AB- Bệnh viện C', 'AB_negative', 5, 2, 'Tủ đông y tế', 'KC00001'),
+('KM00007', 'Kho máu O+ Bệnh viện C', 'O_positive', 80, 50, 'Tủ đông y tế', 'KC00001'),
+('KM00008', 'Kho máu O- Bệnh viện C', 'O_negative', 20, 10, 'Tủ đông y tế', 'KC00001'),
+('KM00009', 'Kho máu A+ Bệnh viện Đà Nẵng', 'A_positive', 100, 50, 'Kho bảo quản 1', 'KC00002'),
+('KM00010', 'Kho máu A- Bệnh viện Đà Nẵng', 'A_negative', 20, 10, 'Kho bảo quản hiếm', 'KC00002'),
+('KM00011', 'Kho máu B+ Bệnh viện Đà Nẵng', 'B_positive', 80, 40, 'Kho bảo quản 1', 'KC00002'),
+('KM00012', 'Kho máu B- Bệnh viện Đà Nẵng', 'B_negative', 15, 5, 'Kho bảo quản hiếm', 'KC00002'),
+('KM00013', 'Kho máu AB+ Bệnh viện Đà Nẵng', 'AB_positive', 40, 20, 'Kho bảo quản 1', 'KC00002'),
+('KM00014', 'Kho máu AB- Bệnh viện Đà Nẵng', 'AB_negative', 10, 2, 'Kho bảo quản hiếm', 'KC00002'),
+('KM00015', 'Kho máu O+ Bệnh viện Đà Nẵng', 'O_positive', 150, 80, 'Kho lưu trữ trung tâm', 'KC00002'),
+('KM00016', 'Kho máu O- Bệnh viện Đà Nẵng', 'O_negative', 30, 15, 'Kho bảo quản hiếm', 'KC00002');
 
 -- =============================================================
 -- BƯỚC 4: DỮ LIỆU TÀI KHOẢN HỆ THỐNG (Mật khẩu mặc định: Abc123!@#)
@@ -338,12 +356,12 @@ ON DUPLICATE KEY UPDATE matKhau = VALUES(matKhau), maVaiTro = VALUES(maVaiTro);
 
 -- HỒ SƠ NHÂN VIÊN TƯƠNG ỨNG
 INSERT INTO NHANVIEN (maNhanVien, maTaiKhoan, maKhoa, maDiaDiem, hoTen, CCCD, gioiTinh, soDienThoai) VALUES 
-('NV00001', 'TK00001', 'KC00006', 'DD00001', 'Admin Hệ Thống',        '048075000001', 'Nam', '0905000001'),
+('NV00001', 'TK00001', 'KC00001', 'DD00001', 'Admin Hệ Thống',        '048075000001', 'Nam', '0905000001'),
 ('NV00002', 'TK00002', 'KC00002', 'DD00001', 'Nguyễn NVYT 1',         '048075000002', 'Nữ',  '0905000002'),
 ('NV00003', 'TK00003', 'KC00002', 'DD00001', 'Trần NVYT 2',           '048075000003', 'Nữ',  '0905000003'),
 ('NV00004', 'TK00004', 'KC00001', 'DD00001', 'Bác Sĩ Một',            '048075000004', 'Nam', '0905000004'),
 ('NV00005', 'TK00005', 'KC00001', 'DD00001', 'Bác Sĩ Hai',            '048075000005', 'Nam', '0905000005'),
-('NV00006', 'TK00006', 'BV01',    'DD00002', 'Quản Lý Kho BV C',       '048075000006', 'Nam', '0905000006'),
+('NV00006', 'TK00006', 'KC00001', 'DD00002', 'Quản Lý Kho BV C',       '048075000006', 'Nam', '0905000006'),
 ('NV00007', 'TK00007', 'KC00003', 'DD00001', 'Nguyễn Văn Xét Nghiệm', '048075000007', 'Nam', '0905000007')
 ON DUPLICATE KEY UPDATE hoTen = VALUES(hoTen), maKhoa = VALUES(maKhoa);
 

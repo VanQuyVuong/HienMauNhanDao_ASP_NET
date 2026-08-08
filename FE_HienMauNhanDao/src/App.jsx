@@ -44,6 +44,12 @@ import QuanLyNguoiDung from "./pages/admin/QuanLyNguoiDung";
 import QuanLyChienDich from "./pages/admin/QuanLyChienDich";
 import CapGiayChungNhan from "./pages/admin/CapGiayChungNhan";
 
+import AdminHospitalLayout from "./layouts/AdminHospitalLayout";
+import DashboardOverview from "./pages/adminHospital/DashboardOverview";
+import ManageStaff from "./pages/adminHospital/ManageStaff";
+import ManageStock from "./pages/adminHospital/ManageStock";
+import ManageNews from "./pages/adminHospital/ManageNews";
+
 const queryClient = new QueryClient();
 
 // Guard: cho phép các vai trò NVYT (Lễ Tân & Xét Nghiệm) truy cập
@@ -70,6 +76,12 @@ function QlkGuard({ children }) {
 function AdminGuard({ children }) {
   const role = localStorage.getItem("role");
   if (role !== "AD") return <Navigate to="/login" replace />;
+  return children;
+}
+
+function AdminHospitalGuard({ children }) {
+  const role = localStorage.getItem("role");
+  if (role !== "ADMIN_BV") return <Navigate to="/login" replace />;
   return children;
 }
 
@@ -123,12 +135,22 @@ function App() {
             <Route path="ket-qua-xet-nghiem" element={<KetQuaXetNghiem />} />
           </Route>
 
-          {/* ── Trang quản trị (Admin) ── */}
+          {/* ── Trang Admin Toàn Hệ Thống ── */}
           <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
             <Route index element={<Navigate to="nguoi-dung" replace />} />
             <Route path="nguoi-dung" element={<QuanLyNguoiDung />} />
             <Route path="chien-dich" element={<QuanLyChienDich />} />
             <Route path="chung-nhan" element={<CapGiayChungNhan />} />
+          </Route>
+
+          {/* ── Trang Admin Bệnh Viện (Level 2) ── */}
+          <Route path="/admin-bv" element={<AdminHospitalGuard><AdminHospitalLayout /></AdminHospitalGuard>}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<DashboardOverview />} />
+            <Route path="nhan-su" element={<ManageStaff />} />
+            <Route path="kho-mau" element={<ManageStock />} />
+            <Route path="tin-tuc" element={<ManageNews />} />
+            <Route path="chien-dich" element={<QuanLyChienDich />} />
           </Route>
 
           {/* ── Trang nhân viên y tế ── */}

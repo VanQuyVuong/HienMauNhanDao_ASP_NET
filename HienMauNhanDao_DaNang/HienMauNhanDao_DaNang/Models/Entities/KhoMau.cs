@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using HienMauNhanDao_DaNang.Models.Enums;
 
@@ -35,5 +35,12 @@ namespace HienMauNhanDao_DaNang.Models.Entities
         [Column("moTa")]
         [MaxLength(200)]
         public string? MoTa { get; set; }
+
+        [Column("maKhoa")]
+        [MaxLength(10)]
+        public string? MaKhoa { get; set; }
+
+        [ForeignKey("MaKhoa")]
+        public KhoaCongTac? KhoaCongTac { get; set; }
     }
 }
