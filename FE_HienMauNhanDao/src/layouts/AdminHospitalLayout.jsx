@@ -3,9 +3,29 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 
 const NAV_ITEMS = [
   {
-    label: "Quản lý nội bộ",
-    icon: "manage_accounts",
+    label: "Bảng điều khiển",
+    icon: "dashboard",
     path: "/admin-bv/dashboard",
+  },
+  {
+    label: "Quản lý Nhân sự",
+    icon: "badge",
+    path: "/admin-bv/nhan-su",
+  },
+  {
+    label: "Quản lý Kho máu",
+    icon: "bloodtype",
+    path: "/admin-bv/kho-mau",
+  },
+  {
+    label: "Tin tức & Thông báo",
+    icon: "campaign",
+    path: "/admin-bv/tin-tuc",
+  },
+  {
+    label: "Chiến dịch Máu",
+    icon: "event",
+    path: "/admin-bv/chien-dich",
   }
 ];
 

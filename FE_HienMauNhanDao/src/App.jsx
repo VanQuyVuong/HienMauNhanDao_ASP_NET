@@ -45,7 +45,10 @@ import QuanLyChienDich from "./pages/admin/QuanLyChienDich";
 import CapGiayChungNhan from "./pages/admin/CapGiayChungNhan";
 
 import AdminHospitalLayout from "./layouts/AdminHospitalLayout";
-import AdminHospitalDashboard from "./pages/adminHospital/AdminHospitalDashboard";
+import DashboardOverview from "./pages/adminHospital/DashboardOverview";
+import ManageStaff from "./pages/adminHospital/ManageStaff";
+import ManageStock from "./pages/adminHospital/ManageStock";
+import ManageNews from "./pages/adminHospital/ManageNews";
 
 const queryClient = new QueryClient();
 
@@ -143,7 +146,11 @@ function App() {
           {/* ── Trang Admin Bệnh Viện (Level 2) ── */}
           <Route path="/admin-bv" element={<AdminHospitalGuard><AdminHospitalLayout /></AdminHospitalGuard>}>
             <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<AdminHospitalDashboard />} />
+            <Route path="dashboard" element={<DashboardOverview />} />
+            <Route path="nhan-su" element={<ManageStaff />} />
+            <Route path="kho-mau" element={<ManageStock />} />
+            <Route path="tin-tuc" element={<ManageNews />} />
+            <Route path="chien-dich" element={<QuanLyChienDich />} />
           </Route>
 
           {/* ── Trang nhân viên y tế ── */}
