@@ -51,7 +51,7 @@ namespace HienMauNhanDao_DaNang.Controllers
             if (nv?.KhoaCongTac == null)
             {
                 var defaultKhoa = await _context.KhoaCongTacs.FirstOrDefaultAsync() 
-                               ?? new KhoaCongTac { MaKhoa = "BV01", TenKhoa = "Bệnh viện C Đà Nẵng" };
+                               ?? new KhoaCongTac { MaKhoa = "KC00001", TenKhoa = "Bệnh viện C Đà Nẵng" };
                 return (nv, defaultKhoa);
             }
 
@@ -63,7 +63,7 @@ namespace HienMauNhanDao_DaNang.Controllers
         public async Task<IActionResult> GetAllHospitalsStock()
         {
             var danhSachKhoa = await _context.KhoaCongTacs
-                .Where(k => k.MaKhoa.StartsWith("BV"))
+                .Where(k => k.MaKhoa.StartsWith("KC"))
                 .ToListAsync();
 
             if (!danhSachKhoa.Any())
@@ -72,13 +72,14 @@ namespace HienMauNhanDao_DaNang.Controllers
             }
             var danhSachKhoMau = await _context.KhoMaus.ToListAsync();
             var danhSachTuiMau = await _context.TuiMaus
+                .Include(t => t.KhoMau)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
                 .ToListAsync();
 
             var result = danhSachKhoa.Select(khoa =>
             {
-                var tuis = danhSachTuiMau.Where(t => t.MaKho == khoa.MaKhoa || (khoa.MaKhoa == "BV01" && string.IsNullOrEmpty(t.MaKho))).ToList();
+                var tuis = danhSachTuiMau.Where(t => t.KhoMau?.MaKhoa == khoa.MaKhoa || (khoa.MaKhoa == "KC00001" && string.IsNullOrEmpty(t.MaKho))).ToList();
                 
                 int GetCount(string code) => tuis.Count(t => 
                     t.DonDangKy?.TinhNguyenVien?.NhomMau?.ToString() == code);
@@ -111,16 +112,17 @@ namespace HienMauNhanDao_DaNang.Controllers
         public async Task<IActionResult> GetMyHospitalStock()
         {
             var (nv, khoa) = await GetNhanVienProfileAsync();
-            string maKhoa = khoa?.MaKhoa ?? "BV01";
+            string maKhoa = khoa?.MaKhoa ?? "KC00001";
             string tenBenhVien = khoa?.TenKhoa ?? "Bệnh viện C Đà Nẵng";
 
             // Lấy danh sách các túi máu hiện lưu tại Kho Bệnh viện này
             var danhSachTuiMau = await _context.TuiMaus
+                .Include(t => t.KhoMau)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
-                .Where(t => t.MaKho == maKhoa || (t.TrangThai == TrangThaiTuiMau.DaLuuKho && string.IsNullOrEmpty(t.MaKho)))
+                .Where(t => (t.KhoMau != null && t.KhoMau.MaKhoa == maKhoa) || (t.TrangThai == TrangThaiTuiMau.DaLuuKho && string.IsNullOrEmpty(t.MaKho)))
                 .OrderByDescending(t => t.ThoiGianLayMau)
                 .ToListAsync();
 
