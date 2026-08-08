@@ -297,13 +297,27 @@ INSERT INTO DIADIEM VALUES
 ('DD00005', 'Hội Chữ Thập Đỏ TP. Đà Nẵng',         '522 Ông Ích Khiêm, Hải Châu',     'PX00003', 'CoQuan', 'CoDinh'),
 ('DD00006', 'Trường Đại học Sư phạm Kỹ thuật (UTE)','48 Cao Thắng, Hải Châu',          'PX00001', 'TruongHoc', 'LuuDong'),
 ('DD00007', 'Trường Đại học Đông Á',                '33 Xô Viết Nghệ Tĩnh, Hải Châu', 'PX00002', 'TruongHoc', 'LuuDong'),
-('DD00008', 'Khoa Huyết học - Truyền máu (BV Đà Nẵng)', '103 Quang Trung, Hải Châu',  'PX00001', 'BenhVien', 'CoDinh');
+('DD00008', 'Khoa Huyết học - Truyền máu (BV Đà Nẵng)', '103 Quang Trung, Hải Châu',  'PX00001', 'BenhVien', 'CoDinh'),
+('DD00009', 'Bệnh viện Đa khoa Tâm Trí Đà Nẵng', '64 Cách Mạng Tháng 8, Cẩm Lệ', 'PX00045', 'BenhVien', 'LuuDong'),
+('DD00010', 'Bệnh viện Đa khoa Quốc tế Vinmec Đà Nẵng', 'Đường 30 Tháng 4, Hải Châu', 'PX00001', 'BenhVien', 'LuuDong'),
+('DD00011', 'Bệnh viện Đa khoa Gia Đình', '73 Nguyễn Hữu Thọ, Hải Châu', 'PX00001', 'BenhVien', 'LuuDong'),
+('DD00012', 'Bệnh viện Hoàn Mỹ Đà Nẵng', '291 Nguyễn Văn Linh, Thanh Khê', 'PX00014', 'BenhVien', 'LuuDong');
 
 -- 3.4 KHOA CÔNG TÁC (Các Bệnh viện công tác)
 INSERT INTO KHOACONGTAC VALUES
 ('BV01', 'Bệnh viện C Đà Nẵng'),
 ('BV02', 'Bệnh viện Đà Nẵng'),
 ('BV03', 'Bệnh viện Phụ Sản - Nhi Đà Nẵng'),
+('BV04', 'Bệnh viện Quân y 17'),
+('BV05', 'Bệnh viện 199 - Bộ Công An'),
+('BV06', 'Bệnh viện Đa khoa Nam Liên Chiểu'),
+('BV11', 'Trung tâm Y tế Quận Hải Châu'),
+('BV12', 'Trung tâm Y tế Quận Thanh Khê'),
+('BV13', 'Trung tâm Y tế Quận Sơn Trà'),
+('BV14', 'Trung tâm Y tế Quận Ngũ Hành Sơn'),
+('BV15', 'Trung tâm Y tế Quận Liên Chiểu'),
+('BV16', 'Trung tâm Y tế Quận Cẩm Lệ'),
+('BV17', 'Trung tâm Y tế Huyện Hòa Vang'),
 ('KC00001', 'Khoa Huyết học - BV Đà Nẵng'),
 ('KC00002', 'Khoa Tiếp nhận máu - BV Đà Nẵng'),
 ('KC00003', 'Khoa Xét nghiệm - BV Đà Nẵng'),
