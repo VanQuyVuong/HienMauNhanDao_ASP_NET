@@ -305,8 +305,11 @@ INSERT INTO KHOACONGTAC VALUES
 ('BV02', 'Bệnh viện Đà Nẵng'),
 ('BV03', 'Bệnh viện Phụ Sản - Nhi Đà Nẵng'),
 ('KC00001', 'Khoa Huyết học - BV Đà Nẵng'),
+('KC00002', 'Khoa Tiếp nhận máu - BV Đà Nẵng'),
+('KC00003', 'Khoa Xét nghiệm - BV Đà Nẵng'),
 ('KC00004', 'Khoa Huyết học - BV C Đà Nẵng'),
-('KC00005', 'Khoa Cấp cứu - BV Phụ sản Nhi');
+('KC00005', 'Khoa Cấp cứu - BV Phụ sản Nhi'),
+('KC00006', 'Phòng Quản lý Hệ thống - Sở Y Tế');
 
 -- 3.5 KHO MÁU BỆNH VIỆN
 INSERT INTO KHOMAU VALUES
@@ -320,7 +323,13 @@ INSERT INTO KHOMAU VALUES
 ('K_5', 'Kho máu A-',  'A_negative',  0, 10, 'Tủ đông hiếm - Phòng bảo quản đặc biệt'),
 ('K_6', 'Kho máu B-',  'B_negative',  0, 10, 'Tủ đông hiếm - Phòng bảo quản đặc biệt'),
 ('K_7', 'Kho máu AB-', 'AB_negative', 0,  5, 'Tủ đông hiếm - Phòng bảo quản đặc biệt'),
-('K_8', 'Kho máu O-',  'O_negative',  0, 20, 'Tủ đông hiếm - Phòng bảo quản đặc biệt');
+('K_8', 'Kho máu O-',  'O_negative',  0, 20, 'Tủ đông hiếm - Phòng bảo quản đặc biệt'),
+('KM00001', 'Kho Máu 01', 'O_positive', 0, 50, 'Kho lưu trữ 1'),
+('KM00002', 'Kho Máu 02', 'A_positive', 0, 50, 'Kho lưu trữ 2'),
+('KM00003', 'Kho Máu 03', 'B_positive', 0, 50, 'Kho lưu trữ 3'),
+('KM00004', 'Kho Máu 04', 'AB_positive', 0, 50, 'Kho lưu trữ 4'),
+('KM00005', 'Kho Máu 05', 'O_negative', 0, 50, 'Kho lưu trữ 5'),
+('KM00006', 'Kho Máu 06', 'A_negative', 0, 50, 'Kho lưu trữ 6');
 
 -- =============================================================
 -- BƯỚC 4: DỮ LIỆU TÀI KHOẢN HỆ THỐNG (Mật khẩu mặc định: Abc123!@#)
