@@ -120,13 +120,9 @@ namespace HienMauNhanDao_DaNang.Controllers
         [HttpGet("campaign-stats")]
         public async Task<IActionResult> GetCampaignStats()
         {
-            var (nv, khoa) = await GetNhanVienProfileAsync();
-            string maKhoa = khoa?.MaKhoa ?? "KC00001";
-
-            // Lấy danh sách chiến dịch do nhân viên thuộc khoa/bệnh viện này tổ chức
+            // Lấy TẤT CẢ chiến dịch trong hệ thống (Công khai thông tin tổng quan)
             var campaigns = await _context.ChienDichHienMaus
                 .Include(c => c.DiaDiem)
-                .Where(c => _context.NhanViens.Any(n => n.MaNhanVien == c.MaNhanVien && n.MaKhoa == maKhoa))
                 .ToListAsync();
 
             // 1. Thống kê theo tháng (trong năm hiện tại, hoặc tất cả thời gian)

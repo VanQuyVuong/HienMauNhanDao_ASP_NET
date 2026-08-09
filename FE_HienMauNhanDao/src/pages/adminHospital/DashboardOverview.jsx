@@ -112,13 +112,13 @@ export default function DashboardOverview() {
       <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2 py-0.5 bg-rose-50 text-[10px] font-black text-[#e62e43] uppercase tracking-widest border border-rose-100 rounded-md">Bảng Điều Khiển</span>
+            <span className="px-2 py-0.5 bg-rose-50 text-[10px] font-black text-[#e62e43] uppercase tracking-widest border border-rose-100 rounded-md">Tổng Quan</span>
             <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live Data
             </span>
           </div>
-          <h1 className="text-xl font-black text-slate-800">Thống Kê Toàn Diện</h1>
-          <p className="text-slate-500 font-medium text-xs mt-0.5">Giám sát tồn kho, nhân sự và hoạt động chiến dịch y tế.</p>
+          <h1 className="text-xl font-black text-slate-800">Thông Tin Tổng Quan</h1>
+          <p className="text-slate-500 font-medium text-xs mt-0.5">Hiển thị đầy đủ số liệu công khai và nội bộ của hệ thống hiến máu.</p>
         </div>
       </div>
 
@@ -169,16 +169,16 @@ export default function DashboardOverview() {
         </div>
       </div>
 
-      {/* Khu vực Biểu đồ - Hàng 1 (Kho Máu & Nhân Sự) */}
+      {/* Hàng 1 (Kho Máu & Nhân Sự) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Biểu đồ Cột - Chiếm 2 phần */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col min-h-[350px]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Tình Hình Dự Trữ Kho Máu</h3>
             <Link to="/admin-bv/kho-mau" className="text-[10px] font-bold text-[#e62e43] hover:underline uppercase">Xem chi tiết</Link>
           </div>
-          <div className="flex-1 w-full h-[280px]">
+          <div className="flex-1 w-full" style={{ minHeight: '280px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stockChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -189,21 +189,21 @@ export default function DashboardOverview() {
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                   labelStyle={{ fontWeight: 'bold', color: '#1e293b' }}
                 />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', fontWeight: 'bold' }} />
-                <Bar dataKey="Tồn Kho" fill="#e62e43" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                <Bar dataKey="Ngưỡng An Toàn" fill="#94a3b8" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', fontWeight: 'bold', paddingTop: '10px' }} />
+                <Bar dataKey="Tồn Kho" fill="#e62e43" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                <Bar dataKey="Ngưỡng An Toàn" fill="#94a3b8" radius={[4, 4, 0, 0]} maxBarSize={50} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Biểu đồ Tròn Nhân Sự - Chiếm 1 phần */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col min-h-[350px]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Cơ Cấu Nhân Sự</h3>
             <Link to="/admin-bv/nhan-su" className="text-[10px] font-bold text-blue-600 hover:underline uppercase">Quản lý</Link>
           </div>
-          <div className="flex-1 w-full h-[220px] relative">
+          <div className="flex-1 w-full relative" style={{ minHeight: '220px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -227,7 +227,7 @@ export default function DashboardOverview() {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-black text-slate-800">{totalStaff}</span>
+              <span className="text-3xl font-black text-slate-800">{totalStaff}</span>
               <span className="text-[10px] font-bold text-slate-400 uppercase">Người</span>
             </div>
           </div>
@@ -243,24 +243,24 @@ export default function DashboardOverview() {
 
       </div>
 
-      {/* Khu vực Biểu đồ - Hàng 2 (Chiến dịch mới bổ sung) */}
+      {/* Hàng 2 (Chiến dịch mới bổ sung) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Biểu đồ Đường/Vùng (Area Chart) cho Chiến dịch theo tháng */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col min-h-[350px]">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Xu Hướng Chiến Dịch Hiến Máu</h3>
-              <p className="text-[10px] font-medium text-slate-400 mt-1">Số lượng chiến dịch được tổ chức qua các tháng trong năm</p>
+              <p className="text-[10px] font-medium text-slate-400 mt-1">Số lượng chiến dịch công khai toàn hệ thống năm nay</p>
             </div>
-            <Link to="/admin-bv/chien-dich" className="text-[10px] font-bold text-emerald-600 hover:underline uppercase">Mở chiến dịch mới</Link>
+            <Link to="/admin-bv/chien-dich" className="text-[10px] font-bold text-emerald-600 hover:underline uppercase">Xem chi tiết</Link>
           </div>
-          <div className="flex-1 w-full h-[280px]">
+          <div className="flex-1 w-full" style={{ minHeight: '280px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={campaignStats.monthly} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorCampaigns" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
                     <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
@@ -277,7 +277,7 @@ export default function DashboardOverview() {
                   dataKey="total" 
                   name="Số lượng chiến dịch" 
                   stroke="#10b981" 
-                  strokeWidth={3}
+                  strokeWidth={4}
                   fillOpacity={1} 
                   fill="url(#colorCampaigns)" 
                   activeDot={{ r: 6, fill: "#fff", stroke: "#10b981", strokeWidth: 3 }}
@@ -288,15 +288,15 @@ export default function DashboardOverview() {
         </div>
 
         {/* Biểu đồ Tròn (Donut Chart) cho Địa điểm tổ chức */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col min-h-[350px]">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Cơ Cấu Địa Điểm</h3>
               <p className="text-[10px] font-medium text-slate-400 mt-1">Phân bổ chiến dịch theo khu vực</p>
             </div>
           </div>
-          <div className="flex-1 w-full h-[220px] relative">
-            {campaignStats.locations.length === 0 ? (
+          <div className="flex-1 w-full relative" style={{ minHeight: '200px' }}>
+            {(!campaignStats.locations || campaignStats.locations.length === 0) ? (
               <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-xs font-bold">Chưa có dữ liệu</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -322,9 +322,9 @@ export default function DashboardOverview() {
                 </PieChart>
               </ResponsiveContainer>
             )}
-            {campaignStats.locations.length > 0 && (
+            {campaignStats.locations?.length > 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="material-symbols-outlined text-3xl text-slate-300">location_on</span>
+                <span className="material-symbols-outlined text-4xl text-emerald-100 drop-shadow-sm">location_on</span>
               </div>
             )}
           </div>
