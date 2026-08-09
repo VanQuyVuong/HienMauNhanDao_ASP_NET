@@ -23,13 +23,20 @@ export default function ManageNews() {
   const [loadingNews, setLoadingNews] = useState(false);
   const [loadingNoti, setLoadingNoti] = useState(false);
 
-  // Mock dữ liệu lịch sử tin tức để UI không trống
-  const [newsHistory] = useState([
-    { id: 1, title: "Lợi ích tuyệt vời của việc hiến máu", type: "LoiKhuyen", repeat: "Monthly", status: "Active", date: "2026-02-01" },
-    { id: 2, title: "Kêu gọi hiến máu Lễ hội Xuân Hồng", type: "ChienDich", repeat: "None", status: "Inactive", date: "2026-02-10" },
-    { id: 3, title: "Những lưu ý trước khi đi hiến máu", type: "LoiKhuyen", repeat: "Weekly", status: "Active", date: "2026-03-05" },
-    { id: 4, title: "Bệnh viện C tiếp nhận thiết bị mới", type: "NoiBo", repeat: "None", status: "Active", date: "2026-04-12" },
-  ]);
+  const [newsHistory, setNewsHistory] = useState([]);
+
+  // Fetch lịch sử tin tức từ backend
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await axios.get("https://localhost:7004/api/TinTuc");
+        setNewsHistory(res.data);
+      } catch (err) {
+        console.error("Lỗi khi tải lịch sử tin tức", err);
+      }
+    };
+    fetchNews();
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -67,8 +74,8 @@ export default function ManageNews() {
         uploadedImageUrl = uploadRes.data.data; // Trả về dạng tintuc/xxx.jpg
       }
 
-      // 2. Gửi request tạo Tin Tức (Mock request, cần backend API thật)
-      await axios.post("https://localhost:7004/api/AdminHospital/news", {
+      // 2. Gửi request tạo Tin Tức
+      await axios.post("https://localhost:7004/api/TinTuc", {
         TieuDe: newsForm.TieuDe,
         NoiDung: newsForm.NoiDung,
         HinhAnh: uploadedImageUrl,
@@ -82,6 +89,10 @@ export default function ManageNews() {
       setNewsForm({ TieuDe: "", LoaiTin: "ChienDich", ChuKyLap: "None", HinhAnh: "", NoiDung: "" });
       setImageFile(null);
       setImagePreview(null);
+      
+      // Refresh lại list
+      const res = await axios.get("https://localhost:7004/api/TinTuc");
+      setNewsHistory(res.data);
     } catch (err) {
       toast.error("Lỗi khi tải ảnh hoặc đăng tin");
     } finally {
@@ -270,34 +281,30 @@ export default function ManageNews() {
                 </thead>
                 <tbody>
                   {newsHistory.map((item) => (
-                    <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                    <tr key={item.maTinTuc} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
                       <td className="py-3 px-4">
-                        <p className="text-sm font-bold text-slate-700 truncate max-w-[220px]" title={item.title}>{item.title}</p>
-                        <p className="text-[10px] text-slate-400 font-medium mt-0.5">{item.date}</p>
+                        <p className="text-sm font-bold text-slate-700 truncate max-w-[220px]" title={item.tieuDe}>{item.tieuDe}</p>
+                        <p className="text-[10px] text-slate-400 font-medium mt-0.5">{new Date(item.ngayDang).toLocaleDateString("vi-VN")}</p>
                       </td>
                       <td className="py-3 px-4">
                         <span className="text-xs font-bold text-slate-600">
-                          {item.type === "ChienDich" && "Chiến dịch"}
-                          {item.type === "LoiKhuyen" && "Lời khuyên"}
-                          {item.type === "NoiBo" && "Nội bộ"}
+                          {item.loaiTin === "ChienDich" && "Chiến dịch"}
+                          {item.loaiTin === "LoiKhuyen" && "Lời khuyên"}
+                          {item.loaiTin === "NoiBo" && "Nội bộ"}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        {item.repeat !== "None" ? (
+                        {item.chuKyLap !== "None" ? (
                           <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-md">
                             <span className="material-symbols-outlined text-[12px]">cycle</span>
-                            <span className="text-[10px] font-bold uppercase">{item.repeat}</span>
+                            <span className="text-[10px] font-bold uppercase">{item.chuKyLap}</span>
                           </div>
                         ) : (
                           <span className="text-[10px] font-medium text-slate-300">-</span>
                         )}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        {item.status === "Active" ? (
-                          <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></span>
-                        ) : (
-                          <span className="inline-block w-2.5 h-2.5 rounded-full bg-slate-300"></span>
-                        )}
+                        <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></span>
                       </td>
                       <td className="py-3 px-4 text-right">
                         <button className="text-slate-400 hover:text-slate-800 transition-colors">
