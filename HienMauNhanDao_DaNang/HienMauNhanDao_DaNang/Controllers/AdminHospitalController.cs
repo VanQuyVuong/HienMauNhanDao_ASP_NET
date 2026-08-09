@@ -105,11 +105,6 @@ namespace HienMauNhanDao_DaNang.Controllers
             return Ok(result);
         }
 
-        [HttpPost("news")]
-        public IActionResult PostNews([FromBody] object news)
-        {
-            return Ok(new { success = true, message = "Đăng tin tức thành công!" });
-        }
 
         [HttpPost("notification")]
         public IActionResult PostNotification([FromBody] object notification)

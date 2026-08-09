@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using HienMauNhanDao_DaNang.Models.Enums;
 
@@ -28,6 +28,14 @@ namespace HienMauNhanDao_DaNang.Models.Entities
 
         [Column("hinhAnh")]
         public string? HinhAnh { get; set; }
+
+        [Column("loaiTin")]
+        [MaxLength(50)]
+        public string LoaiTin { get; set; } = "ChienDich";
+
+        [Column("chuKyLap")]
+        [MaxLength(50)]
+        public string ChuKyLap { get; set; } = "None";
 
         [Column("ngayDang")]
         public DateTime NgayDang { get; set; } = DateTime.Now;

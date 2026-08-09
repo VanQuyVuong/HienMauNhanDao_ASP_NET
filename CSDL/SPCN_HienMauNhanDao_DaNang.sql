@@ -190,9 +190,11 @@ CREATE TABLE TINTUC (
     tieuDe VARCHAR(255) NOT NULL,
     noiDung TEXT,
     hinhAnh VARCHAR(255),
+    loaiTin VARCHAR(50) DEFAULT 'ChienDich',
+    chuKyLap VARCHAR(50) DEFAULT 'None',
     ngayDang DATETIME DEFAULT CURRENT_TIMESTAMP,
     trangThai VARCHAR(50)
-    -- Giá trị hợp lệ: NhapLieu, DanDang, DaAn
+    -- Giá trị hợp lệ trạng thái: NhapLieu, DanDang, DaAn
 );
 
 CREATE TABLE THONGBAO (
@@ -756,8 +758,8 @@ INSERT INTO CHITIETNHAPXUAT VALUES
 
 
 INSERT INTO TINTUC VALUES 
-('TT00001','NV00001','Tổng kết Xuân Hồng 2026','Đà Nẵng thu nhận 500 đơn vị máu','img1.jpg','2026-02-13','Đã thêm'),
-('TT00002','NV00001','Kêu gọi hiến máu nhóm O','Kho máu đang thiếu hụt nhóm O','img2.jpg','2026-03-01','Đã thêm');
+('TT00001','NV00001','Tổng kết Xuân Hồng 2026','Đà Nẵng thu nhận 500 đơn vị máu','img1.jpg','ChienDich','None','2026-02-13','Đã thêm'),
+('TT00002','NV00001','Kêu gọi hiến máu nhóm O','Kho máu đang thiếu hụt nhóm O','img2.jpg','ChienDich','None','2026-03-01','Đã thêm');
 
 INSERT INTO THONGBAO VALUES 
 -- Thông báo nội bộ giữa các nhân viên y tế (Điều phối công việc)
