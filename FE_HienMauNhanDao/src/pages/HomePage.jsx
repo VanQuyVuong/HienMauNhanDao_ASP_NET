@@ -19,6 +19,10 @@ export default function HomePage() {
     const [userProfile, setUserProfile] = useState(null);
     const [registeredCampaignIds, setRegisteredCampaignIds] = useState([]);
     const [submittingFastTrack, setSubmittingFastTrack] = useState(false);
+    
+    // State cho Tin Tức (Slider Trang chủ)
+    const [newsList, setNewsList] = useState([]);
+    const [activeNewsIndex, setActiveNewsIndex] = useState(0);
 
     // Kéo thả chuột / Chạm vuốt tay
     const [dragStartX, setDragStartX] = useState(null);
@@ -100,6 +104,32 @@ export default function HomePage() {
         }, 10000); // 10 giây
         return () => clearInterval(interval);
     }, [emergencyCampaigns]);
+
+    // Lấy danh sách Tin tức để làm Slider Hero
+    useEffect(() => {
+        const fetchNews = async () => {
+            try {
+                // Fetch public API (sử dụng axios, hoặc fetch)
+                const res = await fetch("https://localhost:7004/api/TinTuc");
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setNewsList(data);
+                }
+            } catch (err) {
+                console.error("Lỗi khi tải tin tức", err);
+            }
+        };
+        fetchNews();
+    }, []);
+
+    // ⏱️ Tự động xoay vòng Slider Tin Tức mỗi 5 GIÂY
+    useEffect(() => {
+        if (newsList.length <= 1) return;
+        const interval = setInterval(() => {
+            setActiveNewsIndex(prev => (prev + 1) % newsList.length);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [newsList]);
 
     // ⏱️ Tự động nhích 1 sự kiện liên tục mỗi 10 GIÂY
     useEffect(() => {
@@ -343,81 +373,157 @@ export default function HomePage() {
                 </div>
             </div>
 
-            {/* Editorial Hero Section */}
+            {/* Editorial Hero Section (Dynamic News Slider) */}
             <section className="relative min-h-[540px] md:min-h-[580px] w-full flex items-center py-10 lg:py-14">
                 <div className="w-full max-w-[1280px] mx-auto px-4 md:px-8 relative z-10">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-                        
-                        {/* Left Content Column */}
-                        <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
-                            <div className="inline-flex items-center gap-3 px-4 py-2 bg-rose-50 border border-rose-200/80 rounded-full">
-                                <span className="w-2.5 h-2.5 rounded-full bg-[#e62e43] animate-pulse"></span>
-                                <span className="text-xs font-black uppercase tracking-widest text-[#e62e43]">
-                                    Cổng Thông Tin Hiến Máu Nhân Đạo TP. Đà Nẵng
-                                </span>
-                            </div>
+                    {newsList.length > 0 ? (
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center animate-fade-in transition-all duration-500" key={activeNewsIndex}>
+                            {/* Left Content Column (Dynamic News) */}
+                            <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
+                                <div className="inline-flex items-center gap-3 px-4 py-2 bg-rose-50 border border-rose-200/80 rounded-full">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-[#e62e43] animate-pulse"></span>
+                                    <span className="text-xs font-black uppercase tracking-widest text-[#e62e43]">
+                                        {newsList[activeNewsIndex].loaiTin === "ChienDich" && "TIN TỨC CHIẾN DỊCH HIẾN MÁU"}
+                                        {newsList[activeNewsIndex].loaiTin === "LoiKhuyen" && "LỜI KHUYÊN SỨC KHỎE"}
+                                        {newsList[activeNewsIndex].loaiTin === "NoiBo" && "BẢN TIN HOẠT ĐỘNG"}
+                                    </span>
+                                </div>
 
-                            <h1 className="text-3xl sm:text-5xl lg:text-[64px] font-black leading-[1.08] tracking-tight text-slate-900">
-                                MỖI GIỌT MÁU,<br />
-                                <span className="editorial-title-ruby">MỘT MỆNH SỐNG HỒI SINH</span>
-                            </h1>
+                                <h1 className="text-3xl sm:text-4xl lg:text-[54px] font-black leading-[1.1] tracking-tight text-slate-900 line-clamp-3">
+                                    {newsList[activeNewsIndex].tieuDe}
+                                </h1>
 
-                            <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                                Hệ thống quản lý hiến máu y tế số kết nối minh bạch giữa người hiến máu tình nguyện, bệnh viện điều trị và Ngân hàng máu Đà Nẵng. An toàn tuyệt đối theo chuẩn quy trình Bộ Y Tế.
-                            </p>
+                                <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto lg:mx-0 line-clamp-3">
+                                    {newsList[activeNewsIndex].noiDung}
+                                </p>
 
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
-                                <button
-                                    onClick={() => navigate('/chiendich')}
-                                    className="h-14 px-9 bg-[#e62e43] text-white rounded-2xl font-black text-sm hover:bg-[#c01b30] hover:shadow-xl hover:shadow-[#e62e43]/30 transition-all flex items-center justify-center gap-3 group">
-                                    <span className="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>volunteer_activism</span>
-                                    <span>ĐĂNG KÝ HIẾN MÁU</span>
-                                </button>
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
+                                    {newsList[activeNewsIndex].loaiTin === "ChienDich" ? (
+                                        <button
+                                            onClick={() => navigate('/chiendich')}
+                                            className="h-14 px-9 bg-[#e62e43] text-white rounded-2xl font-black text-sm hover:bg-[#c01b30] hover:shadow-xl hover:shadow-[#e62e43]/30 transition-all flex items-center justify-center gap-3 group">
+                                            <span className="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>volunteer_activism</span>
+                                            <span>ĐĂNG KÝ HIẾN MÁU</span>
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => navigate(`/tin-tuc/${newsList[activeNewsIndex].maTinTuc}`)}
+                                            className="h-14 px-9 bg-[#e62e43] text-white rounded-2xl font-black text-sm hover:bg-[#c01b30] hover:shadow-xl hover:shadow-[#e62e43]/30 transition-all flex items-center justify-center gap-3 group">
+                                            <span className="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>article</span>
+                                            <span>XEM CHI TIẾT</span>
+                                        </button>
+                                    )}
+                                    
+                                    <button 
+                                        onClick={() => document.getElementById('quy-trinh').scrollIntoView({ behavior: 'smooth' })}
+                                        className="h-14 px-8 bg-white border-2 border-slate-200 text-slate-800 rounded-2xl font-bold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2 shadow-sm">
+                                        <span className="material-symbols-outlined text-xl">play_circle</span>
+                                        <span>Tìm hiểu quy trình</span>
+                                    </button>
+                                </div>
                                 
-                                <button 
-                                    onClick={() => document.getElementById('quy-trinh').scrollIntoView({ behavior: 'smooth' })}
-                                    className="h-14 px-8 bg-white border-2 border-slate-200 text-slate-800 rounded-2xl font-bold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2 shadow-sm">
-                                    <span className="material-symbols-outlined text-xl">play_circle</span>
-                                    <span>Tìm hiểu quy trình y tế</span>
-                                </button>
-                            </div>
-
-                            <div className="pt-8 border-t border-slate-200/80 grid grid-cols-3 gap-4 text-center lg:text-left">
-                                <div>
-                                    <p className="text-xl sm:text-2xl font-black text-slate-900">100%</p>
-                                    <p className="text-xs text-slate-500 font-semibold">An toàn y tế</p>
-                                </div>
-                                <div>
-                                    <p className="text-xl sm:text-2xl font-black text-[#00b894]">24/7</p>
-                                    <p className="text-xs text-slate-500 font-semibold">Tiếp nhận thông tin</p>
-                                </div>
-                                <div>
-                                    <p className="text-xl sm:text-2xl font-black text-[#e62e43]">QR Code</p>
-                                    <p className="text-xs text-slate-500 font-semibold">Chứng nhận điện tử</p>
+                                {/* News Slider Pagination Dots */}
+                                <div className="pt-8 border-t border-slate-200/80 flex justify-center lg:justify-start gap-2">
+                                    {newsList.map((_, idx) => (
+                                        <button 
+                                            key={idx}
+                                            onClick={() => setActiveNewsIndex(idx)}
+                                            className={`h-2 rounded-full transition-all ${idx === activeNewsIndex ? 'w-8 bg-[#e62e43]' : 'w-2 bg-slate-300 hover:bg-slate-400'}`}
+                                        />
+                                    ))}
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Right Column: Hero Medical Frame */}
-                        <div className="lg:col-span-5 relative">
-                            <div className="relative mx-auto max-w-[420px] lg:max-w-none">
-                                <div className="rounded-[36px] overflow-hidden shadow-2xl border-4 border-white bg-slate-100 h-[440px] relative">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=1000" 
-                                        alt="Bác sĩ tiếp nhận hiến máu" 
-                                        className="w-full h-full object-cover" 
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
-                                    <div className="absolute bottom-6 left-6 right-6 text-white space-y-1">
-                                        <span className="px-3 py-1 bg-[#e62e43] text-white text-[10px] font-black uppercase tracking-wider rounded-full">Bệnh viện Đa Khoa Đà Nẵng</span>
-                                        <h4 className="text-lg font-bold">Đội ngũ Y bác sĩ chuyên khoa</h4>
-                                        <p className="text-xs text-slate-300 font-light">Đồng hành cùng hơn 5.000 lượt hiến máu an toàn mỗi năm.</p>
+                            {/* Right Column: Dynamic Image */}
+                            <div className="lg:col-span-5 relative">
+                                <div className="relative mx-auto max-w-[420px] lg:max-w-none">
+                                    <div className="rounded-[36px] overflow-hidden shadow-2xl border-4 border-white bg-slate-100 h-[440px] relative group">
+                                        <img 
+                                            src={newsList[activeNewsIndex].hinhAnh ? `/images/${newsList[activeNewsIndex].hinhAnh}` : "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=1000"} 
+                                            alt={newsList[activeNewsIndex].tieuDe}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                                            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=1000'; }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+                                        <div className="absolute bottom-6 left-6 right-6 text-white space-y-1">
+                                            <span className="px-3 py-1 bg-[#e62e43] text-white text-[10px] font-black uppercase tracking-wider rounded-full">Bản tin Cập nhật</span>
+                                            <p className="text-xs text-slate-300 font-light mt-2">{new Date(newsList[activeNewsIndex].ngayDang).toLocaleDateString('vi-VN')}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    ) : (
+                        /* Fallback Static Hero (Khi chưa có tin tức nào) */
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+                            <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
+                                <div className="inline-flex items-center gap-3 px-4 py-2 bg-rose-50 border border-rose-200/80 rounded-full">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-[#e62e43] animate-pulse"></span>
+                                    <span className="text-xs font-black uppercase tracking-widest text-[#e62e43]">
+                                        Cổng Thông Tin Hiến Máu Nhân Đạo TP. Đà Nẵng
+                                    </span>
+                                </div>
 
-                    </div>
+                                <h1 className="text-3xl sm:text-5xl lg:text-[64px] font-black leading-[1.08] tracking-tight text-slate-900">
+                                    MỖI GIỌT MÁU,<br />
+                                    <span className="editorial-title-ruby">MỘT MỆNH SỐNG HỒI SINH</span>
+                                </h1>
+
+                                <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                                    Hệ thống quản lý hiến máu y tế số kết nối minh bạch giữa người hiến máu tình nguyện, bệnh viện điều trị và Ngân hàng máu Đà Nẵng. An toàn tuyệt đối theo chuẩn quy trình Bộ Y Tế.
+                                </p>
+
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
+                                    <button
+                                        onClick={() => navigate('/chiendich')}
+                                        className="h-14 px-9 bg-[#e62e43] text-white rounded-2xl font-black text-sm hover:bg-[#c01b30] hover:shadow-xl hover:shadow-[#e62e43]/30 transition-all flex items-center justify-center gap-3 group">
+                                        <span className="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>volunteer_activism</span>
+                                        <span>ĐĂNG KÝ HIẾN MÁU</span>
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={() => document.getElementById('quy-trinh').scrollIntoView({ behavior: 'smooth' })}
+                                        className="h-14 px-8 bg-white border-2 border-slate-200 text-slate-800 rounded-2xl font-bold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2 shadow-sm">
+                                        <span className="material-symbols-outlined text-xl">play_circle</span>
+                                        <span>Tìm hiểu quy trình y tế</span>
+                                    </button>
+                                </div>
+
+                                <div className="pt-8 border-t border-slate-200/80 grid grid-cols-3 gap-4 text-center lg:text-left">
+                                    <div>
+                                        <p className="text-xl sm:text-2xl font-black text-slate-900">100%</p>
+                                        <p className="text-xs text-slate-500 font-semibold">An toàn y tế</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xl sm:text-2xl font-black text-[#00b894]">24/7</p>
+                                        <p className="text-xs text-slate-500 font-semibold">Tiếp nhận thông tin</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xl sm:text-2xl font-black text-[#e62e43]">QR Code</p>
+                                        <p className="text-xs text-slate-500 font-semibold">Chứng nhận điện tử</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="lg:col-span-5 relative">
+                                <div className="relative mx-auto max-w-[420px] lg:max-w-none">
+                                    <div className="rounded-[36px] overflow-hidden shadow-2xl border-4 border-white bg-slate-100 h-[440px] relative">
+                                        <img 
+                                            src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=1000" 
+                                            alt="Bác sĩ tiếp nhận hiến máu" 
+                                            className="w-full h-full object-cover" 
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+                                        <div className="absolute bottom-6 left-6 right-6 text-white space-y-1">
+                                            <span className="px-3 py-1 bg-[#e62e43] text-white text-[10px] font-black uppercase tracking-wider rounded-full">Bệnh viện Đa Khoa Đà Nẵng</span>
+                                            <h4 className="text-lg font-bold">Đội ngũ Y bác sĩ chuyên khoa</h4>
+                                            <p className="text-xs text-slate-300 font-light">Đồng hành cùng hơn 5.000 lượt hiến máu an toàn mỗi năm.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </section>
 
