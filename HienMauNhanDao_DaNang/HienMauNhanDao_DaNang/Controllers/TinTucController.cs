@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using HienMauNhanDao_DaNang.Models;
 using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Common;
+using HienMauNhanDao_DaNang.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
