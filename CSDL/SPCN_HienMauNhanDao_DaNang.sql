@@ -190,9 +190,11 @@ CREATE TABLE TINTUC (
     tieuDe VARCHAR(255) NOT NULL,
     noiDung TEXT,
     hinhAnh VARCHAR(255),
+    loaiTin VARCHAR(50) DEFAULT 'ChienDich',
+    chuKyLap VARCHAR(50) DEFAULT 'None',
     ngayDang DATETIME DEFAULT CURRENT_TIMESTAMP,
     trangThai VARCHAR(50)
-    -- Giá trị hợp lệ: NhapLieu, DanDang, DaAn
+    -- Giá trị hợp lệ trạng thái: NhapLieu, DanDang, DaAn
 );
 
 CREATE TABLE THONGBAO (
