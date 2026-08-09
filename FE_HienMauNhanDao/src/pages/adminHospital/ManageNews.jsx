@@ -10,9 +10,12 @@ export default function ManageNews() {
     TieuDe: "", 
     LoaiTin: "ChienDich",
     ChuKyLap: "None",
-    HinhAnh: null,
+    HinhAnh: "",
     NoiDung: "" 
   });
+  
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   
   // State cho form Thông báo
   const [notiForm, setNotiForm] = useState({ NhomMau: "O_positive", NoiDung: "" });
@@ -28,22 +31,59 @@ export default function ManageNews() {
     { id: 4, title: "Bệnh viện C tiếp nhận thiết bị mới", type: "NoiBo", repeat: "None", status: "Active", date: "2026-04-12" },
   ]);
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Ảnh không được vượt quá 5MB");
+        return;
+      }
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleNewsSubmit = async (e) => {
     e.preventDefault();
     setLoadingNews(true);
     try {
       const token = localStorage.getItem("token");
-      // Gửi mock request (do Backend chưa có đủ field)
+      let uploadedImageUrl = "";
+
+      // 1. Nếu có file ảnh, upload trước
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("file", imageFile);
+        formData.append("type", "tintuc");
+        formData.append("category", newsForm.LoaiTin);
+        formData.append("title", newsForm.TieuDe);
+
+        const uploadRes = await axios.post("https://localhost:7004/api/Upload/image", formData, {
+          headers: { 
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}` 
+          }
+        });
+        uploadedImageUrl = uploadRes.data.data; // Trả về dạng tintuc/xxx.jpg
+      }
+
+      // 2. Gửi request tạo Tin Tức (Mock request, cần backend API thật)
       await axios.post("https://localhost:7004/api/AdminHospital/news", {
         TieuDe: newsForm.TieuDe,
-        NoiDung: newsForm.NoiDung
+        NoiDung: newsForm.NoiDung,
+        HinhAnh: uploadedImageUrl,
+        LoaiTin: newsForm.LoaiTin,
+        ChuKyLap: newsForm.ChuKyLap
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success("Đăng tin tức thành công!");
-      setNewsForm({ TieuDe: "", LoaiTin: "ChienDich", ChuKyLap: "None", HinhAnh: null, NoiDung: "" });
+      
+      toast.success("Đăng bài viết và lưu ảnh thành công!");
+      setNewsForm({ TieuDe: "", LoaiTin: "ChienDich", ChuKyLap: "None", HinhAnh: "", NoiDung: "" });
+      setImageFile(null);
+      setImagePreview(null);
     } catch (err) {
-      toast.error("Lỗi khi đăng tin");
+      toast.error("Lỗi khi tải ảnh hoặc đăng tin");
     } finally {
       setLoadingNews(false);
     }
@@ -158,9 +198,27 @@ export default function ManageNews() {
               
               <div>
                 <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Ảnh minh họa (Tùy chọn)</label>
-                <div className="w-full h-24 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer">
-                  <span className="material-symbols-outlined text-2xl mb-1">add_photo_alternate</span>
-                  <span className="text-[10px] font-bold">Kéo thả hoặc Nhấp để tải ảnh lên</span>
+                <div className="relative w-full h-32 border-2 border-dashed border-slate-300 rounded-xl overflow-hidden hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer group">
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  {imagePreview ? (
+                    <>
+                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-slate-900/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="material-symbols-outlined text-white text-2xl">flip_camera_ios</span>
+                        <span className="text-[10px] font-bold text-white mt-1">Đổi ảnh khác</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 group-hover:text-slate-500">
+                      <span className="material-symbols-outlined text-2xl mb-1">add_photo_alternate</span>
+                      <span className="text-[10px] font-bold">Kéo thả hoặc Nhấp để tải ảnh lên</span>
+                    </div>
+                  )}
                 </div>
               </div>
               
