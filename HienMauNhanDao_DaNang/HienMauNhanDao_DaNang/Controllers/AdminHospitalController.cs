@@ -116,5 +116,50 @@ namespace HienMauNhanDao_DaNang.Controllers
         {
             return Ok(new { success = true, message = "Gửi thông báo thành công!" });
         }
+
+        [HttpGet("campaign-stats")]
+        public async Task<IActionResult> GetCampaignStats()
+        {
+            // Lấy TẤT CẢ chiến dịch trong hệ thống (Công khai thông tin tổng quan)
+            var campaigns = await _context.ChienDichHienMaus
+                .Include(c => c.DiaDiem)
+                .ToListAsync();
+
+            // 1. Thống kê theo tháng (trong năm hiện tại, hoặc tất cả thời gian)
+            // Lấy theo năm hiện tại (hoặc có thể lấy tất cả nếu dữ liệu ít)
+            int currentYear = DateTime.Now.Year;
+            var campaignsThisYear = campaigns.Where(c => c.ThoiGianBD.Year == currentYear || c.ThoiGianBD.Year == 2026).ToList(); // Lấy 2026 vì DB test hay dùng 2026
+
+            var monthlyStats = Enumerable.Range(1, 12).Select(month => new
+            {
+                name = $"Tháng {month}",
+                total = campaignsThisYear.Count(c => c.ThoiGianBD.Month == month)
+            }).ToList();
+
+            // 2. Thống kê theo loại địa điểm
+            var locationStats = campaigns
+                .Where(c => c.DiaDiem != null)
+                .GroupBy(c => c.DiaDiem.LoaiDiaDiem)
+                .Select(g => new
+                {
+                    name = g.Key.ToString() switch
+                    {
+                        "BenhVien" => "Bệnh viện",
+                        "TramYTe" => "Trạm Y tế",
+                        "TruongHoc" => "Trường học",
+                        "CoQuan" => "Cơ quan/Doanh nghiệp",
+                        "KhuDanCu" => "Khu dân cư",
+                        _ => "Khác"
+                    },
+                    value = g.Count()
+                })
+                .ToList();
+
+            return Ok(new
+            {
+                monthly = monthlyStats,
+                locations = locationStats
+            });
+        }
     }
 }

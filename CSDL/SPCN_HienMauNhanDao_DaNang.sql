@@ -270,7 +270,8 @@ INSERT INTO VAITRO VALUES
 ('NVYT_XN', 'Nhân viên y tế Xét nghiệm & Lấy máu'),
 ('NVYT-XN', 'Nhân viên y tế Xét nghiệm & Lấy máu'),
 ('QLK',     'Quản lý kho máu'),
-('TNV',     'Tình nguyện viên');
+('TNV',     'Tình nguyện viên'),
+('ADMIN_BV','Quản trị Bệnh viện');
 
 -- 3.2 PHƯỜNG XÃ (TP. Đà Nẵng)
 INSERT INTO PHUONGXA VALUES
@@ -300,10 +301,10 @@ INSERT INTO DIADIEM VALUES
 ('DD00006', 'Trường Đại học Sư phạm Kỹ thuật (UTE)','48 Cao Thắng, Hải Châu',          'PX00001', 'TruongHoc', 'LuuDong'),
 ('DD00007', 'Trường Đại học Đông Á',                '33 Xô Viết Nghệ Tĩnh, Hải Châu', 'PX00002', 'TruongHoc', 'LuuDong'),
 ('DD00008', 'Khoa Huyết học - Truyền máu (BV Đà Nẵng)', '103 Quang Trung, Hải Châu',  'PX00001', 'BenhVien', 'CoDinh'),
-('DD00009', 'Bệnh viện Đa khoa Tâm Trí Đà Nẵng', '64 Cách Mạng Tháng 8, Cẩm Lệ', 'PX00045', 'BenhVien', 'LuuDong'),
+('DD00009', 'Bệnh viện Đa khoa Tâm Trí Đà Nẵng', '64 Cách Mạng Tháng 8, Cẩm Lệ', 'PX00015', 'BenhVien', 'LuuDong'),
 ('DD00010', 'Bệnh viện Đa khoa Quốc tế Vinmec Đà Nẵng', 'Đường 30 Tháng 4, Hải Châu', 'PX00001', 'BenhVien', 'LuuDong'),
 ('DD00011', 'Bệnh viện Đa khoa Gia Đình', '73 Nguyễn Hữu Thọ, Hải Châu', 'PX00001', 'BenhVien', 'LuuDong'),
-('DD00012', 'Bệnh viện Hoàn Mỹ Đà Nẵng', '291 Nguyễn Văn Linh, Thanh Khê', 'PX00014', 'BenhVien', 'LuuDong');
+('DD00012', 'Bệnh viện Hoàn Mỹ Đà Nẵng', '291 Nguyễn Văn Linh, Thanh Khê', 'PX00011', 'BenhVien', 'LuuDong');
 
 -- 3.4 KHOA CÔNG TÁC (Các Bệnh viện công tác)
 INSERT INTO KHOACONGTAC VALUES
@@ -351,7 +352,9 @@ INSERT INTO TAIKHOAN (maTaiKhoan, maVaiTro, email, matKhau, trangThai) VALUES
 ('TK00004', 'BS',      'doctor1@gmail.com','$2a$11$dcgltimlogByLALH9P8hPOy6Yf0hImynlzF0UkqNqNTJOQiUY6Z5G', 1),
 ('TK00005', 'BS',      'doctor2@gmail.com','$2a$11$7v0Jg8k1Cf94UxKke.hVpOGWx5HC1pcj0L7nx1nexd3mojzcyI1IK', 1),
 ('TK00006', 'QLK',     'qlk@gmail.com',    '$2a$11$SoPa7XGP3InPdakUcjNC2ex2OmOZfyhGUQq1Erv2lnmN9g0VoPNvS', 1),
-('TK00007', 'NVYT-XN', 'nvxn1@gmail.com',  '$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy', 1)
+('TK00007', 'NVYT-XN', 'nvxn1@gmail.com',  '$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy', 1),
+('TK00037', 'ADMIN_BV', 'adminbvc@gmail.com', '$2a$11$rKZh4s8EBwZwkCwX2SeneeYNHD9CCBAs.cO2Nq2QIfVfVYd2YejHu', 1),
+('TK00038', 'ADMIN_BV', 'adminbvqy17@gmail.com', '$2a$11$uBALjbY.2JD8gAnpVvdyxuLRHLb/MJ6YDukQ8OldAnz5T04JQG6CO', 1)
 ON DUPLICATE KEY UPDATE matKhau = VALUES(matKhau), maVaiTro = VALUES(maVaiTro);
 
 -- HỒ SƠ NHÂN VIÊN TƯƠNG ỨNG
@@ -362,7 +365,9 @@ INSERT INTO NHANVIEN (maNhanVien, maTaiKhoan, maKhoa, maDiaDiem, hoTen, CCCD, gi
 ('NV00004', 'TK00004', 'KC00001', 'DD00001', 'Bác Sĩ Một',            '048075000004', 'Nam', '0905000004'),
 ('NV00005', 'TK00005', 'KC00001', 'DD00001', 'Bác Sĩ Hai',            '048075000005', 'Nam', '0905000005'),
 ('NV00006', 'TK00006', 'KC00001', 'DD00002', 'Quản Lý Kho BV C',       '048075000006', 'Nam', '0905000006'),
-('NV00007', 'TK00007', 'KC00003', 'DD00001', 'Nguyễn Văn Xét Nghiệm', '048075000007', 'Nam', '0905000007')
+('NV00007', 'TK00007', 'KC00003', 'DD00001', 'Nguyễn Văn Xét Nghiệm', '048075000007', 'Nam', '0905000007'),
+('NV00022', 'TK00037', 'KC00001', 'DD00001', 'Admin BV C',             '048075000022', 'Nữ',  '0905000022'),
+('NV00023', 'TK00038', 'KC00004', 'DD00001', 'Admin BV Quân Y 17',     '048075000023', 'Nam', '0905000023')
 ON DUPLICATE KEY UPDATE hoTen = VALUES(hoTen), maKhoa = VALUES(maKhoa);
 
 -- =============================================================
@@ -584,8 +589,24 @@ INSERT INTO KETQUALAMSANG VALUES
 ('KL00034','DK00034','NV00004','120/80',75,68,36.5,1,NULL), 
 ('KL00035','DK00035','NV00003','100/60',90,40,36.7,0,'Cân nặng dưới 40kg'); -- Rớt do thiếu cân
 
--- 58 TÚI MÁU (Phân bổ đa dạng 8 nhóm máu cho BV01, BV02, BV03, BV04)
+-- 58 TÚI MÁU (Phân bổ đa dạng 8 nhóm máu)
 INSERT INTO TUIMAU VALUES 
+('TM00001','DK00001','NV00001','KM00001',350,'2026-02-10 08:00','Nhập kho',4.5), 
+('TM00002','DK00002','NV00001','KM00002',250,'2026-02-12 09:30','Nhập kho',4.2), 
+('TM00003','DK00003','NV00001','KM00003',450,'2026-02-15 10:00','Nhập kho',4.5), 
+('TM00004','DK00004','NV00001','KM00004',250,'2026-02-18 08:00','Nhập kho',4.5), 
+('TM00005','DK00005','NV00001','KM00005',350,'2026-02-20 09:00','Nhập kho',4.2), 
+('TM00006','DK00006','NV00001','KM00006',250,'2026-02-22 10:00','Nhập kho',4.5), 
+('TM00007','DK00007','NV00001','KM00007',350,'2026-02-25 08:00','Nhập kho',4.5), 
+('TM00008','DK00008','NV00001','KM00008',450,'2026-02-28 09:00','Nhập kho',4.2), 
+('TM00009','DK00009','NV00001','KM00009',250,'2026-03-01 10:00','Nhập kho',4.5), 
+('TM00010','DK00010','NV00001','KM00010',350,'2026-03-05 08:00','Nhập kho',4.5), 
+('TM00011','DK00011','NV00001','KM00011',250,'2026-03-10 09:00','Nhập kho',4.2), 
+('TM00012','DK00012','NV00001','KM00012',450,'2026-03-15 10:00','Nhập kho',4.5), 
+('TM00013','DK00013','NV00001','KM00013',350,'2026-03-20 08:00','Nhập kho',4.5), 
+('TM00014','DK00014','NV00001','KM00014',250,'2026-03-25 09:00','Nhập kho',4.2), 
+('TM00015','DK00016','NV00001','KM00015',450,'2026-04-01 10:00','Nhập kho',4.5), 
+('TM00016','DK00017','NV00001','KM00016',250,'2026-04-05 08:00','Nhập kho',4.5),
 ('TM00017','DK00018','NV00001','KM00001',350,'2026-04-08 07:58','Nhập kho',4.2), 
 ('TM00018','DK00019','NV00001','KM00001',250,'2026-04-15 08:00','Nhập kho',4.5),
 ('TM00019','DK00020','NV00006','KM00006',350,'2026-04-22 08:03','Đã xuất',4.2),
