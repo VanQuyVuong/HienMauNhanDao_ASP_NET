@@ -68,7 +68,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 MaDon = "DON" + DateTime.Now.ToString("HHmmss"),
                 MaChienDich = request.MaChienDich,
                 ThoiGianDangKy = DateTime.Now,
-                TrangThai = TrangThaiDonDangKy.ChoDuyet,
+                TrangThai = TrangThaiDonDangKy.DaDangKy, // Luồng chuẩn: Web tạo -> DaDangKy. Lễ tân ấn Tiếp nhận -> ChoDuyet. Bác sĩ Khám -> DaDuyet
                 TheTich = request.TheTich ?? 250,
                 MaTNV = tnv.maTNV // Đã sửa maTNV
             };

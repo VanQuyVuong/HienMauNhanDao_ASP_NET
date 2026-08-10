@@ -199,14 +199,6 @@ function DonModal({ mode, don, nhanVien, onClose, onSaved }) {
       // 3. Tự động Tiếp nhận & Lưu Tờ khai y tế sơ lược (Không bắt bấm lại ngoài bảng)
       if (savedDon?.maDon) {
         try {
-          // Gọi API tiếp nhận check-in
-          await donDangKyNvytService.tiepNhan({
-            maTNV: tnv?.maTNV || savedDon.maTNV,
-            maChienDich: savedDon.maChienDich,
-            theTich: savedDon.theTich || 350,
-            maNV: nhanVien?.maNV
-          });
-
           // Lưu hồ sơ sức khỏe sơ lược
           await khaiBaoYTeNvytService.create({
             maDon: savedDon.maDon,
@@ -958,11 +950,13 @@ export default function DonDangKy() {
                       <span className={`px-2.5 py-1 text-xs font-bold rounded-full whitespace-nowrap
                         ${don.trangThai === 'ChoDuyet' || don.trangThai === 'DaDuyet' || don.trangThai === 'DaHoanThanh' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
                           don.trangThai === 'DaTuChoi' ? 'bg-red-100 text-red-700 border border-red-200' :
+                          don.trangThai === 'DaDangKy' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
                             'bg-blue-100 text-blue-700 border border-blue-200'}`}>
                         {don.trangThai === 'ChoDuyet' ? '⏳ Chờ khám bác sĩ' : 
                          don.trangThai === 'DaDuyet' ? '✅ Bác sĩ đã duyệt' :
                          don.trangThai === 'DaHoanThanh' ? '🩸 Đã hoàn thành' :
-                         don.trangThai === 'DaTuChoi' ? '❌ Đã từ chối' : (don.trangThai || 'Chờ tiếp nhận')}
+                         don.trangThai === 'DaTuChoi' ? '❌ Đã từ chối' : 
+                         don.trangThai === 'DaDangKy' ? '⌛ Chờ tiếp nhận' : (don.trangThai || 'Chờ tiếp nhận')}
                       </span>
                     </td>
                     <td className="px-4 py-4 text-xs text-slate-500">
