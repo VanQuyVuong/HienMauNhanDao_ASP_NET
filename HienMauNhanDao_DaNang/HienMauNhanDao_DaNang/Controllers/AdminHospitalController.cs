@@ -23,7 +23,7 @@ namespace HienMauNhanDao_DaNang.Controllers
         {
             var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value 
                           ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var email = User.Identity?.Name;
 
             NhanVien? nv = null;
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -94,7 +94,16 @@ export default function ManageNews() {
       const res = await axios.get("https://localhost:7004/api/TinTuc");
       setNewsHistory(res.data);
     } catch (err) {
-      toast.error("Lỗi khi tải ảnh hoặc đăng tin");
+      console.error(err);
+      let errMsg = "Lỗi khi tải ảnh hoặc đăng tin";
+      if (err.response?.data?.message) {
+        errMsg = err.response.data.message;
+      } else if (typeof err.response?.data === 'string') {
+        errMsg = err.response.data;
+      } else if (err.message) {
+        errMsg = err.message;
+      }
+      toast.error(errMsg);
     } finally {
       setLoadingNews(false);
     }
