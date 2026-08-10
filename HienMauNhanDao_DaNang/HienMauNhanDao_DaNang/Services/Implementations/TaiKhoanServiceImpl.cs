@@ -108,6 +108,11 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
             //tao ma tai khoan tu dong 
             var count = await _db.TaiKhoans.CountAsync();
             var maTaiKhoan = $"TK{(count + 1):D5}";
+            while (await _db.TaiKhoans.AnyAsync(t => t.MaTaiKhoan == maTaiKhoan))
+            {
+                count++;
+                maTaiKhoan = $"TK{(count + 1):D5}";
+            }
             //d5 la dinh dang 5 chu so 
 
             //tao tai khoan moi

@@ -58,9 +58,9 @@ export default function OtpVerification() {
             // Redirect to login
             navigate('/login');
         } catch (err) {
-            if (err.response && err.response.status === 400) {
-                setError('Mã OTP không hợp lệ hoặc đã hết hạn!');
-            } else if (err.response && err.response.data) {
+            if (err.response?.data?.message) {
+                setError(err.response.data.message);
+            } else if (err.response?.data) {
                 setError(typeof err.response.data === 'string' ? err.response.data : 'Xác thực thất bại!');
             } else {
                 setError('Lỗi kết nối. Vui lòng thử lại.');
