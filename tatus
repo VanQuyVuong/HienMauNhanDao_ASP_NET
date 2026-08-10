@@ -1,0 +1,39 @@
+  Fix/admin_capchungnhan                                    [m 1e3bfb3 feat(admin): phan loai 2 Tab chinh va 3 Sub-Tab lich su cap giay chung nhan hien mau #79
+  Fix/nvxn_KQXN                                             [m 4e5604d [[34morigin/Fix/nvxn_KQXN[m] fix(nvyt-xn): khac phuc triet de loi DbUpdateException khi LuuXetNghiem #71
+  Style/Update_GiaoDien_Doctor                              [m a92ea01 style(nvyt): cap nhat tong mau Ruby Blood Life Cap Nhat Xet Nghiem #75
+  Style/Update_GiaoDien_NVXN                                [m 80741b7 [[34morigin/Style/Update_GiaoDien_NVXN[m] style(nvxn): doi moi hoan toan mau sac bo cuc hieu ung Cyber Clinical #73
+  feature/58-fix-ui-test-quan-ly-chien-dich                 [m d97dc9b [[34morigin/feature/58-fix-ui-test-quan-ly-chien-dich[m: ahead 2] feat(campaign): hoàn thiện hiển thị tên TNV, nâng cấp UX GIS tạo chiến dịch lưu động và cập nhật CSDL
+  feature/Admin_quanLyChienDich                             [m 999cbc4 [[34morigin/feature/Admin_quanLyChienDich[m] feat(frontend): xay dung trang quan ly chien dich cho admin va cau hinh router (#21)
+  feature/BS_khamLamSang                                    [m f741dc3 [[34morigin/feature/BS_khamLamSang[m] feat(frontend): dang ky route va tich hop trang kham lam sang danh cho bac si (#29)
+  feature/NVYT_danhSachKhaiBaoYTe                           [m ad140c0 [[34morigin/feature/NVYT_danhSachKhaiBaoYTe[m] fix(frontend): import CSS cho trang danh sach khai bao y te de sua loi vo layout close #33
+  feature/NVYT_ketQuaXetNghiem                              [m f29d9a0 fix(frontend): sua loi viet tat max-w trong css de fix giao dien modal xet nghiem (close #31)
+  feature/NVYT_thuNhanMau                                   [m 9496c41 [[34morigin/feature/NVYT_thuNhanMau[m] feat(frontend): xay dung trang thu nhan mau va tinh nang in barcode da dang ki route (close #35)
+  feature/QLK_ThongKeYeuCauNhapKho                          [m f23c64f [[34morigin/feature/QLK_ThongKeYeuCauNhapKho[m] feat(qlk): tich hop Navbar va router cho ThongKeNhapKho - Close #17
+  feature/QLK_nhapKhoQuetMa                                 [m f9295b7 [[34morigin/feature/QLK_nhapKhoQuetMa[m] feat(frontend): xay dung giao dien quet ma nhap kho va modal cap nhat (#23)
+  feature/QLK_quanLyHanDung                                 [m af60c1d [[34morigin/feature/QLK_quanLyHanDung[m] fix(frontend): sua loi mismatch API stats, loi viet tat CSS va loi dat sai vi tri route trong App.jsx close #27
+  feature/QLK_thongKeTonKho                                 [m cb17fd7 [[34morigin/feature/QLK_thongKeTonKho[m] feat(frontend): xay dung trang dashboard thong ke ton kho va xuat bao cao word close #25
+  feature/QLK_updateLogic                                   [m 7de2930 [[34morigin/feature/QLK_updateLogic[m: ahead 1] Merge pull request #78 from VanQuyVuong/Feature/QLK_updateLogic
+  feature/TNV_chiTietChienDich                              [m 298d523 feat(frontend): tich hop su kien click chuyen sang trang chi tiet tren Dashboard - Close #45
+  feature/TNV_chuanHoaCSDLKiemThuE2E                        [m 69c4b6f feat(frontend): dong bo hoan toan 100% cac trang page thieu va luong dang ky hiens mau
+  feature/TNV_chuongThongBaoNavbar                          [m 57a28fb feat(frontend): tich hop chuong thong bao dong bo don dang ky trong Navbar.jsx - Close #47
+  feature/TNV_dangKyOTP                                     [m dded22f [[34morigin/feature/TNV_dangKyOTP[m] feat(frontend): tao trang xac thuc otp va thiet ke css (#19)
+  feature/TNV_dongBoPhuongXaXacThucHoSo                     [m 742fc30 feat(frontend): bo sung dropdown PhuongXa va validate CCCD SĐT chat che tren UserProfile - Close #49
+  feature/TNV_heThongBaoVeRoute                             [m db7e360 feat(frontend): viet he thong Route Guard va bọc bao ve phan quyen - Close #43
+  feature/TNV_homePage_footer                               [m a2caa80 [[34morigin/feature/TNV_homePage_footer[m: ahead 1] Merge pull request #38 from VanQuyVuong/feature/TNV_homePage_footer
+  feature/TNV_route_lichSu_chungNhan                        [m 166d6ef feat(frontend): dang ky route lich su dang ky va giay chung nhan trong App.jsx - Close #39
+  feature/TNV_trangGioiThieuFAQ                             [m fd3615c feat(frontend): tao trang AboutPage va css trang tri tich hop FAQ close #41
+  feature/UI_Improvement_Authentication                     [m bac8625 fix(auth): nổi bật giao diện nút Đăng nhập và khắc phục lỗi delay chuyển hướng theo vai trò
+  feature/Update-Doctor                                     [m 8eb90b6 [[34morigin/feature/Update-Doctor[m] fix(db): bo sung trangThaiTuiMauConverter khac phuc loi Convert Enum SQL trong AppDbContext close #69
+  feature/Update-nvyt-xet-nghiem                            [m 3f7340d [[34morigin/feature/Update-nvyt-xet-nghiem[m] fix(api): bo sung endpoint GET cho-thu-nhan cho NVYT Xet Nghiem trong DonDangKyController.cs close #67
+  feature/admin-user-management                             [m 94eef25 [[34morigin/feature/admin-user-management[m] feat(frontend): tich hop dinh tuyen va navbar cho quan ly nguoi dung (#13)
+  feature/blood-expiry-management                           [m f91c52f [[34morigin/feature/blood-expiry-management[m] feat(frontend): xay dung trang quan ly han dung va menu phan quyen QLK
+  feature/clinical-screening                                [m b958e08 [[34morigin/feature/clinical-screening[m] feat(frontend): nang cap real-time warning chi so sinh ton cho bac si - Close #8
+  feature/hien-mau-thuong-xuyen                             [m 2bd7885 style(nvyt): co dinh menu bar sidebar va tich hop phan trang 10 dong tren trang close #63
+  feature/rebuild-csdl-spcn-hien-mau                        [m ce456e9 [[34morigin/feature/rebuild-csdl-spcn-hien-mau[m] feat(database): hoàn thiện 6 tài khoản nội bộ có mã hóa BCrypt và phân quyền đầy đủ close #54
+  feature/tach-actor-nvyt-p1-le-tan                         [m 875692f [[34morigin/feature/tach-actor-nvyt-p1-le-tan[m] fix(db): bo sung ho so NHANVIEN NV00007 cho TK00007 nvxn1@gmail.com trong CSDL SQL #65
+  feature/ui-auth-otp-redesign                              [m a97d6da [[34morigin/feature/ui-auth-otp-redesign[m] style(campaigns): tối ưu bố cục trang danh sách chiến dịch hiến máu
+  feature/ui-qa-admin-pages                                 [m 2670a21 [[34morigin/feature/ui-qa-admin-pages[m] fix(admin-user): sửa lỗi endpoint xác thực mật khẩu Admin từ /TaiKhoan/Login sang /auth/login trong Modal bảo mật - Close #56
+  feature/volunteer-management                              [m 71fba2c [[34morigin/feature/volunteer-management[m] feat(frontend): xay dung giao dien tra cuu tinh nguyen vien cho NVYT (#15)
+  feature/xet-nghiem-va-nhap-kho                            [m 38e6947 [[34morigin/feature/xet-nghiem-va-nhap-kho[m] feat(frontend): dang ky route va navbar cho xet nghiem va nhap kho - Close #11
+  master                                                    [m 7de2930 [[34morigin/master[m] Merge pull request #78 from VanQuyVuong/Feature/QLK_updateLogic
+  tinh-nang/Feature_Update-hien-mau-khan-cap-va-thuong-xuyen[m 7667e6d [[34morigin/tinh-nang/Feature_Update-hien-mau-khan-cap-va-thuong-xuyen[m] fix(backend-csdl): tu dong chuan hoa trang thai DangDienRa cho tat ca chien dich khan cap close #61
