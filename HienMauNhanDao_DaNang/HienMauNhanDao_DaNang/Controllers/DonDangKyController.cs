@@ -279,7 +279,8 @@ namespace HienMauNhanDao_DaNang.Controllers
             var danhSach = await _context.DonDangKys
                 .Include(d => d.ChienDich) // LẤY TÊN CHIẾN DỊCH
                 .Include(D => D.TinhNguyenVien)   // lấy thông tin Tình nguyện viên nộp đơn
-                .OrderByDescending(d => d.ThoiGianDangKy)
+                .OrderByDescending(d => d.TrangThai == TrangThaiDonDangKy.DaDangKy) // Ưu tiên Đơn đăng ký từ Web chưa tiếp nhận lên đầu
+                .ThenByDescending(d => d.ThoiGianDangKy) // Sau đó mới sắp xếp theo thời gian mới nhất
                 .ToListAsync();
 
             return Ok(new { success = true, data = danhSach });
