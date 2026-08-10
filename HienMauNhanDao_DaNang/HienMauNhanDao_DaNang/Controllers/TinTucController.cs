@@ -77,8 +77,10 @@ namespace HienMauNhanDao_DaNang.Controllers
             var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userEmail)) return Unauthorized();
 
-            var tk = await _context.TaiKhoans.Include(t => t.NhanVien).FirstOrDefaultAsync(t => t.Email == userEmail);
-            string maNhanVien = tk?.NhanVien?.MaNhanVien;
+            var nhanVien = await _context.NhanViens
+                .Include(n => n.TaiKhoan)
+                .FirstOrDefaultAsync(n => n.TaiKhoan != null && n.TaiKhoan.Email == userEmail);
+            string maNhanVien = nhanVien?.MaNhanVien ?? "NV00001";
 
             // Generate MaTinTuc
             int count = await _context.TinTucs.CountAsync();
