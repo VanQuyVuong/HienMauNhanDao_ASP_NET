@@ -39,17 +39,6 @@ function TuiMauModal({ don, item, nhanVien, onClose, onSaved }) {
       } else {
         const res = await thuNhanMauService.create(data);
         maTuiMauCreated = res?.data?.maTuiMau || res?.data?.data?.maTuiMau || res?.maTuiMau;
-        
-        if (maTuiMauCreated && data.maNV) {
-          try {
-            await ketQuaXetNghiemService.create({
-              maTuiMau: maTuiMauCreated,
-              maNhanVien: data.maNV,
-            });
-          } catch (xnErr) {
-            console.warn('Khởi tạo bản ghi xét nghiệm:', xnErr);
-          }
-        }
       }
       onSaved(maTuiMauCreated, don || item);
     } catch (e) {
