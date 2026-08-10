@@ -118,6 +118,29 @@ namespace HienMauNhanDao_DaNang.Controllers
             }
         }
 
+        // DELETE: api/TinTuc/{id} (Auth - Admin/BV)
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteNews(string id)
+        {
+            var tinTuc = await _context.TinTucs.FindAsync(id);
+            if (tinTuc == null)
+            {
+                return NotFound(ApiResponse<object>.Fail("Không tìm thấy bài viết để xóa."));
+            }
+
+            try
+            {
+                _context.TinTucs.Remove(tinTuc);
+                await _context.SaveChangesAsync();
+                return Ok(ApiResponse<object>.Ok("Đã xóa bài viết thành công."));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.Fail($"Lỗi Database khi xóa: {ex.Message}"));
+            }
+        }
+
         public class NewsDto
         {
             public string TieuDe { get; set; }

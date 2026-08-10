@@ -20,6 +20,7 @@ export default function ManageNews() {
   // State cho form Thông báo
   const [notiForm, setNotiForm] = useState({ NhomMau: "O_positive", NoiDung: "" });
   
+  const [activeMenuId, setActiveMenuId] = useState(null);
   const [loadingNews, setLoadingNews] = useState(false);
   const [loadingNoti, setLoadingNoti] = useState(false);
 
@@ -36,6 +37,17 @@ export default function ManageNews() {
       }
     };
     fetchNews();
+  }, []);
+
+  // Đóng dropdown khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.action-menu')) {
+        setActiveMenuId(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   const handleImageChange = (e) => {
@@ -123,6 +135,25 @@ export default function ManageNews() {
       toast.error(err.response?.data || "Lỗi khi gửi thông báo");
     } finally {
       setLoadingNoti(false);
+    }
+  };
+
+  const handleDeleteNews = async (maTinTuc) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) return;
+    
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`https://localhost:7004/api/TinTuc/${maTinTuc}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success("Đã xóa bài viết thành công!");
+      
+      // Cập nhật lại danh sách
+      setNewsHistory(prev => prev.filter(item => item.maTinTuc !== maTinTuc));
+      setActiveMenuId(null);
+    } catch (err) {
+      console.error("Lỗi xóa tin tức", err);
+      toast.error("Không thể xóa bài viết. " + (err.response?.data?.message || ""));
     }
   };
 
@@ -315,10 +346,37 @@ export default function ManageNews() {
                       <td className="py-3 px-4 text-center">
                         <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></span>
                       </td>
-                      <td className="py-3 px-4 text-right">
-                        <button className="text-slate-400 hover:text-slate-800 transition-colors">
+                      <td className="py-3 px-4 text-right relative action-menu">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveMenuId(activeMenuId === item.maTinTuc ? null : item.maTinTuc);
+                          }}
+                          className="text-slate-400 hover:text-slate-800 transition-colors p-1 rounded-md hover:bg-slate-100"
+                        >
                           <span className="material-symbols-outlined text-lg">more_horiz</span>
                         </button>
+
+                        {/* Dropdown Menu */}
+                        {activeMenuId === item.maTinTuc && (
+                          <div className="absolute right-8 top-10 bg-white rounded-xl shadow-lg border border-slate-100 w-36 py-2 z-50 animate-in fade-in zoom-in duration-200">
+                            <button 
+                              className="w-full px-4 py-2 text-left text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center gap-2"
+                              onClick={() => {
+                                toast.info("Tính năng sửa đang phát triển");
+                                setActiveMenuId(null);
+                              }}
+                            >
+                              <span className="material-symbols-outlined text-[16px]">edit</span> Sửa bài
+                            </button>
+                            <button 
+                              className="w-full px-4 py-2 text-left text-xs font-bold text-red-500 hover:bg-red-50 transition-colors flex items-center gap-2"
+                              onClick={() => handleDeleteNews(item.maTinTuc)}
+                            >
+                              <span className="material-symbols-outlined text-[16px]">delete</span> Xóa bài
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
