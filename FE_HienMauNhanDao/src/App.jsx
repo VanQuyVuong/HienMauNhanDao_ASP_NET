@@ -23,6 +23,7 @@ import KhaiBaoYTe from "./pages/KhaiBaoYTe";
 import XacNhanDangKy from "./pages/XacNhanDangKy";
 import GiayChungNhanPage from "./pages/GiayChungNhanPage";
 import HoSoCaNhan from "./pages/HoSoCaNhan";
+import NewsDetail from "./pages/NewsDetail";
 import ThongKeTonKho from "./pages/qlk/ThongKeTonKho";
 import QuanLyNhapKho from "./pages/qlk/QuanLyNhapKho";
 import DanhSachDonDangKy from "./pages/DanhSachDonDangKy";
@@ -106,6 +107,7 @@ function App() {
             <Route path="otp" element={<OtpVerification />} />
             <Route path="about" element={<AboutPage />} />
             <Route path="chiendich" element={<ChienDichPage />} />
+            <Route path="tin-tuc/:id" element={<NewsDetail />} />
             <Route path="don-dang-ky" element={<DanhSachDonDangKy />} />
             <Route path="don-dang-ky-detail/:maDon" element={<XacNhanDangKy />}/>
             <Route path="khai-bao-thong-tin-ca-nhan"element={<ThongTinCaNhan />}/>

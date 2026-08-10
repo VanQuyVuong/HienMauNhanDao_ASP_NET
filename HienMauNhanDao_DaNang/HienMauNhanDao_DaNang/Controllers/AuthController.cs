@@ -102,7 +102,7 @@ namespace HienMauNhanDao_DaNang.Controllers
         public IActionResult GetProfile()
         {
             // C# sẽ tự động lấy Token do React gửi lên, giải mã nó để biết ai đang gọi API
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var email = User.Identity?.Name ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
             return Ok(new
             {
                 thongDiep = $"Xin chao {email}, day la kho bao chi nhung nguoi co token moi xem duoc"

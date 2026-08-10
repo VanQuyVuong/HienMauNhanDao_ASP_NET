@@ -117,7 +117,15 @@ namespace HienMauNhanDao_DaNang.Data
 
             modelBuilder.Entity<ThongBao>().Property(t => t.TrangThai).HasConversion<string>();
 
-            modelBuilder.Entity<TinTuc>().Property(t => t.TrangThai).HasConversion<string>();
+            // Custom converter cho TrangThaiTinTuc để đọc mượt mà 'Đã thêm' từ DB cũ
+            var trangThaiTinTucConverter = new ValueConverter<TrangThaiTinTuc, string>(
+                v => v.ToString(),
+                v => string.IsNullOrEmpty(v) ? TrangThaiTinTuc.NhapLieu :
+                     (v == "Đã thêm" || v == "DanDang") ? TrangThaiTinTuc.DanDang :
+                     (v == "DaAn") ? TrangThaiTinTuc.DaAn : TrangThaiTinTuc.NhapLieu
+            );
+
+            modelBuilder.Entity<TinTuc>().Property(t => t.TrangThai).HasConversion(trangThaiTinTucConverter);
 
 
 

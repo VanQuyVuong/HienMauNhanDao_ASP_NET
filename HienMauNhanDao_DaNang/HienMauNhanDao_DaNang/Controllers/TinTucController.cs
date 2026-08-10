@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using HienMauNhanDao_DaNang.Models;
 using HienMauNhanDao_DaNang.Models.Entities;
 using HienMauNhanDao_DaNang.Common;
+using HienMauNhanDao_DaNang.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
@@ -37,6 +38,8 @@ namespace HienMauNhanDao_DaNang.Controllers
                     t.NgayDang
                 })
                 .ToListAsync();
+
+            Console.WriteLine($"[DEBUG] GET api/TinTuc - Found {news.Count} news articles.");
 
             return Ok(news);
         }
@@ -73,11 +76,13 @@ namespace HienMauNhanDao_DaNang.Controllers
         [Authorize]
         public async Task<IActionResult> CreateNews([FromBody] NewsDto dto)
         {
-            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userEmail)) return Unauthorized();
+            var userEmail = User.Identity?.Name ?? User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userEmail)) return Unauthorized("Không tìm thấy thông tin xác thực trong Token");
 
-            var tk = await _context.TaiKhoans.Include(t => t.NhanVien).FirstOrDefaultAsync(t => t.Email == userEmail);
-            string maNhanVien = tk?.NhanVien?.MaNhanVien;
+            var nhanVien = await _context.NhanViens
+                .Include(n => n.TaiKhoan)
+                .FirstOrDefaultAsync(n => n.TaiKhoan != null && n.TaiKhoan.Email == userEmail);
+            string maNhanVien = nhanVien?.MaNhanVien ?? "NV00001";
 
             // Generate MaTinTuc
             int count = await _context.TinTucs.CountAsync();
@@ -100,10 +105,17 @@ namespace HienMauNhanDao_DaNang.Controllers
                 NgayDang = DateTime.Now
             };
 
-            _context.TinTucs.Add(tinTuc);
-            await _context.SaveChangesAsync();
-
-            return Ok(ApiResponse<TinTuc>.Ok(tinTuc, "Đăng bài viết thành công"));
+            try
+            {
+                _context.TinTucs.Add(tinTuc);
+                await _context.SaveChangesAsync();
+                return Ok(ApiResponse<TinTuc>.Ok(tinTuc, "Đăng bài viết thành công"));
+            }
+            catch (Exception ex)
+            {
+                var innerMsg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return StatusCode(500, ApiResponse<object>.Fail($"Lỗi Database: {innerMsg}"));
+            }
         }
 
         public class NewsDto

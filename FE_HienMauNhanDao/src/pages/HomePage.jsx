@@ -19,6 +19,10 @@ export default function HomePage() {
     const [userProfile, setUserProfile] = useState(null);
     const [registeredCampaignIds, setRegisteredCampaignIds] = useState([]);
     const [submittingFastTrack, setSubmittingFastTrack] = useState(false);
+    
+    // State cho Tin Tức (Slider Trang chủ)
+    const [newsList, setNewsList] = useState([]);
+    const [activeNewsIndex, setActiveNewsIndex] = useState(0);
 
     // Kéo thả chuột / Chạm vuốt tay
     const [dragStartX, setDragStartX] = useState(null);
@@ -100,6 +104,32 @@ export default function HomePage() {
         }, 10000); // 10 giây
         return () => clearInterval(interval);
     }, [emergencyCampaigns]);
+
+    // Lấy danh sách Tin tức để làm Slider Hero
+    useEffect(() => {
+        const fetchNews = async () => {
+            try {
+                // Fetch public API (sử dụng axios, hoặc fetch)
+                const res = await fetch("https://localhost:7004/api/TinTuc");
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setNewsList(data);
+                }
+            } catch (err) {
+                console.error("Lỗi khi tải tin tức", err);
+            }
+        };
+        fetchNews();
+    }, []);
+
+    // ⏱️ Tự động xoay vòng Slider Tin Tức mỗi 5 GIÂY
+    useEffect(() => {
+        if (newsList.length <= 1) return;
+        const interval = setInterval(() => {
+            setActiveNewsIndex(prev => (prev + 1) % newsList.length);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [newsList]);
 
     // ⏱️ Tự động nhích 1 sự kiện liên tục mỗi 10 GIÂY
     useEffect(() => {
@@ -343,12 +373,10 @@ export default function HomePage() {
                 </div>
             </div>
 
-            {/* Editorial Hero Section */}
+            {/* Hero Background (Cố định tĩnh luôn hiện câu Mỗi giọt máu) */}
             <section className="relative min-h-[540px] md:min-h-[580px] w-full flex items-center py-10 lg:py-14">
                 <div className="w-full max-w-[1280px] mx-auto px-4 md:px-8 relative z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-                        
-                        {/* Left Content Column */}
                         <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
                             <div className="inline-flex items-center gap-3 px-4 py-2 bg-rose-50 border border-rose-200/80 rounded-full">
                                 <span className="w-2.5 h-2.5 rounded-full bg-[#e62e43] animate-pulse"></span>
@@ -398,7 +426,6 @@ export default function HomePage() {
                             </div>
                         </div>
 
-                        {/* Right Column: Hero Medical Frame */}
                         <div className="lg:col-span-5 relative">
                             <div className="relative mx-auto max-w-[420px] lg:max-w-none">
                                 <div className="rounded-[36px] overflow-hidden shadow-2xl border-4 border-white bg-slate-100 h-[440px] relative">
@@ -416,10 +443,99 @@ export default function HomePage() {
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </section>
+
+            {/* Mục riêng cho BẢNG TIN TỨC & THÔNG BÁO (Editorial News Slider) */}
+            {newsList.length > 0 && (
+                <section className="w-full max-w-[1280px] mx-auto px-4 md:px-8 py-10 lg:py-16 mt-4">
+                    <div className="bg-white rounded-[36px] p-6 sm:p-10 shadow-2xl border-2 border-rose-50 relative overflow-hidden">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 border-b border-slate-100 pb-4 relative z-10">
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <span className="px-3 py-1 bg-sky-100 text-sky-800 font-black text-[10px] uppercase tracking-widest rounded-full shadow-sm">
+                                        📰 TIN TỨC & HOẠT ĐỘNG
+                                    </span>
+                                </div>
+                                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
+                                    Bản Tin Nổi Bật
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center animate-fade-in transition-all duration-500" key={activeNewsIndex}>
+                            {/* Left Content Column (Dynamic News) */}
+                            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+                                <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-slate-50 border border-slate-200 rounded-full">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-[#e62e43]"></span>
+                                    <span className="text-xs font-bold tracking-wider text-slate-600 uppercase">
+                                        {newsList[activeNewsIndex].loaiTin === "ChienDich" && "TIN TỨC CHIẾN DỊCH HIẾN MÁU"}
+                                        {newsList[activeNewsIndex].loaiTin === "LoiKhuyen" && "LỜI KHUYÊN SỨC KHỎE"}
+                                        {newsList[activeNewsIndex].loaiTin === "NoiBo" && "BẢN TIN HOẠT ĐỘNG"}
+                                    </span>
+                                </div>
+
+                                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight tracking-tight text-slate-900 line-clamp-3">
+                                    {newsList[activeNewsIndex].tieuDe}
+                                </h3>
+
+                                <p className="text-base text-slate-600 leading-relaxed max-w-2xl mx-auto lg:mx-0 line-clamp-3">
+                                    {newsList[activeNewsIndex].noiDung}
+                                </p>
+
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
+                                    {newsList[activeNewsIndex].loaiTin === "ChienDich" ? (
+                                        <button
+                                            onClick={() => navigate('/chiendich')}
+                                            className="h-12 px-8 bg-[#e62e43] text-white rounded-xl font-bold text-sm hover:bg-[#c01b30] shadow-lg shadow-red-200 transition-all flex items-center justify-center gap-2 group">
+                                            <span className="material-symbols-outlined text-lg group-hover:rotate-12 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>volunteer_activism</span>
+                                            <span>ĐĂNG KÝ HIẾN MÁU NGAY</span>
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => navigate(`/tin-tuc/${newsList[activeNewsIndex].maTinTuc}`)}
+                                            className="h-12 px-8 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 shadow-lg shadow-slate-200 transition-all flex items-center justify-center gap-2 group">
+                                            <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>read_more</span>
+                                            <span>XEM CHI TIẾT</span>
+                                        </button>
+                                    )}
+                                </div>
+                                
+                                {/* News Slider Pagination Dots */}
+                                <div className="pt-6 flex justify-center lg:justify-start gap-2">
+                                    {newsList.map((_, idx) => (
+                                        <button 
+                                            key={idx}
+                                            onClick={() => setActiveNewsIndex(idx)}
+                                            className={`h-2 rounded-full transition-all ${idx === activeNewsIndex ? 'w-8 bg-[#e62e43]' : 'w-2 bg-slate-200 hover:bg-slate-300'}`}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Right Column: Dynamic Image */}
+                            <div className="lg:col-span-5 relative">
+                                <div className="rounded-[24px] overflow-hidden shadow-xl border border-slate-100 h-[340px] relative group">
+                                    <img 
+                                        src={newsList[activeNewsIndex].hinhAnh ? `/images/${newsList[activeNewsIndex].hinhAnh}` : "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=1000"} 
+                                        alt={newsList[activeNewsIndex].tieuDe}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=1000'; }}
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent"></div>
+                                    <div className="absolute bottom-5 left-5 right-5 text-white">
+                                        <p className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-[16px]">schedule</span>
+                                            {new Date(newsList[activeNewsIndex].ngayDang).toLocaleDateString('vi-VN')}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* 📖 🎴 SECTION TẠP CHÍ & BẢNG TIN KHẨN CẤP: ĐẬP ĐI XÂY LẠI MÀU SẮC HÀI HÒA & NHÍCH 1 SỰ KIỆN TRÂN TRÚC */}
             <section className="w-full max-w-[1280px] mx-auto px-4 md:px-8 py-8 mb-12">
