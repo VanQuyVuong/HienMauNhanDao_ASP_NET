@@ -110,7 +110,7 @@ export const donDangKyService = {
      */
     getByMaTNV: async (maTNV, page = 0, size = 10) => {
         try {
-            const response = await http.get(`/dondangky/user/${maTNV}?page=${page}&size=${size}`);
+            const response = await http.get(`/dondangky`);
             return response?.data || [];
         } catch (error) {
             console.error(`Error fetching đơn đăng ký cho TNV ${maTNV}:`, error);
