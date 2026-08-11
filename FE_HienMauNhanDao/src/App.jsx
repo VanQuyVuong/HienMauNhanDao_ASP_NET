@@ -25,7 +25,7 @@ import GiayChungNhanPage from "./pages/GiayChungNhanPage";
 import HoSoCaNhan from "./pages/HoSoCaNhan";
 import NewsDetail from "./pages/NewsDetail";
 import ThongKeTonKho from "./pages/qlk/ThongKeTonKho";
-import QuanLyNhapKho from "./pages/qlk/QuanLyNhapKho";
+import QuanLyNhapKhoTheoChienDich from "./pages/qlk/QuanLyNhapKhoTheoChienDich";
 import DanhSachDonDangKy from "./pages/DanhSachDonDangKy";
 import DebugLogin from "./pages/qlk/DebugLogin";
 
@@ -39,7 +39,7 @@ import KetQuaXetNghiem from "./pages/bacsi/KetQuaXetNghiem";
 import CapNhatXetNghiem from "./pages/nvyt/CapNhatXetNghiem";
 import ThuNhanMau from "./pages/nvyt/ThuNhanMau"; // Trigger Vite reload
 import QuanLyHanDung from "./pages/qlk/QuanLyHanDung";
-import QuanLyKhoBenhVien from "./pages/qlk/QuanLyKhoBenhVien";
+import QuanLyNhapKhoQuetMa from "./pages/qlk/QuanLyNhapKhoQuetMa";
 import AdminLayout from "./layouts/AdminLayout";
 import QuanLyNguoiDung from "./pages/admin/QuanLyNguoiDung";
 import QuanLyChienDich from "./pages/admin/QuanLyChienDich";
@@ -120,12 +120,10 @@ function App() {
           </Route>
           {/* Quản Lý Kho Routes */}
           <Route path="/quan-ly-kho" element={<QlkGuard><QuanLyKhoLayout /></QlkGuard>}>
-            <Route index element={<Navigate to="benh-vien" replace />} />
-            <Route path="benh-vien" element={<QuanLyKhoBenhVien />} />
+            <Route index element={<Navigate to="thong-ke" replace />} />
+            <Route path="benh-vien" element={<QuanLyNhapKhoQuetMa />} />
             <Route path="thong-ke" element={<ThongKeTonKho />} />
-            <Route path="nhap-kho" element={<QuanLyNhapKho />} />
-            <Route path="nhap-kho-chien-dich" element={<Navigate to="/quan-ly-kho/nhap-kho?tab=chien-dich" replace />} />
-            <Route path="nhan-yeu-cau" element={<Navigate to="/quan-ly-kho/nhap-kho?tab=nhan-yeu-cau" replace />} />
+            <Route path="nhap-kho" element={<QuanLyNhapKhoTheoChienDich />} />
             <Route path="quan-ly-han-dung" element={<QuanLyHanDung />} />
           </Route>
 
