@@ -363,7 +363,8 @@ namespace HienMauNhanDao_DaNang.Controllers
             [FromQuery] int page = 0 ,
             [FromQuery] int size = 10,
             [FromQuery] string? search = null,
-            [FromQuery] string? status = null
+            [FromQuery] string? status = null,
+            [FromQuery] string? maChienDich = null
             )
         {
             var query = _context.TuiMaus
@@ -372,6 +373,11 @@ namespace HienMauNhanDao_DaNang.Controllers
                 .Include(t => t.DonDangKy)
                 .ThenInclude(d => d.ChienDich)
                 .AsQueryable();
+
+            if (!string.IsNullOrEmpty(maChienDich))
+            {
+                query = query.Where(t => t.DonDangKy != null && t.DonDangKy.MaChienDich == maChienDich);
+            }
 
             //LỌC TRẠNG THÁI 
             if(!string.IsNullOrEmpty(status) && status == "Nhập kho")

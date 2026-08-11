@@ -6,25 +6,7 @@ export default function QuanLyKhoLayout() {
   const location = useLocation();
   const currentPath = location.pathname;
   const navigate = useNavigate();
-  const [pendingImportCount, setPendingImportCount] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const fetchPendingImportCount = async () => {
-    try {
-      const res = await http.get('/tuimau');
-      const data = Array.isArray(res) ? res : (res?.data || []);
-      const count = data.filter(tm => tm.trangThai === 'Yêu cầu nhập kho').length;
-      setPendingImportCount(count);
-    } catch (err) {
-      console.error('Lỗi khi lấy số lượng yêu cầu nhập kho:', err);
-    }
-  };
-
-  useEffect(() => {
-    fetchPendingImportCount();
-    const interval = setInterval(fetchPendingImportCount, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleLogout = () => {
     localStorage.clear(); // Xóa toàn bộ token và role
@@ -95,13 +77,6 @@ export default function QuanLyKhoLayout() {
                         style={{ fontVariationSettings: `'FILL' ${active ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' 24` }}>{item.icon}</span>
                   <span>{item.label}</span>
                 </div>
-                {isNhapKho && pendingImportCount > 0 && (
-                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm animate-pulse ${
-                    active ? 'bg-red-700 text-white' : 'bg-purple-600 text-white'
-                  }`}>
-                    {pendingImportCount}
-                  </span>
-                )}
               </Link>
             );
           })}
