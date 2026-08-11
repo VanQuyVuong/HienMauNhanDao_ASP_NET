@@ -59,6 +59,33 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
         // API 1: Xem tổng quan tồn kho của TẤT CẢ CÁC BỆNH VIỆN (Chi tiết 8 nhóm máu A+, A-, B+, B-, O+, O-, AB+, AB-)
+        [HttpGet("my-hospital-inventory")]
+        public async Task<IActionResult> GetMyHospitalInventory()
+        {
+            var (nv, khoa) = await GetNhanVienProfileAsync();
+            if (khoa == null)
+            {
+                return BadRequest(new { success = false, message = "Không xác định được khoa công tác của nhân viên" });
+            }
+
+            var danhSachKhoMau = await _context.KhoMaus
+                .Where(k => k.MaKhoa == khoa.MaKhoa)
+                .ToListAsync();
+
+            var ketQua = danhSachKhoMau.Select(kho => new
+            {
+                maKho = kho.MaKho,
+                tenKho = kho.TenKho,
+                nhomMauString = kho.NhomMau != null ? kho.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ",
+                soLuongTon = kho.SoLuongTon ?? 0,
+                nguongAnToan = kho.NguongAnToan ?? 50,
+                tinhTrang = (kho.SoLuongTon ?? 0) <= (kho.NguongAnToan ?? 50) ? "CanKiet" : "AnToan",
+                maKhoa = kho.MaKhoa
+            });
+
+            return Ok(new { success = true, tenBenhVien = khoa.TenKhoa, data = ketQua });
+        }
+
         [HttpGet("all-hospitals")]
         public async Task<IActionResult> GetAllHospitalsStock()
         {
@@ -246,28 +273,36 @@ namespace HienMauNhanDao_DaNang.Controllers
                 return NotFound(new { success = false, message = $"Không tìm thấy túi máu {request.MaTuiMau}" });
             }
 
-            // Cập nhật trạng thái túi máu
-            tui.TrangThai = TrangThaiTuiMau.DaLuuKho;
-            tui.MaKho = maKhoa;
+            var nhomMau = tui.DonDangKy?.TinhNguyenVien?.NhomMau;
+            var nhomMauString = nhomMau != null ? nhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ";
 
             // Cập nhật số lượng tồn kho theo nhóm máu cho Kho Bệnh viện
-            var kho = await _context.KhoMaus.FirstOrDefaultAsync(k => k.MaKho == maKhoa);
+            var kho = await _context.KhoMaus.FirstOrDefaultAsync(k => k.MaKhoa == maKhoa && k.NhomMau == nhomMau);
             if (kho != null)
             {
                 kho.SoLuongTon = (kho.SoLuongTon ?? 0) + 1;
+                tui.MaKho = kho.MaKho;
             }
             else
             {
                 // Nếu chưa có bản ghi kho, tự động khởi tạo
-                _context.KhoMaus.Add(new KhoMau
+                string newMaKho = "KM" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper();
+                kho = new KhoMau
                 {
-                    MaKho = maKhoa,
-                    TenKho = $"Kho Máu {tenBenhVien}",
+                    MaKho = newMaKho,
+                    TenKho = $"Kho Máu {nhomMauString} {tenBenhVien}",
                     SoLuongTon = 1,
-                    NguongAnToan = 50,
-                    MoTa = $"Kho máu chuyên dụng lưu trữ tại {tenBenhVien}"
-                });
+                    NguongAnToan = 20,
+                    MoTa = $"Kho máu lưu trữ tại {tenBenhVien}",
+                    MaKhoa = maKhoa,
+                    NhomMau = nhomMau
+                };
+                _context.KhoMaus.Add(kho);
+                tui.MaKho = newMaKho;
             }
+
+            // Cập nhật trạng thái túi máu
+            tui.TrangThai = TrangThaiTuiMau.DaLuuKho;
 
             await _context.SaveChangesAsync();
 
