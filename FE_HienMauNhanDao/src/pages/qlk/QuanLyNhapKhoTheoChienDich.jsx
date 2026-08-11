@@ -294,7 +294,7 @@ const QuanLyNhapKhoTheoChienDich = () => {
                                         <div className="text-sm font-black text-slate-600">
                                             {camp.maChienDich} 
                                             <span className="text-primary ml-1 text-xs">
-                                                ({camp.luongMauDaThu || 0} túi máu)
+                                                ({camp.luongMauDaThu || 0} ml)
                                             </span>
                                         </div>
                                     </div>
