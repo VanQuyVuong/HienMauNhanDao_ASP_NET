@@ -21,12 +21,26 @@ export default function ChienDichPage() {
     const [showMobileFilter, setShowMobileFilter] = useState(false);
     const itemsPerPage = 6;
     const STATUS_PRIORITY = {
-        "Đang diễn ra": 1,
-        "Đã phê duyệt": 3,
+        "Đang mở": 1,
         "Sắp diễn ra": 2,
-        "Đã kết thúc": 4
+        "Đã kết thúc": 3
     };
     const uniqueLocations = [...new Set(allCampaigns.map(item => item.diaDiem.tenDiaDiem))];
+
+    // Get campaign status badge
+    const getCampaignStatus = (campaign) => {
+        const now = new Date();
+        const startDate = new Date(campaign.thoiGianBD);
+        const endDate = new Date(campaign.thoiGianKT);
+
+        if (now > endDate) {
+            return { status: "Đã kết thúc", color: "gray" };
+        } else if (now < startDate) {
+            return { status: "Sắp diễn ra", color: "amber" };
+        } else {
+            return { status: "Đang mở", color: "green" };
+        }
+    };
 
     // Load maTNV từ tài khoản đang đăng nhập
     useEffect(() => {
@@ -120,8 +134,8 @@ export default function ChienDichPage() {
             const bIsKhanCap = (b.mucDoUuTien === "KhanCap" || b.mucDoUuTien === 1) ? 1 : 0;
             if (aIsKhanCap !== bIsKhanCap) return bIsKhanCap - aIsKhanCap;
 
-            const weightA = STATUS_PRIORITY[a.trangThai] || 99;
-            const weightB = STATUS_PRIORITY[b.trangThai] || 99;
+            const weightA = STATUS_PRIORITY[getCampaignStatus(a).status] || 99;
+            const weightB = STATUS_PRIORITY[getCampaignStatus(b).status] || 99;
             return weightA - weightB;
         });
 
@@ -140,20 +154,7 @@ export default function ChienDichPage() {
         }
     };
 
-    // Get campaign status badge
-    const getCampaignStatus = (campaign) => {
-        const now = new Date();
-        const startDate = new Date(campaign.thoiGianBD);
-        const endDate = new Date(campaign.thoiGianKT);
 
-        if (now > endDate) {
-            return { status: "Đã kết thúc", color: "gray" };
-        } else if (now < startDate) {
-            return { status: "Sắp diễn ra", color: "amber" };
-        } else {
-            return { status: "Đang mở", color: "green" };
-        }
-    };
 
     const getProgressPercentage = (campaign) => {
         if (campaign.soLuongDuKien === 0)

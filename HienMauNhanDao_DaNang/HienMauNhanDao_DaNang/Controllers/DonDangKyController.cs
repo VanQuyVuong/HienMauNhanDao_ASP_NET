@@ -79,6 +79,26 @@ namespace HienMauNhanDao_DaNang.Controllers
             return Ok(new { success = true, message = "Đăng ký hiến máu thành công!", maDon=donMoi.MaDon });
         }
 
+        [HttpGet("check")]
+        public async Task<IActionResult> CheckDaDangKy([FromQuery] string maTNV, [FromQuery] string maChienDich)
+        {
+            if (string.IsNullOrEmpty(maTNV) || string.IsNullOrEmpty(maChienDich))
+            {
+                return BadRequest(new { success = false, message = "Thiếu thông tin maTNV hoặc maChienDich" });
+            }
+
+            var don = await _context.DonDangKys
+                .Where(d => d.MaTNV == maTNV && d.MaChienDich == maChienDich && d.TrangThai != TrangThaiDonDangKy.DaHuy && d.TrangThai != TrangThaiDonDangKy.DaTuChoi)
+                .OrderByDescending(d => d.ThoiGianDangKy)
+                .FirstOrDefaultAsync();
+
+            if (don != null)
+            {
+                return Ok(don);
+            }
+            return NotFound(new { success = false, message = "Chưa đăng ký chiến dịch này" });
+        }
+
         public class TiepNhanRequest
         {
             public string? MaDon { get; set; }
