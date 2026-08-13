@@ -33,7 +33,7 @@ export default function QuanLyKhoLayout() {
   ];
 
   return (
-    <div className="w-full min-h-screen flex bg-gray-50 text-slate-800 antialiased overflow-x-hidden">
+    <div className="w-full h-screen flex bg-gray-50 text-slate-800 antialiased overflow-hidden">
       {/* Sidebar mobile overlay backdrop */}
       {isSidebarOpen && (
         <div 
@@ -90,7 +90,7 @@ export default function QuanLyKhoLayout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+      <div className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden">
         {/* Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30 shrink-0">
           <div className="flex items-center gap-3 flex-1 max-w-md">

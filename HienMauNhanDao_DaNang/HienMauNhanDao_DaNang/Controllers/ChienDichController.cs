@@ -35,18 +35,46 @@ namespace HienMauNhanDao_DaNang.Controllers
 
             // Bảo Entity Framework chạy xuống MySQL, mở bảng CHIENDICHHIENMAU và lấy hết lên
 
-                       var danhSach = await _context.ChienDichHienMaus
+                        var danhSach = await _context.ChienDichHienMaus
                 .Include(c => c.DiaDiem)
                 .Include(c => c.NhanVienPhuTrach)
                 .ToListAsync();
 
-            // Tự động chuẩn hóa đợt khẩn cấp luôn luôn là DangDienRa (trừ khi DaKetThuc / DaHuy)
+            // Tự động chuẩn hóa trạng thái và tính toán lượng máu đã thu
+            var today = DateTime.Now;
+            var donDangKys = await _context.DonDangKys
+                .Where(d => d.TrangThai == TrangThaiDonDangKy.DaHoanThanh)
+                .ToListAsync();
+
+            var luongMauDict = donDangKys
+                .GroupBy(d => d.MaChienDich)
+                .ToDictionary(g => g.Key ?? "", g => g.Sum(d => d.TheTich ?? 0));
+
+            bool isChanged = false;
+
             foreach (var c in danhSach)
             {
+                // 1. Nếu chiến dịch quá hạn nhưng vẫn đang mở -> tự động đóng
+                if (c.ThoiGianKT < today && c.TrangThai != TrangThaiChienDich.DaKetThuc && c.TrangThai != TrangThaiChienDich.DaHuy)
+                {
+                    c.TrangThai = TrangThaiChienDich.DaKetThuc;
+                    isChanged = true;
+                }
+
+                // 2. Khẩn cấp thì luôn luôn là Đang diễn ra nếu vừa tạo
                 if (c.MucDoUuTien == MucDoUuTienChienDich.KhanCap && c.TrangThai == TrangThaiChienDich.ChuaBatDau)
                 {
                     c.TrangThai = TrangThaiChienDich.DangDienRa;
+                    isChanged = true;
                 }
+
+                // 3. Gán số lượng máu đã thu vào NotMapped property
+                c.LuongMauDaThu = luongMauDict.ContainsKey(c.MaChienDich) ? luongMauDict[c.MaChienDich] : 0;
+            }
+
+            if (isChanged)
+            {
+                await _context.SaveChangesAsync();
             }
 
             // Trả về cho React dưới định dạng JSON
