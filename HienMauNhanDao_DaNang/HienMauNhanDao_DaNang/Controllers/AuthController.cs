@@ -4,6 +4,7 @@ using HienMauNhanDao_DaNang.Models.DTOs.Responses;
 using HienMauNhanDao_DaNang.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HienMauNhanDao_DaNang.Services;
 using Org.BouncyCastle.Asn1.UA;
 
 namespace HienMauNhanDao_DaNang.Controllers
@@ -22,13 +23,13 @@ namespace HienMauNhanDao_DaNang.Controllers
         
         private readonly ITaiKhoanService _taiKhoanService;
         private readonly IOtpService _otpService;
-        private readonly IEmailService _emailService;
+        private readonly EmailQueueService _emailQueue;
 
-        public AuthController(ITaiKhoanService taiKhoanService, IOtpService otpService, IEmailService emailService)
+        public AuthController(ITaiKhoanService taiKhoanService, IOtpService otpService, EmailQueueService emailQueue)
         {
             _taiKhoanService = taiKhoanService;
             _otpService = otpService;
-            _emailService = emailService;
+            _emailQueue = emailQueue;
         }
 
 
@@ -146,14 +147,24 @@ namespace HienMauNhanDao_DaNang.Controllers
 
 
                 // 2. Tạo mã OTP, in ra Terminal và trả về response để test trên Scalar
-                var otp = _otpService.GenerateOtp(request.Email);
+                string otp;
                 try
                 {
-                    await _emailService.SendOtpEmailAsync(request.Email, otp);
+                    otp = _otpService.GenerateOtp(request.Email);
+                }
+                catch (InvalidOperationException ex) when (ex.Message == "COOLDOWN")
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Vui lòng đợi 60 giây trước khi yêu cầu lại mã OTP để tránh Spam."));
+                }
+
+                try
+                {
+                    // Đẩy email vào Background Queue (Bất đồng bộ - Tốn 0.001 giây)
+                    await _emailQueue.QueueEmailAsync(request.Email, otp);
                 }
                 catch (Exception emailEx)
                 {
-                    Console.WriteLine($"[WARNING SMTP]: Không thể gửi email tới {request.Email} - {emailEx.Message}");
+                    Console.WriteLine($"[WARNING QUEUE]: Không thể đẩy email tới hàng đợi {request.Email} - {emailEx.Message}");
                 }
 
                 Console.WriteLine($"\n========================================================");
