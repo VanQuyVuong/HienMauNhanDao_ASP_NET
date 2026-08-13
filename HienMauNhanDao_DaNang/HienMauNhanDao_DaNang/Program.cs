@@ -1,7 +1,9 @@
 using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Security;
 using HienMauNhanDao_DaNang.Services.Implementations;
+using HienMauNhanDao_DaNang.Services.Implementations;
 using HienMauNhanDao_DaNang.Services.Interfaces;
+using HienMauNhanDao_DaNang.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -83,6 +85,8 @@ namespace HienMauNhanDao_DaNang
             builder.Services.AddScoped<ITaiKhoanService, TaiKhoanServiceImpl>();
             builder.Services.AddScoped<IOtpService, OtpServiceImpl>();
             builder.Services.AddScoped<IEmailService, EmailServiceImpl>();
+            builder.Services.AddSingleton<EmailQueueService>();
+            builder.Services.AddHostedService<EmailBackgroundWorker>();
             builder.Services.AddHostedService<EmergencyCampaignHostedService>();
 
             // AddSingleton: Cả nhà hàng chỉ dùng chung 1 máy làm Token

@@ -21,6 +21,12 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
             //làm sạch email trước khi dùng làm key trong cache
             email = email.Trim().ToLower();
 
+            // Kiểm tra Cooldown 60s chống Spam (Rate Limiting)
+            if (_cache.TryGetValue($"cooldown_{email}", out _))
+            {
+                throw new InvalidOperationException("COOLDOWN");
+            }
+
             //sinh số ngẫu nhiên từ 100000 đến 999999 (6 chữu số )
             var random = new Random();
             var otp = random.Next(100000, 999999).ToString();
@@ -28,9 +34,10 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
             //lưu cặp Key-Value (Email-Otp) vào cache kèm theo thười gian hết hạn là 5 phút 
             _cache.Set(email, otp, ExpireTime);
 
+            // Đặt thời gian chờ (cooldown) là 60 giây
+            _cache.Set($"cooldown_{email}", true, TimeSpan.FromSeconds(60));
+
             return otp;
-
-
         }
 
         public bool ValidateOtp(string email, string otp)

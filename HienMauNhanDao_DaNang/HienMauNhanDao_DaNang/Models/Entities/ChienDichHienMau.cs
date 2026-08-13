@@ -48,5 +48,8 @@ namespace HienMauNhanDao_DaNang.Models.Entities
             [Column("nhomMauCanKhapCap")]
             [MaxLength(50)]
             public string? NhomMauCanKhapCap { get; set; }
+
+            [NotMapped]
+            public int LuongMauDaThu { get; set; } = 0;
         }
 }

@@ -559,7 +559,7 @@ export default function ThuNhanMau() {
                           <>
                             <button
                               onClick={() => setModalDon(don)}
-                              className="h-9 px-3 bg-slate-700 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center gap-1 transition-all shadow-sm active:scale-95"
+                              className="h-9 px-3 bg-slate-700 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center gap-1 transition-all shadow-sm active:scale-95 whitespace-nowrap"
                               title="Chỉnh sửa thể tích túi máu"
                             >
                               <span className="material-symbols-outlined text-base">edit</span>
@@ -567,7 +567,7 @@ export default function ThuNhanMau() {
                             </button>
                             <a
                               href="/nvyt/cap-nhat-xet-nghiem"
-                              className="h-9 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-extrabold text-xs flex items-center gap-1 transition-all shadow-md shadow-indigo-200 active:scale-95"
+                              className="h-9 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-extrabold text-xs flex items-center gap-1 transition-all shadow-md shadow-indigo-200 active:scale-95 whitespace-nowrap"
                               title="Đi đến Trang 2 Cập nhật kết quả xét nghiệm"
                             >
                               <span className="material-symbols-outlined text-base">biotech</span>
