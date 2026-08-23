@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import { ENDPOINTS } from '../constants/api';
 import { chienDichService } from '../services/chienDichService';
 import { DiaDiemService } from '../services/DiaDiemService';
 import { tinhNguyenVienService } from '../services/tinhNguyenVienService';
@@ -109,9 +111,8 @@ export default function HomePage() {
     useEffect(() => {
         const fetchNews = async () => {
             try {
-                // Fetch public API (sử dụng axios, hoặc fetch)
-                const res = await fetch("https://localhost:7004/api/TinTuc");
-                const data = await res.json();
+                const res = await api.get(ENDPOINTS.TIN_TUC.GET_ALL);
+                const data = res.data;
                 if (Array.isArray(data)) {
                     setNewsList(data);
                 }

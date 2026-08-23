@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
+import { ENDPOINTS } from '../constants/api';
 
 export default function NewsDetail() {
   const { id } = useParams();
@@ -11,7 +12,7 @@ export default function NewsDetail() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const res = await axios.get(`https://localhost:7004/api/TinTuc/${id}`);
+        const res = await api.get(ENDPOINTS.TIN_TUC.GET_BY_ID(id));
         setNews(res.data);
       } catch (err) {
         setError("Không tìm thấy bài viết hoặc có lỗi xảy ra.");
