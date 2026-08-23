@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../services/api";
+import { ENDPOINTS } from "../../constants/api";
 import { toast } from "react-toastify";
 
 export default function ManageStock() {
@@ -9,10 +10,7 @@ export default function ManageStock() {
   useEffect(() => {
     const fetchStock = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get("https://localhost:7004/api/AdminHospital/stock", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get(ENDPOINTS.ADMIN_HOSPITAL.STOCK);
         setStocks(res.data);
       } catch (err) {
         toast.error("Lỗi tải thông tin kho máu");

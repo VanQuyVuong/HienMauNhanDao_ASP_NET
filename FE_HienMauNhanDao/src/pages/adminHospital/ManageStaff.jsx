@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
+import api from "../../services/api";
+import { ENDPOINTS } from "../../constants/api";
 import { toast } from "react-toastify";
 
 const ROLE_STYLES = {
@@ -45,10 +46,7 @@ export default function ManageStaff() {
 
   const fetchStaff = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get("https://localhost:7004/api/AdminHospital/staff", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get(ENDPOINTS.ADMIN_HOSPITAL.STAFF);
       setStaffList(res.data);
     } catch (err) {
       toast.error("Không thể tải danh sách nhân sự");

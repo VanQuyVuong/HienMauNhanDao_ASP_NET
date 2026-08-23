@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../services/api";
+import { ENDPOINTS } from "../../constants/api";
 import { Link } from "react-router-dom";
 import {
   BarChart,
@@ -50,13 +51,10 @@ export default function DashboardOverview() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const headers = { Authorization: `Bearer ${token}` };
-
         const [stockRes, staffRes, campaignRes] = await Promise.allSettled([
-          axios.get("https://localhost:7004/api/AdminHospital/stock", { headers }),
-          axios.get("https://localhost:7004/api/AdminHospital/staff", { headers }),
-          axios.get("https://localhost:7004/api/AdminHospital/campaign-stats", { headers })
+          api.get(ENDPOINTS.ADMIN_HOSPITAL.STOCK),
+          api.get(ENDPOINTS.ADMIN_HOSPITAL.STAFF),
+          api.get(ENDPOINTS.ADMIN_HOSPITAL.CAMPAIGN_STATS)
         ]);
 
         if (stockRes.status === "fulfilled") setStocks(stockRes.value.data);

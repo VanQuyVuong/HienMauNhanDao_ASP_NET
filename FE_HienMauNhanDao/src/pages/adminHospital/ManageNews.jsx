@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../services/api";
+import { ENDPOINTS } from "../../constants/api";
 import { toast } from "react-toastify";
 
 export default function ManageNews() {
@@ -30,7 +31,7 @@ export default function ManageNews() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const res = await axios.get("https://localhost:7004/api/TinTuc");
+        const res = await api.get(ENDPOINTS.TIN_TUC.GET_ALL);
         setNewsHistory(res.data);
       } catch (err) {
         console.error("Lỗi khi tải lịch sử tin tức", err);
@@ -77,24 +78,21 @@ export default function ManageNews() {
         formData.append("category", newsForm.LoaiTin);
         formData.append("title", newsForm.TieuDe);
 
-        const uploadRes = await axios.post("https://localhost:7004/api/Upload/image", formData, {
+        const uploadRes = await api.post(ENDPOINTS.UPLOAD.IMAGE, formData, {
           headers: { 
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}` 
+            "Content-Type": "multipart/form-data"
           }
         });
         uploadedImageUrl = uploadRes.data.data; // Trả về dạng tintuc/xxx.jpg
       }
 
       // 2. Gửi request tạo Tin Tức
-      await axios.post("https://localhost:7004/api/TinTuc", {
+      await api.post(ENDPOINTS.TIN_TUC.CREATE, {
         TieuDe: newsForm.TieuDe,
         NoiDung: newsForm.NoiDung,
         HinhAnh: uploadedImageUrl,
         LoaiTin: newsForm.LoaiTin,
         ChuKyLap: newsForm.ChuKyLap
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
       
       toast.success("Đăng bài viết và lưu ảnh thành công!");
@@ -103,7 +101,7 @@ export default function ManageNews() {
       setImagePreview(null);
       
       // Refresh lại list
-      const res = await axios.get("https://localhost:7004/api/TinTuc");
+      const res = await api.get(ENDPOINTS.TIN_TUC.GET_ALL);
       setNewsHistory(res.data);
     } catch (err) {
       console.error(err);
@@ -125,10 +123,7 @@ export default function ManageNews() {
     e.preventDefault();
     setLoadingNoti(true);
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post("https://localhost:7004/api/AdminHospital/notification", notiForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.post(ENDPOINTS.ADMIN_HOSPITAL.NOTIFICATION, notiForm);
       toast.success(res.data.message || "Gửi thông báo thành công!");
       setNotiForm({ ...notiForm, NoiDung: "" });
     } catch (err) {
@@ -142,10 +137,7 @@ export default function ManageNews() {
     if (!window.confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) return;
     
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`https://localhost:7004/api/TinTuc/${maTinTuc}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(ENDPOINTS.TIN_TUC.DELETE(maTinTuc));
       toast.success("Đã xóa bài viết thành công!");
       
       // Cập nhật lại danh sách
