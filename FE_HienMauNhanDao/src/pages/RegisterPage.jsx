@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { AUTH_URL } from '../constants/api';
+import { authService } from '../services/api';
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
@@ -30,7 +29,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError('');
     try {
-      await axios.post(`${AUTH_URL}/send-otp`, { email: formData.email });
+      await authService.sendOtp(formData.email);
       setStep(2);
     } catch (err) {
       if (err.response && err.response.data) {
@@ -54,7 +53,7 @@ export default function RegisterPage() {
     try {
       // Verify OTP
       try {
-        await axios.post(`${AUTH_URL}/verify-otp`, { email: formData.email, otp });
+        await authService.verifyOtp({ email: formData.email, otp });
       } catch (otpErr) {
         if (otpErr.response && otpErr.response.status === 400) {
             setError('Mã OTP không hợp lệ hoặc đã hết hạn!');
@@ -70,7 +69,7 @@ export default function RegisterPage() {
           email: formData.email,
           matKhau: formData.matKhau
       };
-      await axios.post(`${AUTH_URL}/register`, registerPayload);
+      await authService.register(registerPayload);
       
       // Redirect to login
       navigate('/login');

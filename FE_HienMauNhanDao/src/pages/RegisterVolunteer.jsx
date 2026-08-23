@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { AUTH_URL } from '../constants/api';
+import { authService } from '../services/api';
 
 export default function RegisterVolunteer() {
   const [formData, setFormData] = useState({
@@ -41,7 +40,7 @@ export default function RegisterVolunteer() {
     setLoading(true);
     setError('');
     try {
-      await axios.post(`${AUTH_URL}/send-otp`, { Email: formData.email });
+      await authService.sendOtp(formData.email);
       // Chuyển sang trang OTP và truyền dữ liệu đăng ký qua state
       navigate('/otp', { state: { formData } });
     } catch (err) {

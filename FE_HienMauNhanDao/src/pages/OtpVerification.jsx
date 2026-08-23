@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import { AUTH_URL } from '../constants/api';
+import { authService } from '../services/api';
 
 export default function OtpVerification() {
     const [otp, setOtp] = useState('');
@@ -21,7 +20,7 @@ export default function OtpVerification() {
         setLoading(true);
         setError('');
         try {
-            await axios.post(`${AUTH_URL}/send-otp`, { Email: formData.email });
+            await authService.sendOtp(formData.email);
             setError('Mã OTP đã được gửi lại thành công!');
         } catch (err) {
             if (err.response && err.response.data) {
@@ -44,7 +43,7 @@ export default function OtpVerification() {
         setError('');
         try {
             // Verify OTP
-            await axios.post(`${AUTH_URL}/verify-otp`, { Email: formData.email, Otp: otp });
+            await authService.verifyOtp({ Email: formData.email, Otp: otp });
 
             // Register user
             const registerPayload = {
@@ -52,7 +51,7 @@ export default function OtpVerification() {
                 MatKhau: formData.matKhau,
                 XacNhanMatKhau: formData.matKhau
             };
-            await axios.post(`${AUTH_URL}/register`, registerPayload);
+            await authService.register(registerPayload);
 
 
             // Redirect to login
