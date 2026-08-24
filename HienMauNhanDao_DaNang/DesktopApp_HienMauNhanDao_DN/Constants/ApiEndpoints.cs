@@ -2,7 +2,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Constants
 {
     public static class ApiEndpoints
     {
-        public const string BaseUrl = "https://localhost:7004/api";
+        public const string BaseUrl = "http://localhost:5236/api";
 
         public static class Auth
         {

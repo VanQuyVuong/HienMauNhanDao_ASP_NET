@@ -33,7 +33,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
 
             try
             {
-                var loginRequest = new LoginRequest { Username = username, Password = password };
+                var loginRequest = new LoginRequest { Email = username, MatKhau = password };
                 var json = JsonConvert.SerializeObject(loginRequest);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -42,10 +42,10 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = JsonConvert.DeserializeObject<LoginResponse>(responseString);
-                    if (result != null && !string.IsNullOrEmpty(result.Token))
+                    var result = JsonConvert.DeserializeObject<ApiResponse<LoginResponse>>(responseString);
+                    if (result != null && result.Success && result.Data != null && !string.IsNullOrEmpty(result.Data.Token))
                     {
-                        ApiClient.Instance.SetToken(result.Token);
+                        ApiClient.Instance.SetToken(result.Data.Token);
                         
                         // Ở đây mặc định hướng tới màn hình NVYT theo luồng nghiệp vụ hiện tại
                         var dashboard = new NVYTDashboard();
@@ -71,6 +71,11 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                 btnLogin.IsEnabled = true;
                 btnLogin.Content = "ĐĂNG NHẬP";
             }
+        }
+
+        private void btnClose_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
     }
 }
