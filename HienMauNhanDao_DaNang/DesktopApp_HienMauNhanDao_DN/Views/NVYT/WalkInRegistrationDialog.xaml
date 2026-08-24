@@ -1,0 +1,128 @@
+<Window x:Class="DesktopApp_HienMauNhanDao_DN.Views.NVYT.WalkInRegistrationDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tạo Đơn Trực Tiếp (Walk-in)" Height="600" Width="550" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Background="#f8fafc">
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock Text="TẠO ĐƠN TIẾP NHẬN TRỰC TIẾP" FontSize="18" FontWeight="Black" Foreground="#1e293b"/>
+        </StackPanel>
+        
+        <Border Grid.Row="1" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+            <StackPanel>
+                <TextBlock Text="1. Tra cứu thông tin Tình nguyện viên theo CCCD:" FontSize="12" FontWeight="Bold" Foreground="#475569" Margin="0,0,0,5"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="txtCCCD" Grid.Column="0" Height="35" Padding="10,0" BorderBrush="#cbd5e1" BorderThickness="1" VerticalContentAlignment="Center" Margin="0,0,10,0"/>
+                    <Button x:Name="btnSearch" Grid.Column="1" Content="Tìm Kiếm" Background="#0284c7" Foreground="White" FontWeight="Bold" Cursor="Hand" BorderThickness="0" Click="btnSearch_Click"/>
+                </Grid>
+                <TextBlock x:Name="txtStatus" Margin="0,5,0,0" FontSize="12" FontWeight="Bold" Visibility="Collapsed"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Form Info -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,0,0,15">
+            <StackPanel x:Name="FormPanel" Visibility="Collapsed">
+                
+                <Border Background="#f1f5f9" BorderBrush="#cbd5e1" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="Tình nguyện viên:" FontSize="12" Foreground="#64748b"/>
+                        <TextBlock x:Name="txtTNVName" FontSize="14" FontWeight="Bold" Foreground="#1e293b"/>
+                        <!-- Create New TNV fields if not found -->
+                        <StackPanel x:Name="NewTNVPanel" Visibility="Collapsed" Margin="0,10,0,0">
+                            <TextBlock Text="Chưa có hồ sơ. Vui lòng nhập nhanh thông tin:" FontSize="12" FontWeight="Bold" Foreground="#b45309" Margin="0,0,0,10"/>
+                            
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Họ và Tên *" FontSize="12"/>
+                                    <TextBox x:Name="txtNewHoTen" Height="30" Padding="5,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Số Điện Thoại *" FontSize="12"/>
+                                    <TextBox x:Name="txtNewSDT" Height="30" Padding="5,0"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Ngày Sinh *" FontSize="12"/>
+                                    <DatePicker x:Name="dpNewNgaySinh" Height="30"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Giới Tính" FontSize="12"/>
+                                    <ComboBox x:Name="cbNewGioiTinh" Height="30">
+                                        <ComboBoxItem Content="Nam" IsSelected="True"/><ComboBoxItem Content="Nữ"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="2. Chọn Loại Hình Hiến Máu *" FontSize="12" FontWeight="Bold" Foreground="#475569" Margin="0,0,0,5"/>
+                <ComboBox x:Name="cbLoaiHinh" Height="35" Margin="0,0,0,10" SelectionChanged="cbLoaiHinh_SelectionChanged">
+                    <ComboBoxItem Content="Thường Xuyên (Tại Bệnh viện)" Tag="TuDo" IsSelected="True"/>
+                    <ComboBoxItem Content="Chiến Dịch (Đợt phong trào)" Tag="ChienDich"/>
+                </ComboBox>
+
+                <StackPanel x:Name="PanelChienDich" Visibility="Collapsed" Margin="0,0,0,10">
+                    <TextBlock Text="Chọn Chiến Dịch *" FontSize="12" FontWeight="Bold" Foreground="#475569" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="cbChienDich" Height="35"/>
+                </StackPanel>
+
+                <TextBlock Text="Thể tích máu dự kiến (ml)" FontSize="12" FontWeight="Bold" Foreground="#475569" Margin="0,0,0,5"/>
+                <ComboBox x:Name="cbTheTich" Height="35" Margin="0,0,0,15">
+                    <ComboBoxItem Content="250"/>
+                    <ComboBoxItem Content="350" IsSelected="True"/>
+                    <ComboBoxItem Content="450"/>
+                </ComboBox>
+
+                <TextBlock Text="3. Hỏi sơ lược sức khỏe lúc tiếp nhận:" FontSize="12" FontWeight="Bold" Foreground="#475569" Margin="0,0,0,10"/>
+                
+                <Grid Margin="0,0,0,5">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="Sốt/Đau họng, mệt mỏi?" VerticalAlignment="Center"/>
+                    <CheckBox x:Name="cbQ1" Grid.Column="1" Margin="10,0"/>
+                </Grid>
+                <Grid Margin="0,0,0,5">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="Đang dùng kháng sinh?" VerticalAlignment="Center"/>
+                    <CheckBox x:Name="cbQ2" Grid.Column="1" Margin="10,0"/>
+                </Grid>
+                <Grid Margin="0,0,0,5">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="Bệnh truyền nhiễm / Phẫu thuật?" VerticalAlignment="Center"/>
+                    <CheckBox x:Name="cbQ3" Grid.Column="1" Margin="10,0"/>
+                </Grid>
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="Nữ: Mang thai / Cho con bú?" VerticalAlignment="Center"/>
+                    <CheckBox x:Name="cbQ4" Grid.Column="1" Margin="10,0"/>
+                </Grid>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnCancel" Grid.Column="0" Content="Hủy" Height="40" Background="White" BorderBrush="#cbd5e1" BorderThickness="1" Foreground="#475569" FontWeight="Bold" Cursor="Hand" Click="btnCancel_Click"/>
+            <Button x:Name="btnSave" Grid.Column="2" Content="Hoàn Tất Tiếp Nhận" Height="40" Background="#dc2626" Foreground="White" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="btnSave_Click" IsEnabled="False"/>
+        </Grid>
+    </Grid>
+</Window>
