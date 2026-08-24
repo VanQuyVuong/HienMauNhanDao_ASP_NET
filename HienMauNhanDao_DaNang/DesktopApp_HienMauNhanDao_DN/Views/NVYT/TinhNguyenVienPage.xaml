@@ -1,0 +1,140 @@
+<Page x:Class="DesktopApp_HienMauNhanDao_DN.Views.NVYT.TinhNguyenVienPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Quản lý Tình Nguyện Viên" Background="White" Loaded="Page_Loaded">
+
+    <Page.Resources>
+        <!-- DataGrid Style -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#e2e8f0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#f8fafc"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#f1f5f9"/>
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
+            <Setter Property="RowHeight" Value="45"/>
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#f1f5f9"/>
+            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#cbd5e1"/>
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderThickness="0">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#e0f2fe"/>
+                    <Setter Property="Foreground" Value="#0369a1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="QUẢN LÝ TÌNH NGUYỆN VIÊN" FontSize="24" FontWeight="Black" Foreground="#1e293b" Margin="0,0,0,10"/>
+        
+        <!-- Controls -->
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Search -->
+            <Border Grid.Column="0" CornerRadius="8" BorderBrush="#cbd5e1" BorderThickness="1" Width="300" HorizontalAlignment="Left" Background="White">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="🔍" Margin="10,0" VerticalAlignment="Center" Foreground="#94a3b8"/>
+                    <TextBox x:Name="txtSearch" Grid.Column="1" Height="35" BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center"
+                             Padding="0,0,10,0" FontSize="14" Foreground="#334155" KeyUp="txtSearch_KeyDown"/>
+                </Grid>
+            </Border>
+
+            <!-- Refresh Button -->
+            <Button x:Name="btnRefresh" Grid.Column="1" Content="LÀM MỚI" Height="35" Width="100" 
+                    Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" Foreground="#475569"
+                    FontWeight="Bold" Cursor="Hand" Click="btnRefresh_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
+
+        <!-- DataGrid -->
+        <Border Grid.Row="2" CornerRadius="10" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" ClipToBounds="True">
+            <DataGrid x:Name="dgTNV" Margin="-1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Mã TNV" Binding="{Binding MaTNV}" Width="100"/>
+                    <DataGridTextColumn Header="Họ và Tên" Binding="{Binding HoTen}" Width="*"/>
+                    <DataGridTextColumn Header="CCCD/CMND" Binding="{Binding Cccd}" Width="150"/>
+                    <DataGridTextColumn Header="Số Điện Thoại" Binding="{Binding SoDienThoai}" Width="120"/>
+                    <DataGridTextColumn Header="Ngày Sinh" Binding="{Binding NgaySinh, StringFormat=dd/MM/yyyy}" Width="120"/>
+                    
+                    <DataGridTemplateColumn Header="Số Lần Hiến" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="12" Padding="10,4" HorizontalAlignment="Left" Background="#fef2f2">
+                                    <TextBlock Text="{Binding SoLanHienMau, StringFormat={}{0} lần}" FontSize="12" FontWeight="SemiBold" Foreground="#991b1b"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Thao Tác" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Cập Nhật" Width="70" Height="28" Background="#0284c7" Foreground="White" 
+                                        BorderThickness="0" Cursor="Hand" Click="btnEdit_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</Page>
