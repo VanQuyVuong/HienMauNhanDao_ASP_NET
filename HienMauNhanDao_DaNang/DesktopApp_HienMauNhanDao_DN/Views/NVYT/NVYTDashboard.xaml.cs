@@ -1,6 +1,4 @@
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Controls;
 using DesktopApp_HienMauNhanDao_DN.Services;
 
 namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
@@ -10,35 +8,73 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
         public NVYTDashboard()
         {
             InitializeComponent();
-            btnDonDangKy.Click += (s, e) => NavigateTo(new DonDangKyPage(), btnDonDangKy);
-            btnKhaiBaoYTe.Click += (s, e) => NavigateTo(new KhaiBaoYTePage(), btnKhaiBaoYTe);
-            btnThuNhanMau.Click += (s, e) => NavigateTo(new ThuNhanMauPage(), btnThuNhanMau);
-            btnCapNhatXetNghiem.Click += (s, e) => NavigateTo(new CapNhatXetNghiemPage(), btnCapNhatXetNghiem);
-            
-            // Default page
-            NavigateTo(new DonDangKyPage(), btnDonDangKy);
+            SetupMenuByRole();
         }
 
-        private void NavigateTo(Page page, Button activeBtn)
+        private void SetupMenuByRole()
         {
-            // Reset all buttons
-            btnDonDangKy.Background = Brushes.Transparent;
-            btnKhaiBaoYTe.Background = Brushes.Transparent;
-            btnThuNhanMau.Background = Brushes.Transparent;
-            btnCapNhatXetNghiem.Background = Brushes.Transparent;
-            
-            // Set active button
-            activeBtn.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ffe6e8"));
-            
-            MainFrame.Navigate(page);
+            string role = ApiClient.Instance.Role;
+
+            if (role == "NVYT_LT" || role == "NVYT" || role == "NVYT-LT")
+            {
+                btnDonDangKy.Visibility = Visibility.Visible;
+                btnTinhNguyenVien.Visibility = Visibility.Visible;
+                btnKhaiBaoYTe.Visibility = Visibility.Visible;
+                MainFrame.Navigate(new DonDangKyPage());
+            }
+            else if (role == "NVYT_XN" || role == "NVYT-XN")
+            {
+                btnThuNhanMau.Visibility = Visibility.Visible;
+                btnCapNhatXetNghiem.Visibility = Visibility.Visible;
+                MainFrame.Navigate(new ThuNhanMauPage());
+            }
+            else if (role == "BS")
+            {
+                // Bác sĩ sẽ có Dashboard riêng, nhưng tạm thời mượn frame này.
+                // Sẽ navigate sang trang Danh Sách Chờ Khám
+            }
+            else
+            {
+                // Default fallback
+                MainFrame.Navigate(new DonDangKyPage());
+            }
+        }
+
+        private void btnDonDangKy_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new DonDangKyPage());
+        }
+
+        private void btnTinhNguyenVien_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new TinhNguyenVienPage());
+        }
+
+        private void btnKhaiBaoYTe_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new KhaiBaoYTePage());
+        }
+
+        private void btnThuNhanMau_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new ThuNhanMauPage());
+        }
+
+        private void btnCapNhatXetNghiem_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new CapNhatXetNghiemPage());
         }
 
         private void btnLogout_Click(object sender, RoutedEventArgs e)
         {
-            ApiClient.Instance.ClearToken();
-            var login = new LoginWindow();
-            login.Show();
-            this.Close();
+            var result = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                ApiClient.Instance.Logout();
+                var loginWindow = new LoginWindow();
+                loginWindow.Show();
+                this.Close();
+            }
         }
     }
 }

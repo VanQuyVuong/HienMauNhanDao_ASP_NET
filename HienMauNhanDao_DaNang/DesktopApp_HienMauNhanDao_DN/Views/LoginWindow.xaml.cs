@@ -45,7 +45,8 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                     var result = JsonConvert.DeserializeObject<ApiResponse<LoginResponse>>(responseString);
                     if (result != null && result.Success && result.Data != null && !string.IsNullOrEmpty(result.Data.Token))
                     {
-                        ApiClient.Instance.SetToken(result.Data.Token);
+                        // Lưu Token và Role vào ApiClient (Singleton)
+                        ApiClient.Instance.SetToken(result.Data.Token, result.Data.Role);
                         
                         // Ở đây mặc định hướng tới màn hình NVYT theo luồng nghiệp vụ hiện tại
                         var dashboard = new NVYTDashboard();
