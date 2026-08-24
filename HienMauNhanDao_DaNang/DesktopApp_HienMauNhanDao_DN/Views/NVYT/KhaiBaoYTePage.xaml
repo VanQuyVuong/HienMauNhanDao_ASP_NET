@@ -1,0 +1,212 @@
+<Page x:Class="DesktopApp_HienMauNhanDao_DN.Views.NVYT.KhaiBaoYTePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="clr-namespace:DesktopApp_HienMauNhanDao_DN.Views.NVYT"
+      Title="Khai Báo Y Tế" Background="White" Loaded="Page_Loaded">
+
+    <Page.Resources>
+        <local:BoolToYesNoConverter x:Key="BoolToYesNoConverter"/>
+        <local:BoolToColorConverter x:Key="BoolToColorConverter"/>
+        <!-- TabControl Style -->
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Border" Padding="20,10" Margin="0,0,10,0" Background="#f1f5f9" CornerRadius="8,8,0,0">
+                            <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#dc2626"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter Property="Foreground" Value="#64748b"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- DataGrid Style -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#e2e8f0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#f8fafc"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#f1f5f9"/>
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
+            <Setter Property="RowHeight" Value="45"/>
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#f1f5f9"/>
+            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#cbd5e1"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="HỒ SƠ KHAI BÁO Y TẾ &amp; SỨC KHỎE" FontSize="24" FontWeight="Black" Foreground="#1e293b" Margin="0,0,0,15"/>
+
+        <TabControl Grid.Row="1">
+            <!-- TAB 1: KHAI BÁO MỚI -->
+            <TabItem Header="Khai Báo Y Tế Mới">
+                <Grid Margin="0,15,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Border Grid.Row="0" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                        <StackPanel>
+                            <TextBlock Text="Nhập mã đơn đăng ký" FontSize="14" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,10"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="150"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="txtMaDon" Grid.Column="0" Height="40" Padding="15,0" BorderBrush="#cbd5e1" BorderThickness="1" VerticalContentAlignment="Center" FontSize="14" Margin="0,0,10,0"/>
+                                <Button x:Name="btnCheckMaDon" Grid.Column="1" Content="Kiểm tra" Background="#dc2626" Foreground="White" FontWeight="Bold" Cursor="Hand" BorderThickness="0" Click="btnCheckMaDon_Click"/>
+                            </Grid>
+                            <TextBlock x:Name="txtStatus" Margin="0,10,0,0" FontSize="14" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border x:Name="FormKhaiBao" Grid.Row="1" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="8" Padding="20" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="Tình trạng sức khỏe hiện tại" FontSize="16" FontWeight="Bold" Foreground="#1e293b" Margin="0,0,0,15"/>
+                            
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <TextBlock Text="1. Bạn có đang cảm thấy mệt mỏi, sốt hoặc đau họng không?" VerticalAlignment="Center"/>
+                                <RadioButton x:Name="rbQ1_Yes" Content="Có" Grid.Column="1" Margin="10,0" GroupName="Q1"/>
+                                <RadioButton x:Name="rbQ1_No" Content="Không" Grid.Column="2" IsChecked="True" GroupName="Q1"/>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <TextBlock Text="2. Bạn có đang dùng thuốc kháng sinh hay điều trị bệnh nào không?" VerticalAlignment="Center"/>
+                                <RadioButton x:Name="rbQ2_Yes" Content="Có" Grid.Column="1" Margin="10,0" GroupName="Q2"/>
+                                <RadioButton x:Name="rbQ2_No" Content="Không" Grid.Column="2" IsChecked="True" GroupName="Q2"/>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <TextBlock Text="3. Trong 6 tháng qua, bạn có mắc bệnh truyền nhiễm hay phẫu thuật không?" VerticalAlignment="Center"/>
+                                <RadioButton x:Name="rbQ3_Yes" Content="Có" Grid.Column="1" Margin="10,0" GroupName="Q3"/>
+                                <RadioButton x:Name="rbQ3_No" Content="Không" Grid.Column="2" IsChecked="True" GroupName="Q3"/>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,15">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <TextBlock Text="4. Đối với nữ: Bạn có đang trong kỳ kinh nguyệt, mang thai hoặc cho con bú?" VerticalAlignment="Center"/>
+                                <RadioButton x:Name="rbQ4_Yes" Content="Có" Grid.Column="1" Margin="10,0" GroupName="Q4"/>
+                                <RadioButton x:Name="rbQ4_No" Content="Không" Grid.Column="2" IsChecked="True" GroupName="Q4"/>
+                            </Grid>
+
+                            <TextBlock Text="Mô tả khác" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <TextBox x:Name="txtMoTaKhac" Height="60" TextWrapping="Wrap" AcceptsReturn="True" Padding="10" BorderBrush="#cbd5e1" BorderThickness="1" Margin="0,0,0,15"/>
+
+                            <CheckBox x:Name="cbCamDoan" Content="Tôi cam đoan những thông tin trên là hoàn toàn đúng sự thật." FontWeight="SemiBold" Margin="0,0,0,20"/>
+
+                            <Button x:Name="btnSubmitKhaiBao" Content="LƯU KHAI BÁO Y TẾ" Height="45" Background="#0284c7" Foreground="White" FontWeight="Bold" FontSize="14" Cursor="Hand" BorderThickness="0" Click="btnSubmitKhaiBao_Click"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- TAB 2: DANH SÁCH -->
+            <TabItem Header="Danh Sách Hồ Sơ Đã Khai Báo">
+                <Grid Margin="0,15,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Button x:Name="btnRefreshList" Grid.Row="0" Content="LÀM MỚI" Height="35" Width="100" HorizontalAlignment="Right" Margin="0,0,0,10"
+                            Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" Foreground="#475569" FontWeight="Bold" Cursor="Hand" Click="btnRefreshList_Click"/>
+
+                    <Border Grid.Row="1" CornerRadius="8" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" ClipToBounds="True">
+                        <DataGrid x:Name="dgHoSo" Margin="-1">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Mã Hồ Sơ" Binding="{Binding MaHoSo}" Width="100"/>
+                                <DataGridTextColumn Header="Mã Đơn" Binding="{Binding MaDon}" Width="100"/>
+                                
+                                <DataGridTemplateColumn Header="Sốt/Đau họng" Width="110">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding DauHong, Converter={StaticResource BoolToYesNoConverter}}" Foreground="{Binding DauHong, Converter={StaticResource BoolToColorConverter}}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="Kháng sinh" Width="110">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding KhangSinh, Converter={StaticResource BoolToYesNoConverter}}" Foreground="{Binding KhangSinh, Converter={StaticResource BoolToColorConverter}}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="Truyền nhiễm" Width="110">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding TruyenNhiem, Converter={StaticResource BoolToYesNoConverter}}" Foreground="{Binding TruyenNhiem, Converter={StaticResource BoolToColorConverter}}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="Thai sản" Width="110">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding CoThai, Converter={StaticResource BoolToYesNoConverter}}" Foreground="{Binding CoThai, Converter={StaticResource BoolToColorConverter}}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="Mô tả" Binding="{Binding MoTaKhac}" Width="*"/>
+
+                                <DataGridTemplateColumn Header="Thao Tác" Width="130">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <Button Content="Sửa" Width="50" Height="28" Margin="0,0,5,0" Background="#0284c7" Foreground="White" BorderThickness="0" Cursor="Hand" Click="btnEditHoSo_Click"/>
+                                                <Button Content="Xóa" Width="50" Height="28" Background="#dc2626" Foreground="White" BorderThickness="0" Cursor="Hand" Click="btnDeleteHoSo_Click"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Page>
