@@ -48,9 +48,18 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                         // Lưu Token và Role vào ApiClient (Singleton)
                         ApiClient.Instance.SetToken(result.Data.Token, result.Data.Role);
                         
-                        // Ở đây mặc định hướng tới màn hình NVYT theo luồng nghiệp vụ hiện tại
-                        var dashboard = new NVYTDashboard();
-                        dashboard.Show();
+                        string role = (result.Data.Role ?? "").Trim();
+                        if (role == "BS")
+                        {
+                            var bacSiDashboard = new DesktopApp_HienMauNhanDao_DN.Views.BacSi.BacSiDashboard();
+                            bacSiDashboard.Show();
+                        }
+                        else
+                        {
+                            var dashboard = new NVYTDashboard();
+                            dashboard.Show();
+                        }
+                        
                         this.Close();
                     }
                     else
@@ -65,7 +74,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi kết nối máy chủ: {ex.Message}", "Lỗi hệ thống", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi chi tiết: {ex.Message}\n\nNguồn phát sinh lỗi:\n{ex.StackTrace}", "Lỗi hệ thống", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
