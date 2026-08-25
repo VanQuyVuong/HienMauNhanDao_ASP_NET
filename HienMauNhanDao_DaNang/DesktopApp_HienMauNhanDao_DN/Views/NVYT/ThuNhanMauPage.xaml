@@ -35,210 +35,215 @@
         </Style>
     </Page.Resources>
 
-    <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="28">
-                <!-- Header Gradient Banner -->
-                <Border CornerRadius="22" Padding="28,24" Margin="0,0,0,24">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                            <GradientStop Color="#dc2626" Offset="0.0"/>
-                            <GradientStop Color="#e11d48" Offset="0.5"/>
-                            <GradientStop Color="#db2777" Offset="1.0"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Column="0">
-                            <Border Background="#33ffffff" CornerRadius="12" Padding="12,5" HorizontalAlignment="Left" Margin="0,0,0,10">
-                                <TextBlock Text="🩸 TRẠM THU NHẬN MÁU &amp; CẤP BARCODE ĐỊNH DANH" Foreground="White" FontSize="12" FontWeight="Black"/>
-                            </Border>
-                            <TextBlock Text="Thu Nhận Máu &amp; In Nhãn Barcode Dán Túi" Foreground="White" FontSize="25" FontWeight="Black"/>
-                            <TextBlock Text="Tiếp nhận TNV đủ điều kiện sức khỏe từ Bác Sĩ, sinh mã vạch Barcode dán túi máu và ghi nhận thông số thể tích lấy máu" 
-                                       Foreground="#ffe4e6" FontSize="13" FontWeight="Medium" Margin="0,6,0,0"/>
-                        </StackPanel>
+        <!-- Fixed Header Gradient Banner -->
+        <Border Grid.Row="0" CornerRadius="22" Padding="28,20" Margin="0,0,0,20">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#dc2626" Offset="0.0"/>
+                    <GradientStop Color="#e11d48" Offset="0.5"/>
+                    <GradientStop Color="#db2777" Offset="1.0"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                        <!-- Header Tab Switcher -->
-                        <Border Grid.Column="1" VerticalAlignment="Center" Background="#33ffffff" Padding="5" CornerRadius="16">
-                            <StackPanel Orientation="Horizontal">
-                                <Button x:Name="btnTabPending" Content="💉 1. Ca Chờ Lấy Máu" Height="42" Padding="18,0" 
-                                        Background="White" Foreground="#be123c" FontWeight="Black" FontSize="13" 
-                                        Cursor="Hand" BorderThickness="0" Click="btnTabPending_Click">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="12" Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                                <Button x:Name="btnTabCompleted" Content="🩸 2. Túi Máu Đã Lấy (Chờ XN)" Height="42" Padding="18,0" Margin="6,0,0,0"
-                                        Background="Transparent" Foreground="White" FontWeight="Bold" FontSize="13" 
-                                        Cursor="Hand" BorderThickness="0" Click="btnTabCompleted_Click">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="12" Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-                </Border>
+                <StackPanel Grid.Column="0">
+                    <Border Background="#33ffffff" CornerRadius="12" Padding="12,4" HorizontalAlignment="Left" Margin="0,0,0,8">
+                        <TextBlock Text="🩸 TRẠM THU NHẬN MÁU &amp; CẤP BARCODE ĐỊNH DANH" Foreground="White" FontSize="11" FontWeight="Black"/>
+                    </Border>
+                    <TextBlock Text="Thu Nhận Máu &amp; In Nhãn Barcode Dán Túi" Foreground="White" FontSize="22" FontWeight="Black"/>
+                    <TextBlock Text="Tiếp nhận TNV đủ điều kiện sức khỏe từ Bác Sĩ, sinh mã vạch Barcode dán túi máu và ghi nhận thông số thể tích lấy máu" 
+                               Foreground="#ffe4e6" FontSize="12" FontWeight="Medium" Margin="0,4,0,0"/>
+                </StackPanel>
 
-                <!-- Toolbar: Search Bar & Blood Type Selector -->
-                <Border Background="White" BorderBrush="#ffe4e6" BorderThickness="1" CornerRadius="18" Padding="18" Margin="0,0,0,20">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="120"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBox x:Name="txtSearch" Grid.Column="0" Height="46" Padding="14,0" BorderBrush="#fecdd3" BorderThickness="1.5" 
-                                 VerticalContentAlignment="Center" FontSize="14" FontWeight="SemiBold" Foreground="#0f172a" 
-                                 TextChanged="txtSearch_TextChanged" Tag="🔍 Tìm theo mã đơn, mã túi, họ tên TNV..."/>
-
-                        <ComboBox x:Name="cbBloodFilter" Grid.Column="2" Height="46" VerticalContentAlignment="Center" 
-                                  FontSize="13" FontWeight="Black" Foreground="#0f172a" SelectionChanged="cbBloodFilter_SelectionChanged">
-                            <ComboBoxItem Content="Tất cả nhóm máu" IsSelected="True" Tag="ALL"/>
-                            <ComboBoxItem Content="Nhóm A" Tag="A"/>
-                            <ComboBoxItem Content="Nhóm B" Tag="B"/>
-                            <ComboBoxItem Content="Nhóm O" Tag="O"/>
-                            <ComboBoxItem Content="Nhóm AB" Tag="AB"/>
-                        </ComboBox>
-
-                        <Button x:Name="btnRefresh" Grid.Column="4" Content="LÀM MỚI" Height="46" 
-                                Background="#fff1f2" BorderBrush="#fecdd3" BorderThickness="1" Foreground="#e11d48" 
-                                FontWeight="Black" FontSize="13" Cursor="Hand" Click="btnRefresh_Click">
+                <!-- Header Tab Switcher -->
+                <Border Grid.Column="1" VerticalAlignment="Center" Background="#33ffffff" Padding="4" CornerRadius="16">
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="btnTabPending" Content="💉 1. Ca Chờ Lấy Máu" Height="40" Padding="16,0" 
+                                Background="White" Foreground="#be123c" FontWeight="Black" FontSize="12" 
+                                Cursor="Hand" BorderThickness="0" Click="btnTabPending_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="12" Padding="{TemplateBinding Padding}">
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-                    </Grid>
+                        <Button x:Name="btnTabCompleted" Content="🩸 2. Túi Máu Đã Lấy (Chờ XN)" Height="40" Padding="16,0" Margin="6,0,0,0"
+                                Background="Transparent" Foreground="White" FontWeight="Bold" FontSize="12" 
+                                Cursor="Hand" BorderThickness="0" Click="btnTabCompleted_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
                 </Border>
+            </Grid>
+        </Border>
 
-                <!-- TAB 1: CA CHỜ LẤY MÁU (Approved Donors Table) -->
-                <StackPanel x:Name="ViewPending">
-                    <Border CornerRadius="18" Background="White" BorderBrush="#ffe4e6" BorderThickness="1" ClipToBounds="True">
-                        <DataGrid x:Name="dgPending" Margin="-1">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Mã Đơn" Binding="{Binding MaDon}" Width="120"/>
-                                <DataGridTextColumn Header="Họ và Tên TNV" Binding="{Binding TenTinhNguyenVien}" Width="*"/>
-                                <DataGridTextColumn Header="CCCD" Binding="{Binding Cccd}" Width="140"/>
-                                <DataGridTextColumn Header="Giới Tính / Ngày Sinh" Binding="{Binding GioiTinhNgaySinh}" Width="160"/>
-                                
-                                <DataGridTemplateColumn Header="Nhóm Máu" Width="120">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Border Background="#e11d48" Padding="12,4" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding NhomMau}" Foreground="White" FontWeight="Black" FontSize="12"/>
-                                            </Border>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+        <!-- Fixed Toolbar: Search Bar & Blood Type Selector -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#ffe4e6" BorderThickness="1" CornerRadius="18" Padding="16" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="120"/>
+                </Grid.ColumnDefinitions>
 
-                                <DataGridTextColumn Header="Đợt Hiến Máu" Binding="{Binding TenChienDich}" Width="200"/>
+                <TextBox x:Name="txtSearch" Grid.Column="0" Height="42" Padding="14,0" BorderBrush="#fecdd3" BorderThickness="1.5" 
+                         VerticalContentAlignment="Center" FontSize="13" FontWeight="SemiBold" Foreground="#0f172a" 
+                         TextChanged="txtSearch_TextChanged" Tag="🔍 Tìm theo mã đơn, mã túi, họ tên TNV..."/>
 
-                                <DataGridTemplateColumn Header="Thao Tác" Width="220">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Content="🏷️ Sinh Barcode &amp; Lấy Máu" Height="36" Padding="14,0" 
-                                                    Background="#e11d48" Foreground="White" FontWeight="Black" FontSize="12" 
-                                                    Cursor="Hand" BorderThickness="0" Click="btnCreateBarcode_Click">
-                                                <Button.Template>
-                                                    <ControlTemplate TargetType="Button">
-                                                        <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
-                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </Button.Template>
-                                            </Button>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Border>
-                </StackPanel>
+                <ComboBox x:Name="cbBloodFilter" Grid.Column="2" Height="42" VerticalContentAlignment="Center" 
+                          FontSize="13" FontWeight="Black" Foreground="#0f172a" SelectionChanged="cbBloodFilter_SelectionChanged">
+                    <ComboBoxItem Content="Tất cả nhóm máu" IsSelected="True" Tag="ALL"/>
+                    <ComboBoxItem Content="Nhóm A" Tag="A"/>
+                    <ComboBoxItem Content="Nhóm B" Tag="B"/>
+                    <ComboBoxItem Content="Nhóm O" Tag="O"/>
+                    <ComboBoxItem Content="Nhóm AB" Tag="AB"/>
+                </ComboBox>
 
-                <!-- TAB 2: TÚI MÁU ĐÃ LẤY (Completed Blood Bags Table) -->
-                <StackPanel x:Name="ViewCompleted" Visibility="Collapsed">
-                    <Border CornerRadius="18" Background="White" BorderBrush="#ffe4e6" BorderThickness="1" ClipToBounds="True">
-                        <DataGrid x:Name="dgCompleted" Margin="-1">
-                            <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Mã Túi Máu" Width="140">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Border Background="#fff1f2" BorderBrush="#fecdd3" BorderThickness="1" Padding="10,4" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding MaTuiMau}" Foreground="#be123c" FontWeight="Black" FontSize="13" FontFamily="Consolas"/>
-                                            </Border>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                <Button x:Name="btnRefresh" Grid.Column="4" Content="LÀM MỚI" Height="42" 
+                        Background="#fff1f2" BorderBrush="#fecdd3" BorderThickness="1" Foreground="#e11d48" 
+                        FontWeight="Black" FontSize="12" Cursor="Hand" Click="btnRefresh_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Border>
 
-                                <DataGridTextColumn Header="Mã Đơn" Binding="{Binding MaDon}" Width="120"/>
-                                <DataGridTextColumn Header="Họ và Tên TNV" Binding="{Binding TenTinhNguyenVien}" Width="*"/>
-                                
-                                <DataGridTemplateColumn Header="Nhóm Máu" Width="110">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Border Background="#e11d48" Padding="12,4" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding NhomMau}" Foreground="White" FontWeight="Black" FontSize="12"/>
-                                            </Border>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+        <!-- DYNAMIC DATA CONTENT AREA (Only DataGrid Scrolls) -->
+        <Grid Grid.Row="2">
+            <!-- TAB 1: CA CHỜ LẤY MÁU (Approved Donors Table) -->
+            <Grid x:Name="ViewPending">
+                <Border CornerRadius="18" Background="White" BorderBrush="#ffe4e6" BorderThickness="1" ClipToBounds="True">
+                    <DataGrid x:Name="dgPending" Margin="-1">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Mã Đơn" Binding="{Binding MaDon}" Width="120"/>
+                            <DataGridTextColumn Header="Họ và Tên TNV" Binding="{Binding TenTinhNguyenVien}" Width="*"/>
+                            <DataGridTextColumn Header="CCCD" Binding="{Binding Cccd}" Width="140"/>
+                            <DataGridTextColumn Header="Giới Tính / Ngày Sinh" Binding="{Binding GioiTinhNgaySinh}" Width="160"/>
+                            
+                            <DataGridTemplateColumn Header="Nhóm Máu" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#e11d48" Padding="12,4" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding NhomMau}" Foreground="White" FontWeight="Black" FontSize="12"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="Thể Tích" Binding="{Binding TheTich, StringFormat={}{0} ml}" Width="110"/>
-                                <DataGridTextColumn Header="Thời Gian Lấy" Binding="{Binding ThoiGianLayMau, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
-                                <DataGridTextColumn Header="Nhiệt Độ" Binding="{Binding NhietDoVanChuyen, StringFormat={}{0} °C}" Width="100"/>
-                                
-                                <DataGridTemplateColumn Header="Trạng Thái" Width="150">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Border Background="#fef3c7" BorderBrush="#fde68a" BorderThickness="1" Padding="10,4" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                                <TextBlock Text="⏳ Chờ xét nghiệm" Foreground="#b45309" FontWeight="Black" FontSize="12"/>
-                                            </Border>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Đợt Hiến Máu" Binding="{Binding TenChienDich}" Width="200"/>
 
-                                <DataGridTemplateColumn Header="Thao Tác" Width="160">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <Button Content="✏️ Sửa" Height="32" Padding="10,0" Margin="0,0,6,0"
-                                                        Background="#f1f5f9" Foreground="#334155" FontWeight="Bold" FontSize="11" 
-                                                        Cursor="Hand" BorderThickness="0" Click="btnEditBag_Click"/>
-                                                <Button Content="🗑️ Xóa" Height="32" Padding="10,0" 
-                                                        Background="#fff1f2" Foreground="#e11d48" FontWeight="Bold" FontSize="11" 
-                                                        Cursor="Hand" BorderThickness="0" Click="btnDeleteBag_Click"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Border>
-                </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
+                            <DataGridTemplateColumn Header="Thao Tác" Width="220">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="🏷️ Sinh Barcode &amp; Lấy Máu" Height="36" Padding="14,0" 
+                                                Background="#e11d48" Foreground="White" FontWeight="Black" FontSize="12" 
+                                                Cursor="Hand" BorderThickness="0" Click="btnCreateBarcode_Click">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </Grid>
+
+            <!-- TAB 2: TÚI MÁU ĐÃ LẤY (Completed Blood Bags Table - Only DataGrid Scrolls) -->
+            <Grid x:Name="ViewCompleted" Visibility="Collapsed">
+                <Border CornerRadius="18" Background="White" BorderBrush="#ffe4e6" BorderThickness="1" ClipToBounds="True">
+                    <DataGrid x:Name="dgCompleted" Margin="-1">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Mã Túi Máu" Width="140">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#fff1f2" BorderBrush="#fecdd3" BorderThickness="1" Padding="10,4" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding MaTuiMau}" Foreground="#be123c" FontWeight="Black" FontSize="13" FontFamily="Consolas"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Mã Đơn" Binding="{Binding MaDon}" Width="120"/>
+                            <DataGridTextColumn Header="Họ và Tên TNV" Binding="{Binding TenTinhNguyenVien}" Width="*"/>
+                            
+                            <DataGridTemplateColumn Header="Nhóm Máu" Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#e11d48" Padding="12,4" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding NhomMau}" Foreground="White" FontWeight="Black" FontSize="12"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Thể Tích" Binding="{Binding TheTich, StringFormat={}{0} ml}" Width="110"/>
+                            <DataGridTextColumn Header="Thời Gian Lấy" Binding="{Binding ThoiGianLayMau, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
+                            <DataGridTextColumn Header="Nhiệt Độ" Binding="{Binding NhietDoVanChuyen, StringFormat={}{0} °C}" Width="100"/>
+                            
+                            <DataGridTemplateColumn Header="Trạng Thái" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#fef3c7" BorderBrush="#fde68a" BorderThickness="1" Padding="10,4" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Text="⏳ Chờ xét nghiệm" Foreground="#b45309" FontWeight="Black" FontSize="12"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Thao Tác" Width="160">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button Content="✏️ Sửa" Height="32" Padding="10,0" Margin="0,0,6,0"
+                                                    Background="#f1f5f9" Foreground="#334155" FontWeight="Bold" FontSize="11" 
+                                                    Cursor="Hand" BorderThickness="0" Click="btnEditBag_Click"/>
+                                            <Button Content="🗑️ Xóa" Height="32" Padding="10,0" 
+                                                    Background="#fff1f2" Foreground="#e11d48" FontWeight="Bold" FontSize="11" 
+                                                    Cursor="Hand" BorderThickness="0" Click="btnDeleteBag_Click"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </Grid>
+        </Grid>
 
         <!-- DIALOG MODAL: BARCODE SIMULATOR & COLLECTION FORM -->
-        <Grid x:Name="BarcodeModal" Background="#aa0f172a" Visibility="Collapsed">
+        <Grid x:Name="BarcodeModal" Grid.RowSpan="3" Background="#aa0f172a" Visibility="Collapsed">
             <Border Background="#0f172a" CornerRadius="28" Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0" Margin="20">
                 <StackPanel>
                     <!-- Modal Header -->
