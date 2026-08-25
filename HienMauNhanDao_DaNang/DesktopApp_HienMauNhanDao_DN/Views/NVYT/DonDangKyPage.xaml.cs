@@ -92,17 +92,20 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
 
         private void FilterData()
         {
-            var keyword = txtSearch.Text.Trim().ToLower();
+            if (dgDonDangKy == null) return;
+            if (_allDons == null) _allDons = new List<DonDangKy>();
+
+            var keyword = txtSearch?.Text?.Trim()?.ToLower() ?? "";
             if (string.IsNullOrEmpty(keyword))
             {
-                dgDonDangKy.ItemsSource = _allDons.OrderByDescending(d => d.ThoiGianDangKy).ToList();
+                dgDonDangKy.ItemsSource = _allDons.Where(d => d != null).OrderByDescending(d => d.ThoiGianDangKy).ToList();
             }
             else
             {
-                dgDonDangKy.ItemsSource = _allDons.Where(d => 
-                    (d.MaDon != null && d.MaDon.ToLower().Contains(keyword)) ||
-                    (d.HoTenTNV != null && d.HoTenTNV.ToLower().Contains(keyword)) ||
-                    (d.TenChienDich != null && d.TenChienDich.ToLower().Contains(keyword))
+                dgDonDangKy.ItemsSource = _allDons.Where(d => d != null && 
+                    ((d.MaDon != null && d.MaDon.ToLower().Contains(keyword)) ||
+                     (d.HoTenTNV != null && d.HoTenTNV.ToLower().Contains(keyword)) ||
+                     (d.TenChienDich != null && d.TenChienDich.ToLower().Contains(keyword)))
                 ).OrderByDescending(x => x.ThoiGianDangKy).ToList();
             }
         }

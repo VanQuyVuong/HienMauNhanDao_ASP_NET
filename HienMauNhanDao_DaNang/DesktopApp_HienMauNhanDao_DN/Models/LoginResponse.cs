@@ -10,6 +10,9 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
         [JsonProperty("maVaiTro")]
         public string Role { get; set; }
 
+        [JsonProperty("MaVaiTro")]
+        public string RoleAlt { set { if (string.IsNullOrEmpty(Role)) Role = value; } }
+
         [JsonProperty("email")]
         public string Email { get; set; }
     }

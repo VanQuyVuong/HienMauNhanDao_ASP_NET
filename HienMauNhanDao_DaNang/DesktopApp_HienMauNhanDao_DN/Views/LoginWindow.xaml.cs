@@ -48,9 +48,18 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                         // Lưu Token và Role vào ApiClient (Singleton)
                         ApiClient.Instance.SetToken(result.Data.Token, result.Data.Role);
                         
-                        // Ở đây mặc định hướng tới màn hình NVYT theo luồng nghiệp vụ hiện tại
-                        var dashboard = new NVYTDashboard();
-                        dashboard.Show();
+                        string role = (result.Data.Role ?? "").Trim();
+                        if (role == "BS")
+                        {
+                            var bacSiDashboard = new DesktopApp_HienMauNhanDao_DN.Views.BacSi.BacSiDashboard();
+                            bacSiDashboard.Show();
+                        }
+                        else
+                        {
+                            var dashboard = new NVYTDashboard();
+                            dashboard.Show();
+                        }
+                        
                         this.Close();
                     }
                     else
@@ -60,12 +69,23 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                 }
                 else
                 {
-                    MessageBox.Show("Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    string errStr = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        var apiRes = JsonConvert.DeserializeObject<ApiResponse<object>>(errStr);
+                        if (apiRes != null && !string.IsNullOrEmpty(apiRes.Message))
+                        {
+                            errStr = apiRes.Message;
+                        }
+                    }
+                    catch { }
+
+                    MessageBox.Show($"Đăng nhập thất bại ({response.StatusCode}):\n{errStr}", "Lỗi đăng nhập", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi kết nối máy chủ: {ex.Message}", "Lỗi hệ thống", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi chi tiết: {ex.Message}\n\nNguồn phát sinh lỗi:\n{ex.StackTrace}", "Lỗi hệ thống", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

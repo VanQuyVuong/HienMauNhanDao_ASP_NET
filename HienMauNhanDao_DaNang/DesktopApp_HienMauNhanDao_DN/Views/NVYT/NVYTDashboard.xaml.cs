@@ -17,28 +17,24 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
 
         private void SetupMenuByRole()
         {
-            string role = ApiClient.Instance.Role;
+            string role = (ApiClient.Instance.Role ?? "").Trim().ToUpper();
 
-            if (role == "NVYT_LT" || role == "NVYT" || role == "NVYT-LT")
+            if (role.Contains("XN"))
             {
-                btnDonDangKy.Visibility = Visibility.Visible;
-                btnTinhNguyenVien.Visibility = Visibility.Visible;
-                btnKhaiBaoYTe.Visibility = Visibility.Visible;
+                if (btnThuNhanMau != null) btnThuNhanMau.Visibility = Visibility.Visible;
+                if (btnCapNhatXetNghiem != null) btnCapNhatXetNghiem.Visibility = Visibility.Visible;
                 
-                MainFrame.Navigate(new DonDangKyPage());
-                SetActiveButton(btnDonDangKy);
-            }
-            else if (role == "NVYT_XN" || role == "NVYT-XN")
-            {
-                btnThuNhanMau.Visibility = Visibility.Visible;
-                btnCapNhatXetNghiem.Visibility = Visibility.Visible;
-                
-                MainFrame.Navigate(new ThuNhanMauPage());
+                MainFrame?.Navigate(new ThuNhanMauPage());
                 SetActiveButton(btnThuNhanMau);
             }
             else
             {
-                MainFrame.Navigate(new DonDangKyPage());
+                // Default / Lễ tân / General NVYT
+                if (btnDonDangKy != null) btnDonDangKy.Visibility = Visibility.Visible;
+                if (btnTinhNguyenVien != null) btnTinhNguyenVien.Visibility = Visibility.Visible;
+                if (btnKhaiBaoYTe != null) btnKhaiBaoYTe.Visibility = Visibility.Visible;
+                
+                MainFrame?.Navigate(new DonDangKyPage());
                 SetActiveButton(btnDonDangKy);
             }
         }
@@ -55,14 +51,17 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
             
             foreach (var btn in allButtons)
             {
+                if (btn == null) continue;
                 if (btn == activeBtn)
                 {
+                    btn.Tag = "Active";
                     btn.Background = activeBg;
                     btn.Foreground = activeFg;
                     btn.FontWeight = FontWeights.Bold;
                 }
                 else
                 {
+                    btn.Tag = "Inactive";
                     btn.Background = inactiveBg;
                     btn.Foreground = inactiveFg;
                     btn.FontWeight = FontWeights.SemiBold;
