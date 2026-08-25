@@ -62,8 +62,8 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.BacSi
                 }
                 catch { }
 
-                // Fallback API if /api/khamlamsang/cho-kham is empty
-                if (list == null || list.Count == 0)
+                // Fallback API ONLY if response failed or returned null
+                if (list == null)
                 {
                     try
                     {

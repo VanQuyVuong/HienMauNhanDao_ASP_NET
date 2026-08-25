@@ -69,7 +69,18 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                 }
                 else
                 {
-                    MessageBox.Show("Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    string errStr = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        var apiRes = JsonConvert.DeserializeObject<ApiResponse<object>>(errStr);
+                        if (apiRes != null && !string.IsNullOrEmpty(apiRes.Message))
+                        {
+                            errStr = apiRes.Message;
+                        }
+                    }
+                    catch { }
+
+                    MessageBox.Show($"Đăng nhập thất bại ({response.StatusCode}):\n{errStr}", "Lỗi đăng nhập", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
