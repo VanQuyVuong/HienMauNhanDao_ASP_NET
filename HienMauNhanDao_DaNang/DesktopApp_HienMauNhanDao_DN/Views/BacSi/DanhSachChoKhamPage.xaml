@@ -1,0 +1,173 @@
+<Page x:Class="DesktopApp_HienMauNhanDao_DN.Views.BacSi.DanhSachChoKhamPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Danh Sách Chờ Khám" Background="White" Loaded="Page_Loaded">
+
+    <Page.Resources>
+        <!-- DataGrid Style -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#e2e8f0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#fff1f2"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#ffe4e6"/>
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
+            <Setter Property="RowHeight" Value="48"/>
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#fff1f2"/>
+            <Setter Property="Foreground" Value="#9f1239"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#fecdd3"/>
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderThickness="0">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#ffe4e6"/>
+                    <Setter Property="Foreground" Value="#9f1239"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header & Stats Cards -->
+        <Grid Grid.Row="0" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="DANH SÁCH TÌNH NGUYỆN VIÊN CHỜ KHÁM LÂM SÀNG" FontSize="20" FontWeight="Black" Foreground="#9f1239"/>
+                <TextBlock Text="Danh sách TNV đã qua bước Lễ Tân tiếp nhận tại quầy và sẵn sàng khám thể lực" FontSize="12" Foreground="#64748b" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Border Background="#fff1f2" BorderBrush="#fecdd3" BorderThickness="1" CornerRadius="10" Padding="15,8" Margin="0,0,10,0">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="CHỜ KHÁM NGAY" FontSize="10" FontWeight="Bold" Foreground="#9f1239" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="txtStatTotal" Text="0" FontSize="18" FontWeight="Black" Foreground="#9f1239" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#f0fdf4" BorderBrush="#bbf7d0" BorderThickness="1" CornerRadius="10" Padding="15,8" Margin="0,0,10,0">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="LỄ TÂN ĐÃ DUYỆT" FontSize="10" FontWeight="Bold" Foreground="#15803d" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="txtStatLeTan" Text="0" FontSize="18" FontWeight="Black" Foreground="#15803d" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#eff6ff" BorderBrush="#bfdbfe" BorderThickness="1" CornerRadius="10" Padding="15,8">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="TỰ ĐĂNG KÝ" FontSize="10" FontWeight="Bold" Foreground="#1d4ed8" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="txtStatTuDangKy" Text="0" FontSize="18" FontWeight="Black" Foreground="#1d4ed8" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+        
+        <!-- Controls -->
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="160"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Search -->
+            <Border Grid.Column="0" CornerRadius="8" BorderBrush="#cbd5e1" BorderThickness="1" Margin="0,0,15,0" HorizontalAlignment="Stretch" Background="White">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="🔍" Margin="10,0" VerticalAlignment="Center" Foreground="#94a3b8"/>
+                    <TextBox x:Name="txtSearch" Grid.Column="1" Height="38" BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center"
+                             Padding="0,0,10,0" FontSize="14" Foreground="#334155" KeyUp="txtSearch_KeyUp" Tag="Tìm theo mã đơn, họ tên, CCCD, SĐT..."/>
+                </Grid>
+            </Border>
+
+            <!-- Blood Filter -->
+            <ComboBox x:Name="cbBloodFilter" Grid.Column="1" Height="38" SelectionChanged="cbBloodFilter_SelectionChanged">
+                <ComboBoxItem Content="Tất cả nhóm máu" IsSelected="True" Tag="ALL"/>
+                <ComboBoxItem Content="Nhóm A" Tag="A"/>
+                <ComboBoxItem Content="Nhóm B" Tag="B"/>
+                <ComboBoxItem Content="Nhóm O" Tag="O"/>
+                <ComboBoxItem Content="Nhóm AB" Tag="AB"/>
+            </ComboBox>
+
+            <!-- Refresh Button -->
+            <Button x:Name="btnRefresh" Grid.Column="3" Content="LÀM MỚI" Height="38" Width="100" 
+                    Background="#fff1f2" BorderBrush="#fecdd3" BorderThickness="1" Foreground="#e11d48"
+                    FontWeight="Bold" Cursor="Hand" Click="btnRefresh_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
+
+        <!-- DataGrid -->
+        <Border Grid.Row="2" CornerRadius="10" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" ClipToBounds="True">
+            <DataGrid x:Name="dgChoKham" Margin="-1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Mã Đơn" Binding="{Binding MaDon}" Width="100"/>
+                    <DataGridTextColumn Header="Họ và Tên TNV" Binding="{Binding TenTinhNguyenVien}" Width="*"/>
+                    <DataGridTextColumn Header="CCCD/CMND" Binding="{Binding Cccd}" Width="140"/>
+                    <DataGridTextColumn Header="Số Điện Thoại" Binding="{Binding SoDienThoai}" Width="120"/>
+                    <DataGridTextColumn Header="Giới Tính" Binding="{Binding GioiTinh}" Width="80"/>
+                    <DataGridTextColumn Header="Thể Tích Dự Kiến" Binding="{Binding TheTich, StringFormat={}{0} ml}" Width="120"/>
+                    
+                    <DataGridTemplateColumn Header="Thao Tác" Width="140">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="🩺 KHÁM NGAY" Width="110" Height="30" Background="#e11d48" Foreground="White" 
+                                        FontWeight="Bold" FontSize="12" BorderThickness="0" Cursor="Hand" Click="btnKhamNow_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</Page>
