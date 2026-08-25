@@ -35,11 +35,16 @@
         </Style>
     </Page.Resources>
 
-    <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="28">
-                <!-- Hero Header Banner -->
-                <Border CornerRadius="22" Padding="28,24" Margin="0,0,0,24">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Hero Header Banner -->
+        <Border Grid.Row="0" CornerRadius="22" Padding="28,24" Margin="0,0,0,24">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                             <GradientStop Color="#dc2626" Offset="0.0"/>
@@ -60,7 +65,7 @@
                 </Border>
 
                 <!-- 4 Holographic Metric KPI Cards -->
-                <Grid Margin="0,0,0,24">
+        <Grid Grid.Row="1" Margin="0,0,0,24">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="16"/>
@@ -125,7 +130,7 @@
                 </Grid>
 
                 <!-- Toolbar: Search Bar & Blood Type Selector -->
-                <Border Background="White" BorderBrush="#ffe4e6" BorderThickness="1" CornerRadius="18" Padding="18" Margin="0,0,0,20">
+                <Border Grid.Row="2" Background="White" BorderBrush="#ffe4e6" BorderThickness="1" CornerRadius="18" Padding="18" Margin="0,0,0,20">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -163,7 +168,7 @@
                 </Border>
 
                 <!-- DataGrid Table -->
-                <Border CornerRadius="18" Background="White" BorderBrush="#ffe4e6" BorderThickness="1" ClipToBounds="True">
+                <Border Grid.Row="3" CornerRadius="18" Background="White" BorderBrush="#ffe4e6" BorderThickness="1" ClipToBounds="True">
                     <DataGrid x:Name="dgXetNghiem" Margin="-1">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Mã Túi Máu" Width="140">
@@ -240,11 +245,9 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
-            </StackPanel>
-        </ScrollViewer>
 
         <!-- DIAGNOSTIC MODAL PANEL (Cyber Clinical Theme) -->
-        <Grid x:Name="DiagnosticModal" Background="#aa0f172a" Visibility="Collapsed">
+        <Grid x:Name="DiagnosticModal" Grid.RowSpan="4" Background="#aa0f172a" Visibility="Collapsed">
             <Border Background="#0f172a" CornerRadius="28" Width="580" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0" Margin="20">
                 <StackPanel>
                     <!-- Modal Header -->
