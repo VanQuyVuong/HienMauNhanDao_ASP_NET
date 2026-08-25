@@ -19,21 +19,31 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
         {
             string role = (ApiClient.Instance.Role ?? "").Trim().ToUpper();
 
-            if (role.Contains("XN"))
+            // Hide all menu buttons first
+            if (btnDonDangKy != null) btnDonDangKy.Visibility = Visibility.Collapsed;
+            if (btnTinhNguyenVien != null) btnTinhNguyenVien.Visibility = Visibility.Collapsed;
+            if (btnKhaiBaoYTe != null) btnKhaiBaoYTe.Visibility = Visibility.Collapsed;
+            if (btnThuNhanMau != null) btnThuNhanMau.Visibility = Visibility.Collapsed;
+            if (btnCapNhatXetNghiem != null) btnCapNhatXetNghiem.Visibility = Visibility.Collapsed;
+
+            bool isXn = role.Contains("XN");
+
+            if (isXn)
             {
+                // Role NVYT_XN / NVYT-XN: Show strictly 2 Lab & Blood Collection Menu Items
                 if (btnThuNhanMau != null) btnThuNhanMau.Visibility = Visibility.Visible;
                 if (btnCapNhatXetNghiem != null) btnCapNhatXetNghiem.Visibility = Visibility.Visible;
-                
+
                 MainFrame?.Navigate(new ThuNhanMauPage());
                 SetActiveButton(btnThuNhanMau);
             }
             else
             {
-                // Default / Lễ tân / General NVYT
+                // Role NVYT_LT / NVYT-LT / General NVYT: Show strictly 3 Le Tan Reception Menu Items
                 if (btnDonDangKy != null) btnDonDangKy.Visibility = Visibility.Visible;
                 if (btnTinhNguyenVien != null) btnTinhNguyenVien.Visibility = Visibility.Visible;
                 if (btnKhaiBaoYTe != null) btnKhaiBaoYTe.Visibility = Visibility.Visible;
-                
+
                 MainFrame?.Navigate(new DonDangKyPage());
                 SetActiveButton(btnDonDangKy);
             }

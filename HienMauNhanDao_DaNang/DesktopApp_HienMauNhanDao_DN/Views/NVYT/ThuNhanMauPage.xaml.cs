@@ -27,6 +27,42 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
         public string GioiTinhNgaySinh => $"{GioiTinh} | {NgaySinh}";
     }
 
+    public class ChoThuNhanDto
+    {
+        [JsonProperty("maDon")]
+        public string MaDon { get; set; } = string.Empty;
+
+        [JsonProperty("hoTen")]
+        public string HoTen { get; set; } = string.Empty;
+
+        [JsonProperty("tenTinhNguyenVien")]
+        public string TenTinhNguyenVien { get; set; } = string.Empty;
+
+        [JsonProperty("cccd")]
+        public string Cccd { get; set; } = string.Empty;
+
+        [JsonProperty("gioiTinh")]
+        public string GioiTinh { get; set; } = "---";
+
+        [JsonProperty("ngaySinh")]
+        public string NgaySinh { get; set; } = "---";
+
+        [JsonProperty("nhomMau")]
+        public string NhomMau { get; set; } = "Chưa rõ";
+
+        [JsonProperty("tenChienDich")]
+        public string TenChienDich { get; set; } = string.Empty;
+
+        [JsonProperty("theTich")]
+        public int TheTich { get; set; } = 350;
+
+        [JsonProperty("daCapMa")]
+        public bool DaCapMa { get; set; }
+
+        [JsonProperty("maTuiMau")]
+        public string? MaTuiMau { get; set; }
+    }
+
     public partial class ThuNhanMauPage : Page
     {
         private List<PendingDonorDto> _allPending = new List<PendingDonorDto>();
@@ -76,46 +112,41 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/DonDangKy/tat-ca");
+                var response = await ApiClient.Instance.Client.GetAsync("/api/dondangky/cho-thu-nhan");
+                if (!response.IsSuccessStatusCode)
+                {
+                    response = await ApiClient.Instance.Client.GetAsync("/api/DonDangKy/tat-ca");
+                }
+
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    List<DonDangKy> dons = null;
+                    List<ChoThuNhanDto> items = null;
 
                     try
                     {
-                        var apiRes = JsonConvert.DeserializeObject<ApiResponse<List<DonDangKy>>>(json);
-                        if (apiRes != null && apiRes.Data != null) dons = apiRes.Data;
+                        var paginated = JsonConvert.DeserializeObject<PaginatedResponse<ChoThuNhanDto>>(json);
+                        if (paginated != null && paginated.Content != null) items = paginated.Content;
                     }
                     catch { }
 
-                    if (dons == null)
+                    if (items == null)
                     {
-                        try
-                        {
-                            var paginated = JsonConvert.DeserializeObject<PaginatedResponse<DonDangKy>>(json);
-                            if (paginated != null && paginated.Content != null) dons = paginated.Content;
-                        }
-                        catch { }
+                        try { items = JsonConvert.DeserializeObject<List<ChoThuNhanDto>>(json); } catch { }
                     }
 
-                    if (dons == null)
+                    if (items != null)
                     {
-                        try { dons = JsonConvert.DeserializeObject<List<DonDangKy>>(json); } catch { }
-                    }
-
-                    if (dons != null)
-                    {
-                        _allPending = dons.Select(d => new PendingDonorDto
+                        _allPending = items.Select(d => new PendingDonorDto
                         {
                             MaDon = d.MaDon,
-                            TenTinhNguyenVien = d.HoTenTNV,
-                            Cccd = d.TinhNguyenVien?.Cccd ?? "---",
-                            GioiTinh = d.TinhNguyenVien?.GioiTinh ?? "---",
-                            NgaySinh = d.TinhNguyenVien?.NgaySinh?.ToString("dd/MM/yyyy") ?? "---",
-                            NhomMau = d.TinhNguyenVien?.NhomMau ?? "Chưa rõ",
-                            TenChienDich = d.TenChienDich,
-                            TheTich = d.TheTich ?? 350
+                            TenTinhNguyenVien = !string.IsNullOrEmpty(d.HoTen) ? d.HoTen : (!string.IsNullOrEmpty(d.TenTinhNguyenVien) ? d.TenTinhNguyenVien : "TNV Hiến Máu"),
+                            Cccd = d.Cccd ?? "---",
+                            GioiTinh = d.GioiTinh ?? "---",
+                            NgaySinh = d.NgaySinh ?? "---",
+                            NhomMau = d.NhomMau ?? "Chưa rõ",
+                            TenChienDich = d.TenChienDich ?? "Hiến máu thường xuyên",
+                            TheTich = d.TheTich > 0 ? d.TheTich : 350
                         }).ToList();
                     }
                 }
