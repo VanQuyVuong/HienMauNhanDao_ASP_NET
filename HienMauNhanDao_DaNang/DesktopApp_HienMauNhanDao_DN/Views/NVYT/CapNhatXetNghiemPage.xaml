@@ -1,8 +1,385 @@
 <Page x:Class="DesktopApp_HienMauNhanDao_DN.Views.NVYT.CapNhatXetNghiemPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="Cập Nhật Xét Nghiệm">
-    <Grid Background="White" Margin="10">
-        <TextBlock Text="Màn hình Cập Nhật Xét Nghiệm Túi Máu" FontSize="20" FontWeight="Bold" Margin="10"/>
+      Title="Cập Nhật Xét Nghiệm" Background="#f8fafc" Loaded="Page_Loaded">
+
+    <Page.Resources>
+        <!-- DataGrid Style -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#ffe4e6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#fff1f2"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#ffe4e6"/>
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
+            <Setter Property="RowHeight" Value="54"/>
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#fff1f2"/>
+            <Setter Property="Foreground" Value="#9f1239"/>
+            <Setter Property="FontWeight" Value="Black"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#fecdd3"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="28">
+                <!-- Hero Header Banner -->
+                <Border CornerRadius="22" Padding="28,24" Margin="0,0,0,24">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#dc2626" Offset="0.0"/>
+                            <GradientStop Color="#e11d48" Offset="0.5"/>
+                            <GradientStop Color="#db2777" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Grid>
+                        <StackPanel>
+                            <Border Background="#33ffffff" CornerRadius="12" Padding="12,5" HorizontalAlignment="Left" Margin="0,0,0,10">
+                                <TextBlock Text="🔬 PHÒNG XÉT NGHIỆM VI SINH &amp; BẢO QUẢN KHO" Foreground="White" FontSize="12" FontWeight="Black"/>
+                            </Border>
+                            <TextBlock Text="Cập Nhật Kết Quả Xét Nghiệm &amp; Quản Lý Kho" Foreground="White" FontSize="25" FontWeight="Black"/>
+                            <TextBlock Text="Kiểm tra sàng lọc vi sinh phẩm túi máu (HBV, HCV, HIV, Giang Mai), đánh giá chất lượng &amp; xử lý Re-test với Quản lý kho" 
+                                       Foreground="#ffe4e6" FontSize="13" FontWeight="Medium" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 4 Holographic Metric KPI Cards -->
+                <Grid Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- KPI 1: Tổng Ca Chờ XN -->
+                    <Border Grid.Column="0" Background="White" BorderBrush="#ffe4e6" BorderThickness="1.5" CornerRadius="18" Padding="18,16">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="TỔNG CA CHỜ XN" FontSize="11" FontWeight="Black" Foreground="#64748b"/>
+                                <TextBlock x:Name="txtKpiTongSo" Text="0" FontSize="26" FontWeight="Black" Foreground="#0f172a" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <Border Width="42" Height="42" CornerRadius="12" Background="#eff6ff" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="🔬" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- KPI 2: Đạt Tiêu Chuẩn -->
+                    <Border Grid.Column="2" Background="White" BorderBrush="#ffe4e6" BorderThickness="1.5" CornerRadius="18" Padding="18,16">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="ĐẠT TIÊU CHUẨN" FontSize="11" FontWeight="Black" Foreground="#15803d"/>
+                                <TextBlock x:Name="txtKpiDat" Text="0" FontSize="26" FontWeight="Black" Foreground="#15803d" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <Border Width="42" Height="42" CornerRadius="12" Background="#f0fdf4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="✅" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- KPI 3: Không Đạt (Hủy) -->
+                    <Border Grid.Column="4" Background="White" BorderBrush="#ffe4e6" BorderThickness="1.5" CornerRadius="18" Padding="18,16">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="KHÔNG ĐẠT (HỦY)" FontSize="11" FontWeight="Black" Foreground="#e11d48"/>
+                                <TextBlock x:Name="txtKpiKhongDat" Text="0" FontSize="26" FontWeight="Black" Foreground="#e11d48" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <Border Width="42" Height="42" CornerRadius="12" Background="#fff1f2" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="❌" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- KPI 4: Re-Test Kho Máu -->
+                    <Border Grid.Column="6" Background="White" BorderBrush="#f5d0fe" BorderThickness="1.5" CornerRadius="18" Padding="18,16">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="RE-TEST KHO MÁU" FontSize="11" FontWeight="Black" Foreground="#7e22ce"/>
+                                <TextBlock x:Name="txtKpiReTest" Text="0" FontSize="26" FontWeight="Black" Foreground="#7e22ce" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <Border Width="42" Height="42" CornerRadius="12" Background="#faf5ff" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="🚨" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Toolbar: Search Bar & Blood Type Selector -->
+                <Border Background="White" BorderBrush="#ffe4e6" BorderThickness="1" CornerRadius="18" Padding="18" Margin="0,0,0,20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox x:Name="txtSearch" Grid.Column="0" Height="46" Padding="14,0" BorderBrush="#fecdd3" BorderThickness="1.5" 
+                                 VerticalContentAlignment="Center" FontSize="14" FontWeight="SemiBold" Foreground="#0f172a" 
+                                 TextChanged="txtSearch_TextChanged" Tag="🔍 Tìm theo mã túi máu, tên TNV, đợt hiến..."/>
+
+                        <ComboBox x:Name="cbBloodFilter" Grid.Column="2" Height="46" VerticalContentAlignment="Center" 
+                                  FontSize="13" FontWeight="Black" Foreground="#0f172a" SelectionChanged="cbBloodFilter_SelectionChanged">
+                            <ComboBoxItem Content="Tất cả nhóm máu" IsSelected="True" Tag="ALL"/>
+                            <ComboBoxItem Content="Nhóm A" Tag="A"/>
+                            <ComboBoxItem Content="Nhóm B" Tag="B"/>
+                            <ComboBoxItem Content="Nhóm O" Tag="O"/>
+                            <ComboBoxItem Content="Nhóm AB" Tag="AB"/>
+                        </ComboBox>
+
+                        <Button x:Name="btnRefresh" Grid.Column="4" Content="LÀM MỚI" Height="46" 
+                                Background="#fff1f2" BorderBrush="#fecdd3" BorderThickness="1" Foreground="#e11d48" 
+                                FontWeight="Black" FontSize="13" Cursor="Hand" Click="btnRefresh_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- DataGrid Table -->
+                <Border CornerRadius="18" Background="White" BorderBrush="#ffe4e6" BorderThickness="1" ClipToBounds="True">
+                    <DataGrid x:Name="dgXetNghiem" Margin="-1">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Mã Túi Máu" Width="140">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#fff1f2" BorderBrush="#fecdd3" BorderThickness="1" Padding="10,4" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding MaTuiMau}" Foreground="#be123c" FontWeight="Black" FontSize="13" FontFamily="Consolas"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Tình Nguyện Viên" Binding="{Binding TenTinhNguyenVien}" Width="*"/>
+                            <DataGridTextColumn Header="Đợt Hiến Máu" Binding="{Binding TenChienDich}" Width="180"/>
+                            
+                            <DataGridTemplateColumn Header="Nhóm Máu" Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#e11d48" Padding="12,4" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding NhomMau}" Foreground="White" FontWeight="Black" FontSize="12"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Số Lần XN" Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#f1f5f9" BorderBrush="#cbd5e1" BorderThickness="1" Padding="10,4" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding SoLanXetNghiem, StringFormat={}Lần {0}}" Foreground="#334155" FontWeight="Black" FontSize="12"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Đánh Giá XN" Width="170">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding KetQuaHienThi}" FontWeight="Black" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#d97706"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsDat}" Value="True">
+                                                            <Setter Property="Foreground" Value="#15803d"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Ghi Chú / Trạng Thái Kho" Binding="{Binding MoTa}" Width="200"/>
+
+                            <DataGridTemplateColumn Header="Thao Tác" Width="200">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="🧪 Nhập Kết Quả XN" Height="36" Padding="14,0" 
+                                                Background="#e11d48" Foreground="White" FontWeight="Black" FontSize="12" 
+                                                Cursor="Hand" BorderThickness="0" Click="btnOpenModal_Click">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- DIAGNOSTIC MODAL PANEL (Cyber Clinical Theme) -->
+        <Grid x:Name="DiagnosticModal" Background="#aa0f172a" Visibility="Collapsed">
+            <Border Background="#0f172a" CornerRadius="28" Width="580" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0" Margin="20">
+                <StackPanel>
+                    <!-- Modal Header -->
+                    <Border x:Name="ModalHeaderBorder" Background="#e11d48" Padding="24,20" CornerRadius="28,28,0,0">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock x:Name="txtModalTitle" Text="🧪 ĐÁNH GIÁ VI SINH TÚI MÁU" Foreground="White" FontSize="16" FontWeight="Black"/>
+                                <TextBlock x:Name="txtModalSubtitle" Text="Mã định danh túi máu: TM0412850" Foreground="#ffe4e6" FontSize="12" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <Button Content="✕" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="20" FontWeight="Black" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" Click="btnCloseModal_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Margin="24">
+                        <!-- Quick Donor Info Summary -->
+                        <Border Background="#1e293b" CornerRadius="16" Padding="16" Margin="0,0,0,20">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,10">
+                                    <TextBlock x:Name="txtModalDonorName" Text="TNV: Nguyễn Văn A" FontSize="15" FontWeight="Black" Foreground="White"/>
+                                    <TextBlock x:Name="txtModalCampaign" Text="Đợt hiến: Hiến thường xuyên" FontSize="12" Foreground="#94a3b8" HorizontalAlignment="Right"/>
+                                </Grid>
+                                <Grid>
+                                    <TextBlock Text="Nhóm Máu Xác Định:" FontSize="12" FontWeight="Bold" Foreground="#94a3b8" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="cbModalBloodType" Width="120" Height="36" HorizontalAlignment="Right" VerticalContentAlignment="Center" 
+                                              FontSize="13" FontWeight="Black" Foreground="White" Background="#020617">
+                                        <ComboBoxItem Content="O+" IsSelected="True"/>
+                                        <ComboBoxItem Content="O-"/>
+                                        <ComboBoxItem Content="A+"/>
+                                        <ComboBoxItem Content="A-"/>
+                                        <ComboBoxItem Content="B+"/>
+                                        <ComboBoxItem Content="B-"/>
+                                        <ComboBoxItem Content="AB+"/>
+                                        <ComboBoxItem Content="AB-"/>
+                                    </ComboBox>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 4 Pathogen Diagnostic Switches (2x2 Grid) -->
+                        <Border Background="#1e293b" CornerRadius="18" Padding="18" Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock Text="BẢNG KIỂM TRA SÀNG LỌC 4 BỆNH MÁU TRUYỀN NHIỄM" FontSize="12" FontWeight="Black" Foreground="#94a3b8" Margin="0,0,0,14"/>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="12"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Switch 1: HBV -->
+                                    <Border x:Name="btnHbv" Grid.Row="0" Grid.Column="0" Height="60" Background="#064e3b" BorderBrush="#059669" BorderThickness="1.5" CornerRadius="12" Padding="12,8" Cursor="Hand" MouseLeftButtonDown="btnPathogen_Click">
+                                        <Grid>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="HBV" FontSize="14" FontWeight="Black" Foreground="White"/>
+                                                <TextBlock Text="Viêm gan B (HBsAg)" FontSize="10" Foreground="#a7f3d0" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                            <TextBlock x:Name="txtHbvStatus" Text="ÂM TÍNH ✅" FontSize="11" FontWeight="Black" Foreground="#34d399" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Switch 2: HCV -->
+                                    <Border x:Name="btnHcv" Grid.Row="0" Grid.Column="2" Height="60" Background="#064e3b" BorderBrush="#059669" BorderThickness="1.5" CornerRadius="12" Padding="12,8" Cursor="Hand" MouseLeftButtonDown="btnPathogen_Click">
+                                        <Grid>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="HCV" FontSize="14" FontWeight="Black" Foreground="White"/>
+                                                <TextBlock Text="Viêm gan C (Anti-HCV)" FontSize="10" Foreground="#a7f3d0" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                            <TextBlock x:Name="txtHcvStatus" Text="ÂM TÍNH ✅" FontSize="11" FontWeight="Black" Foreground="#34d399" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Switch 3: HIV -->
+                                    <Border x:Name="btnHiv" Grid.Row="2" Grid.Column="0" Height="60" Background="#064e3b" BorderBrush="#059669" BorderThickness="1.5" CornerRadius="12" Padding="12,8" Cursor="Hand" MouseLeftButtonDown="btnPathogen_Click">
+                                        <Grid>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="HIV" FontSize="14" FontWeight="Black" Foreground="White"/>
+                                                <TextBlock Text="Kháng thể HIV 1/2" FontSize="10" Foreground="#a7f3d0" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                            <TextBlock x:Name="txtHivStatus" Text="ÂM TÍNH ✅" FontSize="11" FontWeight="Black" Foreground="#34d399" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Switch 4: Giang Mai -->
+                                    <Border x:Name="btnGiangMai" Grid.Row="2" Grid.Column="2" Height="60" Background="#064e3b" BorderBrush="#059669" BorderThickness="1.5" CornerRadius="12" Padding="12,8" Cursor="Hand" MouseLeftButtonDown="btnPathogen_Click">
+                                        <Grid>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="Giang Mai" FontSize="14" FontWeight="Black" Foreground="White"/>
+                                                <TextBlock Text="Syphilis Treponema Ab" FontSize="10" Foreground="#a7f3d0" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                            <TextBlock x:Name="txtGiangMaiStatus" Text="ÂM TÍNH ✅" FontSize="11" FontWeight="Black" Foreground="#34d399" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Realtime Auto Assessment Banner -->
+                        <Border x:Name="AssessmentBadge" Background="#064e3b" BorderBrush="#059669" BorderThickness="1.5" CornerRadius="14" Padding="16,14" Margin="0,0,0,20">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="KẾT QUẢ ĐÁNH GIÁ TỰ ĐỘNG" FontSize="11" FontWeight="Black" Foreground="#a7f3d0" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="txtAssessmentMsg" Text="✅ PHÊ DUYỆT: ĐẠT TIÊU CHUẨN KHO MÁU" FontSize="15" FontWeight="Black" Foreground="White" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Notes Area -->
+                        <StackPanel Margin="0,0,0,24">
+                            <TextBlock Text="GHI CHÚ CHI TIẾT XÉT NGHIỆM" FontSize="12" FontWeight="Black" Foreground="#cbd5e1" Margin="0,0,0,8"/>
+                            <TextBox x:Name="txtMoTa" Height="60" TextWrapping="Wrap" AcceptsReturn="True" Padding="12" 
+                                     Background="#020617" Foreground="White" BorderBrush="#334155" BorderThickness="1" FontSize="13"/>
+                        </StackPanel>
+
+                        <!-- Action Buttons -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button x:Name="btnTuChoi" Grid.Column="0" Content="❌ Không Đạt (Hủy)" Height="48" 
+                                    Background="#88be123c" Foreground="#fecdd3" FontWeight="Black" FontSize="13" 
+                                    Cursor="Hand" BorderThickness="0" Click="btnTuChoi_Click"/>
+
+                            <Button x:Name="btnPheDuyet" Grid.Column="2" Content="✅ PHÊ DUYỆT (ĐẠT)" Height="48" 
+                                    Background="#059669" Foreground="White" FontWeight="Black" FontSize="13" 
+                                    Cursor="Hand" BorderThickness="0" Click="btnPheDuyet_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Page>
