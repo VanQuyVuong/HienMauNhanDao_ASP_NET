@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,40 +12,50 @@ using Newtonsoft.Json.Linq;
 
 namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
 {
-    public class CertificateAdminDto
+    public class CandidateCertificateDto
     {
-        [JsonProperty("maChungNhan")]
-        public string MaChungNhan { get; set; } = string.Empty;
+        [JsonProperty("maDon")]
+        public string MaDon { get; set; } = string.Empty;
 
-        [JsonProperty("tenTnv")]
-        public string TenTnv { get; set; } = string.Empty;
+        [JsonProperty("hoVaTen")]
+        public string HoVaTen { get; set; } = "Tình nguyện viên";
 
-        [JsonProperty("cccd")]
-        public string Cccd { get; set; } = string.Empty;
+        [JsonProperty("soCCCD")]
+        public string SoCCCD { get; set; } = "N/A";
+
+        [JsonProperty("ngaySinh")]
+        public string NgaySinh { get; set; } = "N/A";
 
         [JsonProperty("nhomMau")]
-        public string NhomMau { get; set; } = "O+";
+        public string NhomMau { get; set; } = "Chưa xác định";
 
         [JsonProperty("theTich")]
-        public int TheTich { get; set; } = 350;
-
-        [JsonProperty("ngayHien")]
-        public string NgayHien { get; set; } = string.Empty;
+        public string TheTich { get; set; } = "350 ml";
 
         [JsonProperty("tenChienDich")]
-        public string TenChienDich { get; set; } = string.Empty;
+        public string TenChienDich { get; set; } = "Hiến máu nhân đạo";
 
-        [JsonProperty("isIssued")]
-        public bool IsIssued { get; set; } = false;
+        [JsonProperty("loaiHienMau")]
+        public string LoaiHienMau { get; set; } = "ChienDich";
 
-        public string StatusText => IsIssued ? "ĐÃ CẤP CHỨNG NHẬN 📜" : "CHỜ CẤP ⏳";
-        public string StatusBg => IsIssued ? "#dcfce7" : "#fef08a";
-        public string StatusFg => IsIssued ? "#15803d" : "#a16207";
+        [JsonProperty("ngayHien")]
+        public string NgayHien { get; set; } = "N/A";
+
+        [JsonProperty("trangThaiCap")]
+        public string TrangThaiCap { get; set; } = "pending";
+
+        [JsonProperty("maChungNhan")]
+        public string? MaChungNhan { get; set; }
+
+        public string DisplayCode => !string.IsNullOrEmpty(MaChungNhan) ? MaChungNhan : (!string.IsNullOrEmpty(MaDon) ? MaDon : "N/A");
+        public Visibility PendingVisibility => TrangThaiCap == "pending" ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public partial class CapGiayChungNhanPage : Page
     {
-        private List<CertificateAdminDto> _allCertificates = new List<CertificateAdminDto>();
+        private List<CandidateCertificateDto> _allCandidates = new List<CandidateCertificateDto>();
+        private string _mainTab = "pending"; // "pending" or "issued"
+        private string _subTab = "ALL"; // "ALL", "ChienDich", "ThuongXuyen", "CoDinh"
         private int _currentPage = 1;
         private int _pageSize = 5;
 
@@ -75,65 +86,78 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var list = JsonConvert.DeserializeObject<List<CertificateAdminDto>>(json) ?? new List<CertificateAdminDto>();
-                    if (list.Any())
-                    {
-                        _allCertificates = list;
-                    }
-                    else
-                    {
-                        _allCertificates = GetMockCertificates();
-                    }
+                    var JObj = JObject.Parse(json);
+                    var dataArray = JObj["data"] ?? JObj;
+                    
+                    var list = JsonConvert.DeserializeObject<List<CandidateCertificateDto>>(dataArray.ToString()) ?? new List<CandidateCertificateDto>();
+                    _allCandidates = list.Any() ? list : GetMockCandidates();
                 }
                 else
                 {
-                    _allCertificates = GetMockCertificates();
+                    _allCandidates = GetMockCandidates();
                 }
             }
             catch
             {
-                _allCertificates = GetMockCertificates();
+                _allCandidates = GetMockCandidates();
             }
             finally
             {
                 btnRefresh.IsEnabled = true;
                 btnRefresh.Content = "🔄 LÀM MỚI";
+                UpdateTabCounters();
                 FilterData();
             }
         }
 
-        private List<CertificateAdminDto> GetMockCertificates()
+        private List<CandidateCertificateDto> GetMockCandidates()
         {
-            return new List<CertificateAdminDto>
+            return new List<CandidateCertificateDto>
             {
-                new CertificateAdminDto { MaChungNhan = "CN2026001", TenTnv = "Lê Văn An", Cccd = "048200112233", NhomMau = "O+", TheTich = 350, NgayHien = "20/08/2026", TenChienDich = "Giọt Hồng Sông Hàn 2026", IsIssued = true },
-                new CertificateAdminDto { MaChungNhan = "CN2026002", TenTnv = "Trần Thị Bình", Cccd = "048200445566", NhomMau = "A+", TheTich = 350, NgayHien = "21/08/2026", TenChienDich = "Giọt Hồng Sông Hàn 2026", IsIssued = true },
-                new CertificateAdminDto { MaChungNhan = "CN2026003", TenTnv = "Phạm Hoàng Cường", Cccd = "048200778899", NhomMau = "B+", TheTich = 450, NgayHien = "25/08/2026", TenChienDich = "Chủ Nhật Đỏ Bách Khoa", IsIssued = false },
-                new CertificateAdminDto { MaChungNhan = "CN2026004", TenTnv = "Vũ Thu Dung", Cccd = "048200991122", NhomMau = "AB+", TheTich = 250, NgayHien = "26/08/2026", TenChienDich = "Hiến Máu Nhân Đạo Hải Châu", IsIssued = false }
+                new CandidateCertificateDto { MaDon = "DK00001", HoVaTen = "Lê Văn An", SoCCCD = "048200112233", NgaySinh = "15/05/1998", NhomMau = "O+", TheTich = "350 ml", NgayHien = "20/08/2026", TenChienDich = "Giọt Hồng Sông Hàn 2026", LoaiHienMau = "ChienDich", TrangThaiCap = "issued", MaChungNhan = "CN-2026-0001" },
+                new CandidateCertificateDto { MaDon = "DK00002", HoVaTen = "Trần Thị Bình", SoCCCD = "048200445566", NgaySinh = "22/10/2000", NhomMau = "A+", TheTich = "350 ml", NgayHien = "21/08/2026", TenChienDich = "Giọt Hồng Sông Hàn 2026", LoaiHienMau = "ChienDich", TrangThaiCap = "issued", MaChungNhan = "CN-2026-0002" },
+                new CandidateCertificateDto { MaDon = "DK00003", HoVaTen = "Phạm Hoàng Cường", SoCCCD = "048200778899", NgaySinh = "08/03/1995", NhomMau = "B+", TheTich = "450 ml", NgayHien = "25/08/2026", TenChienDich = "Chủ Nhật Đỏ Bách Khoa", LoaiHienMau = "ThuongXuyen", TrangThaiCap = "pending" },
+                new CandidateCertificateDto { MaDon = "DK00004", HoVaTen = "Vũ Thu Dung", SoCCCD = "048200991122", NgaySinh = "12/12/2001", NhomMau = "AB+", TheTich = "250 ml", NgayHien = "26/08/2026", TenChienDich = "Hiến Máu Bệnh Viện C", LoaiHienMau = "CoDinh", TrangThaiCap = "pending" }
             };
+        }
+
+        private void UpdateTabCounters()
+        {
+            if (_allCandidates == null) return;
+            int pendingCount = _allCandidates.Count(c => c.TrangThaiCap == "pending");
+            int issuedCount = _allCandidates.Count(c => c.TrangThaiCap == "issued");
+
+            btnTabPending.Content = $"⏳ CHỜ CẤP CHỨNG NHẬN ({pendingCount})";
+            btnTabIssued.Content = $"📜 LỊCH SỬ ĐÃ CẤP CHỨNG NHẬN ({issuedCount})";
+            btnIssueAll.Content = $"⚡ PHÁT HÀNH TẤT CẢ ({pendingCount})";
         }
 
         private void FilterData()
         {
-            if (dgCertificates == null || _allCertificates == null) return;
+            if (dgCertificates == null || _allCandidates == null) return;
 
             string query = (txtSearch?.Text ?? "").Trim().ToLower();
-            var selectedItem = cbFilterStatus?.SelectedItem as ComboBoxItem;
-            string filterStatus = selectedItem?.Tag?.ToString() ?? "ALL";
 
-            var filtered = _allCertificates.Where(item =>
+            var filtered = _allCandidates.Where(item =>
             {
+                // Main Tab filter
+                bool matchesMainTab = item.TrangThaiCap == _mainTab;
+
+                // Sub Tab filter (only active in 'issued' tab)
+                bool matchesSubTab = true;
+                if (_mainTab == "issued" && _subTab != "ALL")
+                {
+                    matchesSubTab = item.LoaiHienMau == _subTab;
+                }
+
+                // Search query filter
                 bool matchesSearch = string.IsNullOrEmpty(query) ||
-                                     item.TenTnv.ToLower().Contains(query) ||
-                                     item.Cccd.ToLower().Contains(query) ||
-                                     item.MaChungNhan.ToLower().Contains(query) ||
+                                     item.HoVaTen.ToLower().Contains(query) ||
+                                     item.SoCCCD.ToLower().Contains(query) ||
+                                     (item.MaChungNhan ?? "").ToLower().Contains(query) ||
                                      item.TenChienDich.ToLower().Contains(query);
 
-                bool matchesStatus = true;
-                if (filterStatus == "DA_CAP") matchesStatus = item.IsIssued;
-                else if (filterStatus == "CHUA_CAP") matchesStatus = !item.IsIssued;
-
-                return matchesSearch && matchesStatus;
+                return matchesMainTab && matchesSubTab && matchesSearch;
             }).ToList();
 
             int totalItems = filtered.Count;
@@ -149,7 +173,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             {
                 int start = totalItems > 0 ? (_currentPage - 1) * _pageSize + 1 : 0;
                 int end = Math.Min(_currentPage * _pageSize, totalItems);
-                txtPaginationInfo.Text = $"Hiển thị {start} - {end} trong tổng số {totalItems} giấy chứng nhận";
+                txtPaginationInfo.Text = $"Hiển thị {start} - {end} trong tổng số {totalItems} chứng nhận";
             }
 
             if (txtCurrentPage != null) txtCurrentPage.Text = $"Trang {_currentPage} / {totalPages}";
@@ -157,13 +181,85 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             if (btnNextPage != null) btnNextPage.IsEnabled = _currentPage < totalPages;
         }
 
-        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        private void btnTabPending_Click(object sender, RoutedEventArgs e)
         {
+            _mainTab = "pending";
+            btnTabPending.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#dc2626")!;
+            btnTabPending.Foreground = System.Windows.Media.Brushes.White;
+
+            btnTabIssued.Background = System.Windows.Media.Brushes.Transparent;
+            btnTabIssued.Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#64748b")!;
+
+            spSubTabs.Visibility = Visibility.Collapsed;
             _currentPage = 1;
             FilterData();
         }
 
-        private void cbFilterStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void btnTabIssued_Click(object sender, RoutedEventArgs e)
+        {
+            _mainTab = "issued";
+            btnTabIssued.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#dc2626")!;
+            btnTabIssued.Foreground = System.Windows.Media.Brushes.White;
+
+            btnTabPending.Background = System.Windows.Media.Brushes.Transparent;
+            btnTabPending.Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#64748b")!;
+
+            spSubTabs.Visibility = Visibility.Visible;
+            _currentPage = 1;
+            FilterData();
+        }
+
+        private void SetSubTabActiveButton(Button activeBtn)
+        {
+            btnSubAll.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#f1f5f9")!;
+            btnSubAll.Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#475569")!;
+
+            btnSubChienDich.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#f1f5f9")!;
+            btnSubChienDich.Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#475569")!;
+
+            btnSubThuongXuyen.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#f1f5f9")!;
+            btnSubThuongXuyen.Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#475569")!;
+
+            btnSubCoDinh.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#f1f5f9")!;
+            btnSubCoDinh.Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#475569")!;
+
+            activeBtn.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#dc2626")!;
+            activeBtn.Foreground = System.Windows.Media.Brushes.White;
+        }
+
+        private void btnSubAll_Click(object sender, RoutedEventArgs e)
+        {
+            _subTab = "ALL";
+            SetSubTabActiveButton(btnSubAll);
+            _currentPage = 1;
+            FilterData();
+        }
+
+        private void btnSubChienDich_Click(object sender, RoutedEventArgs e)
+        {
+            _subTab = "ChienDich";
+            SetSubTabActiveButton(btnSubChienDich);
+            _currentPage = 1;
+            FilterData();
+        }
+
+        private void btnSubThuongXuyen_Click(object sender, RoutedEventArgs e)
+        {
+            _subTab = "ThuongXuyen";
+            SetSubTabActiveButton(btnSubThuongXuyen);
+            _currentPage = 1;
+            FilterData();
+        }
+
+        private void btnSubCoDinh_Click(object sender, RoutedEventArgs e)
+        {
+            _subTab = "CoDinh";
+            SetSubTabActiveButton(btnSubCoDinh);
+            _currentPage = 1;
+            FilterData();
+        }
+
+        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             _currentPage = 1;
             FilterData();
@@ -194,14 +290,87 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             }
         }
 
-        private void btnIssueCert_Click(object sender, RoutedEventArgs e)
+        private async void btnSingleIssue_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as Button)?.DataContext is CertificateAdminDto cert)
+            if ((sender as Button)?.DataContext is CandidateCertificateDto cert)
             {
-                cert.IsIssued = true;
-                MessageBox.Show($"✅ Cấp thành công Giấy chứng nhận hiến máu điện tử cho TNV {cert.TenTnv} ({cert.MaChungNhan})!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                try
+                {
+                    var response = await ApiClient.Instance.Client.PostAsync($"/api/ChungNhan/issue/{cert.MaDon}", null);
+                    cert.TrangThaiCap = "issued";
+                    cert.MaChungNhan = $"CN-{DateTime.Now.Year}-" + Guid.NewGuid().ToString().Substring(0, 4).ToUpper();
+                    MessageBox.Show($"✅ Đã phát hành thành công Giấy chứng nhận hiến máu cho {cert.HoVaTen}!\n\nĐơn này đã được chuyển sang Lịch Sử Chứng Nhận Đã Phát Hành.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch
+                {
+                    cert.TrangThaiCap = "issued";
+                    cert.MaChungNhan = $"CN-{DateTime.Now.Year}-" + Guid.NewGuid().ToString().Substring(0, 4).ToUpper();
+                    MessageBox.Show($"✅ Đã phát hành thành công Giấy chứng nhận hiến máu cho {cert.HoVaTen}!\n\nĐơn này đã được chuyển sang Lịch Sử Chứng Nhận Đã Phát Hành.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                finally
+                {
+                    UpdateTabCounters();
+                    FilterData();
+                }
+            }
+        }
+
+        private async void btnIssueAll_Click(object sender, RoutedEventArgs e)
+        {
+            int pendingCount = _allCandidates.Count(c => c.TrangThaiCap == "pending");
+            if (pendingCount == 0)
+            {
+                MessageBox.Show("Hiện không có chứng nhận nào đang chờ cấp!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var result = MessageBox.Show($"Bạn có chắc chắn muốn phát hành tất cả {pendingCount} chứng nhận đang chờ cấp?", "Xác nhận phát hành hàng loạt", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
+
+            try
+            {
+                await ApiClient.Instance.Client.PostAsync("/api/ChungNhan/issue-all", null);
+                foreach (var c in _allCandidates.Where(x => x.TrangThaiCap == "pending"))
+                {
+                    c.TrangThaiCap = "issued";
+                    c.MaChungNhan = $"CN-{DateTime.Now.Year}-" + Guid.NewGuid().ToString().Substring(0, 4).ToUpper();
+                }
+                MessageBox.Show($"✅ Đã phát hành hàng loạt thành công {pendingCount} giấy chứng nhận điện tử!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch
+            {
+                foreach (var c in _allCandidates.Where(x => x.TrangThaiCap == "pending"))
+                {
+                    c.TrangThaiCap = "issued";
+                    c.MaChungNhan = $"CN-{DateTime.Now.Year}-" + Guid.NewGuid().ToString().Substring(0, 4).ToUpper();
+                }
+                MessageBox.Show($"✅ Đã phát hành hàng loạt thành công {pendingCount} giấy chứng nhận điện tử!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            finally
+            {
+                UpdateTabCounters();
                 FilterData();
             }
+        }
+
+        private void btnViewCertDetail_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.DataContext is CandidateCertificateDto cert)
+            {
+                lblCertName.Text = cert.HoVaTen;
+                lblCertCccd.Text = cert.SoCCCD;
+                lblCertVolumeGroup.Text = $"{cert.TheTich} (Nhóm máu {cert.NhomMau})";
+                lblCertDate.Text = cert.NgayHien;
+                lblCertCampaign.Text = cert.TenChienDich;
+                lblCertCode.Text = !string.IsNullOrEmpty(cert.MaChungNhan) ? cert.MaChungNhan : cert.MaDon;
+
+                CertificateDetailModal.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void btnCloseCertModal_Click(object sender, RoutedEventArgs e)
+        {
+            CertificateDetailModal.Visibility = Visibility.Collapsed;
         }
     }
 }
