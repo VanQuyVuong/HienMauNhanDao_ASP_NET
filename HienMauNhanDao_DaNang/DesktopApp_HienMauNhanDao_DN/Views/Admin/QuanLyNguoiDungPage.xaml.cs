@@ -99,19 +99,22 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/TaiKhoan/danh-sach");
+                var response = await ApiClient.Instance.Client.GetAsync("/api/TaiKhoan");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var JObj = JObject.Parse(json);
-                    if (JObj["data"] != null)
+                    var list = JsonConvert.DeserializeObject<List<UserAccountDto>>(json) ?? new List<UserAccountDto>();
+                    if (list.Any())
                     {
-                        _allUsers = JsonConvert.DeserializeObject<List<UserAccountDto>>(JObj["data"]!.ToString()) ?? new List<UserAccountDto>();
+                        _allUsers = list;
+                    }
+                    else
+                    {
+                        _allUsers = GetMockUsers();
                     }
                 }
                 else
                 {
-                    // Mock data if endpoint not available
                     _allUsers = GetMockUsers();
                 }
             }
@@ -272,11 +275,11 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
 
             try
             {
-                var reqObj = new { email = email, matKhau = pass, maVaiTro = role };
+                var reqObj = new { email = email, matKhau = pass, maVaiTro = role, trangThai = true };
                 var jsonStr = JsonConvert.SerializeObject(reqObj);
                 var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
 
-                var response = await ApiClient.Instance.Client.PostAsync("/api/TaiKhoan/tao-taikhoan", content);
+                var response = await ApiClient.Instance.Client.PostAsync("/api/TaiKhoan", content);
                 if (response.IsSuccessStatusCode)
                 {
                     MessageBox.Show($"✅ Tạo tài khoản thành công cho {email}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);

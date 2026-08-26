@@ -71,14 +71,18 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/ChungNhan/danh-sach");
+                var response = await ApiClient.Instance.Client.GetAsync("/api/ChungNhan/candidates");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var JObj = JObject.Parse(json);
-                    if (JObj["data"] != null)
+                    var list = JsonConvert.DeserializeObject<List<CertificateAdminDto>>(json) ?? new List<CertificateAdminDto>();
+                    if (list.Any())
                     {
-                        _allCertificates = JsonConvert.DeserializeObject<List<CertificateAdminDto>>(JObj["data"]!.ToString()) ?? new List<CertificateAdminDto>();
+                        _allCertificates = list;
+                    }
+                    else
+                    {
+                        _allCertificates = GetMockCertificates();
                     }
                 }
                 else
