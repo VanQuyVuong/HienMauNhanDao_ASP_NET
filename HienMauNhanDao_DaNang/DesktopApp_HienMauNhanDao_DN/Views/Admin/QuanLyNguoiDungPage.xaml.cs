@@ -53,6 +53,8 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             "AD" => "Quản trị viên (AD)",
             "BS" => "Bác sĩ (BS)",
             "NVYT" => "Nhân viên y tế (NVYT)",
+            "NVYT-XN" => "Nhân viên xét nghiệm (NVXN)",
+            "NVXN" => "Nhân viên xét nghiệm (NVXN)",
             "QLK" => "Quản lý kho (QLK)",
             "ADMIN_BV" => "Admin Bệnh viện",
             _ => "Tình nguyện viên (TNV)"
@@ -63,7 +65,10 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             "AD" => "#fee2e2",
             "BS" => "#d1fae5",
             "NVYT" => "#e0f2fe",
+            "NVYT-XN" => "#f0fdf4",
+            "NVXN" => "#f0fdf4",
             "QLK" => "#fef3c7",
+            "ADMIN_BV" => "#fae8ff",
             _ => "#f1f5f9"
         };
 
@@ -72,7 +77,10 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             "AD" => "#991b1b",
             "BS" => "#065f46",
             "NVYT" => "#0369a1",
+            "NVYT-XN" => "#15803d",
+            "NVXN" => "#15803d",
             "QLK" => "#92400e",
+            "ADMIN_BV" => "#86198f",
             _ => "#475569"
         };
 

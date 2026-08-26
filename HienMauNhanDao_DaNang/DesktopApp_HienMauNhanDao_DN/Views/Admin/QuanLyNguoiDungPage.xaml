@@ -62,6 +62,7 @@
                     <ComboBoxItem Content="Quản trị viên (AD)" Tag="AD"/>
                     <ComboBoxItem Content="Bác sĩ (BS)" Tag="BS"/>
                     <ComboBoxItem Content="Nhân viên y tế (NVYT)" Tag="NVYT"/>
+                    <ComboBoxItem Content="Nhân viên xét nghiệm (NVXN)" Tag="NVYT-XN"/>
                     <ComboBoxItem Content="Quản lý kho (QLK)" Tag="QLK"/>
                 </ComboBox>
             </Grid>
