@@ -18,6 +18,8 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
     {
         private List<BloodUnitInventoryDto> _allBloodUnits = new List<BloodUnitInventoryDto>();
         private ScanBloodUnitDto? _scannedUnit = null;
+        private int _currentPage = 1;
+        private int _pageSize = 5;
 
         public KhoMauBenhVienPage()
         {
@@ -286,16 +288,61 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 return matchesSearch && matchesStatus;
             }).ToList();
 
-            dgBloodUnits.ItemsSource = filtered;
+            int totalItems = filtered.Count;
+            int totalPages = (int)Math.Ceiling((double)totalItems / Math.Max(1, _pageSize));
+            if (totalPages < 1) totalPages = 1;
+            if (_currentPage > totalPages) _currentPage = totalPages;
+            if (_currentPage < 1) _currentPage = 1;
+
+            var pagedList = filtered.Skip((_currentPage - 1) * _pageSize).Take(_pageSize).ToList();
+            dgBloodUnits.ItemsSource = pagedList;
+
+            if (txtPaginationInfo != null)
+            {
+                int start = totalItems > 0 ? (_currentPage - 1) * _pageSize + 1 : 0;
+                int end = Math.Min(_currentPage * _pageSize, totalItems);
+                txtPaginationInfo.Text = $"Hiển thị {start} - {end} trong tổng số {totalItems} túi máu";
+            }
+
+            if (txtCurrentPage != null) txtCurrentPage.Text = $"Trang {_currentPage} / {totalPages}";
+            if (btnPrevPage != null) btnPrevPage.IsEnabled = _currentPage > 1;
+            if (btnNextPage != null) btnNextPage.IsEnabled = _currentPage < totalPages;
+        }
+
+        private void btnPrevPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPage > 1)
+            {
+                _currentPage--;
+                FilterData();
+            }
+        }
+
+        private void btnNextPage_Click(object sender, RoutedEventArgs e)
+        {
+            _currentPage++;
+            FilterData();
+        }
+
+        private void cbPageSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbPageSize?.SelectedItem is ComboBoxItem item && int.TryParse(item.Tag?.ToString(), out int size))
+            {
+                _pageSize = size;
+                _currentPage = 1;
+                FilterData();
+            }
         }
 
         private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
+            _currentPage = 1;
             FilterData();
         }
 
         private void cbFilterStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            _currentPage = 1;
             FilterData();
         }
     }

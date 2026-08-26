@@ -213,7 +213,13 @@
 
         <!-- Main DataGrid -->
         <Border Grid.Row="4" CornerRadius="18" Background="White" BorderBrush="#ffedd5" BorderThickness="1" ClipToBounds="True">
-            <DataGrid x:Name="dgBloodUnits" Margin="-1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <DataGrid x:Name="dgBloodUnits" Grid.Row="0" Margin="-1">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Mã Túi Máu" Width="140">
                         <DataGridTemplateColumn.CellTemplate>
@@ -253,6 +259,36 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
+
+            <!-- Pagination Controls -->
+            <Border Grid.Row="1" Background="#fff7ed" BorderBrush="#fed7aa" BorderThickness="1,0,1,1" CornerRadius="0,0,16,16" Padding="14,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Hiển thị: " Foreground="#9a3412" FontSize="11" FontWeight="Medium" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="cbPageSize" Width="90" Height="28" FontSize="11" FontWeight="Bold" SelectionChanged="cbPageSize_SelectionChanged" Margin="4,0,12,0">
+                            <ComboBoxItem Content="5 dòng" IsSelected="True" Tag="5"/>
+                            <ComboBoxItem Content="10 dòng" Tag="10"/>
+                            <ComboBoxItem Content="20 dòng" Tag="20"/>
+                        </ComboBox>
+                        <TextBlock x:Name="txtPaginationInfo" Text="Đang tải..." Foreground="#c2410c" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button x:Name="btnPrevPage" Content="◀ Trang trước" Height="28" Padding="10,0" Background="White" Foreground="#ea580c" BorderBrush="#fdba74" BorderThickness="1" FontSize="11" FontWeight="Bold" Cursor="Hand" Click="btnPrevPage_Click" Margin="0,0,6,0"/>
+                        <Border Background="#ea580c" CornerRadius="4" Padding="10,4" VerticalAlignment="Center" Margin="0,0,6,0">
+                            <TextBlock x:Name="txtCurrentPage" Text="Trang 1 / 1" Foreground="White" FontSize="11" FontWeight="Black"/>
+                        </Border>
+                        <Button x:Name="btnNextPage" Content="Trang sau ▶" Height="28" Padding="10,0" Background="White" Foreground="#ea580c" BorderBrush="#fdba74" BorderThickness="1" FontSize="11" FontWeight="Bold" Cursor="Hand" Click="btnNextPage_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            </Grid>
         </Border>
 
         <!-- REPORT ISSUE MODAL -->
