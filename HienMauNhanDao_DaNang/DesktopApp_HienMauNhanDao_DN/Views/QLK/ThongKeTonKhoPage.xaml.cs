@@ -159,9 +159,13 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
 
                         foreach (var item in dataArray)
                         {
-                            string group = item["nhomMau"]?.ToString() ?? "Khác";
+                            string group = item["nhomMau"]?.ToString() ?? item["nhomMauString"]?.ToString() ?? "Khác";
                             double percent = Convert.ToDouble(item["percent"] ?? 0);
-                            int value = Convert.ToInt32(item["value"] ?? 0);
+                            int value = Convert.ToInt32(item["value"] ?? item["soLuongTon"] ?? 0);
+
+                            if ((group == "Khác" || group == "Chưa rõ") && value == 0) continue;
+                            if (percent == 0 && value == 0) continue;
+
                             string color = colors[colorIdx % colors.Length];
                             colorIdx++;
 
