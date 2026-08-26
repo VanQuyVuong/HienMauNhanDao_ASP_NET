@@ -49,7 +49,12 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                         ApiClient.Instance.SetToken(result.Data.Token, result.Data.Role, result.Data.Email);
                         
                         string role = (result.Data.Role ?? "").Trim();
-                        if (role == "BS")
+                        if (role == "AD" || role == "Admin")
+                        {
+                            var adminDashboard = new DesktopApp_HienMauNhanDao_DN.Views.Admin.AdminDashboard();
+                            adminDashboard.Show();
+                        }
+                        else if (role == "BS")
                         {
                             var bacSiDashboard = new DesktopApp_HienMauNhanDao_DN.Views.BacSi.BacSiDashboard();
                             bacSiDashboard.Show();
