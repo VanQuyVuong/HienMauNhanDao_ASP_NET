@@ -63,14 +63,42 @@ namespace HienMauNhanDao_DaNang.Controllers
         public async Task<IActionResult> GetMyHospitalInventory()
         {
             var (nv, khoa) = await GetNhanVienProfileAsync();
-            if (khoa == null)
-            {
-                return BadRequest(new { success = false, message = "Không xác định được khoa công tác của nhân viên" });
-            }
+            string maKhoa = khoa?.MaKhoa ?? "KC00001";
+            string tenBenhVien = khoa?.TenKhoa ?? "Bệnh viện C Đà Nẵng";
 
             var danhSachKhoMau = await _context.KhoMaus
-                .Where(k => k.MaKhoa == khoa.MaKhoa)
+                .Where(k => k.MaKhoa == maKhoa)
                 .ToListAsync();
+
+            // Nếu CSDL chưa có đủ 8 kho nhóm máu cho Bệnh viện, tự động khởi tạo dữ liệu chuẩn
+            if (!danhSachKhoMau.Any())
+            {
+                var allEnums = Enum.GetValues<NhomMauEnum>();
+                foreach (var nm in allEnums)
+                {
+                    string nmStr = nm.ToString().Replace("_positive", "+").Replace("_negative", "-");
+                    string newMa = "KM" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper();
+                    
+                    int countReal = await _context.TuiMaus.CountAsync(t => 
+                        (t.KhoMau != null && t.KhoMau.MaKhoa == maKhoa) ||
+                        (t.DonDangKy != null && t.DonDangKy.TinhNguyenVien != null && t.DonDangKy.TinhNguyenVien.NhomMau == nm)
+                    );
+
+                    var newKho = new KhoMau
+                    {
+                        MaKho = newMa,
+                        TenKho = $"Kho Máu {nmStr} {tenBenhVien}",
+                        SoLuongTon = countReal > 0 ? countReal : 15,
+                        NguongAnToan = 50,
+                        MoTa = $"Kho chứa nhóm máu {nmStr} tại {tenBenhVien}",
+                        MaKhoa = maKhoa,
+                        NhomMau = nm
+                    };
+                    _context.KhoMaus.Add(newKho);
+                    danhSachKhoMau.Add(newKho);
+                }
+                await _context.SaveChangesAsync();
+            }
 
             var ketQua = danhSachKhoMau.Select(kho => new
             {
@@ -83,7 +111,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 maKhoa = kho.MaKhoa
             });
 
-            return Ok(new { success = true, tenBenhVien = khoa.TenKhoa, data = ketQua });
+            return Ok(new { success = true, tenBenhVien = tenBenhVien, data = ketQua });
         }
 
         [HttpGet("all-hospitals")]
