@@ -38,25 +38,16 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/ChienDichHienMau/tat-ca");
+                var response = await ApiClient.Instance.Client.GetAsync("/api/ChienDich");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    List<ChienDichHienMau> list = null;
-
-                    try
+                    var JObj = JObject.Parse(json);
+                    if (JObj["data"] != null)
                     {
-                        var apiRes = JsonConvert.DeserializeObject<ApiResponse<List<ChienDichHienMau>>>(json);
-                        if (apiRes != null && apiRes.Data != null) list = apiRes.Data;
+                        var list = JsonConvert.DeserializeObject<List<ChienDichHienMau>>(JObj["data"]!.ToString());
+                        if (list != null) _allCampaigns = list;
                     }
-                    catch { }
-
-                    if (list == null)
-                    {
-                        try { list = JsonConvert.DeserializeObject<List<ChienDichHienMau>>(json); } catch { }
-                    }
-
-                    if (list != null) _allCampaigns = list;
                 }
 
                 FilterData();
