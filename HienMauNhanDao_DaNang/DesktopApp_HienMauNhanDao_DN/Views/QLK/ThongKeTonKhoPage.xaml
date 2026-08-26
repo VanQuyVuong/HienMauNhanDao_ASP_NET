@@ -40,8 +40,59 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
+...
+
+        <!-- Row 2: 2 Visual Charts (Bar Chart 12 Months + Blood Group Donut Allocation) -->
+        <Grid Grid.Row="2" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="14"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Chart 1: Bar Chart 12 Months -->
+            <Border Grid.Column="0" Background="White" BorderBrush="#ffedd5" BorderThickness="1" CornerRadius="18" Padding="18">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="140"/>
+                    </Grid.RowDefinitions>
+                    
+                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                        <TextBlock Text="📊 XU HƯỚNG THU NHẬN MÁU THEO THÁNG NĂM 2026" FontSize="11" FontWeight="Black" Foreground="#ea580c"/>
+                        <TextBlock Text="Số lượng túi máu tiếp nhận hàng tháng tại TP. Đà Nẵng" FontSize="11" Foreground="#64748b" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <!-- Dynamic Bar Chart Container -->
+                    <UniformGrid x:Name="ugBarChart" Grid.Row="1" Columns="12" VerticalAlignment="Bottom" Height="130">
+                        <!-- Bars dynamically populated in C# -->
+                    </UniformGrid>
+                </Grid>
+            </Border>
+
+            <!-- Chart 2: Blood Type Distribution -->
+            <Border Grid.Column="2" Background="White" BorderBrush="#ffedd5" BorderThickness="1" CornerRadius="18" Padding="18">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                        <TextBlock Text="🍩 PHÂN BỔ 4 NHÓM MÁU CHÍNH" FontSize="11" FontWeight="Black" Foreground="#ea580c"/>
+                        <TextBlock Text="Tỷ lệ cơ cấu nhóm máu O, A, B, AB" FontSize="11" Foreground="#64748b" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="spPieChart" Grid.Row="1" VerticalAlignment="Center">
+                        <!-- Legend & Percent Bars populated in C# -->
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
 
         <!-- Fixed Header Banner -->
         <Border Grid.Row="0" CornerRadius="22" Padding="28,20" Margin="0,0,0,16">
@@ -130,7 +181,7 @@
         </Grid>
 
         <!-- Fixed Toolbar -->
-        <Border Grid.Row="2" Background="White" BorderBrush="#ffedd5" BorderThickness="1" CornerRadius="16" Padding="14" Margin="0,0,0,16">
+        <Border Grid.Row="3" Background="White" BorderBrush="#ffedd5" BorderThickness="1" CornerRadius="16" Padding="14" Margin="0,0,0,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -166,7 +217,7 @@
         </Border>
 
         <!-- Main DataGrid (Only DataGrid Scrolls Vertically) -->
-        <Border Grid.Row="3" CornerRadius="18" Background="White" BorderBrush="#ffedd5" BorderThickness="1" ClipToBounds="True">
+        <Border Grid.Row="4" CornerRadius="18" Background="White" BorderBrush="#ffedd5" BorderThickness="1" ClipToBounds="True">
             <DataGrid x:Name="dgKhoMau" Margin="-1">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Mã Kho" Binding="{Binding MaKho}" Width="120"/>
