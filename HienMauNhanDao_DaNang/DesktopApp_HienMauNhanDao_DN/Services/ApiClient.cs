@@ -13,6 +13,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Services
         public HttpClient Client { get; private set; }
         public string Token { get; set; }
         public string Role { get; set; }
+        public string Email { get; set; }
 
         private ApiClient()
         {
@@ -26,10 +27,11 @@ namespace DesktopApp_HienMauNhanDao_DN.Services
             Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public void SetToken(string token, string role)
+        public void SetToken(string token, string role, string email = "")
         {
             Token = token;
             Role = role;
+            Email = email;
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
@@ -37,6 +39,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Services
         {
             Token = string.Empty;
             Role = string.Empty;
+            Email = string.Empty;
             Client.DefaultRequestHeaders.Authorization = null;
         }
 
