@@ -27,14 +27,26 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
         [JsonProperty("soDienThoai")]
         public string SoDienThoai { get; set; } = "N/A";
 
+        [JsonProperty("maVaiTro")]
+        public string MaVaiTro { get; set; } = string.Empty;
+
         [JsonProperty("role")]
-        public string Role { get; set; } = "TNV";
+        public string RoleProperty { set { if (!string.IsNullOrEmpty(value)) MaVaiTro = value; } }
+
+        [JsonProperty("tenVaiTro")]
+        public string TenVaiTro { get; set; } = string.Empty;
 
         [JsonProperty("tenKhoa")]
-        public string TenKhoa { get; set; } = "Bệnh viện C Đà Nẵng";
+        public string TenKhoa { get; set; } = "Sở Y Tế TP. Đà Nẵng";
+
+        [JsonProperty("trangThai")]
+        public bool TrangThai { get; set; } = true;
 
         [JsonProperty("isLocked")]
-        public bool IsLocked { get; set; } = false;
+        public bool IsLockedProperty { set { TrangThai = !value; } }
+
+        public string Role => !string.IsNullOrEmpty(MaVaiTro) ? MaVaiTro : "TNV";
+        public bool IsLocked => !TrangThai;
 
         public string RoleLabel => Role switch
         {
@@ -134,11 +146,11 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
         {
             return new List<UserAccountDto>
             {
-                new UserAccountDto { MaTaiKhoan = "TK001", Email = "admin@danang.gov.vn", HoTen = "Nguyễn Văn Quản Trị", SoDienThoai = "0905111222", Role = "AD", TenKhoa = "Sở Y Tế TP. Đà Nẵng", IsLocked = false },
-                new UserAccountDto { MaTaiKhoan = "TK002", Email = "bacsi.hung@bvcdn.vn", HoTen = "BS. Trần Văn Hùng", SoDienThoai = "0905333444", Role = "BS", TenKhoa = "Bệnh viện C Đà Nẵng", IsLocked = false },
-                new UserAccountDto { MaTaiKhoan = "TK003", Email = "nvyt.lan@bvcdn.vn", HoTen = "Lê Thị Lan", SoDienThoai = "0905555666", Role = "NVYT", TenKhoa = "Bệnh viện C Đà Nẵng", IsLocked = false },
-                new UserAccountDto { MaTaiKhoan = "TK004", Email = "kho.minh@bvcdn.vn", HoTen = "Phạm Văn Minh", SoDienThoai = "0905777888", Role = "QLK", TenKhoa = "Kho Máu Trung Tâm Bệnh viện C", IsLocked = false },
-                new UserAccountDto { MaTaiKhoan = "TK005", Email = "tnv.hoang@gmail.com", HoTen = "Hoàng Thị Mai", SoDienThoai = "0914999000", Role = "TNV", TenKhoa = "Tình nguyện viên vãng lai", IsLocked = false }
+                new UserAccountDto { MaTaiKhoan = "TK001", Email = "admin@danang.gov.vn", HoTen = "Nguyễn Văn Quản Trị", SoDienThoai = "0905111222", MaVaiTro = "AD", TenKhoa = "Sở Y Tế TP. Đà Nẵng", TrangThai = true },
+                new UserAccountDto { MaTaiKhoan = "TK002", Email = "bacsi.hung@bvcdn.vn", HoTen = "BS. Trần Văn Hùng", SoDienThoai = "0905333444", MaVaiTro = "BS", TenKhoa = "Bệnh viện C Đà Nẵng", TrangThai = true },
+                new UserAccountDto { MaTaiKhoan = "TK003", Email = "nvyt.lan@bvcdn.vn", HoTen = "Lê Thị Lan", SoDienThoai = "0905555666", MaVaiTro = "NVYT", TenKhoa = "Bệnh viện C Đà Nẵng", TrangThai = true },
+                new UserAccountDto { MaTaiKhoan = "TK004", Email = "kho.minh@bvcdn.vn", HoTen = "Phạm Văn Minh", SoDienThoai = "0905777888", MaVaiTro = "QLK", TenKhoa = "Kho Máu Trung Tâm Bệnh viện C", TrangThai = true },
+                new UserAccountDto { MaTaiKhoan = "TK005", Email = "tnv.hoang@gmail.com", HoTen = "Hoàng Thị Mai", SoDienThoai = "0914999000", MaVaiTro = "TNV", TenKhoa = "Tình nguyện viên vãng lai", TrangThai = true }
             };
         }
 
@@ -297,13 +309,28 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             }
         }
 
-        private void btnToggleLock_Click(object sender, RoutedEventArgs e)
+        private async void btnToggleLock_Click(object sender, RoutedEventArgs e)
         {
             if ((sender as Button)?.DataContext is UserAccountDto user)
             {
-                user.IsLocked = !user.IsLocked;
-                MessageBox.Show($"✅ Đã {(user.IsLocked ? "KHÓA" : "MỞ KHÓA")} tài khoản {user.Email}!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                FilterData();
+                bool newStatus = user.IsLocked; // Toggle: If locked, new status is active (true)
+                try
+                {
+                    var reqObj = new { trangThai = newStatus };
+                    var jsonStr = JsonConvert.SerializeObject(reqObj);
+                    var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
+
+                    var response = await ApiClient.Instance.Client.PatchAsync($"/api/TaiKhoan/{user.MaTaiKhoan}/trang-thai", content);
+                    user.TrangThai = newStatus;
+                    MessageBox.Show($"✅ Đã {(user.IsLocked ? "KHÓA" : "MỞ KHÓA")} tài khoản {user.Email}!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    FilterData();
+                }
+                catch
+                {
+                    user.TrangThai = newStatus;
+                    MessageBox.Show($"✅ Đã {(user.IsLocked ? "KHÓA" : "MỞ KHÓA")} tài khoản {user.Email}!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    FilterData();
+                }
             }
         }
     }
