@@ -93,7 +93,9 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
 
         private void FilterData()
         {
-            string query = (txtSearch.Text ?? "").Trim().ToLower();
+            if (dgExpiryUnits == null || _allUnits == null) return;
+
+            string query = (txtSearch?.Text ?? "").Trim().ToLower();
 
             var filtered = _allUnits.Where(item =>
                 string.IsNullOrEmpty(query) ||

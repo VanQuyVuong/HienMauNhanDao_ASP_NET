@@ -74,7 +74,9 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
 
         private void FilterData()
         {
-            string query = (txtSearch.Text ?? "").Trim().ToLower();
+            if (dgCampaigns == null || _allCampaigns == null) return;
+
+            string query = (txtSearch?.Text ?? "").Trim().ToLower();
 
             var filtered = _allCampaigns.Where(c =>
                 string.IsNullOrEmpty(query) ||
