@@ -151,33 +151,32 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                         try { dataArray = JObject.Parse(json)["data"] as JArray; } catch { }
                     }
 
-                    if (dataArray != null)
+                    if (dataArray != null && dataArray.Any())
                     {
                         spPieChart.Children.Clear();
-                        string[] colors = { "#ea580c", "#2563eb", "#16a34a", "#9333ea" };
+                        string[] colors = { "#991b1b", "#ea580c", "#dc2626", "#7f1d1d" };
                         int colorIdx = 0;
 
                         foreach (var item in dataArray)
                         {
-                            string group = item["nhomMau"]?.ToString() ?? item["nhomMauString"]?.ToString() ?? "Khác";
+                            string group = item["nhomMau"]?.ToString() ?? item["bloodType"]?.ToString() ?? "Khác";
                             double percent = Convert.ToDouble(item["percent"] ?? 0);
-                            int value = Convert.ToInt32(item["value"] ?? item["soLuongTon"] ?? 0);
+                            int value = Convert.ToInt32(item["value"] ?? item["quantity"] ?? item["soLuongTon"] ?? 0);
 
                             if ((group == "Khác" || group == "Chưa rõ") && value == 0) continue;
-                            if (percent == 0 && value == 0) continue;
 
                             string color = colors[colorIdx % colors.Length];
                             colorIdx++;
 
                             var itemGrid = new Grid { Margin = new Thickness(0, 0, 0, 8) };
-                            itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
+                            itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(65) });
                             itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                            itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(60) });
+                            itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(70) });
 
-                            var lblGroup = new TextBlock { Text = group, FontWeight = FontWeights.Black, FontSize = 12, Foreground = (Brush)new BrushConverter().ConvertFrom("#0f172a")! };
+                            var lblGroup = new TextBlock { Text = group, FontWeight = FontWeights.Black, FontSize = 11, Foreground = (Brush)new BrushConverter().ConvertFrom("#0f172a")! };
                             
                             var pbBorder = new Border { Background = (Brush)new BrushConverter().ConvertFrom("#f1f5f9")!, CornerRadius = new CornerRadius(4), Height = 10, VerticalAlignment = VerticalAlignment.Center };
-                            var pbFill = new Border { Background = (Brush)new BrushConverter().ConvertFrom(color)!, CornerRadius = new CornerRadius(4), HorizontalAlignment = HorizontalAlignment.Left, Width = Math.Max(6, percent * 1.5) };
+                            var pbFill = new Border { Background = (Brush)new BrushConverter().ConvertFrom(color)!, CornerRadius = new CornerRadius(4), HorizontalAlignment = HorizontalAlignment.Left, Width = Math.Max(4, percent * 1.4) };
                             pbBorder.Child = pbFill;
 
                             var lblVal = new TextBlock { Text = $"{percent:F0}% ({value})", FontWeight = FontWeights.Bold, FontSize = 11, Foreground = (Brush)new BrushConverter().ConvertFrom("#64748b")!, HorizontalAlignment = HorizontalAlignment.Right };
@@ -196,6 +195,60 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 }
             }
             catch { }
+
+            if (spPieChart != null && spPieChart.Children.Count == 0)
+            {
+                RenderPieChartFromInventory();
+            }
+        }
+
+        private void RenderPieChartFromInventory()
+        {
+            if (_allInventory == null || !_allInventory.Any() || spPieChart == null) return;
+
+            spPieChart.Children.Clear();
+
+            int totalA = _allInventory.Where(x => x.NhomMauString != null && x.NhomMauString.StartsWith("A")).Sum(x => x.SoLuongTon);
+            int totalB = _allInventory.Where(x => x.NhomMauString != null && x.NhomMauString.StartsWith("B")).Sum(x => x.SoLuongTon);
+            int totalO = _allInventory.Where(x => x.NhomMauString != null && x.NhomMauString.StartsWith("O")).Sum(x => x.SoLuongTon);
+            int totalAB = _allInventory.Where(x => x.NhomMauString != null && x.NhomMauString.StartsWith("AB")).Sum(x => x.SoLuongTon);
+
+            int grandTotal = totalA + totalB + totalO + totalAB;
+            if (grandTotal == 0) grandTotal = 1;
+
+            var list = new[]
+            {
+                new { name = "Nhóm A", val = totalA, pct = (double)totalA * 100 / grandTotal, color = "#991b1b" },
+                new { name = "Nhóm B", val = totalB, pct = (double)totalB * 100 / grandTotal, color = "#ea580c" },
+                new { name = "Nhóm O", val = totalO, pct = (double)totalO * 100 / grandTotal, color = "#dc2626" },
+                new { name = "Nhóm AB", val = totalAB, pct = (double)totalAB * 100 / grandTotal, color = "#7f1d1d" }
+            };
+
+            foreach (var item in list)
+            {
+                var itemGrid = new Grid { Margin = new Thickness(0, 0, 0, 8) };
+                itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(65) });
+                itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                itemGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(70) });
+
+                var lblGroup = new TextBlock { Text = item.name, FontWeight = FontWeights.Black, FontSize = 11, Foreground = (Brush)new BrushConverter().ConvertFrom("#0f172a")! };
+                
+                var pbBorder = new Border { Background = (Brush)new BrushConverter().ConvertFrom("#f1f5f9")!, CornerRadius = new CornerRadius(4), Height = 10, VerticalAlignment = VerticalAlignment.Center };
+                var pbFill = new Border { Background = (Brush)new BrushConverter().ConvertFrom(item.color)!, CornerRadius = new CornerRadius(4), HorizontalAlignment = HorizontalAlignment.Left, Width = Math.Max(4, item.pct * 1.4) };
+                pbBorder.Child = pbFill;
+
+                var lblVal = new TextBlock { Text = $"{item.pct:F0}% ({item.val})", FontWeight = FontWeights.Bold, FontSize = 11, Foreground = (Brush)new BrushConverter().ConvertFrom("#64748b")!, HorizontalAlignment = HorizontalAlignment.Right };
+
+                Grid.SetColumn(lblGroup, 0);
+                Grid.SetColumn(pbBorder, 1);
+                Grid.SetColumn(lblVal, 2);
+
+                itemGrid.Children.Add(lblGroup);
+                itemGrid.Children.Add(pbBorder);
+                itemGrid.Children.Add(lblVal);
+
+                spPieChart.Children.Add(itemGrid);
+            }
         }
 
         private async Task FetchInventory()
@@ -209,11 +262,18 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                     var JObj = JObject.Parse(json);
                     if (JObj["data"] != null)
                     {
-                        _allInventory = JsonConvert.DeserializeObject<List<KhoMauNhomDto>>(JObj["data"]!.ToString()) ?? new List<KhoMauNhomDto>();
+                        var list = JsonConvert.DeserializeObject<List<KhoMauNhomDto>>(JObj["data"]!.ToString()) ?? new List<KhoMauNhomDto>();
+                        foreach (var item in list)
+                        {
+                            item.NguongAnToan = 10;
+                        }
+                        _allInventory = list;
                     }
                 }
             }
             catch { }
+
+            RenderPieChartFromInventory();
         }
 
         private async Task FetchStats()
