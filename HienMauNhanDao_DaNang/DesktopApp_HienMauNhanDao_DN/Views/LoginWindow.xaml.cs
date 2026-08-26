@@ -46,13 +46,18 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                     if (result != null && result.Success && result.Data != null && !string.IsNullOrEmpty(result.Data.Token))
                     {
                         // Lưu Token và Role vào ApiClient (Singleton)
-                        ApiClient.Instance.SetToken(result.Data.Token, result.Data.Role);
+                        ApiClient.Instance.SetToken(result.Data.Token, result.Data.Role, result.Data.Email);
                         
                         string role = (result.Data.Role ?? "").Trim();
                         if (role == "BS")
                         {
                             var bacSiDashboard = new DesktopApp_HienMauNhanDao_DN.Views.BacSi.BacSiDashboard();
                             bacSiDashboard.Show();
+                        }
+                        else if (role == "QLK" || role.Contains("Kho"))
+                        {
+                            var qlkDashboard = new DesktopApp_HienMauNhanDao_DN.Views.QLK.QLKDashboard();
+                            qlkDashboard.Show();
                         }
                         else
                         {
