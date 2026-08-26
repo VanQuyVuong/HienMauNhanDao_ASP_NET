@@ -40,6 +40,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -63,9 +64,48 @@
                 </StackPanel>
             </Grid>
         </Border>
+        <!-- 8 Blood Type Storage Cards Grid -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#ffedd5" BorderThickness="1" CornerRadius="18" Padding="16" Margin="0,0,0,16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="KHO LƯU TRỮ 8 NHÓM MÁU BỆNH VIỆN" FontSize="11" FontWeight="Black" Foreground="#c2410c" Margin="0,0,0,10"/>
+                
+                <ItemsControl x:Name="icInventoryCards" Grid.Row="1">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="4"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#fff7ed" BorderBrush="#fed7aa" BorderThickness="1" CornerRadius="14" Padding="12" Margin="4">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0" Background="#ea580c" Width="38" Height="38" CornerRadius="10" Margin="0,0,10,0">
+                                        <TextBlock Text="{Binding NhomMauString}" Foreground="White" FontWeight="Black" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding SoLuongTon, StringFormat={}{0} túi máu}" Foreground="#0f172a" FontWeight="Black" FontSize="14"/>
+                                        <TextBlock Text="{Binding TinhTrangHienThi}" Foreground="{Binding TinhTrangFg}" FontWeight="Bold" FontSize="10" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Border>
 
         <!-- Realtime Scan Barcode Station -->
-        <Border Grid.Row="1" Background="#0f172a" CornerRadius="18" Padding="20" Margin="0,0,0,16">
+        <Border Grid.Row="2" Background="#0f172a" CornerRadius="18" Padding="20" Margin="0,0,0,16">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -130,7 +170,7 @@
         </Border>
 
         <!-- Search Toolbar -->
-        <Border Grid.Row="2" Background="White" BorderBrush="#ffedd5" BorderThickness="1" CornerRadius="16" Padding="14" Margin="0,0,0,16">
+        <Border Grid.Row="3" Background="White" BorderBrush="#ffedd5" BorderThickness="1" CornerRadius="16" Padding="14" Margin="0,0,0,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -166,7 +206,7 @@
         </Border>
 
         <!-- Main DataGrid -->
-        <Border Grid.Row="3" CornerRadius="18" Background="White" BorderBrush="#ffedd5" BorderThickness="1" ClipToBounds="True">
+        <Border Grid.Row="4" CornerRadius="18" Background="White" BorderBrush="#ffedd5" BorderThickness="1" ClipToBounds="True">
             <DataGrid x:Name="dgBloodUnits" Margin="-1">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Mã Túi Máu" Width="140">
@@ -210,7 +250,7 @@
         </Border>
 
         <!-- REPORT ISSUE MODAL -->
-        <Grid x:Name="IssueModal" Grid.RowSpan="4" Background="#aa0f172a" Visibility="Collapsed">
+        <Grid x:Name="IssueModal" Grid.RowSpan="5" Background="#aa0f172a" Visibility="Collapsed">
             <Border Background="#0f172a" CornerRadius="28" Width="500" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0" Margin="20">
                 <StackPanel>
                     <!-- Header -->

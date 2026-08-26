@@ -58,6 +58,23 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                     }
                 }
 
+                // Fetch 8 blood types inventory cards
+                try
+                {
+                    var invRes = await ApiClient.Instance.Client.GetAsync("/api/KhoMauBenhVien/my-hospital-inventory");
+                    if (invRes.IsSuccessStatusCode)
+                    {
+                        var invJson = await invRes.Content.ReadAsStringAsync();
+                        var invJObj = JObject.Parse(invJson);
+                        if (invJObj["data"] != null)
+                        {
+                            var invList = JsonConvert.DeserializeObject<List<KhoMauNhomDto>>(invJObj["data"]!.ToString());
+                            if (icInventoryCards != null) icInventoryCards.ItemsSource = invList;
+                        }
+                    }
+                }
+                catch { }
+
                 FilterData();
             }
             catch (Exception ex)
@@ -249,8 +266,10 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
 
         private void FilterData()
         {
-            string query = (txtSearch.Text ?? "").Trim().ToLower();
-            var selectedItem = cbFilterStatus.SelectedItem as ComboBoxItem;
+            if (dgBloodUnits == null || _allBloodUnits == null) return;
+
+            string query = (txtSearch?.Text ?? "").Trim().ToLower();
+            var selectedItem = cbFilterStatus?.SelectedItem as ComboBoxItem;
             string filterTag = selectedItem?.Tag?.ToString() ?? "ALL";
 
             var filtered = _allBloodUnits.Where(item =>
