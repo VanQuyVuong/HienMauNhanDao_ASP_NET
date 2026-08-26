@@ -92,8 +92,8 @@
             </Border>
         </Grid>
 
-        <!-- Fixed Header Banner -->
-        <Border Grid.Row="0" CornerRadius="22" Padding="28,20" Margin="0,0,0,16">
+        <!-- Compact Header Banner -->
+        <Border Grid.Row="0" CornerRadius="14" Padding="16,10" Margin="0,0,0,10">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                     <GradientStop Color="#ea580c" Offset="0.0"/>
@@ -102,14 +102,18 @@
                 </LinearGradientBrush>
             </Border.Background>
             <Grid>
-                <StackPanel>
-                    <Border Background="#33ffffff" CornerRadius="12" Padding="12,4" HorizontalAlignment="Left" Margin="0,0,0,8">
-                        <TextBlock Text="📊 HỆ THỐNG KHO MÁU &amp; CẢNH BÁO AN TOÀN DUYỆT TỒN KHO" Foreground="White" FontSize="11" FontWeight="Black"/>
-                    </Border>
-                    <TextBlock Text="Thống Kê Tồn Kho &amp; Cảnh Báo Cạn Kiệt Máu" Foreground="White" FontSize="22" FontWeight="Black"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="THỐNG KÊ TỒN KHO &amp; CẢNH BÁO CẠN KIỆT MÁU" Foreground="White" FontSize="16" FontWeight="Black"/>
                     <TextBlock Text="Theo dõi tình trạng dung lượng 8 nhóm máu tại Bệnh viện, cảnh báo cạn kiệt nguồn cung cấp cứu" 
-                               Foreground="#ffedd5" FontSize="12" FontWeight="Medium" Margin="0,4,0,0"/>
+                               Foreground="#ffedd5" FontSize="11" FontWeight="Medium" Margin="0,2,0,0"/>
                 </StackPanel>
+                <Border Grid.Column="1" Background="#33ffffff" CornerRadius="8" Padding="10,4" VerticalAlignment="Center">
+                    <TextBlock Text="📊 THỦ KHO BỆNH VIỆN" Foreground="White" FontSize="10" FontWeight="Black"/>
+                </Border>
             </Grid>
         </Border>
 

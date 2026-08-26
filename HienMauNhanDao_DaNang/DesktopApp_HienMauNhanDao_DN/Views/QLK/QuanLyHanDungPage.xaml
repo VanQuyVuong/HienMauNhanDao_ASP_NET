@@ -35,7 +35,7 @@
         </Style>
     </Page.Resources>
 
-    <Grid Margin="28">
+    <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -43,8 +43,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Fixed Header Banner -->
-        <Border Grid.Row="0" CornerRadius="22" Padding="28,20" Margin="0,0,0,16">
+        <!-- Compact Header Banner -->
+        <Border Grid.Row="0" CornerRadius="14" Padding="16,10" Margin="0,0,0,10">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                     <GradientStop Color="#ea580c" Offset="0.0"/>
@@ -53,14 +53,18 @@
                 </LinearGradientBrush>
             </Border.Background>
             <Grid>
-                <StackPanel>
-                    <Border Background="#33ffffff" CornerRadius="12" Padding="12,4" HorizontalAlignment="Left" Margin="0,0,0,8">
-                        <TextBlock Text="⏳ GIÁM SÁT HẠN DÙNG TÚI MÁU BỆNH VIỆN" Foreground="White" FontSize="11" FontWeight="Black"/>
-                    </Border>
-                    <TextBlock Text="Quản Lý Hạn Dùng &amp; Cảnh Báo Tiêu Hủy" Foreground="White" FontSize="22" FontWeight="Black"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="QUẢN LÝ HẠN DÙNG TÚI MÁU &amp; CẢNH BÁO TIÊU HỦY" Foreground="White" FontSize="16" FontWeight="Black"/>
                     <TextBlock Text="Kiểm soát thời hạn 365 ngày lưu trữ túi máu, ưu tiên xuất cấp cứu ca sắp hết hạn và hủy ca quá hạn" 
-                               Foreground="#ffedd5" FontSize="12" FontWeight="Medium" Margin="0,4,0,0"/>
+                               Foreground="#ffedd5" FontSize="11" FontWeight="Medium" Margin="0,2,0,0"/>
                 </StackPanel>
+                <Border Grid.Column="1" Background="#33ffffff" CornerRadius="8" Padding="10,4" VerticalAlignment="Center">
+                    <TextBlock Text="⏳ THỦ KHO BỆNH VIỆN" Foreground="White" FontSize="10" FontWeight="Black"/>
+                </Border>
             </Grid>
         </Border>
 

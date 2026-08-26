@@ -35,15 +35,15 @@
         </Style>
     </Page.Resources>
 
-    <Grid Margin="28">
+    <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Fixed Header Banner -->
-        <Border Grid.Row="0" CornerRadius="22" Padding="28,20" Margin="0,0,0,16">
+        <!-- Compact Header Banner -->
+        <Border Grid.Row="0" CornerRadius="14" Padding="16,10" Margin="0,0,0,10">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                     <GradientStop Color="#ea580c" Offset="0.0"/>
@@ -52,14 +52,18 @@
                 </LinearGradientBrush>
             </Border.Background>
             <Grid>
-                <StackPanel>
-                    <Border Background="#33ffffff" CornerRadius="12" Padding="12,4" HorizontalAlignment="Left" Margin="0,0,0,8">
-                        <TextBlock Text="📋 TỔNG HỢP VẬN CHUYỂN &amp; NHẬP KHO THEO CHIẾN DỊCH HIẾN MÁU" Foreground="White" FontSize="11" FontWeight="Black"/>
-                    </Border>
-                    <TextBlock Text="Nhập Kho Theo Đợt Hiến Máu Nhân Đạo" Foreground="White" FontSize="22" FontWeight="Black"/>
-                    <TextBlock Text="Theo dõi các túi máu thu nhận được từ từng sự kiện hiến máu nhân đạo trên địa bàn" 
-                               Foreground="#ffedd5" FontSize="12" FontWeight="Medium" Margin="0,4,0,0"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="NHẬP KHO TÚI MÁU THEO ĐỢT HIẾN CHIẾN DỊCH" Foreground="White" FontSize="16" FontWeight="Black"/>
+                    <TextBlock Text="Quản lý và nhập danh sách túi máu thu được từ các đợt hiến máu nhân đạo lưu động" 
+                               Foreground="#ffedd5" FontSize="11" FontWeight="Medium" Margin="0,2,0,0"/>
                 </StackPanel>
+                <Border Grid.Column="1" Background="#33ffffff" CornerRadius="8" Padding="10,4" VerticalAlignment="Center">
+                    <TextBlock Text="📋 THỦ KHO BỆNH VIỆN" Foreground="White" FontSize="10" FontWeight="Black"/>
+                </Border>
             </Grid>
         </Border>
 
