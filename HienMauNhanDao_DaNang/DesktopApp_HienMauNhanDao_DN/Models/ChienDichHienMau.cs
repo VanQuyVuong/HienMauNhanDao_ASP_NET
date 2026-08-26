@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DesktopApp_HienMauNhanDao_DN.Models
 {
@@ -12,7 +13,25 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
         public string TenChienDich { get; set; } = string.Empty;
 
         [JsonProperty("diaDiem")]
-        public string? DiaDiem { get; set; }
+        public object? DiaDiemRaw { get; set; }
+
+        public string DiaDiem
+        {
+            get
+            {
+                if (DiaDiemRaw == null) return "TP. Đà Nẵng";
+                if (DiaDiemRaw is string str) return str;
+                try
+                {
+                    var jobj = JObject.FromObject(DiaDiemRaw);
+                    return jobj["tenDiaDiem"]?.ToString() ?? jobj["diaChiChiTiet"]?.ToString() ?? "TP. Đà Nẵng";
+                }
+                catch
+                {
+                    return DiaDiemRaw.ToString() ?? "TP. Đà Nẵng";
+                }
+            }
+        }
 
         [JsonProperty("thoiGianBatDau")]
         public DateTime? ThoiGianBatDau { get; set; }

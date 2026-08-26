@@ -63,8 +63,13 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 if (barRes.IsSuccessStatusCode)
                 {
                     var json = await barRes.Content.ReadAsStringAsync();
-                    var JObj = JObject.Parse(json);
-                    var monthsArray = JObj["months"] as JArray;
+                    JArray monthsArray = null;
+
+                    try { monthsArray = JArray.Parse(json); } catch { }
+                    if (monthsArray == null)
+                    {
+                        try { monthsArray = JObject.Parse(json)["months"] as JArray; } catch { }
+                    }
 
                     if (monthsArray != null && ugBarChart != null)
                     {
@@ -72,20 +77,21 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                         int maxVal = 1;
                         foreach (var item in monthsArray)
                         {
-                            int val = Convert.ToInt32(item["count"] ?? 0);
+                            int val = Convert.ToInt32(item["totalUnits"] ?? item["count"] ?? 0);
                             if (val > maxVal) maxVal = val;
                         }
 
                         int mIdx = 1;
                         foreach (var item in monthsArray)
                         {
-                            int count = Convert.ToInt32(item["count"] ?? 0);
-                            double heightRatio = (double)count / maxVal;
-                            double barHeight = Math.Max(12, heightRatio * 90);
+                            int count = Convert.ToInt32(item["totalUnits"] ?? item["count"] ?? 0);
+                            string monthLabel = item["month"]?.ToString() ?? $"T.{mIdx}";
+                            double heightRatio = (double)count / Math.Max(1, maxVal);
+                            double barHeight = Math.Max(10, heightRatio * 85);
 
                             var colBorder = new Border
                             {
-                                Margin = new Thickness(3, 0, 3, 0),
+                                Margin = new Thickness(2, 0, 2, 0),
                                 VerticalAlignment = VerticalAlignment.Bottom
                             };
 
@@ -104,18 +110,18 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                             var pillar = new Border
                             {
                                 Height = barHeight,
-                                CornerRadius = new CornerRadius(6, 6, 0, 0),
+                                CornerRadius = new CornerRadius(4, 4, 0, 0),
                                 Background = (Brush)new BrushConverter().ConvertFrom("#ea580c")!
                             };
 
                             var txtMonth = new TextBlock
                             {
-                                Text = $"T{mIdx}",
-                                FontSize = 9,
+                                Text = monthLabel.Replace("T.", "T"),
+                                FontSize = 8,
                                 FontWeight = FontWeights.Bold,
                                 Foreground = (Brush)new BrushConverter().ConvertFrom("#64748b")!,
                                 HorizontalAlignment = HorizontalAlignment.Center,
-                                Margin = new Thickness(0, 4, 0, 0)
+                                Margin = new Thickness(0, 3, 0, 0)
                             };
 
                             stack.Children.Add(txtCount);
@@ -138,8 +144,12 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 if (pieRes.IsSuccessStatusCode && spPieChart != null)
                 {
                     var json = await pieRes.Content.ReadAsStringAsync();
-                    var JObj = JObject.Parse(json);
-                    var dataArray = JObj["data"] as JArray;
+                    JArray dataArray = null;
+                    try { dataArray = JArray.Parse(json); } catch { }
+                    if (dataArray == null)
+                    {
+                        try { dataArray = JObject.Parse(json)["data"] as JArray; } catch { }
+                    }
 
                     if (dataArray != null)
                     {
