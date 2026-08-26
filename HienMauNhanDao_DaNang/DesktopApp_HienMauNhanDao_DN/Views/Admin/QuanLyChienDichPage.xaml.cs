@@ -82,7 +82,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
     {
         private List<CampaignAdminDto> _allCampaigns = new List<CampaignAdminDto>();
         private int _currentPage = 1;
-        private int _pageSize = 5;
+        private int _pageSize = 10;
 
         public QuanLyChienDichPage()
         {

@@ -57,7 +57,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
         private string _mainTab = "pending"; // "pending" or "issued"
         private string _subTab = "ALL"; // "ALL", "ChienDich", "ThuongXuyen", "CoDinh"
         private int _currentPage = 1;
-        private int _pageSize = 5;
+        private int _pageSize = 10;
 
         public CapGiayChungNhanPage()
         {

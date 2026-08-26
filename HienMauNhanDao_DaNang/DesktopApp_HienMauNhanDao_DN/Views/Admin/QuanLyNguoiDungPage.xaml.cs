@@ -86,7 +86,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
         private List<UserAccountDto> _allUsers = new List<UserAccountDto>();
         private string _activeTab = "INTERNAL";
         private int _currentPage = 1;
-        private int _pageSize = 5;
+        private int _pageSize = 10;
 
         public QuanLyNguoiDungPage()
         {
@@ -261,10 +261,11 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             }
         }
 
-        private void btnCreateUser_Click(object sender, RoutedEventArgs e)
+        private void btnOpenCreateModal_Click(object sender, RoutedEventArgs e)
         {
-            txtNewEmail.Text = "";
-            txtNewPassword.Password = "";
+            txtNewEmail.Text = string.Empty;
+            txtNewPassword.Password = string.Empty;
+            cbNewRole.SelectedIndex = 1;
             CreateUserModal.Visibility = Visibility.Visible;
         }
 
