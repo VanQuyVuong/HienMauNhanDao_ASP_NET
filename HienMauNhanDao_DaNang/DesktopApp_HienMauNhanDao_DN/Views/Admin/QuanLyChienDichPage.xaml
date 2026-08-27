@@ -114,12 +114,17 @@
                           VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                     <DataGrid.Columns>
                         <!-- CODE & NAME -->
-                        <DataGridTemplateColumn Header="Tên Chiến Dịch / Mã" Width="260">
+                        <DataGridTemplateColumn Header="Tên Chiến Dịch / Mã" Width="280">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding TenChienDich}" FontWeight="Bold" FontSize="12" Foreground="#0f172a"/>
-                                        <TextBlock Text="{Binding MaChienDich}" FontSize="10" Foreground="#64748b" FontFamily="Consolas"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding TenChienDich}" FontWeight="Bold" FontSize="12" Foreground="#0f172a"/>
+                                            <Border Background="#dc2626" Padding="6,1" CornerRadius="4" Visibility="{Binding EmergencyBadgeVisibility}" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock Text="🚨 KHẨN CẤP" Foreground="White" FontSize="9" FontWeight="Black"/>
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding MaChienDich}" FontSize="10" Foreground="#64748b" FontFamily="Consolas" Margin="0,2,0,0"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>

@@ -39,6 +39,12 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
         [JsonProperty("trangThai")]
         public string TrangThaiRaw { get; set; } = "0";
 
+        [JsonProperty("mucDoUuTien")]
+        public int MucDoUuTien { get; set; } = 0;
+
+        public bool IsEmergency => MucDoUuTien == 1;
+        public Visibility EmergencyBadgeVisibility => IsEmergency ? Visibility.Visible : Visibility.Collapsed;
+
         public string TrangThai
         {
             get
@@ -53,29 +59,50 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
 
         public string ProgressText => $"{DaThu} / {ChiTieu} túi";
 
-        public string StatusText => TrangThai switch
+        public string StatusText
         {
-            "DANG_DIEN_RA" => "ĐANG DIỄN RA ⚡",
-            "KET_THUC" => "ĐÃ KẾT THÚC 🏁",
-            "DA_HUY" => "ĐÃ HỦY ❌",
-            _ => "SẮP TỚI 📅"
-        };
+            get
+            {
+                if (IsEmergency) return "🚨 KHẨN CẤP 🔥";
+                return TrangThai switch
+                {
+                    "DANG_DIEN_RA" => "ĐANG DIỄN RA ⚡",
+                    "KET_THUC" => "ĐÃ KẾT THÚC 🏁",
+                    "DA_HUY" => "ĐÃ HỦY ❌",
+                    _ => "SẮP TỚI 📅"
+                };
+            }
+        }
 
-        public string StatusBg => TrangThai switch
+        public string StatusBg
         {
-            "DANG_DIEN_RA" => "#dcfce7",
-            "KET_THUC" => "#fef08a",
-            "DA_HUY" => "#fee2e2",
-            _ => "#dbeafe"
-        };
+            get
+            {
+                if (IsEmergency) return "#fee2e2";
+                return TrangThai switch
+                {
+                    "DANG_DIEN_RA" => "#dcfce7",
+                    "KET_THUC" => "#fef08a",
+                    "DA_HUY" => "#fee2e2",
+                    _ => "#dbeafe"
+                };
+            }
+        }
 
-        public string StatusFg => TrangThai switch
+        public string StatusFg
         {
-            "DANG_DIEN_RA" => "#15803d",
-            "KET_THUC" => "#a16207",
-            "DA_HUY" => "#b91c1c",
-            _ => "#1d4ed8"
-        };
+            get
+            {
+                if (IsEmergency) return "#991b1b";
+                return TrangThai switch
+                {
+                    "DANG_DIEN_RA" => "#15803d",
+                    "KET_THUC" => "#a16207",
+                    "DA_HUY" => "#b91c1c",
+                    _ => "#1d4ed8"
+                };
+            }
+        }
     }
 
     public partial class QuanLyChienDichPage : Page
@@ -128,6 +155,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
 
                             int duKien = token["soLuongDuKien"]?.ToObject<int>() ?? 100;
                             int luongThu = token["luongMauDaThu"]?.ToObject<int>() ?? 0;
+                            int uuTien = token["mucDoUuTien"]?.ToObject<int>() ?? 0;
 
                             if (DateTime.TryParse(bd, out DateTime dtBD)) bd = dtBD.ToString("dd/MM/yyyy");
                             if (DateTime.TryParse(kt, out DateTime dtKT)) kt = dtKT.ToString("dd/MM/yyyy");
@@ -141,7 +169,8 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                                 ThoiGianKT = kt,
                                 ChiTieu = duKien,
                                 DaThu = luongThu,
-                                TrangThaiRaw = status
+                                TrangThaiRaw = status,
+                                MucDoUuTien = uuTien
                             });
                         }
                     }
@@ -169,9 +198,10 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
         {
             return new List<CampaignAdminDto>
             {
-                new CampaignAdminDto { MaChienDich = "CD001", TenChienDich = "Giọt Hồng Sông Hàn 2026", DiaDiemString = "ĐH Bách Khoa Đà Nẵng", ThoiGianBD = "20/08/2026", ThoiGianKT = "30/08/2026", ChiTieu = 500, DaThu = 320, TrangThaiRaw = "1" },
-                new CampaignAdminDto { MaChienDich = "CD002", TenChienDich = "Chủ Nhật Đỏ Lần thứ XVIII", DiaDiemString = "Bệnh viện C Đà Nẵng", ThoiGianBD = "01/09/2026", ThoiGianKT = "05/09/2026", ChiTieu = 300, DaThu = 0, TrangThaiRaw = "0" },
-                new CampaignAdminDto { MaChienDich = "CD003", TenChienDich = "Hành Trình Đỏ Thành Phố 2026", DiaDiemString = "Cung Thể Thao Tuyên Sơn", ThoiGianBD = "10/07/2026", ThoiGianKT = "15/07/2026", ChiTieu = 1000, DaThu = 1050, TrangThaiRaw = "2" }
+                new CampaignAdminDto { MaChienDich = "CD001", TenChienDich = "Hiến Máu Khẩn Cấp Nhóm O- Cấp Cứu", DiaDiemString = "Bệnh viện Đà Nẵng", ThoiGianBD = "26/08/2026", ThoiGianKT = "28/08/2026", ChiTieu = 150, DaThu = 80, TrangThaiRaw = "1", MucDoUuTien = 1 },
+                new CampaignAdminDto { MaChienDich = "CD002", TenChienDich = "Giọt Hồng Sông Hàn 2026", DiaDiemString = "ĐH Bách Khoa Đà Nẵng", ThoiGianBD = "20/08/2026", ThoiGianKT = "30/08/2026", ChiTieu = 500, DaThu = 320, TrangThaiRaw = "1", MucDoUuTien = 0 },
+                new CampaignAdminDto { MaChienDich = "CD003", TenChienDich = "Chủ Nhật Đỏ Lần thứ XVIII", DiaDiemString = "Bệnh viện C Đà Nẵng", ThoiGianBD = "01/09/2026", ThoiGianKT = "05/09/2026", ChiTieu = 300, DaThu = 0, TrangThaiRaw = "0", MucDoUuTien = 0 },
+                new CampaignAdminDto { MaChienDich = "CD004", TenChienDich = "Hành Trình Đỏ Thành Phố 2026", DiaDiemString = "Cung Thể Thao Tuyên Sơn", ThoiGianBD = "10/07/2026", ThoiGianKT = "15/07/2026", ChiTieu = 1000, DaThu = 1050, TrangThaiRaw = "2", MucDoUuTien = 0 }
             };
         }
 

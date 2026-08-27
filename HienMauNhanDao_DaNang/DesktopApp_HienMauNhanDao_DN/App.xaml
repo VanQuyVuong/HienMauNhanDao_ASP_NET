@@ -38,7 +38,7 @@
                             <!-- Disabled State -->
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="border" Property="Opacity" Value="0.5"/>
-                                <Setter Property="Cursor" Value="NotAllowed"/>
+                                <Setter Property="Cursor" Value="No"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
