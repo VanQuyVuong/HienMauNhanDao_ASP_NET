@@ -4,6 +4,9 @@
         Title="Quản Lý Kho Máu - Bệnh Viện C Đà Nẵng" 
         Height="840" Width="1380"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        ResizeMode="CanResize"
+        WindowStyle="SingleBorderWindow"
         Background="#f8fafc">
 
     <Window.Resources>
@@ -11,7 +14,7 @@
             <Setter Property="Height" Value="48"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#c2410c"/>
+            <Setter Property="Foreground" Value="#cbd5e1"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -26,11 +29,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#fff7ed"/>
-                                <Setter Property="Foreground" Value="#ea580c"/>
+                                <Setter TargetName="border" Property="Background" Value="#1e293b"/>
+                                <Setter Property="Foreground" Value="White"/>
                             </Trigger>
                             <Trigger Property="Tag" Value="Active">
-                                <Setter TargetName="border" Property="Background" Value="#ea580c"/>
+                                <Setter TargetName="border" Property="Background" Value="#dc2626"/>
                                 <Setter Property="Foreground" Value="White"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -47,7 +50,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- SIDEBAR NAVIGATION PANEL -->
-        <Border Grid.Column="0" Background="White" BorderBrush="#ffedd5" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0" Background="#0f172a" BorderBrush="#1e293b" BorderThickness="0,0,1,0">
             <Grid Margin="16,24">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
