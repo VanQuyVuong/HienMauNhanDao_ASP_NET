@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VitalStream - Giới thiệu về hiến máu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-low": "#f3f4f5",
+                      "surface-container": "#edeeef",
+                      "on-secondary": "#ffffff",
+                      "on-primary-container": "#fffbff",
+                      "background": "#f8f9fa",
+                      "on-primary-fixed-variant": "#92001c",
+                      "on-secondary-fixed": "#2b141f",
+                      "primary": "#b7102a",
+                      "on-tertiary-fixed": "#001b3c",
+                      "secondary": "#745662",
+                      "on-tertiary-fixed-variant": "#30476a",
+                      "surface-variant": "#e1e3e4",
+                      "on-secondary-fixed-variant": "#5b3f4b",
+                      "on-surface": "#191c1d",
+                      "on-primary": "#ffffff",
+                      "primary-fixed-dim": "#ffb3b1",
+                      "on-tertiary": "#ffffff",
+                      "surface-tint": "#bb152c",
+                      "secondary-container": "#fdd5e4",
+                      "surface-dim": "#d9dadb",
+                      "outline": "#8f6f6e",
+                      "surface": "#f8f9fa",
+                      "on-secondary-container": "#795a67",
+                      "tertiary-fixed-dim": "#b0c7f1",
+                      "surface-container-lowest": "#ffffff",
+                      "on-surface-variant": "#5b403f",
+                      "on-background": "#191c1d",
+                      "surface-container-high": "#e7e8e9",
+                      "tertiary": "#465d81",
+                      "tertiary-container": "#5f759b",
+                      "surface-bright": "#f8f9fa",
+                      "tertiary-fixed": "#d5e3ff",
+                      "secondary-fixed-dim": "#e3bccb",
+                      "primary-fixed": "#ffdad8",
+                      "outline-variant": "#e4bebc",
+                      "secondary-fixed": "#ffd8e7",
+                      "surface-container-highest": "#e1e3e4",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#ffb3b1",
+                      "on-error": "#ffffff",
+                      "inverse-surface": "#2e3132",
+                      "on-primary-fixed": "#410007",
+                      "on-tertiary-container": "#fefcff",
+                      "primary-container": "#db313f",
+                      "error": "#ba1a1a",
+                      "error-container": "#ffdad6",
+                      "inverse-on-surface": "#f0f1f2"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "md": "16px",
+                      "xs": "4px",
+                      "gutter-mobile": "12px",
+                      "sm": "8px",
+                      "lg": "24px",
+                      "xl": "32px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "label-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-lg": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "caption": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Smooth scrolling */
+        html { scroll-behavior: smooth; }
+        
+        /* Glassmorphism utility */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-lg min-h-screen pb-24">
+<!-- Top App Bar (Web) -->
+<header class="hidden md:flex justify-between items-center px-lg py-sm w-full top-0 sticky z-50 bg-surface dark:bg-on-surface border-b border-surface-container">
+<div class="flex items-center gap-sm text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant/10 p-sm rounded-lg cursor-pointer active:scale-95 transition-transform duration-100">
+<span class="material-symbols-outlined" data-icon="water_drop">water_drop</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary dark:text-primary-fixed-dim">VitalStream</h1>
+<div class="flex items-center gap-sm">
+<div class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-variant/10 p-sm rounded-lg cursor-pointer active:scale-95 transition-transform duration-100">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</div>
+</div>
+</header>
+<!-- Top App Bar (Mobile) -->
+<header class="md:hidden flex justify-between items-center px-margin-mobile py-sm w-full top-0 sticky z-50 bg-surface dark:bg-on-surface border-b border-surface-container">
+<div class="flex items-center gap-sm text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant/10 p-sm rounded-lg cursor-pointer active:scale-95 transition-transform duration-100">
+<span class="material-symbols-outlined" data-icon="water_drop">water_drop</span>
+</div>
+<h1 class="font-display-lg text-display-lg-mobile text-primary dark:text-primary-fixed-dim">VitalStream</h1>
+<div class="flex items-center gap-sm">
+<div class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-variant/10 p-sm rounded-lg cursor-pointer active:scale-95 transition-transform duration-100">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</div>
+</div>
+</header>
+<main class="w-full max-w-7xl mx-auto px-margin-mobile md:px-lg py-lg md:py-xl flex flex-col gap-xl">
+<!-- Hero Section with Bento Layout -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="md:col-span-2 rounded-xl overflow-hidden relative min-h-[300px] shadow-sm border border-surface-variant">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="A warm, professional healthcare illustration showing a diverse group of people participating in a blood donation drive. The scene is brightly lit with a clean, modern aesthetic. Soft pink and primary red accents highlight the clinical yet empathetic atmosphere, emphasizing safety, community, and sharing life." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD485A-8j-Nd5ogpjdREZJazNMf9jLM7e2M99ueC5RjKLaQFiXHT5poNo4py06EfrTYfkB0z4T5iMdy4_STMRESNb7KSOjZfYsR0AKSa0nX6pKTXY0WjolWOcsReJY3mYdUDseZAWoqwk6uRTdF6FJC7VCH8DYk640ZoJ0ZrEAZ7bOKWBwjIfAfa3OKZ4QodppepD_iFvl3vANPjTcIOFGNuZz8igYrJ70VL1MvuX0fisrrCDVxhH3b5g"/>
+<div class="absolute inset-0 bg-gradient-to-r from-on-background/80 to-transparent p-lg flex flex-col justify-end">
+<h2 class="font-display-lg text-display-lg text-on-primary mb-sm">Sẻ Chia Máu, Trao Sự Sống</h2>
+<p class="font-body-lg text-body-lg text-on-primary/90 max-w-md">Hiến máu không chỉ là một hành động y tế, mà là một nghĩa cử cao đẹp thể hiện tình người. Mỗi giọt máu cho đi là một cuộc đời ở lại.</p>
+</div>
+</div>
+<div class="bg-primary text-on-primary rounded-xl p-lg flex flex-col justify-between shadow-sm">
+<div>
+<span class="material-symbols-outlined text-[48px] mb-md" data-weight="fill">volunteer_activism</span>
+<h3 class="font-headline-lg text-headline-lg mb-xs">Ý Nghĩa Cao Đẹp</h3>
+<p class="font-body-md text-body-md opacity-90">Một lần hiến máu có thể cứu sống tới 3 người bệnh. Máu của bạn là món quà vô giá dành cho những người đang trong cơn nguy kịch.</p>
+</div>
+<button class="mt-lg bg-on-primary text-primary font-label-lg text-label-lg py-sm px-md rounded-lg w-full text-center hover:bg-surface-container-low transition-colors">
+                    Đăng Ký Ngay
+                </button>
+</div>
+</section>
+<!-- Process Section (Asymmetric Layout) -->
+<section>
+<h2 class="font-headline-lg text-headline-lg text-on-background mb-lg text-center">Quy Trình An Toàn &amp; Chuyên Nghiệp</h2>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md relative">
+<!-- Step 1 -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-md shadow-sm relative z-10 hover:shadow-md transition-shadow">
+<div class="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mb-md">
+<span class="font-headline-md text-headline-md">1</span>
+</div>
+<h4 class="font-label-lg text-label-lg text-on-surface mb-xs">Đăng Ký &amp; Tư Vấn</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Điền thông tin y tế cơ bản và nhận sự tư vấn ban đầu từ đội ngũ chuyên môn để đảm bảo bạn đủ điều kiện.</p>
+</div>
+<!-- Step 2 -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-md shadow-sm relative z-10 md:mt-lg hover:shadow-md transition-shadow">
+<div class="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mb-md">
+<span class="font-headline-md text-headline-md">2</span>
+</div>
+<h4 class="font-label-lg text-label-lg text-on-surface mb-xs">Khám Sức Khỏe</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Bác sĩ tiến hành kiểm tra huyết áp, nhịp tim và xét nghiệm máu nhanh để đảm bảo an toàn tuyệt đối cho bạn.</p>
+</div>
+<!-- Step 3 -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-md shadow-sm relative z-10 hover:shadow-md transition-shadow">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-md">
+<span class="font-headline-md text-headline-md">3</span>
+</div>
+<h4 class="font-label-lg text-label-lg text-on-surface mb-xs">Hiến Máu</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Quá trình hiến máu diễn ra trong môi trường vô trùng, thoải mái và chỉ mất khoảng 10-15 phút.</p>
+</div>
+<!-- Step 4 -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-md shadow-sm relative z-10 md:mt-lg hover:shadow-md transition-shadow">
+<div class="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mb-md">
+<span class="font-headline-md text-headline-md">4</span>
+</div>
+<h4 class="font-label-lg text-label-lg text-on-surface mb-xs">Nghỉ Ngơi &amp; Nhận Quà</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Sau khi hiến, bạn sẽ được nghỉ ngơi, ăn nhẹ, uống nước và nhận Giấy chứng nhận cùng phần quà nhỏ.</p>
+</div>
+</div>
+</section>
+<!-- FAQs Section (Glassmorphism Cards) -->
+<section class="bg-secondary-container/30 rounded-xl p-lg md:p-xl border border-outline-variant/30">
+<div class="flex flex-col md:flex-row gap-lg">
+<div class="md:w-1/3">
+<h2 class="font-headline-lg text-headline-lg text-on-background mb-sm">Câu Hỏi Thường Gặp</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Giải đáp những thắc mắc phổ biến để bạn hoàn toàn an tâm trước khi quyết định hiến máu.</p>
+</div>
+<div class="md:w-2/3 flex flex-col gap-sm">
+<!-- FAQ Item 1 -->
+<div class="glass-card rounded-lg p-md cursor-pointer group" onclick="this.classList.toggle('bg-surface-container')">
+<div class="flex justify-between items-center mb-xs">
+<h4 class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors">Hiến máu có đau không?</h4>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="add">add</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant hidden group-hover:block mt-sm">Cảm giác chỉ như một vết kiến đốt nhẹ khi kim tiêm bắt đầu đưa vào. Trong suốt quá trình hiến máu, hầu hết mọi người đều cảm thấy bình thường và thoải mái.</p>
+</div>
+<!-- FAQ Item 2 -->
+<div class="glass-card rounded-lg p-md cursor-pointer group" onclick="this.classList.toggle('bg-surface-container')">
+<div class="flex justify-between items-center mb-xs">
+<h4 class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors">Bao lâu thì hiến máu lại được?</h4>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="add">add</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant hidden group-hover:block mt-sm">Thời gian tối thiểu giữa 2 lần hiến máu toàn phần là 12 tuần (khoảng 3 tháng). Điều này đảm bảo cơ thể bạn có đủ thời gian tái tạo lượng máu đã cho.</p>
+</div>
+<!-- FAQ Item 3 -->
+<div class="glass-card rounded-lg p-md cursor-pointer group" onclick="this.classList.toggle('bg-surface-container')">
+<div class="flex justify-between items-center mb-xs">
+<h4 class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors">Cần chuẩn bị gì trước khi hiến máu?</h4>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="add">add</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant hidden group-hover:block mt-sm">Đêm trước ngày hiến máu cần ngủ đủ giấc. Ăn nhẹ trước khi hiến (không ăn đồ nhiều dầu mỡ), uống nhiều nước. Mang theo CCCD hoặc Hộ chiếu.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="flex justify-center my-lg">
+<div class="bg-surface-container border border-surface-variant rounded-[32px] px-xl py-lg text-center max-w-2xl shadow-sm">
+<span class="material-symbols-outlined text-[40px] text-primary mb-sm" data-icon="favorite" data-weight="fill">favorite</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-sm">Sẵn sàng trao đi yêu thương?</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg">Hãy tham gia cộng đồng những người hiến máu ngay hôm nay để mang lại hy vọng cho những người đang cần.</p>
+<button class="bg-primary text-on-primary font-label-lg text-label-lg py-sm px-xl rounded-full hover:bg-primary/90 transition-colors shadow-sm">
+                    Tìm Địa Điểm Gần Bạn
+                </button>
+</div>
+</section>
+</main>
+<!-- Bottom Nav Bar (Mobile only, rendered if top level destination) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter-mobile pb-safe bg-surface dark:bg-on-surface border-t border-surface-container h-[80px] pt-sm">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 active:scale-90 transition-all duration-200 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined mb-xs" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</div>
+<!-- Active state for About page -->
+<div class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary-fixed-dim text-on-secondary-container dark:text-on-secondary-fixed rounded-full px-md py-xs active:scale-90 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined mb-xs" data-icon="info" data-weight="fill">info</span>
+<span class="font-label-md text-label-md">About</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 active:scale-90 transition-all duration-200 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined mb-xs" data-icon="campaign">campaign</span>
+<span class="font-label-md text-label-md">Events</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 active:scale-90 transition-all duration-200 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined mb-xs" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</div>
+</nav>
+<script>
+        // Simple accordion logic for FAQs is handled via inline onclick in HTML
+    </script>
+</body></html>

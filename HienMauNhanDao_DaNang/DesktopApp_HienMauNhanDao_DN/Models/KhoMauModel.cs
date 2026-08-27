@@ -19,7 +19,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
         public int SoLuongTon { get; set; }
 
         [JsonProperty("nguongAnToan")]
-        public int NguongAnToan { get; set; } = 50;
+        public int NguongAnToan { get; set; } = 10;
 
         [JsonProperty("tinhTrang")]
         public string TinhTrang { get; set; } = "AnToan";
@@ -27,8 +27,8 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
         [JsonProperty("maKhoa")]
         public string MaKhoa { get; set; } = string.Empty;
 
-        public bool IsAnToan => TinhTrang == "AnToan" && SoLuongTon >= NguongAnToan;
-        public string TinhTrangHienThi => IsAnToan ? "AN TOÀN ✅" : "CẠN KIỆT ⚠️";
+        public bool IsAnToan => SoLuongTon >= NguongAnToan;
+        public string TinhTrangHienThi => IsAnToan ? "AN TOÀN ✅" : "SẮP HẾT ⚠️";
         public string TinhTrangBg => IsAnToan ? "#dcfce7" : "#fee2e2";
         public string TinhTrangFg => IsAnToan ? "#15803d" : "#b91c1c";
         public string TinhTrangBorder => IsAnToan ? "#86efac" : "#fca5a5";

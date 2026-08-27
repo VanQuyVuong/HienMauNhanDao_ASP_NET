@@ -567,70 +567,7 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
 
-        // API 11: Lấy thống kê hạn dùng túi máu
-        [HttpGet("expiry-stats")]
-        public async Task<IActionResult> GetExpiryStats()
-        {
-            var homNay = DateTime.Now;
-            var list = await _context.TuiMaus.ToListAsync();
 
-            int safeCount = 0;
-            int nearExpiryCount = 0;
-            int expiredCount = 0;
-
-            foreach (var tui in list)
-            {
-                var ngayHetHan = tui.ThoiGianLayMau?.AddDays(365) ?? homNay.AddDays(365);
-                var soNgayConLai = (ngayHetHan - homNay).Days;
-                if (soNgayConLai < 0) expiredCount++;
-                else if (soNgayConLai <= 30) nearExpiryCount++;
-                else safeCount++;
-            }
-
-            return Ok(new
-            {
-                safeCount = safeCount,
-                nearExpiryCount = nearExpiryCount,
-                expiredCount = expiredCount
-            });
-        }
-
-        // API 12: Quản lý chi tiết hạn dùng túi máu
-        [HttpGet("expiry-management")]
-        public async Task<IActionResult> GetExpiryManagement([FromQuery] string viewMode = "all", [FromQuery] string? search = null)
-        {
-            var homNay = DateTime.Now;
-            var list = await _context.TuiMaus
-                .Include(t => t.DonDangKy)
-                    .ThenInclude(d => d.TinhNguyenVien)
-                .ToListAsync();
-
-            var result = list.Select(t =>
-            {
-                var ngayHetHan = t.ThoiGianLayMau?.AddDays(365) ?? homNay.AddDays(365);
-                var soNgayConLai = (ngayHetHan - homNay).Days;
-                string statusTag = soNgayConLai < 0 ? "expired" : (soNgayConLai <= 30 ? "near" : "safe");
-                string statusText = soNgayConLai < 0 ? "Đã hết hạn" : (soNgayConLai <= 30 ? "Sắp hết hạn" : "An toàn");
-
-                return new
-                {
-                    maTuiMau = t.MaTuiMau,
-                    tenTinhNguyenVien = t.DonDangKy?.TinhNguyenVien?.HoTen ?? "Nguyễn Văn A",
-                    nhomMau = t.DonDangKy?.TinhNguyenVien?.NhomMau != null 
-                        ? t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-")
-                        : "B+",
-                    theTich = t.TheTich ?? 350,
-                    thoiGianLay = t.ThoiGianLayMau.HasValue ? t.ThoiGianLayMau.Value.ToString("dd/MM/yyyy HH:mm") : "10/06/2026 08:15",
-                    ngayHetHan = ngayHetHan.ToString("dd/MM/yyyy"),
-                    trangThaiHienThi = statusText,
-                    statusTag = statusTag
-                };
-            }).Where(t => 
-                viewMode == "all" || t.statusTag == viewMode
-            ).ToList();
-
-            return Ok(result);
-        }
 
         //API 10 .xoá túi máu khỏi kho lưu trữ
         [HttpDelete("blood-units/{maTuiMau}")]

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VitalStream - News Article</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed-variant": "#30476a",
+                        "inverse-on-surface": "#f0f1f2",
+                        "primary-container": "#db313f",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#465d81",
+                        "inverse-primary": "#ffb3b1",
+                        "tertiary-container": "#5f759b",
+                        "surface-container": "#edeeef",
+                        "on-background": "#191c1d",
+                        "surface-container-high": "#e7e8e9",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9fa",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#fdd5e4",
+                        "primary-fixed": "#ffdad8",
+                        "on-secondary-fixed-variant": "#5b3f4b",
+                        "tertiary-fixed": "#d5e3ff",
+                        "background": "#f8f9fa",
+                        "on-surface-variant": "#5b403f",
+                        "inverse-surface": "#2e3132",
+                        "secondary-fixed": "#ffd8e7",
+                        "on-tertiary-fixed": "#001b3c",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e1e3e4",
+                        "surface-tint": "#bb152c",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#745662",
+                        "outline": "#8f6f6e",
+                        "surface": "#f8f9fa",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#e4bebc",
+                        "on-secondary-container": "#795a67",
+                        "on-tertiary-container": "#fefcff",
+                        "on-primary-fixed-variant": "#92001c",
+                        "primary-fixed-dim": "#ffb3b1",
+                        "surface-container-low": "#f3f4f5",
+                        "on-secondary-fixed": "#2b141f",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#191c1d",
+                        "on-primary-container": "#fffbff",
+                        "primary": "#b7102a",
+                        "secondary-fixed-dim": "#e3bccb",
+                        "tertiary-fixed-dim": "#b0c7f1",
+                        "surface-dim": "#d9dadb",
+                        "on-primary-fixed": "#410007"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "base": "4px",
+                        "gutter-mobile": "12px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased pb-24 md:pb-0">
+<!-- Top Navigation (Desktop) - Suppressed per rules for task-focused page -->
+<!-- Nav shell is suppressed on this detailed content screen as it represents a temporary departure from main flow -->
+<!-- Article Header -->
+<header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-md border-b border-surface-container px-margin-mobile py-sm flex justify-between items-center w-full">
+<button aria-label="Go back" class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<span class="font-headline-md text-headline-md text-primary">VitalStream</span>
+<button aria-label="Share article" class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">share</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="max-w-3xl mx-auto px-margin-mobile py-lg">
+<!-- Hero Image -->
+<div class="relative w-full aspect-video rounded-xl overflow-hidden mb-lg shadow-sm border border-surface-container">
+<img class="object-cover w-full h-full" data-alt="A brightly lit, modern clinical setting showing a professional nurse comfortably preparing a patient for blood donation. The scene is shot from a warm, encouraging angle, highlighting clean medical equipment and soft natural light. The color palette emphasizes sterile whites, soft pinks, and subtle reds, evoking a safe and trusting healthcare environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAzc6tKbymmyiLlMo4SFFHzLIt-l4EMjqU0fKutzgSUeE4e1Vhs3gGsg0E9UMXu9pgFG3wCoA1q6hIaCMy3YmEyNrvyPZtikiCa2ooV8vZxxPYcmKfX_rHVVkHo00nRdmtP5EkKp6Iq4QOgg2mchi2XEC3GvN7biHYRMe3-ktQilLHYuRE-gk0ZeKiMIxhlSfD8aVVoGZxkHXTzoBZMnW7YCI-NTv3vslyjuYVRcMzd0fql-w8O97ZRA"/>
+</div>
+<!-- Article Meta -->
+<div class="flex flex-col gap-sm mb-xl">
+<span class="inline-flex items-center px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md w-fit">Mẹo sức khỏe</span>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-2">5 Lời khuyên nhanh khi hiến máu lần đầu</h1>
+<div class="flex items-center gap-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span class="font-body-md text-body-md">BS. Nguyễn Văn A</span>
+<span class="px-2">•</span>
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span class="font-body-md text-body-md">15/05/2024</span>
+<span class="px-2">•</span>
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="font-body-md text-body-md">5 min read</span>
+</div>
+</div>
+<!-- Article Body -->
+<article class="prose prose-sm md:prose-base lg:prose-lg max-w-none font-body-lg text-body-lg text-on-surface-variant space-y-6"><div class="bg-primary-container/10 p-md rounded-lg border border-primary/20 mb-md"><h4 class="font-label-lg text-primary mb-1 flex items-center gap-xs"><span class="material-symbols-outlined text-[20px]">info</span> Tóm tắt nhanh</h4><p class="text-body-md text-on-surface">Chuẩn bị tốt sức khỏe, ăn nhẹ và uống đủ nước là chìa khóa để có một buổi hiến máu an toàn và nhẹ nhàng.</p></div><div class="space-y-4"><div class="flex gap-md p-md bg-surface-container-low rounded-lg border border-surface-variant"><span class="material-symbols-outlined text-primary">check_circle</span><div><h4 class="font-label-lg text-on-surface">Ngủ đủ giấc</h4><p class="text-body-md">Đảm bảo ngủ ít nhất 7-8 tiếng vào đêm trước ngày hiến máu.</p></div></div><div class="flex gap-md p-md bg-surface-container-low rounded-lg border border-surface-variant"><span class="material-symbols-outlined text-primary">check_circle</span><div><h4 class="font-label-lg text-on-surface">Dinh dưỡng hợp lý</h4><p class="text-body-md">Ăn nhẹ, tránh dầu mỡ và không dùng chất kích thích trong 24h.</p></div></div><div class="flex gap-md p-md bg-surface-container-low rounded-lg border border-surface-variant"><span class="material-symbols-outlined text-primary">check_circle</span><div><h4 class="font-label-lg text-on-surface">Bổ sung nước</h4><p class="text-body-md">Uống ít nhất 500ml nước lọc ngay trước khi thực hiện lấy máu.</p></div></div><div class="flex gap-md p-md bg-surface-container-low rounded-lg border border-surface-variant"><span class="material-symbols-outlined text-primary">check_circle</span><div><h4 class="font-label-lg text-on-surface">Nghỉ ngơi sau hiến</h4><p class="text-body-md">Dành 15 phút nghỉ tại chỗ và tránh vận động mạnh trong ngày.</p></div></div></div></article>
+<!-- Call to Action -->
+<div class="mt-xl p-lg bg-surface-container border border-surface-variant rounded-xl flex flex-col items-center text-center"><div class="flex flex-col md:flex-row items-center justify-between w-full gap-md"><div class="text-left"><h3 class="font-headline-md text-on-surface">Sẵn sàng hiến máu?</h3><p class="text-body-md text-on-surface-variant">Cứu sống 3 người chỉ với 1 lần hiến.</p></div><button class="w-full md:w-auto px-lg py-2 bg-primary text-on-primary rounded-lg font-label-lg transition-colors shadow-sm active:scale-95">Đăng ký ngay</button></div></div>
+</main>
+<!-- Bottom Navigation - Suppressed per instructions for linear/task-focused pages -->
+<!-- Content view represents a departure from the main navigation flow -->
+</body></html>

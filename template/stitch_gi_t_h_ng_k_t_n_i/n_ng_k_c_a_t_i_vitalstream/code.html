@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Applications - VitalStream</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#5b403f",
+                        "tertiary-container": "#5f759b",
+                        "primary": "#b7102a",
+                        "secondary-container": "#fdd5e4",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#410007",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#001b3c",
+                        "surface-container-low": "#f3f4f5",
+                        "surface-variant": "#e1e3e4",
+                        "inverse-surface": "#2e3132",
+                        "tertiary-fixed": "#d5e3ff",
+                        "primary-fixed-dim": "#ffb3b1",
+                        "surface-bright": "#f8f9fa",
+                        "outline": "#8f6f6e",
+                        "on-tertiary-fixed-variant": "#30476a",
+                        "background": "#f8f9fa",
+                        "surface": "#f8f9fa",
+                        "on-secondary-fixed-variant": "#5b3f4b",
+                        "on-surface": "#191c1d",
+                        "surface-container-high": "#e7e8e9",
+                        "surface-dim": "#d9dadb",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#92001c",
+                        "on-secondary-container": "#795a67",
+                        "on-secondary-fixed": "#2b141f",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb3b1",
+                        "inverse-on-surface": "#f0f1f2",
+                        "secondary": "#745662",
+                        "outline-variant": "#e4bebc",
+                        "surface-container": "#edeeef",
+                        "tertiary-fixed-dim": "#b0c7f1",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#465d81",
+                        "secondary-fixed": "#ffd8e7",
+                        "surface-tint": "#bb152c",
+                        "primary-container": "#db313f",
+                        "on-background": "#191c1d",
+                        "on-primary-container": "#fffbff",
+                        "on-tertiary-container": "#fefcff",
+                        "secondary-fixed-dim": "#e3bccb",
+                        "primary-fixed": "#ffdad8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "gutter-mobile": "12px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "base": "4px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "caption": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Smooth scrolling */
+        html { scroll-behavior: smooth; }
+        
+        /* Hide scrollbar for clean UI */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface dark:bg-on-surface border-b border-surface-container flex justify-between items-center px-margin-mobile py-sm z-40">
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-surface-container-low dark:hover:bg-surface-variant/10 rounded-full active:scale-95 transition-transform duration-100 text-on-surface-variant dark:text-surface-variant">
+<span class="material-symbols-outlined">water_drop</span>
+</button>
+<span class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim">VitalStream</span>
+</div>
+<button class="p-2 hover:bg-surface-container-low dark:hover:bg-surface-variant/10 rounded-full active:scale-95 transition-transform duration-100 text-on-surface-variant dark:text-surface-variant">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-margin-mobile py-lg max-w-2xl mx-auto w-full">
+<!-- Page Header -->
+<div class="mb-lg">
+<h1 class="font-display-lg text-display-lg text-on-background mb-2">My Applications</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Track your blood donation appointments and history.</p>
+</div>
+<!-- Filter/Tabs -->
+<div class="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-md -mx-margin-mobile px-margin-mobile">
+<button class="px-md py-sm bg-primary text-on-primary rounded-full font-label-lg text-label-lg whitespace-nowrap active:scale-95 transition-transform duration-100">All Applications</button>
+<button class="px-md py-sm bg-surface-container border border-surface-variant text-on-surface-variant rounded-full font-label-lg text-label-lg whitespace-nowrap active:scale-95 transition-transform duration-100">Upcoming</button>
+<button class="px-md py-sm bg-surface-container border border-surface-variant text-on-surface-variant rounded-full font-label-lg text-label-lg whitespace-nowrap active:scale-95 transition-transform duration-100">Completed</button>
+</div>
+<!-- Applications List (Bento-ish Stack) -->
+<div class="flex flex-col gap-md">
+<!-- Pending Application Card -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-md flex flex-col gap-md hover:shadow-sm transition-shadow">
+<div class="flex justify-between items-start">
+<div class="flex gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-tertiary-container">event</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background">City Hospital Blood Drive</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Tomorrow, 10:00 AM</p>
+</div>
+</div>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-1 rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Pending
+                    </span>
+</div>
+<div class="h-px bg-surface-variant w-full"></div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>123 Main St, Springfield</span>
+</div>
+<button class="font-label-lg text-label-lg text-primary hover:underline flex items-center gap-1">
+                        Details <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Confirmed Application Card -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-md flex flex-col gap-md hover:shadow-sm transition-shadow">
+<div class="flex justify-between items-start">
+<div class="flex gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-tertiary-container">event</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background">Red Cross Mobile Unit</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Oct 25, 2023, 2:30 PM</p>
+</div>
+</div>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed px-2 py-1 rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Confirmed
+                    </span>
+</div>
+<div class="bg-surface-container-low rounded-lg p-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary fill">qr_code_2</span>
+<span class="font-label-lg text-label-lg text-on-surface">Donation Pass Ready</span>
+</div>
+<button class="bg-primary text-on-primary px-3 py-1.5 rounded-lg font-label-md text-label-md">View Pass</button>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>Downtown Plaza</span>
+</div>
+<button class="font-label-lg text-label-lg text-primary hover:underline flex items-center gap-1">
+                        Details <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Completed Application Card -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-md flex flex-col gap-md hover:shadow-sm transition-shadow opacity-80">
+<div class="flex justify-between items-start">
+<div class="flex gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-tertiary-container">water_drop</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background">Annual Community Drive</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Aug 10, 2023</p>
+</div>
+</div>
+<span class="bg-surface-variant text-on-surface px-2 py-1 rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span> Completed
+                    </span>
+</div>
+<div class="h-px bg-surface-variant w-full"></div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="bg-surface-container px-2 py-1 rounded font-caption text-caption text-on-surface-variant">450ml</span>
+<span class="bg-surface-container px-2 py-1 rounded font-caption text-caption text-on-surface-variant">Whole Blood</span>
+</div>
+<button class="font-label-lg text-label-lg text-tertiary-container hover:underline flex items-center gap-1">
+                        Certificate <span class="material-symbols-outlined text-[16px]">workspace_premium</span>
+</button>
+</div>
+</div>
+<!-- Cancelled Application Card -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-md flex flex-col gap-md hover:shadow-sm transition-shadow opacity-70 grayscale-[50%]">
+<div class="flex justify-between items-start">
+<div class="flex gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">event_busy</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background">Local Clinic Drive</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Jun 15, 2023</p>
+</div>
+</div>
+<span class="bg-error-container text-on-error-container px-2 py-1 rounded-full font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">cancel</span> Cancelled
+                    </span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter-mobile pb-safe bg-surface dark:bg-on-surface border-t border-surface-container md:hidden py-2">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 rounded-lg active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 rounded-lg active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined mb-1">info</span>
+<span class="font-label-md text-label-md">About</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 rounded-lg active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined mb-1">campaign</span>
+<span class="font-label-md text-label-md">Events</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary-fixed-dim text-on-secondary-container dark:text-on-secondary-fixed rounded-full px-md py-xs active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined mb-1 fill">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<!-- Side Nav for Desktop (Hidden on Mobile) -->
+<aside class="hidden md:flex flex-col w-64 fixed left-0 top-16 h-[calc(100vh-64px)] border-r border-surface-container bg-surface py-lg px-md gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-lg text-label-lg">Home</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">campaign</span>
+<span class="font-label-lg text-label-lg">Events</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary-container text-on-secondary-container font-label-lg text-label-lg transition-colors" href="#">
+<span class="material-symbols-outlined fill">event_note</span>
+<span>My Applications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-lg text-label-lg">Profile</span>
+</a>
+</aside>
+<!-- Add padding to main content for desktop side nav -->
+<style>
+        @media (min-width: 768px) {
+            main { padding-left: calc(16rem + 16px); max-width: none; }
+        }
+    </style>
+</body></html>

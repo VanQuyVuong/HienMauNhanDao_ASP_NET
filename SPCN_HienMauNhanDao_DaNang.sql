@@ -133,7 +133,9 @@ CREATE TABLE KHOMAU (
     nhomMau VARCHAR(50),
     soLuongTon INT DEFAULT 0,
     nguongAnToan INT DEFAULT 1000,
-    moTa VARCHAR(255)
+    moTa VARCHAR(255),
+    maKhoa VARCHAR(10),
+    FOREIGN KEY (maKhoa) REFERENCES KHOACONGTAC(maKhoa)
 );
 
 CREATE TABLE TUIMAU (
@@ -188,9 +190,11 @@ CREATE TABLE TINTUC (
     tieuDe VARCHAR(255) NOT NULL,
     noiDung TEXT,
     hinhAnh VARCHAR(255),
+    loaiTin VARCHAR(50) DEFAULT 'ChienDich',
+    chuKyLap VARCHAR(50) DEFAULT 'None',
     ngayDang DATETIME DEFAULT CURRENT_TIMESTAMP,
     trangThai VARCHAR(50)
-    -- Giá trị hợp lệ: NhapLieu, DanDang, DaAn
+    -- Giá trị hợp lệ trạng thái: NhapLieu, DanDang, DaAn
 );
 
 CREATE TABLE THONGBAO (
@@ -259,7 +263,7 @@ ALTER TABLE TINNHAN          ADD FOREIGN KEY (maTaiKhoanNhan)   REFERENCES TAIKH
 -- =============================================================
 
 -- 3.1 VAI TRÒ
-INSERT INTO VAITRO (maVaiTro, tenVaiTro) VALUES 
+INSERT INTO VAITRO VALUES
 ('AD',      'Quản trị hệ thống'),
 ('BS',      'Bác sĩ chuyên khoa'),
 ('NVYT',    'Nhân viên y tế Lễ tân'),
@@ -268,8 +272,8 @@ INSERT INTO VAITRO (maVaiTro, tenVaiTro) VALUES
 ('NVYT_XN', 'Nhân viên y tế Xét nghiệm & Lấy máu'),
 ('NVYT-XN', 'Nhân viên y tế Xét nghiệm & Lấy máu'),
 ('QLK',     'Quản lý kho máu'),
-('TNV',     'Tình nguyện viên')
-ON DUPLICATE KEY UPDATE tenVaiTro = VALUES(tenVaiTro);
+('TNV',     'Tình nguyện viên'),
+('ADMIN_BV','Quản trị Bệnh viện');
 
 -- 3.2 PHƯỜNG XÃ (TP. Đà Nẵng)
 INSERT INTO PHUONGXA VALUES
@@ -298,27 +302,46 @@ INSERT INTO DIADIEM VALUES
 ('DD00005', 'Hội Chữ Thập Đỏ TP. Đà Nẵng',         '522 Ông Ích Khiêm, Hải Châu',     'PX00003', 'CoQuan', 'CoDinh'),
 ('DD00006', 'Trường Đại học Sư phạm Kỹ thuật (UTE)','48 Cao Thắng, Hải Châu',          'PX00001', 'TruongHoc', 'LuuDong'),
 ('DD00007', 'Trường Đại học Đông Á',                '33 Xô Viết Nghệ Tĩnh, Hải Châu', 'PX00002', 'TruongHoc', 'LuuDong'),
-('DD00008', 'Khoa Huyết học - Truyền máu (BV Đà Nẵng)', '103 Quang Trung, Hải Châu',  'PX00001', 'BenhVien', 'CoDinh');
+('DD00008', 'Khoa Huyết học - Truyền máu (BV Đà Nẵng)', '103 Quang Trung, Hải Châu',  'PX00001', 'BenhVien', 'CoDinh'),
+('DD00009', 'Bệnh viện Đa khoa Tâm Trí Đà Nẵng', '64 Cách Mạng Tháng 8, Cẩm Lệ', 'PX00015', 'BenhVien', 'LuuDong'),
+('DD00010', 'Bệnh viện Đa khoa Quốc tế Vinmec Đà Nẵng', 'Đường 30 Tháng 4, Hải Châu', 'PX00001', 'BenhVien', 'LuuDong'),
+('DD00011', 'Bệnh viện Đa khoa Gia Đình', '73 Nguyễn Hữu Thọ, Hải Châu', 'PX00001', 'BenhVien', 'LuuDong'),
+('DD00012', 'Bệnh viện Hoàn Mỹ Đà Nẵng', '291 Nguyễn Văn Linh, Thanh Khê', 'PX00011', 'BenhVien', 'LuuDong');
 
--- 3.4 KHOA CÔNG TÁC
+-- 3.4 KHOA CÔNG TÁC (Các Bệnh viện công tác)
 INSERT INTO KHOACONGTAC VALUES
-('KC00001', 'Khoa Huyết học - BV Đà Nẵng'),
-('KC00002', 'Khoa Khám bệnh - BV Đà Nẵng'),
-('KC00003', 'Khoa Xét nghiệm - BV Đà Nẵng'),
-('KC00004', 'Khoa Huyết học - BV C Đà Nẵng'),
-('KC00005', 'Khoa Cấp cứu - BV Phụ sản Nhi'),
-('KC00006', 'Phòng Hành chính - Quản trị');
+('KC00001', 'Bệnh viện C Đà Nẵng'),
+('KC00002', 'Bệnh viện Đà Nẵng'),
+('KC00003', 'Bệnh viện Phụ Sản - Nhi Đà Nẵng'),
+('KC00004', 'Bệnh viện Quân y 17'),
+('KC00005', 'Bệnh viện 199 - Bộ Công An'),
+('KC00006', 'Bệnh viện Đa khoa Nam Liên Chiểu'),
+('KC00007', 'Trung tâm Y tế Quận Hải Châu'),
+('KC00008', 'Trung tâm Y tế Quận Thanh Khê'),
+('KC00009', 'Trung tâm Y tế Quận Sơn Trà'),
+('KC00010', 'Trung tâm Y tế Quận Ngũ Hành Sơn'),
+('KC00011', 'Trung tâm Y tế Quận Liên Chiểu'),
+('KC00012', 'Trung tâm Y tế Quận Cẩm Lệ'),
+('KC00013', 'Trung tâm Y tế Huyện Hòa Vang');
 
--- 3.5 KHO MÁU - 8 nhóm máu (tồn kho = 0, chờ hiến thực tế)
-INSERT INTO KHOMAU VALUES
-('K_1', 'Kho máu A+',  'A_positive',  0, 50, 'Tủ lạnh chuyên dụng - Tầng 1'),
-('K_2', 'Kho máu B+',  'B_positive',  0, 50, 'Tủ lạnh chuyên dụng - Tầng 1'),
-('K_3', 'Kho máu AB+', 'AB_positive', 0, 20, 'Tủ lạnh chuyên dụng - Tầng 2'),
-('K_4', 'Kho máu O+',  'O_positive',  0, 80, 'Tủ lạnh chuyên dụng - Tầng 1'),
-('K_5', 'Kho máu A-',  'A_negative',  0, 10, 'Tủ đông hiếm - Phòng bảo quản đặc biệt'),
-('K_6', 'Kho máu B-',  'B_negative',  0, 10, 'Tủ đông hiếm - Phòng bảo quản đặc biệt'),
-('K_7', 'Kho máu AB-', 'AB_negative', 0,  5, 'Tủ đông hiếm - Phòng bảo quản đặc biệt'),
-('K_8', 'Kho máu O-',  'O_negative',  0, 20, 'Tủ đông hiếm - Phòng bảo quản đặc biệt');
+-- 3.5 KHO MÁU BỆNH VIỆN
+INSERT INTO KHOMAU (maKho, tenKho, nhomMau, soLuongTon, nguongAnToan, moTa, maKhoa) VALUES
+('KM00001', 'Kho máu A+ Bệnh viện C', 'A_positive', 50, 20, 'Tủ đông y tế', 'KC00001'),
+('KM00002', 'Kho máu A- Bệnh viện C', 'A_negative', 10, 5, 'Tủ đông y tế', 'KC00001'),
+('KM00003', 'Kho máu B+ Bệnh viện C', 'B_positive', 40, 20, 'Tủ đông y tế', 'KC00001'),
+('KM00004', 'Kho máu B- Bệnh viện C', 'B_negative', 5, 5, 'Tủ đông y tế', 'KC00001'),
+('KM00005', 'Kho máu AB+ Bệnh viện C', 'AB_positive', 20, 10, 'Tủ đông y tế', 'KC00001'),
+('KM00006', 'Kho máu AB- Bệnh viện C', 'AB_negative', 5, 2, 'Tủ đông y tế', 'KC00001'),
+('KM00007', 'Kho máu O+ Bệnh viện C', 'O_positive', 80, 50, 'Tủ đông y tế', 'KC00001'),
+('KM00008', 'Kho máu O- Bệnh viện C', 'O_negative', 20, 10, 'Tủ đông y tế', 'KC00001'),
+('KM00009', 'Kho máu A+ Bệnh viện Đà Nẵng', 'A_positive', 100, 50, 'Kho bảo quản 1', 'KC00002'),
+('KM00010', 'Kho máu A- Bệnh viện Đà Nẵng', 'A_negative', 20, 10, 'Kho bảo quản hiếm', 'KC00002'),
+('KM00011', 'Kho máu B+ Bệnh viện Đà Nẵng', 'B_positive', 80, 40, 'Kho bảo quản 1', 'KC00002'),
+('KM00012', 'Kho máu B- Bệnh viện Đà Nẵng', 'B_negative', 15, 5, 'Kho bảo quản hiếm', 'KC00002'),
+('KM00013', 'Kho máu AB+ Bệnh viện Đà Nẵng', 'AB_positive', 40, 20, 'Kho bảo quản 1', 'KC00002'),
+('KM00014', 'Kho máu AB- Bệnh viện Đà Nẵng', 'AB_negative', 10, 2, 'Kho bảo quản hiếm', 'KC00002'),
+('KM00015', 'Kho máu O+ Bệnh viện Đà Nẵng', 'O_positive', 150, 80, 'Kho lưu trữ trung tâm', 'KC00002'),
+('KM00016', 'Kho máu O- Bệnh viện Đà Nẵng', 'O_negative', 30, 15, 'Kho bảo quản hiếm', 'KC00002');
 
 -- =============================================================
 -- BƯỚC 4: DỮ LIỆU TÀI KHOẢN HỆ THỐNG (Mật khẩu mặc định: Abc123!@#)
@@ -331,16 +354,23 @@ INSERT INTO TAIKHOAN (maTaiKhoan, maVaiTro, email, matKhau, trangThai) VALUES
 ('TK00004', 'BS',      'doctor1@gmail.com','$2a$11$dcgltimlogByLALH9P8hPOy6Yf0hImynlzF0UkqNqNTJOQiUY6Z5G', 1),
 ('TK00005', 'BS',      'doctor2@gmail.com','$2a$11$7v0Jg8k1Cf94UxKke.hVpOGWx5HC1pcj0L7nx1nexd3mojzcyI1IK', 1),
 ('TK00006', 'QLK',     'qlk@gmail.com',    '$2a$11$SoPa7XGP3InPdakUcjNC2ex2OmOZfyhGUQq1Erv2lnmN9g0VoPNvS', 1),
-('TK00007', 'NVYT-XN', 'nvxn1@gmail.com',  '$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy', 1)
+('TK00007', 'NVYT-XN', 'nvxn1@gmail.com',  '$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy', 1),
+('TK00037', 'ADMIN_BV', 'adminbvc@gmail.com', '$2a$11$rKZh4s8EBwZwkCwX2SeneeYNHD9CCBAs.cO2Nq2QIfVfVYd2YejHu', 1),
+('TK00038', 'ADMIN_BV', 'adminbvqy17@gmail.com', '$2a$11$uBALjbY.2JD8gAnpVvdyxuLRHLb/MJ6YDukQ8OldAnz5T04JQG6CO', 1)
 ON DUPLICATE KEY UPDATE matKhau = VALUES(matKhau), maVaiTro = VALUES(maVaiTro);
+
 -- HỒ SƠ NHÂN VIÊN TƯƠNG ỨNG
 INSERT INTO NHANVIEN (maNhanVien, maTaiKhoan, maKhoa, maDiaDiem, hoTen, CCCD, gioiTinh, soDienThoai) VALUES 
-('NV00001', 'TK00001', 'KC00006', 'DD00001', 'Admin Hệ Thống', '048075000001', 'Nam', '0905000001'),
-('NV00002', 'TK00002', 'KC00002', 'DD00001', 'Nguyễn NVYT 1',  '048075000002', 'Nữ',  '0905000002'),
-('NV00003', 'TK00003', 'KC00002', 'DD00001', 'Trần NVYT 2',    '048075000003', 'Nữ',  '0905000003'),
-('NV00004', 'TK00004', 'KC00001', 'DD00001', 'Bác Sĩ Một',     '048075000004', 'Nam', '0905000004'),
-('NV00005', 'TK00005', 'KC00001', 'DD00001', 'Bác Sĩ Hai',     '048075000005', 'Nam', '0905000005'),
-('NV00006', 'TK00006', 'KC00003', 'DD00001', 'Quản Lý Kho',    '048075000006', 'Nam', '0905000006');
+('NV00001', 'TK00001', 'KC00001', 'DD00001', 'Admin Hệ Thống',        '048075000001', 'Nam', '0905000001'),
+('NV00002', 'TK00002', 'KC00002', 'DD00001', 'Nguyễn NVYT 1',         '048075000002', 'Nữ',  '0905000002'),
+('NV00003', 'TK00003', 'KC00002', 'DD00001', 'Trần NVYT 2',           '048075000003', 'Nữ',  '0905000003'),
+('NV00004', 'TK00004', 'KC00001', 'DD00001', 'Bác Sĩ Một',            '048075000004', 'Nam', '0905000004'),
+('NV00005', 'TK00005', 'KC00001', 'DD00001', 'Bác Sĩ Hai',            '048075000005', 'Nam', '0905000005'),
+('NV00006', 'TK00006', 'KC00001', 'DD00002', 'Quản Lý Kho BV C',       '048075000006', 'Nam', '0905000006'),
+('NV00007', 'TK00007', 'KC00003', 'DD00001', 'Nguyễn Văn Xét Nghiệm', '048075000007', 'Nam', '0905000007'),
+('NV00022', 'TK00037', 'KC00001', 'DD00001', 'Admin BV C',             '048075000022', 'Nữ',  '0905000022'),
+('NV00023', 'TK00038', 'KC00004', 'DD00001', 'Admin BV Quân Y 17',     '048075000023', 'Nam', '0905000023')
+ON DUPLICATE KEY UPDATE hoTen = VALUES(hoTen), maKhoa = VALUES(maKhoa);
 
 -- =============================================================
 -- ✅ XONG! DATABASE ĐÃ ĐƯỢC CHUẨN BỊ ĐẦY ĐỦ
@@ -561,51 +591,24 @@ INSERT INTO KETQUALAMSANG VALUES
 ('KL00034','DK00034','NV00004','120/80',75,68,36.5,1,NULL), 
 ('KL00035','DK00035','NV00003','100/60',90,40,36.7,0,'Cân nặng dưới 40kg'); -- Rớt do thiếu cân
 
--- =============================================================
--- 8. THU NHẬN, XÉT NGHIỆM VÀ KHO MÁU 
--- Đa dạng trạng thái (Nhập kho, Chờ xét nghiệm, Đã xuất, Hủy)
--- =============================================================
--- =============================================================
--- 8. THU NHẬN, XÉT NGHIỆM VÀ KHO MÁU 
--- Đa dạng trạng thái (Nhập kho, Chờ xét nghiệm, Đã xuất, Hủy)
--- =============================================================
-
--- Xóa dữ liệu rác (nếu có) do câu lệnh lỗi vừa rồi gây ra
-
-
--- Phân tách mã kho theo từng nhóm máu chuyên biệt
-INSERT INTO KHOMAU (maKho, tenKho, nhomMau, soLuongTon, nguongAnToan, moTa) VALUES 
-('KM00001', 'Kho Nhóm O+', 'O+', 150, 50, 'Tủ lạnh chuyên dụng A1 - Khu vực Tầng 1'), 
-('KM00002', 'Kho Nhóm A+', 'A+', 30, 40, 'Tủ lạnh chuyên dụng A2 - Khu vực Tầng 1'), 
-('KM00003', 'Kho Nhóm B+', 'B+', 60, 30, 'Tủ lạnh chuyên dụng B1 - Khu vực Tầng 2'), 
-('KM00004', 'Kho Nhóm AB+', 'AB+', 10, 15, 'Tủ lạnh chuyên dụng AB1 - Khu vực Tầng 2'),
-('KM00005', 'Kho Nhóm O-', 'O-', 5, 10, 'Tủ đông hiếm O- - Phòng bảo quản đặc biệt'), 
-('KM00006', 'Kho Nhóm A-', 'A-', 5, 10, 'Tủ đông hiếm A- - Phòng bảo quản đặc biệt'), 
-('KM00007', 'Kho Nhóm B-', 'B-', 5, 10, 'Tủ đông hiếm B- - Phòng bảo quản đặc biệt'), 
-('KM00008', 'Kho Nhóm AB-', 'AB-', 2, 5, 'Tủ đông hiếm AB- - Phòng bảo quản đặc biệt');
-
--- 47 TÚI MÁU (Túi máu của TNV nhóm nào sẽ được lưu vào kho nhóm đó)
+-- 58 TÚI MÁU (Phân bổ đa dạng 8 nhóm máu)
 INSERT INTO TUIMAU VALUES 
--- TM00001-TM00005: Tháng 1 (Chiến dịch Xuân Hồng sớm)
-('TM00001','DK00001','NV00006','KM00003',250,'2026-01-15 07:15','Nhập kho',4.5), 
-('TM00002','DK00002','NV00001','KM00001',350,'2026-01-15 07:18','Nhập kho',4.2),
-('TM00003','DK00003','NV00001','KM00002',250,'2026-01-20 07:20','Nhập kho',4.5), 
-('TM00004','DK00004','NV00006','KM00001',350,'2026-01-20 07:23','Nhập kho',4.2),
-('TM00005','DK00005','NV00001','KM00004',250,'2026-01-25 07:25','Nhập kho',4.5), 
--- TM00006-TM00012: Tháng 2 (Chiến dịch Xuân Hồng chính)
-('TM00006','DK00006','NV00001','KM00005',350,'2026-02-10 07:28','Nhập kho',4.2),
-('TM00007','DK00007','NV00006','KM00001',250,'2026-02-10 07:30','Nhập kho',4.5), 
-('TM00008','DK00008','NV00001','KM00006',350,'2026-02-10 07:33','Nhập kho',4.2),
-('TM00009','DK00009','NV00001','KM00003',250,'2026-02-10 07:35','Nhập kho',4.5), 
-('TM00010','DK00010','NV00006','KM00008',350,'2026-02-10 07:38','Hủy',4.2),
-('TM00011','DK00011','NV00001','KM00002',250,'2026-02-15 07:40','Nhập kho',4.5), 
-('TM00012','DK00012','NV00001','KM00003',350,'2026-02-20 07:43','Nhập kho',4.2),
--- TM00013-TM00016: Tháng 3
-('TM00013','DK00013','NV00006','KM00001',250,'2026-03-05 07:45','Nhập kho',4.5), 
-('TM00014','DK00014','NV00001','KM00001',350,'2026-03-10 07:48','Nhập kho',4.2),
-('TM00015','DK00016','NV00001','KM00002',350,'2026-03-15 07:53','Nhập kho',4.2), 
-('TM00016','DK00017','NV00006','KM00003',250,'2026-03-20 07:55','Nhập kho',4.5),
--- TM00017-TM00019: Tháng 4
+('TM00001','DK00001','NV00001','KM00001',350,'2026-02-10 08:00','Nhập kho',4.5), 
+('TM00002','DK00002','NV00001','KM00002',250,'2026-02-12 09:30','Nhập kho',4.2), 
+('TM00003','DK00003','NV00001','KM00003',450,'2026-02-15 10:00','Nhập kho',4.5), 
+('TM00004','DK00004','NV00001','KM00004',250,'2026-02-18 08:00','Nhập kho',4.5), 
+('TM00005','DK00005','NV00001','KM00005',350,'2026-02-20 09:00','Nhập kho',4.2), 
+('TM00006','DK00006','NV00001','KM00006',250,'2026-02-22 10:00','Nhập kho',4.5), 
+('TM00007','DK00007','NV00001','KM00007',350,'2026-02-25 08:00','Nhập kho',4.5), 
+('TM00008','DK00008','NV00001','KM00008',450,'2026-02-28 09:00','Nhập kho',4.2), 
+('TM00009','DK00009','NV00001','KM00009',250,'2026-03-01 10:00','Nhập kho',4.5), 
+('TM00010','DK00010','NV00001','KM00010',350,'2026-03-05 08:00','Nhập kho',4.5), 
+('TM00011','DK00011','NV00001','KM00011',250,'2026-03-10 09:00','Nhập kho',4.2), 
+('TM00012','DK00012','NV00001','KM00012',450,'2026-03-15 10:00','Nhập kho',4.5), 
+('TM00013','DK00013','NV00001','KM00013',350,'2026-03-20 08:00','Nhập kho',4.5), 
+('TM00014','DK00014','NV00001','KM00014',250,'2026-03-25 09:00','Nhập kho',4.2), 
+('TM00015','DK00016','NV00001','KM00015',450,'2026-04-01 10:00','Nhập kho',4.5), 
+('TM00016','DK00017','NV00001','KM00016',250,'2026-04-05 08:00','Nhập kho',4.5),
 ('TM00017','DK00018','NV00001','KM00001',350,'2026-04-08 07:58','Nhập kho',4.2), 
 ('TM00018','DK00019','NV00001','KM00001',250,'2026-04-15 08:00','Nhập kho',4.5),
 ('TM00019','DK00020','NV00006','KM00006',350,'2026-04-22 08:03','Đã xuất',4.2),
@@ -755,8 +758,8 @@ INSERT INTO CHITIETNHAPXUAT VALUES
 
 
 INSERT INTO TINTUC VALUES 
-('TT00001','NV00001','Tổng kết Xuân Hồng 2026','Đà Nẵng thu nhận 500 đơn vị máu','img1.jpg','2026-02-13','Đã thêm'),
-('TT00002','NV00001','Kêu gọi hiến máu nhóm O','Kho máu đang thiếu hụt nhóm O','img2.jpg','2026-03-01','Đã thêm');
+('TT00001','NV00001','Tổng kết Xuân Hồng 2026','Đà Nẵng thu nhận 500 đơn vị máu','img1.jpg','ChienDich','None','2026-02-13','Đã thêm'),
+('TT00002','NV00001','Kêu gọi hiến máu nhóm O','Kho máu đang thiếu hụt nhóm O','img2.jpg','ChienDich','None','2026-03-01','Đã thêm');
 
 INSERT INTO THONGBAO VALUES 
 -- Thông báo nội bộ giữa các nhân viên y tế (Điều phối công việc)
@@ -1046,17 +1049,28 @@ INSERT INTO TAIKHOAN (maTaiKhoan, maVaiTro, email, matKhau, trangThai) VALUES
 ('TK00031','NVYT','huy@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
 ('TK00032','QLK','quanlykho@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
 ('TK00033','BS','bacsi@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
-('TK00034','AD','admin@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1);
+('TK00034','AD','admin@gmail.com','$2a$10$xpZsghkpkmQh4rjp3AvdwuffH2HgVl65iLDC7Xa2wyG5tyk4TCK.S',1),
+('TK00035','NVYT_XN','nvxn1@gmail.com','$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy',1),
+('TK00036','NVYT_LT','nvletan1@gmail.com','$2a$11$.pMKtIp7AJKcrYp.fB/JE.CvWH3mvbRWGNWmHgI8zp/2Z58wOHFqy',1);
 
 INSERT INTO NHANVIEN (maNhanVien, maTaiKhoan, maKhoa, maDiaDiem, hoTen, CCCD, gioiTinh, soDienThoai) VALUES 
 ('NV00016', 'TK00031', 'KC00001', 'DD00001', 'Huy', '000000000000', 'Nam', '0000000000'),
 ('NV00017', 'TK00033', 'KC00001', 'DD00001', 'Bác sĩ','000000000001', 'Nam', '0000000001'),
 ('NV00018', 'TK00009', 'KC00001', 'DD00001', 'Hoàng Thị Huy', '000000000002', 'Nữ', '0000000002'),
-('NV00019', 'TK00010', 'KC00001', 'DD00001', 'Nguyễn Tuyết Mai', '000000000003', 'Nữ', '0000000003');
+('NV00019', 'TK00010', 'KC00001', 'DD00001', 'Nguyễn Tuyết Mai', '000000000003', 'Nữ', '0000000003'),
+('NV00020', 'TK00035', 'KC00001', 'DD00001', 'Nhân Viên Xét Nghiệm 1', '000000000004', 'Nam', '0000000004'),
+('NV00021', 'TK00036', 'KC00001', 'DD00001', 'Nhân Viên Lễ Tân 1', '000000000005', 'Nữ', '0000000005');
 
 UPDATE CHIENDICHHIENMAU SET trangThai = 'DaKetThuc' WHERE maChienDich = 'CD00002';
 
 INSERT INTO CHIENDICHHIENMAU (maChienDich, maDiaDiem, maNhanVien, tenChienDich, thoiGianBD, thoiGianKT, soLuongDuKien, trangThai, maQR, imageUrl, mucDoUuTien, nhomMauCanKhapCap) VALUES
 ('CD99991', 'DD00001', 'NV00001', 'Khẩn cấp cần máu A+ tại BV Đà Nẵng', DATE_ADD(NOW(), INTERVAL -1 HOUR), DATE_ADD(NOW(), INTERVAL 11 HOUR), 10, 'DangDienRa', 'QR_KCA', 'hienmau.jpg', 'KhanCap', 'A+'),
 ('CD99992', 'DD00002', 'NV00001', 'Khẩn cấp cần máu O+ tại BV C Đà Nẵng', DATE_ADD(NOW(), INTERVAL -2 HOUR), DATE_ADD(NOW(), INTERVAL 10 HOUR), 5, 'DangDienRa', 'QR_KCO', 'hienmau.jpg', 'KhanCap', 'O+');
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE CHIENDICHHIENMAU SET trangThai = 'DangDienRa' WHERE mucDoUuTien = 'KhanCap' AND trangThai = 'ChuaBatDau';
+SET SQL_SAFE_UPDATES = 1;
+ALTER TABLE SPCN_HienMauNhanDao_DaNang.TINTUC ADD loaiTin VARCHAR(50) DEFAULT 'ChienDich';
+ALTER TABLE SPCN_HienMauNhanDao_DaNang.TINTUC ADD chuKyLap VARCHAR(50) DEFAULT 'None';
+
 
