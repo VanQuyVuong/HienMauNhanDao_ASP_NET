@@ -7,6 +7,9 @@
         Title="Hệ Thống Hiến Máu Nhân Đạo TP. Đà Nẵng - Quản Trị Viên Hệ Thống (Admin)" 
         Height="820" Width="1350"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        ResizeMode="CanResize"
+        WindowStyle="SingleBorderWindow"
         Background="#f8fafc">
 
     <Grid>

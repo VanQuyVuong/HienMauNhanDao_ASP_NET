@@ -6,7 +6,10 @@
         mc:Ignorable="d"
         Title="Hệ Thống Hiến Máu Nhân Đạo TP. Đà Nẵng - Quản Trị Bệnh Viện (Admin_BV)" 
         Height="880" Width="1380"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        ResizeMode="CanResize"
+        WindowStyle="SingleBorderWindow">
 
     <Grid Background="#f8fafc">
         <Grid.ColumnDefinitions>
