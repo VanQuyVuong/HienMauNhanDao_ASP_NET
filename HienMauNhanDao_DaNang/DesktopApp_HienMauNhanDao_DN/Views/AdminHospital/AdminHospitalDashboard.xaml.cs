@@ -25,12 +25,12 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.AdminHospital
             if (_currentActiveNav != null)
             {
                 _currentActiveNav.Background = System.Windows.Media.Brushes.Transparent;
-                _currentActiveNav.Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#ccfbf1")!;
+                _currentActiveNav.Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#cbd5e1")!;
                 _currentActiveNav.FontWeight = FontWeights.SemiBold;
             }
 
             _currentActiveNav = activeBtn;
-            _currentActiveNav.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#14b8a6")!;
+            _currentActiveNav.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#dc2626")!;
             _currentActiveNav.Foreground = System.Windows.Media.Brushes.White;
             _currentActiveNav.FontWeight = FontWeights.Bold;
         }

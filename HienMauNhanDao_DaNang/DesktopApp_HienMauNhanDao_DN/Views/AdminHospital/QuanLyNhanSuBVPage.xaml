@@ -15,7 +15,7 @@
         </Grid.RowDefinitions>
 
         <!-- TOP BANNER -->
-        <Border Grid.Row="0" Background="#0f766e" CornerRadius="16" Padding="20,16" Margin="0,0,0,16">
+        <Border Grid.Row="0" Background="#0f172a" CornerRadius="16" Padding="20,16" Margin="0,0,0,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -24,12 +24,12 @@
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                     <TextBlock Text="👨‍⚕️ QUẢN LÝ NHÂN SỰ Y TẾ BỆNH VIỆN" Foreground="White" FontSize="18" FontWeight="Black"/>
-                    <TextBlock Text="Danh sách Cán bộ, Bác sĩ, Nhân viên y tế, Nhân viên xét nghiệm và Thủ kho thuộc Bệnh viện" Foreground="#ccfbf1" FontSize="12" Margin="0,4,0,0"/>
+                    <TextBlock Text="Danh sách Cán bộ, Bác sĩ, Nhân viên y tế, Nhân viên xét nghiệm và Thủ kho thuộc Bệnh viện" Foreground="#cbd5e1" FontSize="12" Margin="0,4,0,0"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="btnRefresh" Content="🔄 LÀM MỚI" Height="38" Padding="14,0" Background="#0d9488" Foreground="White" FontWeight="Bold" FontSize="11" Cursor="Hand" Click="btnRefresh_Click" Margin="0,0,8,0"/>
-                    <Button x:Name="btnOpenCreateModal" Content="➕ THÊM CÁN BỘ MỚI" Height="38" Padding="16,0" Background="#14b8a6" Foreground="White" FontWeight="Black" FontSize="11" Cursor="Hand" Click="btnOpenCreateModal_Click"/>
+                    <Button x:Name="btnRefresh" Content="🔄 LÀM MỚI" Height="38" Padding="14,0" Background="#475569" Foreground="White" FontWeight="Bold" FontSize="11" Cursor="Hand" Click="btnRefresh_Click" Margin="0,0,8,0"/>
+                    <Button x:Name="btnOpenCreateModal" Content="➕ THÊM CÁN BỘ MỚI" Height="38" Padding="16,0" Background="#dc2626" Foreground="White" FontWeight="Black" FontSize="11" Cursor="Hand" Click="btnOpenCreateModal_Click"/>
                 </StackPanel>
             </Grid>
         </Border>

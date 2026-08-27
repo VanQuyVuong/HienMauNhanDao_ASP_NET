@@ -19,8 +19,8 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- SIDEBAR CONTAINER (Teal / Navy Theme) -->
-        <Border Grid.Column="0" Background="#0f766e" Padding="0">
+        <!-- SIDEBAR CONTAINER (Unified Deep Navy & Red Accent Theme) -->
+        <Border Grid.Column="0" Background="#0f172a" Padding="0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -29,14 +29,14 @@
                 </Grid.RowDefinitions>
 
                 <!-- BRANDING HEADER -->
-                <Border Grid.Row="0" Padding="20,24" BorderBrush="#14b8a6" BorderThickness="0,0,0,1">
+                <Border Grid.Row="0" Padding="20,24" BorderBrush="#334155" BorderThickness="0,0,0,1">
                     <StackPanel Orientation="Horizontal">
-                        <Border Width="44" Height="44" Background="#14b8a6" CornerRadius="12">
+                        <Border Width="44" Height="44" Background="#dc2626" CornerRadius="12">
                             <TextBlock Text="🏥" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
                             <TextBlock Text="ADMIN BỆNH VIỆN" Foreground="White" FontSize="15" FontWeight="Black"/>
-                            <TextBlock x:Name="lblHospitalName" Text="Bệnh viện C Đà Nẵng" Foreground="#99f6e4" FontSize="11" FontWeight="Bold" Margin="0,2,0,0"/>
+                            <TextBlock x:Name="lblHospitalName" Text="Bệnh viện C Đà Nẵng" Foreground="#fca5a5" FontSize="11" FontWeight="Bold" Margin="0,2,0,0"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -44,32 +44,32 @@
                 <!-- NAVIGATION MENU -->
                 <StackPanel Grid.Row="1" Margin="12,20">
                     <Button x:Name="btnNavDashboard" Content="📊  Bảng Điều Khiển" Height="46" Margin="0,0,0,8"
-                            Background="#14b8a6" Foreground="White" FontWeight="Bold" FontSize="13"
+                            Background="#dc2626" Foreground="White" FontWeight="Bold" FontSize="13"
                             HorizontalContentAlignment="Left" Padding="16,0" Cursor="Hand" Click="btnNavDashboard_Click"/>
 
                     <Button x:Name="btnNavNhanSu" Content="👨‍⚕️  Quản Lý Nhân Sự" Height="46" Margin="0,0,0,8"
-                            Background="Transparent" Foreground="#ccfbf1" FontWeight="SemiBold" FontSize="13"
+                            Background="Transparent" Foreground="#cbd5e1" FontWeight="SemiBold" FontSize="13"
                             HorizontalContentAlignment="Left" Padding="16,0" Cursor="Hand" Click="btnNavNhanSu_Click"/>
 
                     <Button x:Name="btnNavKhoMau" Content="🩸  Quản Lý Kho Máu" Height="46" Margin="0,0,0,8"
-                            Background="Transparent" Foreground="#ccfbf1" FontWeight="SemiBold" FontSize="13"
+                            Background="Transparent" Foreground="#cbd5e1" FontWeight="SemiBold" FontSize="13"
                             HorizontalContentAlignment="Left" Padding="16,0" Cursor="Hand" Click="btnNavKhoMau_Click"/>
 
                     <Button x:Name="btnNavTinTuc" Content="📣  Tin Tức &amp; Thông Báo" Height="46" Margin="0,0,0,8"
-                            Background="Transparent" Foreground="#ccfbf1" FontWeight="SemiBold" FontSize="13"
+                            Background="Transparent" Foreground="#cbd5e1" FontWeight="SemiBold" FontSize="13"
                             HorizontalContentAlignment="Left" Padding="16,0" Cursor="Hand" Click="btnNavTinTuc_Click"/>
 
                     <Button x:Name="btnNavChienDich" Content="🩸  Chiến Dịch Hiến Máu" Height="46" Margin="0,0,0,8"
-                            Background="Transparent" Foreground="#ccfbf1" FontWeight="SemiBold" FontSize="13"
+                            Background="Transparent" Foreground="#cbd5e1" FontWeight="SemiBold" FontSize="13"
                             HorizontalContentAlignment="Left" Padding="16,0" Cursor="Hand" Click="btnNavChienDich_Click"/>
                 </StackPanel>
 
                 <!-- FOOTER / LOGOUT -->
-                <Border Grid.Row="2" Padding="20" BorderBrush="#14b8a6" BorderThickness="0,1,0,0">
+                <Border Grid.Row="2" Padding="20" BorderBrush="#334155" BorderThickness="0,1,0,0">
                     <StackPanel>
                         <TextBlock x:Name="txtAdminEmail" Text="adminbv@bvdn.vn" Foreground="White" FontSize="12" FontWeight="Bold"/>
-                        <TextBlock Text="Quyền hạn: Admin Bệnh Viện (ADMIN_BV)" Foreground="#99f6e4" FontSize="10" Margin="0,2,0,12"/>
-                        <Button x:Name="btnLogout" Content="🚪  Đăng Xuất" Height="38" Background="#0d9488" Foreground="White" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnLogout_Click"/>
+                        <TextBlock Text="Quyền hạn: Admin Bệnh Viện (ADMIN_BV)" Foreground="#fca5a5" FontSize="10" Margin="0,2,0,12"/>
+                        <Button x:Name="btnLogout" Content="🚪  Đăng Xuất" Height="38" Background="#b91c1c" Foreground="White" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnLogout_Click"/>
                     </StackPanel>
                 </Border>
             </Grid>
