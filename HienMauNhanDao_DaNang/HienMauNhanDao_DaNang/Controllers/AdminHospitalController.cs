@@ -78,6 +78,63 @@ namespace HienMauNhanDao_DaNang.Controllers
             return Ok(staffList);
         }
 
+        public class CreateHospitalStaffRequest
+        {
+            public string Email { get; set; } = string.Empty;
+            public string MatKhau { get; set; } = "123456";
+            public string MaVaiTro { get; set; } = "BS";
+            public string HoTen { get; set; } = string.Empty;
+            public string? SoDienThoai { get; set; }
+            public string? Cccd { get; set; }
+        }
+
+        [HttpPost("staff")]
+        public async Task<IActionResult> CreateStaff([FromBody] CreateHospitalStaffRequest req)
+        {
+            if (string.IsNullOrEmpty(req.Email) || string.IsNullOrEmpty(req.HoTen))
+            {
+                return BadRequest(new { message = "Email và Họ tên không được để trống!" });
+            }
+
+            var existingTk = await _context.TaiKhoans.FirstOrDefaultAsync(t => t.Email == req.Email);
+            if (existingTk != null)
+            {
+                return BadRequest(new { message = "Email này đã tồn tại trong hệ thống!" });
+            }
+
+            var (adminNv, khoa) = await GetNhanVienProfileAsync();
+            string maKhoa = khoa?.MaKhoa ?? "KC00001";
+
+            string newMaTk = "TK" + DateTime.Now.ToString("fff");
+            string newMaNv = "NV" + DateTime.Now.ToString("fff");
+
+            var newTk = new TaiKhoan
+            {
+                MaTaiKhoan = newMaTk,
+                Email = req.Email,
+                MatKhau = BCrypt.Net.BCrypt.HashPassword(string.IsNullOrEmpty(req.MatKhau) ? "123456" : req.MatKhau),
+                MaVaiTro = req.MaVaiTro,
+                TrangThai = true,
+                NgayTao = DateTime.Now
+            };
+
+            var newNv = new NhanVien
+            {
+                MaNhanVien = newMaNv,
+                MaTaiKhoan = newMaTk,
+                HoTen = req.HoTen,
+                SoDienThoai = req.SoDienThoai ?? "",
+                Cccd = req.Cccd ?? "",
+                MaKhoa = maKhoa
+            };
+
+            _context.TaiKhoans.Add(newTk);
+            _context.NhanViens.Add(newNv);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Thêm cán bộ y tế vào Bệnh viện thành công!", maNhanVien = newMaNv });
+        }
+
         [HttpGet("stock")]
         public async Task<IActionResult> GetStock()
         {

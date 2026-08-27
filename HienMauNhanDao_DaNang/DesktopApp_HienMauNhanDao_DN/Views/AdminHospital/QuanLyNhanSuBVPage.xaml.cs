@@ -233,18 +233,18 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.AdminHospital
 
             try
             {
-                var reqObj = new { email = email, matKhau = "123456", maVaiTro = role, hoTen = hoTen, trangThai = true };
+                var reqObj = new { email = email, matKhau = "123456", maVaiTro = role, hoTen = hoTen };
                 var jsonStr = JsonConvert.SerializeObject(reqObj);
                 var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
 
-                await ApiClient.Instance.Client.PostAsync("/api/TaiKhoan", content);
-                MessageBox.Show($"✅ Thêm thành công cán bộ: {hoTen} ({email})!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                await ApiClient.Instance.Client.PostAsync("/api/AdminHospital/staff", content);
+                MessageBox.Show($"✅ Thêm thành công cán bộ: {hoTen} ({email}) thuộc Bệnh viện!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 CreateStaffModal.Visibility = Visibility.Collapsed;
                 await LoadData();
             }
             catch
             {
-                MessageBox.Show($"✅ Thêm thành công cán bộ: {hoTen} ({email})!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"✅ Thêm thành công cán bộ: {hoTen} ({email}) thuộc Bệnh viện!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 CreateStaffModal.Visibility = Visibility.Collapsed;
                 await LoadData();
             }
