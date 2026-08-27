@@ -58,6 +58,10 @@
                     <Button x:Name="btnNavTinTuc" Content="📣  Tin Tức &amp; Thông Báo" Height="46" Margin="0,0,0,8"
                             Background="Transparent" Foreground="#ccfbf1" FontWeight="SemiBold" FontSize="13"
                             HorizontalContentAlignment="Left" Padding="16,0" Cursor="Hand" Click="btnNavTinTuc_Click"/>
+
+                    <Button x:Name="btnNavChienDich" Content="🩸  Chiến Dịch Hiến Máu" Height="46" Margin="0,0,0,8"
+                            Background="Transparent" Foreground="#ccfbf1" FontWeight="SemiBold" FontSize="13"
+                            HorizontalContentAlignment="Left" Padding="16,0" Cursor="Hand" Click="btnNavChienDich_Click"/>
                 </StackPanel>
 
                 <!-- FOOTER / LOGOUT -->

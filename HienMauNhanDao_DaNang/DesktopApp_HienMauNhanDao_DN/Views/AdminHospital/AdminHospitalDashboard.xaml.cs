@@ -61,6 +61,11 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.AdminHospital
             NavigateToPage(new TinTucHospitalPage(), btnNavTinTuc);
         }
 
+        private void btnNavChienDich_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToPage(new DesktopApp_HienMauNhanDao_DN.Views.Admin.QuanLyChienDichPage(), btnNavChienDich);
+        }
+
         private void btnLogout_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất khỏi quyền Admin Bệnh viện?", "Xác nhận đăng xuất", MessageBoxButton.YesNo, MessageBoxImage.Question);
