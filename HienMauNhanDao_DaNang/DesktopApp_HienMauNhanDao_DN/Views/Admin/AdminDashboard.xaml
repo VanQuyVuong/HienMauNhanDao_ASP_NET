@@ -19,7 +19,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- SIDEBAR -->
-        <Border Grid.Column="0" Background="#991b1b" Padding="0">
+        <Border Grid.Column="0" Background="#0f172a" Padding="0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -38,7 +38,7 @@
                             <TextBlock Text="SUPER ADMIN SYSTEM" Foreground="#fca5a5" FontSize="11" FontWeight="Bold" Margin="0,2,0,0"/>
                         </StackPanel>
                     </StackPanel>
-                    <Border Height="1" Background="#b91c1c" Margin="0,20,0,0"/>
+                    <Border Height="1" Background="#1e293b" Margin="0,20,0,0"/>
                 </StackPanel>
 
                 <!-- NAVIGATION MENU -->
@@ -105,15 +105,13 @@
                 </StackPanel>
 
                 <!-- FOOTER / LOGOUT -->
-                <StackPanel Grid.Row="2" Margin="16,20">
-                    <Border Background="#7f1d1d" CornerRadius="14" Padding="14">
-                        <StackPanel>
-                            <TextBlock x:Name="txtAdminEmail" Text="admin@danang.gov.vn" Foreground="White" FontSize="12" FontWeight="Bold"/>
-                            <TextBlock Text="Quyền hạn: Super Admin (AD)" Foreground="#fca5a5" FontSize="10" Margin="0,2,0,8"/>
-                            <Button Content="🚪 Đăng Xuất" Height="36" Background="#dc2626" Foreground="White" FontWeight="Bold" FontSize="11" Cursor="Hand" Click="btnLogout_Click"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
+                <Border Grid.Row="2" Padding="20" BorderBrush="#1e293b" BorderThickness="0,1,0,0">
+                    <StackPanel>
+                        <TextBlock x:Name="txtAdminEmail" Text="admin@hienmau.vn" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                        <TextBlock Text="Quyền hạn: Super Admin System" Foreground="#fca5a5" FontSize="10" Margin="0,2,0,12"/>
+                        <Button x:Name="btnLogout" Content="🚪  Đăng Xuất" Height="38" Background="#b91c1c" Foreground="White" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnLogout_Click"/>
+                    </StackPanel>
+                </Border>
             </Grid>
         </Border>
 
