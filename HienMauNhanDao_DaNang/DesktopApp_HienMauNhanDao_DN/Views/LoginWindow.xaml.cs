@@ -54,6 +54,11 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                             var adminDashboard = new DesktopApp_HienMauNhanDao_DN.Views.Admin.AdminDashboard();
                             adminDashboard.Show();
                         }
+                        else if (role == "ADMIN_BV")
+                        {
+                            var adminHospitalDashboard = new DesktopApp_HienMauNhanDao_DN.Views.AdminHospital.AdminHospitalDashboard();
+                            adminHospitalDashboard.Show();
+                        }
                         else if (role == "BS")
                         {
                             var bacSiDashboard = new DesktopApp_HienMauNhanDao_DN.Views.BacSi.BacSiDashboard();
