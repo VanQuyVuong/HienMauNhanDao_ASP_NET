@@ -1,175 +1,468 @@
 // src/screens/OtpVerificationScreen.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
-} from "react-native";
-import { authService } from "../services/api";
+  ScrollView,
+  Dimensions
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { authService } from '../services/api';
+
+const { width } = Dimensions.get('window');
 
 export default function OtpVerificationScreen({ route, navigation }) {
-  // Lấy email được truyền từ màn hình đăng ký sang, nếu không có sẽ lấy giá trị mặc định
-  const { email } = route.params || { email: "tnv@gmail.com" };
-  const [otpCode, setOtpCode] = useState("");
-  const [loading, setLoading] = useState(false); // Sửa lỗi: dùng 'false' chữ thường thay vì 'False'
+  const formData = route.params?.formData;
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (!formData) {
+      Alert.alert('Lỗi', 'Không tìm thấy thông tin đăng ký. Vui lòng thử lại.', [
+        { text: 'Quay lại', onPress: () => navigation.navigate('Register') }
+      ]);
+    }
+  }, [formData]);
+
+  const [otp, setOtp] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [countdown, setCountdown] = useState(60);
 
-  // Bộ đếm ngược 60s để gửi lại mã otp
+  // Bộ đếm ngược 60s
   useEffect(() => {
     let timer;
     if (countdown > 0) {
       timer = setInterval(() => setCountdown((prev) => prev - 1), 1000);
     }
-    return () => clearInterval(timer); // Xóa bộ đếm khi component bị huỷ để tránh rò rỉ bộ nhớ
+    return () => clearInterval(timer);
   }, [countdown]);
 
-  // Gửi lại mã OTP mới
+  if (!formData) {
+    return null;
+  }
+
   const handleResendOtp = async () => {
+    setResendLoading(true);
     try {
-      await authService.sendOtp(email); // Sửa lỗi: dùng đúng 'authService'
-      setCountdown(60); // Reset lại bộ đếm ngược
-      Alert.alert("Thành công", "Mã OTP mới đã được gửi đến email của bạn");
-    } catch (error) {
-      Alert.alert("Lỗi", "Đã xảy ra lỗi khi gửi lại mã OTP");
+      await authService.sendOtp(formData.email);
+      setCountdown(60);
+      Alert.alert('Thành công', 'Mã OTP mới đã được gửi đến email của bạn.');
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data || 'Lỗi kết nối server.';
+      Alert.alert('Lỗi', typeof msg === 'string' ? msg : 'Lỗi kết nối. Vui lòng thử lại.');
+    } finally {
+      setResendLoading(false);
     }
   };
 
-  // Xác thực mã OTP người dùng nhập
-  const handleVerifyOtp = async () => {
-    // Sửa lỗi: thêm dấu () cho hàm async
-    if (otpCode.length < 6) {
-      Alert.alert("Thông báo", "Vui lòng nhập đủ 6 ký tự mã OTP");
+  const handleVerifyAndRegister = async () => {
+    if (!otp || otp.length < 6) {
+      Alert.alert('Thông báo', 'Vui lòng nhập đủ 6 chữ số mã OTP!');
       return;
     }
+
     setLoading(true);
     try {
-      // Gọi API /api/auth/verify-otp ở Backend C#
-      await authService.verifyOtp(email, otpCode.trim());
+      // 1. Xác thực OTP
+      try {
+        await authService.verifyOtp({ Email: formData.email, Otp: otp.trim() });
+      } catch (otpErr) {
+        const msg = otpErr.response?.data?.message || otpErr.response?.data || 'Mã OTP không hợp lệ hoặc đã hết hạn!';
+        Alert.alert('Xác thực thất bại', typeof msg === 'string' ? msg : 'Mã OTP không hợp lệ hoặc đã hết hạn!');
+        setLoading(false);
+        return;
+      }
 
-      Alert.alert(
-        "Xác thực thành công",
-        "Email của bạn đã được xác thực thành công",
-        [
-          {
-            text: "Tiếp tục đăng ký",
-            // Điều hướng quay lại Register và truyền cờ emailVerified là true
-            onPress: () =>
-              navigation.navigate("Register", { email, emailVerified: true }),
-          },
-        ],
-      );
-    } catch (error) {
-      const msg =
-        error.response?.data?.message ||
-        "Mã OTP không chính xác hoặc đã hết hạn!";
-      Alert.alert("Xác thực thất bại", msg);
+      // 2. Đăng ký tài khoản
+      const registerPayload = {
+        Email: formData.email,
+        MatKhau: formData.matKhau,
+        XacNhanMatKhau: formData.matKhau
+      };
+      await authService.register(registerPayload);
+
+      Alert.alert('Thành công', 'Tài khoản của bạn đã được khởi tạo thành công.', [
+        { text: 'Đăng nhập ngay', onPress: () => navigation.replace('Login') }
+      ]);
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data || 'Có lỗi xảy ra khi tạo tài khoản.';
+      Alert.alert('Lỗi đăng ký', typeof msg === 'string' ? msg : 'Lỗi kết nối.');
     } finally {
       setLoading(false);
     }
   };
 
+  const focusInput = () => {
+    inputRef.current?.focus();
+  };
+
+  // Render 6 ô tròn OTP
+  const renderOtpDigits = () => {
+    const digits = [];
+    for (let i = 0; i < 6; i++) {
+      const char = otp[i] || '';
+      const isCurrent = otp.length === i;
+      digits.push(
+        <View 
+          key={i} 
+          style={[
+            styles.otpCircle, 
+            char ? styles.otpCircleFilled : null,
+            isCurrent && isFocused ? styles.otpCircleActive : null
+          ]}
+        >
+          <Text style={styles.otpChar}>{char}</Text>
+        </View>
+      );
+    }
+    return digits;
+  };
+
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <View style={styles.inner}>
-        <Text style={styles.title}>Xác thực OTP</Text>
-        <Text style={styles.subtitle}>
-          Mã OTP đã được gửi về email {email}. Vui lòng kiểm tra và nhập mã vào
-          bên dưới.
-        </Text>
-
-        {/* Ô nhập mã OTP */}
-        <TextInput
-          placeholder="Nhập 6 ký tự mã OTP"
-          placeholderTextColor="#999"
-          value={otpCode}
-          onChangeText={setOtpCode}
-          maxLength={6}
-          style={styles.input}
-          keyboardType="number-pad"
-          textAlign="center"
-        />
-
-        {/* Nút Xác thực */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleVerifyOtp}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Xác thực</Text>
-          )}
-        </TouchableOpacity>
-
-        {/* Khu vực đếm ngược và Gửi lại mã */}
-        <View style={styles.resendContainer}>
-          {countdown > 0 ? (
-            <Text style={styles.countdownText}>
-              Gửi lại mã sau {countdown} giây
-            </Text>
-          ) : (
-            <TouchableOpacity onPress={handleResendOtp}>
-              <Text style={styles.resendText}>Gửi lại mã OTP</Text>
-            </TouchableOpacity>
-          )}
+      <ScrollView contentContainerStyle={styles.scrollInner} keyboardShouldPersistTaps="handled">
+        {/* Layered Waves Header */}
+        <View style={styles.headerContainer}>
+          <View style={styles.waveBackground} />
+          <LinearGradient
+            colors={['#e62e43', '#c01b30']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.waveForeground}
+          >
+            <View style={styles.headerContent}>
+              <View style={styles.logoIcon}>
+                <Text style={styles.logoHeart}>♥</Text>
+              </View>
+              <Text style={styles.headerTitle}>HỆ THỐNG HIẾN MÁU</Text>
+              <Text style={styles.headerSubtitle}>TP. ĐÀ NẴNG</Text>
+            </View>
+          </LinearGradient>
         </View>
-      </View>
+
+        {/* Floating Card */}
+        <View style={styles.cardContainer}>
+          <View style={styles.card}>
+            {/* Phone Illustration from Mockup 1 */}
+            <View style={styles.illustrationContainer}>
+              <View style={styles.phoneBody}>
+                <View style={styles.phoneScreen}>
+                  <View style={styles.checkCircle}>
+                    <Text style={styles.checkIcon}>✓</Text>
+                  </View>
+                </View>
+                <View style={styles.phoneButton} />
+              </View>
+            </View>
+
+            <Text style={styles.formTitle}>Xác Thực Email</Text>
+            <Text style={styles.formDesc}>
+              Chúng tôi đã gửi mã OTP gồm 6 chữ số đến email:{'\n'}
+              <Text style={styles.emailText}>{formData?.email}</Text>
+            </Text>
+
+            {/* Hidden Input for OTP */}
+            <TextInput
+              ref={inputRef}
+              value={otp}
+              onChangeText={setOtp}
+              maxLength={6}
+              keyboardType="number-pad"
+              style={styles.hiddenInput}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+            />
+
+            {/* OTP circles row with Hover effect */}
+            <Pressable 
+              activeOpacity={1} 
+              onPress={focusInput} 
+              style={({ hovered }) => [
+                styles.otpRow,
+                (Platform.OS === 'web' && hovered) && styles.otpRowHovered
+              ]}
+            >
+              {renderOtpDigits()}
+            </Pressable>
+
+            {/* Submit Button */}
+            <Pressable
+              onPress={handleVerifyAndRegister}
+              disabled={loading}
+              style={({ hovered, pressed }) => [
+                styles.buttonWrapper,
+                {
+                  transform: [
+                    { scale: pressed ? 0.96 : (Platform.OS === 'web' && hovered) ? 1.03 : 1 }
+                  ],
+                  shadowOpacity: (Platform.OS === 'web' && hovered) ? 0.35 : 0.22,
+                  shadowRadius: (Platform.OS === 'web' && hovered) ? 12 : 6,
+                  elevation: pressed ? 2 : (Platform.OS === 'web' && hovered) ? 6 : 3
+                }
+              ]}
+            >
+              <LinearGradient
+                colors={['#e62e43', '#c01b30']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.gradientButton}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>XÁC NHẬN VÀ HOÀN TẤT</Text>
+                )}
+              </LinearGradient>
+            </Pressable>
+
+            {/* Resend Code Timer */}
+            <View style={styles.resendContainer}>
+              {resendLoading ? (
+                <ActivityIndicator color="#e62e43" />
+              ) : countdown > 0 ? (
+                <Text style={styles.countdownText}>Gửi lại mã sau {countdown} giây</Text>
+              ) : (
+                <Pressable onPress={handleResendOtp}>
+                  {({ hovered, pressed }) => (
+                    <Text style={[
+                      styles.resendText,
+                      {
+                        color: (Platform.OS === 'web' && hovered) ? '#c01b30' : '#e62e43',
+                        textDecorationLine: (Platform.OS === 'web' && hovered) ? 'underline' : 'none',
+                        transform: [{ scale: pressed ? 0.96 : 1 }]
+                      }
+                    ]}>
+                      GỬI LẠI MÃ OTP
+                    </Text>
+                  )}
+                </Pressable>
+              )}
+            </View>
+          </View>
+        </View>
+
+        {/* Back to Edit Link */}
+        <Pressable 
+          onPress={() => navigation.navigate('Register')}
+          disabled={loading}
+          style={styles.backButtonWrapper}
+        >
+          {({ hovered, pressed }) => (
+            <Text style={[
+              styles.backText,
+              {
+                color: (Platform.OS === 'web' && hovered) ? '#666' : '#888',
+                textDecorationLine: (Platform.OS === 'web' && hovered) ? 'underline' : 'none',
+                transform: [{ scale: pressed ? 0.96 : 1 }]
+              }
+            ]}>
+              Quay lại chỉnh sửa email
+            </Text>
+          )}
+        </Pressable>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8f9fa" },
-  inner: { flex: 1, justifyContent: "center", padding: 24 },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#b7102a",
-    textAlign: "center",
-    marginBottom: 12,
+  container: { flex: 1, backgroundColor: '#fdf8f9' },
+  scrollInner: { flexGrow: 1, paddingBottom: 24 },
+  headerContainer: {
+    height: 240,
+    position: 'relative',
+    overflow: 'hidden',
+    marginBottom: 20
   },
-  subtitle: {
-    fontSize: 15,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 32,
-    lineHeight: 22,
+  waveBackground: {
+    position: 'absolute',
+    top: -110,
+    left: -40,
+    width: width + 80,
+    height: 310,
+    backgroundColor: 'rgba(230, 46, 67, 0.12)',
+    borderBottomLeftRadius: 180,
+    borderBottomRightRadius: 200,
+    transform: [{ rotate: '-4deg' }]
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#e1e3e4",
-    backgroundColor: "#fff",
-    marginBottom: 20,
-    padding: 16,
-    borderRadius: 8,
-    fontSize: 22,
-    letterSpacing: 8, // Tạo khoảng cách giữa các chữ số OTP
-    fontWeight: "bold",
+  waveForeground: {
+    position: 'absolute',
+    top: -130,
+    left: -50,
+    width: width + 100,
+    height: 320,
+    borderBottomLeftRadius: 220,
+    borderBottomRightRadius: 180,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: 24,
+    transform: [{ rotate: '2deg' }]
   },
-  button: {
-    backgroundColor: "#b7102a",
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 8,
+  headerContent: {
+    alignItems: 'center',
+    width: width,
+    transform: [{ rotate: '-2deg' }]
   },
-  buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
-  resendContainer: { alignItems: "center", marginTop: 24 },
-  countdownText: { color: "#999", fontSize: 15 },
-  resendText: {
-    color: "#b7102a",
-    fontSize: 15,
-    fontWeight: "bold",
-    textDecorationLine: "underline",
+  logoIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2
   },
+  logoHeart: { color: '#e62e43', fontSize: 32, fontWeight: 'bold' },
+  headerTitle: { fontSize: 20, fontWeight: '900', color: '#fff', letterSpacing: 0.5 },
+  headerSubtitle: { fontSize: 12, fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.8)', letterSpacing: 2, marginTop: 1 },
+  cardContainer: {
+    paddingHorizontal: 24,
+    marginTop: -40,
+    zIndex: 10
+  },
+  card: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+    alignItems: 'center'
+  },
+  illustrationContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16
+  },
+  phoneBody: {
+    width: 70,
+    height: 120,
+    borderWidth: 3.5,
+    borderColor: '#e8ecef',
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    padding: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative'
+  },
+  phoneScreen: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  phoneButton: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#e8ecef',
+    marginTop: 3
+  },
+  checkCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#2e86de',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#2e86de',
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 2
+  },
+  checkIcon: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  formTitle: { fontSize: 22, fontWeight: 'bold', color: '#111', marginBottom: 6, textAlign: 'center' },
+  formDesc: { fontSize: 13.5, color: '#666', marginBottom: 20, textAlign: 'center', lineHeight: 20 },
+  emailText: { fontWeight: 'bold', color: '#333' },
+  hiddenInput: {
+    position: 'absolute',
+    opacity: 0,
+    width: 1,
+    height: 1
+  },
+  otpRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 8,
+    marginBottom: 24,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+    // transition for web
+    ...Platform.select({
+      web: {
+        transitionProperty: 'all',
+        transitionDuration: '150ms'
+      }
+    })
+  },
+  otpRowHovered: {
+    borderColor: 'rgba(230, 46, 67, 0.15)',
+    backgroundColor: '#fdf8f9'
+  },
+  otpCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1.5,
+    borderColor: '#e8ecef',
+    backgroundColor: '#f8f9fa'
+  },
+  otpCircleFilled: {
+    borderColor: '#e62e43',
+    backgroundColor: '#fdf8f9'
+  },
+  otpCircleActive: {
+    borderColor: '#2e86de',
+    borderWidth: 2,
+    backgroundColor: '#fff'
+  },
+  otpChar: { fontSize: 20, fontWeight: 'bold', color: '#111', textAlign: 'center', lineHeight: 39 },
+  buttonWrapper: {
+    borderRadius: 25,
+    shadowColor: '#e62e43',
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    ...Platform.select({
+      web: {
+        transitionProperty: 'all',
+        transitionDuration: '150ms'
+      }
+    })
+  },
+  gradientButton: {
+    height: 50,
+    width: width - 96,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  buttonText: { color: '#fff', fontSize: 15, fontWeight: '900', letterSpacing: 1 },
+  resendContainer: { alignItems: 'center', marginTop: 20 },
+  countdownText: { color: '#999', fontSize: 14, fontWeight: '500' },
+  resendText: { fontSize: 14, fontWeight: 'bold' },
+  backButtonWrapper: { marginTop: 24, alignItems: 'center', marginBottom: 12 },
+  backText: { fontSize: 14, fontWeight: '500' }
 });
