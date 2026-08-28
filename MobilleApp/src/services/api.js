@@ -20,19 +20,15 @@ api.interceptors.request.use(async (config) => {
 });
 
 export const authService = {
-  //Hàm 1 : đăng nhập
+  // Đăng nhập
   login: (data) => api.post(ENDPOINTS.AUTH.LOGIN, data),
-  //hàm 2: gửi otp
+  // Gửi OTP
   sendOtp: (email) => api.post(ENDPOINTS.AUTH.SEND_OTP, { email }),
-
-  //HÀM 3 :XÁC THỰC MÃ OTP
-  verifyOtp: (email, otp) =>
-    api.post(ENDPOINTS.AUTH.VERIFY_OTP, { email, otpCode }),
-
-  //hàm 4 : đăng ký tài khoản tnv
+  // Xác thực OTP
+  verifyOtp: (email, otp) => api.post(ENDPOINTS.AUTH.VERIFY_OTP, { email, otp }),
+  // Đăng ký tài khoản tnv
   register: (data) => api.post(ENDPOINTS.AUTH.REGISTER, data),
-
-  //hàm 5 :quên mật khẩu, nhập lại mật khẩu mới
+  // Quên mật khẩu, nhập lại mật khẩu mới
   resetPassword: (data) => api.post(ENDPOINTS.AUTH.RESET_PASSWORD, data),
 };
 
