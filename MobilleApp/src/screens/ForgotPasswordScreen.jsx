@@ -112,6 +112,19 @@ export default function ForgotPasswordScreen({ navigation }) {
       <ScrollView contentContainerStyle={styles.scrollInner} keyboardShouldPersistTaps="handled">
         {/* Layered Waves Header */}
         <View style={styles.headerContainer}>
+          {/* Custom Back Arrow */}
+          <Pressable
+            onPress={() => navigation.goBack()}
+            style={({ hovered, pressed }) => [
+              styles.backArrowWrapper,
+              {
+                transform: [{ scale: pressed ? 0.9 : (Platform.OS === 'web' && hovered) ? 1.1 : 1 }]
+              }
+            ]}
+          >
+            <Text style={styles.backArrowText}>←</Text>
+          </Pressable>
+
           <View style={styles.waveBackground} />
           <LinearGradient
             colors={['#e62e43', '#c01b30']}
@@ -378,6 +391,31 @@ export default function ForgotPasswordScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fdf8f9' },
   scrollInner: { flexGrow: 1, paddingBottom: 24 },
+  backArrowWrapper: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 99,
+    ...Platform.select({
+      web: {
+        transitionProperty: 'all',
+        transitionDuration: '150ms',
+        cursor: 'pointer'
+      }
+    })
+  },
+  backArrowText: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: 'bold',
+    lineHeight: 22
+  },
   headerContainer: {
     height: 240,
     position: 'relative',

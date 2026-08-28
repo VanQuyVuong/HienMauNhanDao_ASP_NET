@@ -59,21 +59,21 @@ export default function App() {
         <Stack.Screen
           name="Register"
           component={RegisterScreen}
-          options={{ title: 'Đăng ký tài khoản' }}
+          options={{ headerShown: false }}
         />
         
         {/* Màn hình Xác thực OTP */}
         <Stack.Screen
           name="OtpVerification"
           component={OtpVerificationScreen}
-          options={{ title: 'Xác thực mã OTP' }}
+          options={{ headerShown: false }}
         />
 
         {/* Màn hình Quên mật khẩu */}
         <Stack.Screen
           name="ForgotPassword"
           component={ForgotPasswordScreen}
-          options={{ title: 'Quên mật khẩu' }}
+          options={{ headerShown: false }}
         />
         
         {/* Màn hình Trang chủ tạm thời */}
