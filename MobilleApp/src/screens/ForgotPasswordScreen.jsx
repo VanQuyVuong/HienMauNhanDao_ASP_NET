@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { authService } from '../services/api';
-import SleepingDoctorImage from '../../assets/images/sleeping_doctor.png';
+import DonationImage from '../../assets/images/donation.png';
 
 const { width } = Dimensions.get('window');
 
@@ -29,6 +29,16 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [step, setStep] = useState(1); // step 1: nhập email gửi OTP, step 2: nhập OTP & mật khẩu mới
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
+
+  // States for Input Hover and Focus
+  const [emailHovered, setEmailHovered] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [otpHovered, setOtpHovered] = useState(false);
+  const [otpFocused, setOtpFocused] = useState(false);
+  const [newPasswordHovered, setNewPasswordHovered] = useState(false);
+  const [newPasswordFocused, setNewPasswordFocused] = useState(false);
+  const [confirmNewPasswordHovered, setConfirmNewPasswordHovered] = useState(false);
+  const [confirmNewPasswordFocused, setConfirmNewPasswordFocused] = useState(false);
 
   // Bộ đếm ngược 60 giây gửi lại OTP
   useEffect(() => {
@@ -124,9 +134,9 @@ export default function ForgotPasswordScreen({ navigation }) {
           {step === 1 ? (
             // BƯỚC 1: NHẬP EMAIL ĐỂ LẤY MÃ OTP
             <View style={styles.card}>
-              {/* Chibi Sleeping Doctor Illustration */}
+              {/* Chibi Donation Illustration */}
               <Image
-                source={SleepingDoctorImage}
+                source={DonationImage}
                 style={styles.doctorImg}
                 resizeMode="contain"
               />
@@ -137,8 +147,19 @@ export default function ForgotPasswordScreen({ navigation }) {
               </Text>
 
               {/* Email Input */}
-              <View style={styles.inputWrapper}>
-                <Text style={styles.inputIcon}>✉</Text>
+              <View 
+                style={[
+                  styles.inputWrapper,
+                  emailHovered && styles.inputWrapperHovered,
+                  emailFocused && styles.inputWrapperFocused
+                ]}
+                onMouseEnter={() => Platform.OS === 'web' && setEmailHovered(true)}
+                onMouseLeave={() => Platform.OS === 'web' && setEmailHovered(false)}
+              >
+                <Text style={[
+                  styles.inputIcon,
+                  (emailHovered || emailFocused) && styles.inputIconActive
+                ]}>✉</Text>
                 <TextInput
                   placeholder="Địa chỉ Email"
                   placeholderTextColor="#999"
@@ -147,6 +168,8 @@ export default function ForgotPasswordScreen({ navigation }) {
                   style={styles.pillInput}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
                 />
               </View>
 
@@ -183,9 +206,9 @@ export default function ForgotPasswordScreen({ navigation }) {
           ) : (
             // BƯỚC 2: NHẬP MÃ OTP VÀ MẬT KHẨU MỚI
             <View style={styles.card}>
-              {/* Chibi Sleeping Doctor Illustration */}
+              {/* Chibi Donation Illustration */}
               <Image
-                source={SleepingDoctorImage}
+                source={DonationImage}
                 style={styles.doctorImg}
                 resizeMode="contain"
               />
@@ -196,8 +219,19 @@ export default function ForgotPasswordScreen({ navigation }) {
               </Text>
 
               {/* OTP Code Input */}
-              <View style={styles.inputWrapper}>
-                <Text style={styles.inputIcon}>🔑</Text>
+              <View 
+                style={[
+                  styles.inputWrapper,
+                  otpHovered && styles.inputWrapperHovered,
+                  otpFocused && styles.inputWrapperFocused
+                ]}
+                onMouseEnter={() => Platform.OS === 'web' && setOtpHovered(true)}
+                onMouseLeave={() => Platform.OS === 'web' && setOtpHovered(false)}
+              >
+                <Text style={[
+                  styles.inputIcon,
+                  (otpHovered || otpFocused) && styles.inputIconActive
+                ]}>🔑</Text>
                 <TextInput
                   placeholder="Mã OTP"
                   placeholderTextColor="#999"
@@ -206,12 +240,25 @@ export default function ForgotPasswordScreen({ navigation }) {
                   style={styles.pillInput}
                   keyboardType="number-pad"
                   maxLength={6}
+                  onFocus={() => setOtpFocused(true)}
+                  onBlur={() => setOtpFocused(false)}
                 />
               </View>
 
               {/* Password Input */}
-              <View style={styles.inputWrapper}>
-                <Text style={styles.inputIcon}>🔒</Text>
+              <View 
+                style={[
+                  styles.inputWrapper,
+                  newPasswordHovered && styles.inputWrapperHovered,
+                  newPasswordFocused && styles.inputWrapperFocused
+                ]}
+                onMouseEnter={() => Platform.OS === 'web' && setNewPasswordHovered(true)}
+                onMouseLeave={() => Platform.OS === 'web' && setNewPasswordHovered(false)}
+              >
+                <Text style={[
+                  styles.inputIcon,
+                  (newPasswordHovered || newPasswordFocused) && styles.inputIconActive
+                ]}>🔒</Text>
                 <TextInput
                   placeholder="Mật khẩu mới (tối thiểu 6 ký tự)"
                   placeholderTextColor="#999"
@@ -220,12 +267,25 @@ export default function ForgotPasswordScreen({ navigation }) {
                   secureTextEntry
                   style={styles.pillInput}
                   autoCapitalize="none"
+                  onFocus={() => setNewPasswordFocused(true)}
+                  onBlur={() => setNewPasswordFocused(false)}
                 />
               </View>
 
               {/* Confirm Password Input */}
-              <View style={styles.inputWrapper}>
-                <Text style={styles.inputIcon}>🔒</Text>
+              <View 
+                style={[
+                  styles.inputWrapper,
+                  confirmNewPasswordHovered && styles.inputWrapperHovered,
+                  confirmNewPasswordFocused && styles.inputWrapperFocused
+                ]}
+                onMouseEnter={() => Platform.OS === 'web' && setConfirmNewPasswordHovered(true)}
+                onMouseLeave={() => Platform.OS === 'web' && setConfirmNewPasswordHovered(false)}
+              >
+                <Text style={[
+                  styles.inputIcon,
+                  (confirmNewPasswordHovered || confirmNewPasswordFocused) && styles.inputIconActive
+                ]}>🔒</Text>
                 <TextInput
                   placeholder="Xác nhận mật khẩu mới"
                   placeholderTextColor="#999"
@@ -234,6 +294,8 @@ export default function ForgotPasswordScreen({ navigation }) {
                   secureTextEntry
                   style={styles.pillInput}
                   autoCapitalize="none"
+                  onFocus={() => setConfirmNewPasswordFocused(true)}
+                  onBlur={() => setConfirmNewPasswordFocused(false)}
                 />
               </View>
 
@@ -388,9 +450,29 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginBottom: 16,
     paddingHorizontal: 16,
-    height: 50
+    height: 50,
+    ...Platform.select({
+      web: {
+        transitionProperty: 'all',
+        transitionDuration: '150ms'
+      }
+    })
   },
-  inputIcon: { fontSize: 18, color: '#999', marginRight: 10 },
+  inputIcon: { fontSize: 18, color: '#999', marginRight: 10, transitionProperty: 'color', transitionDuration: '150ms' },
+  inputIconActive: { color: '#e62e43' },
+  inputWrapperHovered: {
+    borderColor: 'rgba(230, 46, 67, 0.35)',
+    backgroundColor: '#fff'
+  },
+  inputWrapperFocused: {
+    borderColor: '#e62e43',
+    backgroundColor: '#fff',
+    shadowColor: '#e62e43',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 1
+  },
   pillInput: {
     flex: 1,
     fontSize: 15,

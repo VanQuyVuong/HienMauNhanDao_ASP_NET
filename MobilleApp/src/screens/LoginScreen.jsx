@@ -17,7 +17,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { authService } from '../services/api';
-import DoctorImage from '../../assets/images/doctor.png';
+import DonationImage from '../../assets/images/donation.png';
 
 const { width } = Dimensions.get('window');
 
@@ -26,6 +26,12 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // States for Input Hover and Focus
+  const [emailHovered, setEmailHovered] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordHovered, setPasswordHovered] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   useEffect(() => {
     const clearSession = async () => {
@@ -102,9 +108,9 @@ export default function LoginScreen({ navigation }) {
         {/* Floating Card Form */}
         <View style={styles.cardContainer}>
           <View style={styles.card}>
-            {/* Chibi Doctor Illustration */}
+            {/* Chibi Donation Illustration */}
             <Image
-              source={DoctorImage}
+              source={DonationImage}
               style={styles.doctorImg}
               resizeMode="contain"
             />
@@ -113,8 +119,19 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.formDesc}>Vui lòng điền thông tin email và mật khẩu của bạn.</Text>
 
             {/* Email Input */}
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputIcon}>✉</Text>
+            <View 
+              style={[
+                styles.inputWrapper,
+                emailHovered && styles.inputWrapperHovered,
+                emailFocused && styles.inputWrapperFocused
+              ]}
+              onMouseEnter={() => Platform.OS === 'web' && setEmailHovered(true)}
+              onMouseLeave={() => Platform.OS === 'web' && setEmailHovered(false)}
+            >
+              <Text style={[
+                styles.inputIcon,
+                (emailHovered || emailFocused) && styles.inputIconActive
+              ]}>✉</Text>
               <TextInput
                 placeholder="Địa chỉ Email"
                 placeholderTextColor="#999"
@@ -123,12 +140,25 @@ export default function LoginScreen({ navigation }) {
                 style={styles.pillInput}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                onFocus={() => setEmailFocused(true)}
+                onBlur={() => setEmailFocused(false)}
               />
             </View>
 
             {/* Password Input */}
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputIcon}>🔒</Text>
+            <View 
+              style={[
+                styles.inputWrapper,
+                passwordHovered && styles.inputWrapperHovered,
+                passwordFocused && styles.inputWrapperFocused
+              ]}
+              onMouseEnter={() => Platform.OS === 'web' && setPasswordHovered(true)}
+              onMouseLeave={() => Platform.OS === 'web' && setPasswordHovered(false)}
+            >
+              <Text style={[
+                styles.inputIcon,
+                (passwordHovered || passwordFocused) && styles.inputIconActive
+              ]}>🔒</Text>
               <TextInput
                 placeholder="Mật khẩu"
                 placeholderTextColor="#999"
@@ -137,6 +167,8 @@ export default function LoginScreen({ navigation }) {
                 secureTextEntry={!showPassword}
                 style={styles.pillInput}
                 autoCapitalize="none"
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
               />
               <Pressable
                 onPress={() => setShowPassword(!showPassword)}
@@ -320,9 +352,29 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginBottom: 16,
     paddingHorizontal: 16,
-    height: 50
+    height: 50,
+    ...Platform.select({
+      web: {
+        transitionProperty: 'all',
+        transitionDuration: '150ms'
+      }
+    })
   },
-  inputIcon: { fontSize: 18, color: '#999', marginRight: 10 },
+  inputIcon: { fontSize: 18, color: '#999', marginRight: 10, transitionProperty: 'color', transitionDuration: '150ms' },
+  inputIconActive: { color: '#e62e43' },
+  inputWrapperHovered: {
+    borderColor: 'rgba(230, 46, 67, 0.35)',
+    backgroundColor: '#fff'
+  },
+  inputWrapperFocused: {
+    borderColor: '#e62e43',
+    backgroundColor: '#fff',
+    shadowColor: '#e62e43',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 1
+  },
   pillInput: {
     flex: 1,
     fontSize: 15,

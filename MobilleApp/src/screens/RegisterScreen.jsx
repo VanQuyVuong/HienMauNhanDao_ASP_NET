@@ -29,6 +29,14 @@ export default function RegisterScreen({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // States for Input Hover and Focus
+  const [emailHovered, setEmailHovered] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordHovered, setPasswordHovered] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmPasswordHovered, setConfirmPasswordHovered] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
+
   const handleSendOtp = async () => {
     if (!email || !password || !confirmPassword) {
       Alert.alert('Thông báo', 'Vui lòng điền đầy đủ các thông tin.');
@@ -109,8 +117,19 @@ export default function RegisterScreen({ navigation }) {
             </Text>
 
             {/* Email Input */}
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputIcon}>✉</Text>
+            <View 
+              style={[
+                styles.inputWrapper,
+                emailHovered && styles.inputWrapperHovered,
+                emailFocused && styles.inputWrapperFocused
+              ]}
+              onMouseEnter={() => Platform.OS === 'web' && setEmailHovered(true)}
+              onMouseLeave={() => Platform.OS === 'web' && setEmailHovered(false)}
+            >
+              <Text style={[
+                styles.inputIcon,
+                (emailHovered || emailFocused) && styles.inputIconActive
+              ]}>✉</Text>
               <TextInput
                 placeholder="Địa chỉ Email"
                 placeholderTextColor="#999"
@@ -119,12 +138,25 @@ export default function RegisterScreen({ navigation }) {
                 style={styles.pillInput}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                onFocus={() => setEmailFocused(true)}
+                onBlur={() => setEmailFocused(false)}
               />
             </View>
 
             {/* Password Input */}
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputIcon}>🔒</Text>
+            <View 
+              style={[
+                styles.inputWrapper,
+                passwordHovered && styles.inputWrapperHovered,
+                passwordFocused && styles.inputWrapperFocused
+              ]}
+              onMouseEnter={() => Platform.OS === 'web' && setPasswordHovered(true)}
+              onMouseLeave={() => Platform.OS === 'web' && setPasswordHovered(false)}
+            >
+              <Text style={[
+                styles.inputIcon,
+                (passwordHovered || passwordFocused) && styles.inputIconActive
+              ]}>🔒</Text>
               <TextInput
                 placeholder="Mật khẩu"
                 placeholderTextColor="#999"
@@ -133,6 +165,8 @@ export default function RegisterScreen({ navigation }) {
                 secureTextEntry={!showPassword}
                 style={styles.pillInput}
                 autoCapitalize="none"
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
               />
               <Pressable
                 onPress={() => setShowPassword(!showPassword)}
@@ -153,8 +187,19 @@ export default function RegisterScreen({ navigation }) {
             </View>
 
             {/* Confirm Password Input */}
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputIcon}>🔒</Text>
+            <View 
+              style={[
+                styles.inputWrapper,
+                confirmPasswordHovered && styles.inputWrapperHovered,
+                confirmPasswordFocused && styles.inputWrapperFocused
+              ]}
+              onMouseEnter={() => Platform.OS === 'web' && setConfirmPasswordHovered(true)}
+              onMouseLeave={() => Platform.OS === 'web' && setConfirmPasswordHovered(false)}
+            >
+              <Text style={[
+                styles.inputIcon,
+                (confirmPasswordHovered || confirmPasswordFocused) && styles.inputIconActive
+              ]}>🔒</Text>
               <TextInput
                 placeholder="Xác nhận mật khẩu"
                 placeholderTextColor="#999"
@@ -163,6 +208,8 @@ export default function RegisterScreen({ navigation }) {
                 secureTextEntry={!showConfirmPassword}
                 style={styles.pillInput}
                 autoCapitalize="none"
+                onFocus={() => setConfirmPasswordFocused(true)}
+                onBlur={() => setConfirmPasswordFocused(false)}
               />
               <Pressable
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -331,9 +378,29 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginBottom: 16,
     paddingHorizontal: 16,
-    height: 50
+    height: 50,
+    ...Platform.select({
+      web: {
+        transitionProperty: 'all',
+        transitionDuration: '150ms'
+      }
+    })
   },
-  inputIcon: { fontSize: 18, color: '#999', marginRight: 10 },
+  inputIcon: { fontSize: 18, color: '#999', marginRight: 10, transitionProperty: 'color', transitionDuration: '150ms' },
+  inputIconActive: { color: '#e62e43' },
+  inputWrapperHovered: {
+    borderColor: 'rgba(230, 46, 67, 0.35)',
+    backgroundColor: '#fff'
+  },
+  inputWrapperFocused: {
+    borderColor: '#e62e43',
+    backgroundColor: '#fff',
+    shadowColor: '#e62e43',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 1
+  },
   pillInput: {
     flex: 1,
     fontSize: 15,
