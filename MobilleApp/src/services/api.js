@@ -25,10 +25,12 @@ export const authService = {
   // Gửi OTP
   sendOtp: (email) => api.post(ENDPOINTS.AUTH.SEND_OTP, { email }),
   // Xác thực OTP
-  verifyOtp: (email, otp) => api.post(ENDPOINTS.AUTH.VERIFY_OTP, { email, otp }),
+  verifyOtp: (data) => api.post(ENDPOINTS.AUTH.VERIFY_OTP, data),
   // Đăng ký tài khoản tnv
   register: (data) => api.post(ENDPOINTS.AUTH.REGISTER, data),
-  // Quên mật khẩu, nhập lại mật khẩu mới
+  // Quên mật khẩu: gửi yêu cầu OTP
+  forgotPassword: (email) => api.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, { email }),
+  // Đặt lại mật khẩu mới
   resetPassword: (data) => api.post(ENDPOINTS.AUTH.RESET_PASSWORD, data),
 };
 
