@@ -56,8 +56,8 @@ export default function OtpVerificationScreen({ route, navigation }) {
       setCountdown(60);
       Alert.alert('Thành công', 'Mã OTP mới đã được gửi đến email của bạn.');
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data || 'Lỗi kết nối server.';
-      Alert.alert('Lỗi', typeof msg === 'string' ? msg : 'Lỗi kết nối. Vui lòng thử lại.');
+      const msg = err.response?.data?.message || err.response?.data?.Message || (typeof err.response?.data === 'string' ? err.response.data : null) || 'Lỗi kết nối server.';
+      Alert.alert('Lỗi', msg);
     } finally {
       setResendLoading(false);
     }
@@ -75,8 +75,8 @@ export default function OtpVerificationScreen({ route, navigation }) {
       try {
         await authService.verifyOtp({ Email: formData.email, Otp: otp.trim() });
       } catch (otpErr) {
-        const msg = otpErr.response?.data?.message || otpErr.response?.data || 'Mã OTP không hợp lệ hoặc đã hết hạn!';
-        Alert.alert('Xác thực thất bại', typeof msg === 'string' ? msg : 'Mã OTP không hợp lệ hoặc đã hết hạn!');
+        const msg = otpErr.response?.data?.message || otpErr.response?.data?.Message || (typeof otpErr.response?.data === 'string' ? otpErr.response.data : null) || 'Mã OTP không hợp lệ hoặc đã hết hạn!';
+        Alert.alert('Xác thực thất bại', msg);
         setLoading(false);
         return;
       }
@@ -93,8 +93,8 @@ export default function OtpVerificationScreen({ route, navigation }) {
         { text: 'Đăng nhập ngay', onPress: () => navigation.replace('Login') }
       ]);
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data || 'Có lỗi xảy ra khi tạo tài khoản.';
-      Alert.alert('Lỗi đăng ký', typeof msg === 'string' ? msg : 'Lỗi kết nối.');
+      const msg = err.response?.data?.message || err.response?.data?.Message || (typeof err.response?.data === 'string' ? err.response.data : null) || 'Có lỗi xảy ra khi tạo tài khoản.';
+      Alert.alert('Lỗi đăng ký', msg);
     } finally {
       setLoading(false);
     }

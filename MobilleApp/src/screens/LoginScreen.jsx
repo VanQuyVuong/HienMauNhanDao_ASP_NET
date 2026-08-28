@@ -70,8 +70,8 @@ export default function LoginScreen({ navigation }) {
         Alert.alert('Lỗi', 'Không tìm thấy token trong phản hồi từ server');
       }
     } catch (e) {
-      const errorMsg = e.response?.data?.message || e.response?.data || 'Đăng nhập thất bại. Vui lòng kiểm tra lại Email và Mật khẩu.';
-      Alert.alert('Lỗi đăng nhập', typeof errorMsg === 'string' ? errorMsg : 'Đăng nhập thất bại.');
+      const errorMsg = e.response?.data?.message || e.response?.data?.Message || (typeof e.response?.data === 'string' ? e.response.data : null) || 'Đăng nhập thất bại. Vui lòng kiểm tra lại Email và Mật khẩu.';
+      Alert.alert('Lỗi đăng nhập', errorMsg);
     } finally {
       setLoading(false);
     }

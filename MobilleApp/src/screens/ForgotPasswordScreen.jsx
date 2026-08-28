@@ -62,7 +62,7 @@ export default function ForgotPasswordScreen({ navigation }) {
       setStep(2); // Chuyển sang bước 2 để nhập mã và mật khẩu mới
       Alert.alert('Thành công', 'Mã OTP đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra.');
     } catch (error) {
-      const msg = error.response?.data?.message || 'Email này chưa được đăng ký tài khoản hoặc lỗi kết nối';
+      const msg = error.response?.data?.message || error.response?.data?.Message || (typeof error.response?.data === 'string' ? error.response.data : null) || 'Email này chưa được đăng ký tài khoản hoặc lỗi kết nối';
       Alert.alert('Gửi OTP thất bại', msg);
     } finally {
       setLoading(false);
@@ -97,7 +97,7 @@ export default function ForgotPasswordScreen({ navigation }) {
         { text: 'Đăng nhập ngay', onPress: () => navigation.replace('Login') }
       ]);
     } catch (error) {
-      const msg = error.response?.data?.message || 'Mã OTP không chính xác hoặc đã hết hạn';
+      const msg = error.response?.data?.message || error.response?.data?.Message || (typeof error.response?.data === 'string' ? error.response.data : null) || 'Mã OTP không chính xác hoặc đã hết hạn';
       Alert.alert('Đặt lại thất bại', msg);
     } finally {
       setLoading(false);
@@ -355,9 +355,21 @@ export default function ForgotPasswordScreen({ navigation }) {
         </View>
 
         {/* Back Link */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.backText}>Quay lại <Text style={styles.boldRed}>Đăng nhập</Text></Text>
-        </TouchableOpacity>
+        <Pressable 
+          onPress={() => navigation.navigate('Login')}
+          style={styles.backButton}
+        >
+          {({ hovered, pressed }) => (
+            <Text style={[
+              styles.backText,
+              {
+                transform: [{ scale: pressed ? 0.96 : 1 }]
+              }
+            ]}>
+              Quay lại <Text style={[styles.boldRed, (Platform.OS === 'web' && hovered) && { textDecorationLine: 'underline', color: '#c01b30' }]}>Đăng nhập</Text>
+            </Text>
+          )}
+        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
