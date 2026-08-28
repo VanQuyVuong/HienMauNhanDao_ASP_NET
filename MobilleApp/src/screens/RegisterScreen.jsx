@@ -69,8 +69,8 @@ export default function RegisterScreen({ navigation }) {
         }
       });
     } catch (error) {
-      const msg = error.response?.data?.message || error.response?.data || 'Lỗi kết nối server. Vui lòng kiểm tra backend.';
-      Alert.alert('Lỗi gửi OTP', typeof msg === 'string' ? msg : 'Lỗi kết nối. Vui lòng thử lại.');
+      const msg = error.response?.data?.message || error.response?.data?.Message || (typeof error.response?.data === 'string' ? error.response.data : null) || 'Lỗi kết nối server. Vui lòng kiểm tra backend.';
+      Alert.alert('Lỗi gửi OTP', msg);
     } finally {
       setLoading(false);
     }
@@ -284,9 +284,21 @@ export default function RegisterScreen({ navigation }) {
         </View>
 
         {/* Back to Login Link */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.backText}>Đã có tài khoản? <Text style={styles.boldRed}>Đăng nhập</Text></Text>
-        </TouchableOpacity>
+        <Pressable 
+          onPress={() => navigation.navigate('Login')}
+          style={styles.backButton}
+        >
+          {({ hovered, pressed }) => (
+            <Text style={[
+              styles.backText,
+              {
+                transform: [{ scale: pressed ? 0.96 : 1 }]
+              }
+            ]}>
+              Đã có tài khoản? <Text style={[styles.boldRed, (Platform.OS === 'web' && hovered) && { textDecorationLine: 'underline', color: '#c01b30' }]}>Đăng nhập</Text>
+            </Text>
+          )}
+        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
