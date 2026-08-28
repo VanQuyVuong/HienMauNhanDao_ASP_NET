@@ -37,25 +37,29 @@ export default function RegisterScreen({ navigation }) {
   const [confirmPasswordHovered, setConfirmPasswordHovered] = useState(false);
   const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
 
+  // State for Error Message
+  const [errorMsg, setErrorMsg] = useState('');
+
   const handleSendOtp = async () => {
+    setErrorMsg('');
     if (!email || !password || !confirmPassword) {
-      Alert.alert('Thông báo', 'Vui lòng điền đầy đủ các thông tin.');
+      setErrorMsg('Vui lòng điền đầy đủ các thông tin.');
       return;
     }
 
     if (!agreed) {
-      Alert.alert('Thông báo', 'Bạn phải đồng ý với điều khoản sử dụng để tiếp tục.');
+      setErrorMsg('Bạn phải đồng ý với điều khoản sử dụng để tiếp tục.');
       return;
     }
 
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
     if (!passwordRegex.test(password)) {
-      Alert.alert('Thông báo', 'Mật khẩu phải dài hơn 6 ký tự và bao gồm cả chữ cái và số.');
+      setErrorMsg('Mật khẩu phải dài hơn 6 ký tự và bao gồm cả chữ cái và số.');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Thông báo', 'Mật khẩu xác nhận không khớp!');
+      setErrorMsg('Mật khẩu xác nhận không khớp!');
       return;
     }
 
@@ -70,7 +74,7 @@ export default function RegisterScreen({ navigation }) {
       });
     } catch (error) {
       const msg = error.response?.data?.message || error.response?.data?.Message || (typeof error.response?.data === 'string' ? error.response.data : null) || 'Lỗi kết nối server. Vui lòng kiểm tra backend.';
-      Alert.alert('Lỗi gửi OTP', msg);
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -147,7 +151,7 @@ export default function RegisterScreen({ navigation }) {
                 placeholder="Địa chỉ Email"
                 placeholderTextColor="#999"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(val) => { setEmail(val); setErrorMsg(''); }}
                 style={styles.pillInput}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -174,7 +178,7 @@ export default function RegisterScreen({ navigation }) {
                 placeholder="Mật khẩu"
                 placeholderTextColor="#999"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(val) => { setPassword(val); setErrorMsg(''); }}
                 secureTextEntry={!showPassword}
                 style={styles.pillInput}
                 autoCapitalize="none"
@@ -217,7 +221,7 @@ export default function RegisterScreen({ navigation }) {
                 placeholder="Xác nhận mật khẩu"
                 placeholderTextColor="#999"
                 value={confirmPassword}
-                onChangeText={setConfirmPassword}
+                onChangeText={(val) => { setConfirmPassword(val); setErrorMsg(''); }}
                 secureTextEntry={!showConfirmPassword}
                 style={styles.pillInput}
                 autoCapitalize="none"
@@ -263,6 +267,13 @@ export default function RegisterScreen({ navigation }) {
               )}
             </Pressable>
 
+            {/* Inline Error Alert Area */}
+            {errorMsg ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>⚠ {errorMsg}</Text>
+              </View>
+            ) : null}
+
             {/* Submit Button with Gradient */}
             <Pressable
               onPress={handleSendOtp}
@@ -271,11 +282,11 @@ export default function RegisterScreen({ navigation }) {
                 styles.buttonWrapper,
                 {
                   transform: [
-                    { scale: pressed ? 0.96 : (Platform.OS === 'web' && hovered && agreed) ? 1.03 : 1 }
+                    { scale: pressed ? 0.92 : (Platform.OS === 'web' && hovered && agreed) ? 1.05 : 1 }
                   ],
-                  shadowOpacity: (Platform.OS === 'web' && hovered && agreed) ? 0.35 : 0.22,
-                  shadowRadius: (Platform.OS === 'web' && hovered && agreed) ? 12 : 6,
-                  elevation: pressed ? 2 : (Platform.OS === 'web' && hovered && agreed) ? 6 : 3,
+                  shadowOpacity: (Platform.OS === 'web' && hovered && agreed) ? 0.45 : 0.22,
+                  shadowRadius: (Platform.OS === 'web' && hovered && agreed) ? 14 : 6,
+                  elevation: pressed ? 1 : (Platform.OS === 'web' && hovered && agreed) ? 7 : 3,
                   opacity: agreed ? 1 : 0.5
                 }
               ]}
@@ -470,8 +481,8 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     borderRadius: 25,
     shadowColor: '#e62e43',
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 8,
     ...Platform.select({
       web: {
         transitionProperty: 'all',
@@ -486,6 +497,25 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   buttonText: { color: '#fff', fontSize: 15, fontWeight: '900', letterSpacing: 1 },
+  errorContainer: {
+    backgroundColor: '#ffeef0',
+    borderColor: '#fdbdc3',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 16,
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  errorText: {
+    color: '#e62e43',
+    fontSize: 13.5,
+    fontWeight: '600',
+    lineHeight: 18,
+    flex: 1
+  },
   backButton: { marginTop: 24, alignItems: 'center', marginBottom: 12 },
   backText: { color: '#666', fontSize: 14, fontWeight: '500' },
   boldRed: { color: '#e62e43', fontWeight: 'bold' }

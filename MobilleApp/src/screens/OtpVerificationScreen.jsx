@@ -36,6 +36,9 @@ export default function OtpVerificationScreen({ route, navigation }) {
   const [resendLoading, setResendLoading] = useState(false);
   const [countdown, setCountdown] = useState(60);
 
+  // State for Error Message
+  const [errorMsg, setErrorMsg] = useState('');
+
   // Bộ đếm ngược 60s
   useEffect(() => {
     let timer;
@@ -50,6 +53,7 @@ export default function OtpVerificationScreen({ route, navigation }) {
   }
 
   const handleResendOtp = async () => {
+    setErrorMsg('');
     setResendLoading(true);
     try {
       await authService.sendOtp(formData.email);
@@ -57,15 +61,16 @@ export default function OtpVerificationScreen({ route, navigation }) {
       Alert.alert('Thành công', 'Mã OTP mới đã được gửi đến email của bạn.');
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data?.Message || (typeof err.response?.data === 'string' ? err.response.data : null) || 'Lỗi kết nối server.';
-      Alert.alert('Lỗi', msg);
+      setErrorMsg(msg);
     } finally {
       setResendLoading(false);
     }
   };
 
   const handleVerifyAndRegister = async () => {
+    setErrorMsg('');
     if (!otp || otp.length < 6) {
-      Alert.alert('Thông báo', 'Vui lòng nhập đủ 6 chữ số mã OTP!');
+      setErrorMsg('Vui lòng nhập đủ 6 chữ số mã OTP!');
       return;
     }
 
@@ -76,7 +81,7 @@ export default function OtpVerificationScreen({ route, navigation }) {
         await authService.verifyOtp({ Email: formData.email, Otp: otp.trim() });
       } catch (otpErr) {
         const msg = otpErr.response?.data?.message || otpErr.response?.data?.Message || (typeof otpErr.response?.data === 'string' ? otpErr.response.data : null) || 'Mã OTP không hợp lệ hoặc đã hết hạn!';
-        Alert.alert('Xác thực thất bại', msg);
+        setErrorMsg(msg);
         setLoading(false);
         return;
       }
@@ -94,7 +99,7 @@ export default function OtpVerificationScreen({ route, navigation }) {
       ]);
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data?.Message || (typeof err.response?.data === 'string' ? err.response.data : null) || 'Có lỗi xảy ra khi tạo tài khoản.';
-      Alert.alert('Lỗi đăng ký', msg);
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -189,7 +194,7 @@ export default function OtpVerificationScreen({ route, navigation }) {
             <TextInput
               ref={inputRef}
               value={otp}
-              onChangeText={setOtp}
+              onChangeText={(val) => { setOtp(val); setErrorMsg(''); }}
               maxLength={6}
               keyboardType="number-pad"
               style={styles.hiddenInput}
@@ -209,6 +214,13 @@ export default function OtpVerificationScreen({ route, navigation }) {
               {renderOtpDigits()}
             </Pressable>
 
+            {/* Inline Error Alert Area */}
+            {errorMsg ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>⚠ {errorMsg}</Text>
+              </View>
+            ) : null}
+
             {/* Submit Button */}
             <Pressable
               onPress={handleVerifyAndRegister}
@@ -217,11 +229,11 @@ export default function OtpVerificationScreen({ route, navigation }) {
                 styles.buttonWrapper,
                 {
                   transform: [
-                    { scale: pressed ? 0.96 : (Platform.OS === 'web' && hovered) ? 1.03 : 1 }
+                    { scale: pressed ? 0.92 : (Platform.OS === 'web' && hovered) ? 1.05 : 1 }
                   ],
-                  shadowOpacity: (Platform.OS === 'web' && hovered) ? 0.35 : 0.22,
-                  shadowRadius: (Platform.OS === 'web' && hovered) ? 12 : 6,
-                  elevation: pressed ? 2 : (Platform.OS === 'web' && hovered) ? 6 : 3
+                  shadowOpacity: (Platform.OS === 'web' && hovered) ? 0.45 : 0.22,
+                  shadowRadius: (Platform.OS === 'web' && hovered) ? 14 : 6,
+                  elevation: pressed ? 1 : (Platform.OS === 'web' && hovered) ? 7 : 3
                 }
               ]}
             >
@@ -481,8 +493,8 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     borderRadius: 25,
     shadowColor: '#e62e43',
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 8,
     ...Platform.select({
       web: {
         transitionProperty: 'all',
@@ -498,6 +510,25 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   buttonText: { color: '#fff', fontSize: 15, fontWeight: '900', letterSpacing: 1 },
+  errorContainer: {
+    backgroundColor: '#ffeef0',
+    borderColor: '#fdbdc3',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 16,
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  errorText: {
+    color: '#e62e43',
+    fontSize: 13.5,
+    fontWeight: '600',
+    lineHeight: 18,
+    flex: 1
+  },
   resendContainer: { alignItems: 'center', marginTop: 20 },
   countdownText: { color: '#999', fontSize: 14, fontWeight: '500' },
   resendText: { fontSize: 14, fontWeight: 'bold' },

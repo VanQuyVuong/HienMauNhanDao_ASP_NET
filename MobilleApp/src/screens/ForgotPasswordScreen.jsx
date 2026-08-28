@@ -40,6 +40,9 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [confirmNewPasswordHovered, setConfirmNewPasswordHovered] = useState(false);
   const [confirmNewPasswordFocused, setConfirmNewPasswordFocused] = useState(false);
 
+  // State for Error Message
+  const [errorMsg, setErrorMsg] = useState('');
+
   // Bộ đếm ngược 60 giây gửi lại OTP
   useEffect(() => {
     let timer;
@@ -51,8 +54,9 @@ export default function ForgotPasswordScreen({ navigation }) {
 
   // Gửi OTP yêu cầu quên mật khẩu
   const handleSendOtp = async () => {
+    setErrorMsg('');
     if (!email) {
-      Alert.alert('Thông báo', 'Vui lòng nhập địa chỉ email của bạn');
+      setErrorMsg('Vui lòng nhập địa chỉ email của bạn');
       return;
     }
     setLoading(true);
@@ -63,7 +67,7 @@ export default function ForgotPasswordScreen({ navigation }) {
       Alert.alert('Thành công', 'Mã OTP đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra.');
     } catch (error) {
       const msg = error.response?.data?.message || error.response?.data?.Message || (typeof error.response?.data === 'string' ? error.response.data : null) || 'Email này chưa được đăng ký tài khoản hoặc lỗi kết nối';
-      Alert.alert('Gửi OTP thất bại', msg);
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -71,16 +75,17 @@ export default function ForgotPasswordScreen({ navigation }) {
 
   // Xác nhận đặt lại mật khẩu mới
   const handleResetPassword = async () => {
+    setErrorMsg('');
     if (!otp || !newPassword || !confirmNewPassword) {
-      Alert.alert('Thông báo', 'Vui lòng điền đầy đủ OTP và mật khẩu mới');
+      setErrorMsg('Vui lòng điền đầy đủ OTP và mật khẩu mới');
       return;
     }
     if (newPassword.length < 6) {
-      Alert.alert('Thông báo', 'Mật khẩu mới phải có tối thiểu 6 ký tự');
+      setErrorMsg('Mật khẩu mới phải có tối thiểu 6 ký tự');
       return;
     }
     if (newPassword !== confirmNewPassword) {
-      Alert.alert('Thông báo', 'Mật khẩu xác nhận không trùng khớp');
+      setErrorMsg('Mật khẩu xác nhận không trùng khớp');
       return;
     }
 
@@ -98,7 +103,7 @@ export default function ForgotPasswordScreen({ navigation }) {
       ]);
     } catch (error) {
       const msg = error.response?.data?.message || error.response?.data?.Message || (typeof error.response?.data === 'string' ? error.response.data : null) || 'Mã OTP không chính xác hoặc đã hết hạn';
-      Alert.alert('Đặt lại thất bại', msg);
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -177,7 +182,7 @@ export default function ForgotPasswordScreen({ navigation }) {
                   placeholder="Địa chỉ Email"
                   placeholderTextColor="#999"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(val) => { setEmail(val); setErrorMsg(''); }}
                   style={styles.pillInput}
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -185,6 +190,13 @@ export default function ForgotPasswordScreen({ navigation }) {
                   onBlur={() => setEmailFocused(false)}
                 />
               </View>
+
+              {/* Inline Error Alert Area */}
+              {errorMsg ? (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>⚠ {errorMsg}</Text>
+                </View>
+              ) : null}
 
               {/* Submit Button */}
               <Pressable
@@ -194,11 +206,11 @@ export default function ForgotPasswordScreen({ navigation }) {
                   styles.buttonWrapper,
                   {
                     transform: [
-                      { scale: pressed ? 0.96 : (Platform.OS === 'web' && hovered) ? 1.03 : 1 }
+                      { scale: pressed ? 0.92 : (Platform.OS === 'web' && hovered) ? 1.05 : 1 }
                     ],
-                    shadowOpacity: (Platform.OS === 'web' && hovered) ? 0.35 : 0.22,
-                    shadowRadius: (Platform.OS === 'web' && hovered) ? 12 : 6,
-                    elevation: pressed ? 2 : (Platform.OS === 'web' && hovered) ? 6 : 3
+                    shadowOpacity: (Platform.OS === 'web' && hovered) ? 0.45 : 0.22,
+                    shadowRadius: (Platform.OS === 'web' && hovered) ? 14 : 6,
+                    elevation: pressed ? 1 : (Platform.OS === 'web' && hovered) ? 7 : 3
                   }
                 ]}
               >
@@ -249,7 +261,7 @@ export default function ForgotPasswordScreen({ navigation }) {
                   placeholder="Mã OTP"
                   placeholderTextColor="#999"
                   value={otp}
-                  onChangeText={setOtp}
+                  onChangeText={(val) => { setOtp(val); setErrorMsg(''); }}
                   style={styles.pillInput}
                   keyboardType="number-pad"
                   maxLength={6}
@@ -276,7 +288,7 @@ export default function ForgotPasswordScreen({ navigation }) {
                   placeholder="Mật khẩu mới (tối thiểu 6 ký tự)"
                   placeholderTextColor="#999"
                   value={newPassword}
-                  onChangeText={setNewPassword}
+                  onChangeText={(val) => { setNewPassword(val); setErrorMsg(''); }}
                   secureTextEntry
                   style={styles.pillInput}
                   autoCapitalize="none"
@@ -303,7 +315,7 @@ export default function ForgotPasswordScreen({ navigation }) {
                   placeholder="Xác nhận mật khẩu mới"
                   placeholderTextColor="#999"
                   value={confirmNewPassword}
-                  onChangeText={setConfirmNewPassword}
+                  onChangeText={(val) => { setConfirmNewPassword(val); setErrorMsg(''); }}
                   secureTextEntry
                   style={styles.pillInput}
                   autoCapitalize="none"
@@ -311,6 +323,13 @@ export default function ForgotPasswordScreen({ navigation }) {
                   onBlur={() => setConfirmNewPasswordFocused(false)}
                 />
               </View>
+
+              {/* Inline Error Alert Area */}
+              {errorMsg ? (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>⚠ {errorMsg}</Text>
+                </View>
+              ) : null}
 
               {/* Reset Password Button */}
               <Pressable
@@ -320,11 +339,11 @@ export default function ForgotPasswordScreen({ navigation }) {
                   styles.buttonWrapper,
                   {
                     transform: [
-                      { scale: pressed ? 0.96 : (Platform.OS === 'web' && hovered) ? 1.03 : 1 }
+                      { scale: pressed ? 0.92 : (Platform.OS === 'web' && hovered) ? 1.05 : 1 }
                     ],
-                    shadowOpacity: (Platform.OS === 'web' && hovered) ? 0.35 : 0.22,
-                    shadowRadius: (Platform.OS === 'web' && hovered) ? 12 : 6,
-                    elevation: pressed ? 2 : (Platform.OS === 'web' && hovered) ? 6 : 3
+                    shadowOpacity: (Platform.OS === 'web' && hovered) ? 0.45 : 0.22,
+                    shadowRadius: (Platform.OS === 'web' && hovered) ? 14 : 6,
+                    elevation: pressed ? 1 : (Platform.OS === 'web' && hovered) ? 7 : 3
                   }
                 ]}
               >
@@ -534,8 +553,8 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     borderRadius: 25,
     shadowColor: '#e62e43',
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 8,
     ...Platform.select({
       web: {
         transitionProperty: 'all',
@@ -550,6 +569,25 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   buttonText: { color: '#fff', fontSize: 15, fontWeight: '900', letterSpacing: 1 },
+  errorContainer: {
+    backgroundColor: '#ffeef0',
+    borderColor: '#fdbdc3',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 16,
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  errorText: {
+    color: '#e62e43',
+    fontSize: 13.5,
+    fontWeight: '600',
+    lineHeight: 18,
+    flex: 1
+  },
   backButton: { marginTop: 24, alignItems: 'center', marginBottom: 12 },
   backText: { color: '#666', fontSize: 14, fontWeight: '500' },
   resendContainer: { alignItems: 'center', marginTop: 20 },

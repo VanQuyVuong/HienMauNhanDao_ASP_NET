@@ -33,6 +33,9 @@ export default function LoginScreen({ navigation }) {
   const [passwordHovered, setPasswordHovered] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
 
+  // State for Error Message
+  const [errorMsg, setErrorMsg] = useState('');
+
   useEffect(() => {
     const clearSession = async () => {
       await AsyncStorage.removeItem('token');
@@ -42,8 +45,9 @@ export default function LoginScreen({ navigation }) {
   }, []);
 
   const handleLogin = async () => {
+    setErrorMsg('');
     if (!email || !password) {
-      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ email và mật khẩu');
+      setErrorMsg('Vui lòng nhập đầy đủ email và mật khẩu');
       return;
     }
     setLoading(true);
@@ -55,7 +59,7 @@ export default function LoginScreen({ navigation }) {
       const role = resData.maVaiTro;
 
       if (role !== 'TNV') {
-        Alert.alert('Từ chối truy cập', 'Tài khoản nội bộ không được phép đăng nhập trên ứng dụng di động!');
+        setErrorMsg('Tài khoản nội bộ không được phép đăng nhập trên ứng dụng di động!');
         setLoading(false);
         return;
       }
@@ -67,11 +71,11 @@ export default function LoginScreen({ navigation }) {
           { text: 'OK', onPress: () => navigation.replace('Home') }
         ]);
       } else {
-        Alert.alert('Lỗi', 'Không tìm thấy token trong phản hồi từ server');
+        setErrorMsg('Không tìm thấy token trong phản hồi từ server');
       }
     } catch (e) {
-      const errorMsg = e.response?.data?.message || e.response?.data?.Message || (typeof e.response?.data === 'string' ? e.response.data : null) || 'Đăng nhập thất bại. Vui lòng kiểm tra lại Email và Mật khẩu.';
-      Alert.alert('Lỗi đăng nhập', errorMsg);
+      const msg = e.response?.data?.message || e.response?.data?.Message || (typeof e.response?.data === 'string' ? e.response.data : null) || 'Đăng nhập thất bại. Vui lòng kiểm tra lại Email và Mật khẩu.';
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -136,7 +140,7 @@ export default function LoginScreen({ navigation }) {
                 placeholder="Địa chỉ Email"
                 placeholderTextColor="#999"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(val) => { setEmail(val); setErrorMsg(''); }}
                 style={styles.pillInput}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -163,7 +167,7 @@ export default function LoginScreen({ navigation }) {
                 placeholder="Mật khẩu"
                 placeholderTextColor="#999"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(val) => { setPassword(val); setErrorMsg(''); }}
                 secureTextEntry={!showPassword}
                 style={styles.pillInput}
                 autoCapitalize="none"
@@ -188,6 +192,13 @@ export default function LoginScreen({ navigation }) {
               </Pressable>
             </View>
 
+            {/* Inline Error Alert Area */}
+            {errorMsg ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>⚠ {errorMsg}</Text>
+              </View>
+            ) : null}
+
             {/* Submit Button with Gradient & Pressable interactions */}
             <Pressable
               onPress={handleLogin}
@@ -196,11 +207,11 @@ export default function LoginScreen({ navigation }) {
                 styles.buttonWrapper,
                 {
                   transform: [
-                    { scale: pressed ? 0.96 : (Platform.OS === 'web' && hovered) ? 1.03 : 1 }
+                    { scale: pressed ? 0.92 : (Platform.OS === 'web' && hovered) ? 1.05 : 1 }
                   ],
-                  shadowOpacity: (Platform.OS === 'web' && hovered) ? 0.35 : 0.22,
-                  shadowRadius: (Platform.OS === 'web' && hovered) ? 12 : 6,
-                  elevation: pressed ? 2 : (Platform.OS === 'web' && hovered) ? 6 : 3
+                  shadowOpacity: (Platform.OS === 'web' && hovered) ? 0.45 : 0.22,
+                  shadowRadius: (Platform.OS === 'web' && hovered) ? 14 : 6,
+                  elevation: pressed ? 1 : (Platform.OS === 'web' && hovered) ? 7 : 3
                 }
               ]}
             >
@@ -389,8 +400,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 25,
     shadowColor: '#e62e43',
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 8,
     // Add smooth CSS transition for web
     ...Platform.select({
       web: {
@@ -406,8 +417,27 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   buttonText: { color: '#fff', fontSize: 15, fontWeight: '900', letterSpacing: 1 },
+  errorContainer: {
+    backgroundColor: '#ffeef0',
+    borderColor: '#fdbdc3',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 16,
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  errorText: {
+    color: '#e62e43',
+    fontSize: 13.5,
+    fontWeight: '600',
+    lineHeight: 18,
+    flex: 1
+  },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24, alignItems: 'center' },
-  footerLink: { fontSize: 14, fontWeight: 'bold' },
+  footerLink: { fontSize: 14, fontWeight: 'bold', transitionProperty: 'color, transform', transitionDuration: '150ms' },
   divider: { marginHorizontal: 16, color: '#eee' },
   sloganContainer: { marginTop: 28, paddingHorizontal: 32 },
   sloganText: { fontSize: 13, color: '#888', fontStyle: 'italic', textAlign: 'center', lineHeight: 18 }
