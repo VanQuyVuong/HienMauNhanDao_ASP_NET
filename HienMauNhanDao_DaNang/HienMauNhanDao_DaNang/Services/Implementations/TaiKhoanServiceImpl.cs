@@ -152,6 +152,16 @@ namespace HienMauNhanDao_DaNang.Services.Implementations
             return await _db.TaiKhoans.AnyAsync(tk => tk.Email == email);
         }
 
+        // Triển khai đặt lại mật khẩu mới
+        public async Task ResetPasswordAsync(string email, string newPassword)
+        {
+            var taiKhoan = await _db.TaiKhoans.FirstOrDefaultAsync(tk => tk.Email == email);
+            if (taiKhoan == null)
+                throw new InvalidOperationException("Email không tồn tại.");
 
+            // Băm mật khẩu mới bằng BCrypt và cập nhật
+            taiKhoan.MatKhau = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            await _db.SaveChangesAsync();
+        }
     }
 }
