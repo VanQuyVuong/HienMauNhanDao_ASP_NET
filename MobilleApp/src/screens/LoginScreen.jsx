@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   Pressable,
   Alert,
   StyleSheet,
@@ -14,6 +13,7 @@ import {
   Dimensions,
   Image
 } from 'react-native';
+import AnimatedInput from '../components/AnimatedInput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { authService } from '../services/api';
@@ -27,14 +27,9 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // States for Input Hover and Focus
-  const [emailHovered, setEmailHovered] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordHovered, setPasswordHovered] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
-
-  // State for Error Message
-  const [errorMsg, setErrorMsg] = useState('');
+  // State báo lỗi & kích hoạt hiệu ứng Shake
+  const [errorMsg,  setErrorMsg]  = useState('');
+  const [shakeKey,  setShakeKey]  = useState(0);
 
   useEffect(() => {
     const clearSession = async () => {
@@ -48,6 +43,7 @@ export default function LoginScreen({ navigation }) {
     setErrorMsg('');
     if (!email || !password) {
       setErrorMsg('Vui lòng nhập đầy đủ email và mật khẩu');
+      setShakeKey(k => k + 1);
       return;
     }
     setLoading(true);
@@ -60,6 +56,7 @@ export default function LoginScreen({ navigation }) {
 
       if (role !== 'TNV') {
         setErrorMsg('Tài khoản nội bộ không được phép đăng nhập trên ứng dụng di động!');
+        setShakeKey(k => k + 1);
         setLoading(false);
         return;
       }
@@ -76,6 +73,7 @@ export default function LoginScreen({ navigation }) {
     } catch (e) {
       const msg = e.response?.data?.message || e.response?.data?.Message || (typeof e.response?.data === 'string' ? e.response.data : null) || 'Đăng nhập thất bại. Vui lòng kiểm tra lại Email và Mật khẩu.';
       setErrorMsg(msg);
+      setShakeKey(k => k + 1);
     } finally {
       setLoading(false);
     }
@@ -123,74 +121,24 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.formDesc}>Vui lòng điền thông tin email và mật khẩu của bạn.</Text>
 
             {/* Email Input */}
-            <View 
-              style={[
-                styles.inputWrapper,
-                emailHovered && styles.inputWrapperHovered,
-                emailFocused && styles.inputWrapperFocused
-              ]}
-              onMouseEnter={() => Platform.OS === 'web' && setEmailHovered(true)}
-              onMouseLeave={() => Platform.OS === 'web' && setEmailHovered(false)}
-            >
-              <Text style={[
-                styles.inputIcon,
-                (emailHovered || emailFocused) && styles.inputIconActive
-              ]}>✉</Text>
-              <TextInput
-                placeholder="Địa chỉ Email"
-                placeholderTextColor="#999"
-                value={email}
-                onChangeText={(val) => { setEmail(val); setErrorMsg(''); }}
-                style={styles.pillInput}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                onFocus={() => setEmailFocused(true)}
-                onBlur={() => setEmailFocused(false)}
-              />
-            </View>
+            <AnimatedInput
+              label="Địa chỉ Email"
+              icon="✉"
+              value={email}
+              onChangeText={(val) => { setEmail(val); setErrorMsg(''); }}
+              keyboardType="email-address"
+              shakeKey={shakeKey}
+            />
 
             {/* Password Input */}
-            <View 
-              style={[
-                styles.inputWrapper,
-                passwordHovered && styles.inputWrapperHovered,
-                passwordFocused && styles.inputWrapperFocused
-              ]}
-              onMouseEnter={() => Platform.OS === 'web' && setPasswordHovered(true)}
-              onMouseLeave={() => Platform.OS === 'web' && setPasswordHovered(false)}
-            >
-              <Text style={[
-                styles.inputIcon,
-                (passwordHovered || passwordFocused) && styles.inputIconActive
-              ]}>🔒</Text>
-              <TextInput
-                placeholder="Mật khẩu"
-                placeholderTextColor="#999"
-                value={password}
-                onChangeText={(val) => { setPassword(val); setErrorMsg(''); }}
-                secureTextEntry={!showPassword}
-                style={styles.pillInput}
-                autoCapitalize="none"
-                onFocus={() => setPasswordFocused(true)}
-                onBlur={() => setPasswordFocused(false)}
-              />
-              <Pressable
-                onPress={() => setShowPassword(!showPassword)}
-                style={({ pressed }) => [
-                  styles.eyeButton,
-                  { transform: [{ scale: pressed ? 0.9 : 1 }] }
-                ]}
-              >
-                {({ hovered }) => (
-                  <Text style={[
-                    styles.eyeText,
-                    (Platform.OS === 'web' && hovered) && { textDecorationLine: 'underline', color: '#c01b30' }
-                  ]}>
-                    {showPassword ? 'Ẩn' : 'Hiện'}
-                  </Text>
-                )}
-              </Pressable>
-            </View>
+            <AnimatedInput
+              label="Mật khẩu"
+              icon="🔒"
+              value={password}
+              onChangeText={(val) => { setPassword(val); setErrorMsg(''); }}
+              showToggle
+              shakeKey={shakeKey}
+            />
 
             {/* Inline Error Alert Area */}
             {errorMsg ? (
@@ -354,48 +302,7 @@ const styles = StyleSheet.create({
   },
   formTitle: { fontSize: 22, fontWeight: 'bold', color: '#111', marginBottom: 4 },
   formDesc: { fontSize: 13, color: '#666', marginBottom: 20 },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#e8ecef',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 25,
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    height: 50,
-    ...Platform.select({
-      web: {
-        transitionProperty: 'all',
-        transitionDuration: '150ms'
-      }
-    })
-  },
-  inputIcon: { fontSize: 18, color: '#999', marginRight: 10, transitionProperty: 'color', transitionDuration: '150ms' },
-  inputIconActive: { color: '#e62e43' },
-  inputWrapperHovered: {
-    borderColor: 'rgba(230, 46, 67, 0.35)',
-    backgroundColor: '#fff'
-  },
-  inputWrapperFocused: {
-    borderColor: '#e62e43',
-    backgroundColor: '#fff',
-    shadowColor: '#e62e43',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 1
-  },
-  pillInput: {
-    flex: 1,
-    fontSize: 15,
-    color: '#333',
-    fontWeight: '600',
-    height: '100%',
-    outlineStyle: 'none' // remove web focus outline
-  },
-  eyeButton: { padding: 4 },
-  eyeText: { color: '#e62e43', fontSize: 13, fontWeight: 'bold' },
+  // inputWrapper, pillInput, eyeButton đã chuyển sang AnimatedInput component
   buttonWrapper: {
     marginTop: 10,
     borderRadius: 25,

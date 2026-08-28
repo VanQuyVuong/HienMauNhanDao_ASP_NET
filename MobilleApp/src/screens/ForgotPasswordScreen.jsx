@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   Pressable,
   Alert,
   StyleSheet,
@@ -15,6 +14,7 @@ import {
   Image
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import AnimatedInput from '../components/AnimatedInput';
 import { authService } from '../services/api';
 import DonationImage from '../../assets/images/donation.png';
 
@@ -30,18 +30,9 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
-  // States for Input Hover and Focus
-  const [emailHovered, setEmailHovered] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [otpHovered, setOtpHovered] = useState(false);
-  const [otpFocused, setOtpFocused] = useState(false);
-  const [newPasswordHovered, setNewPasswordHovered] = useState(false);
-  const [newPasswordFocused, setNewPasswordFocused] = useState(false);
-  const [confirmNewPasswordHovered, setConfirmNewPasswordHovered] = useState(false);
-  const [confirmNewPasswordFocused, setConfirmNewPasswordFocused] = useState(false);
-
-  // State for Error Message
+  // State báo lỗi & kích hoạt hiệu ứng Shake
   const [errorMsg, setErrorMsg] = useState('');
+  const [shakeKey, setShakeKey] = useState(0);
 
   // Bộ đếm ngược 60 giây gửi lại OTP
   useEffect(() => {
@@ -57,6 +48,7 @@ export default function ForgotPasswordScreen({ navigation }) {
     setErrorMsg('');
     if (!email) {
       setErrorMsg('Vui lòng nhập địa chỉ email của bạn');
+      setShakeKey(k => k + 1);
       return;
     }
     setLoading(true);
@@ -68,6 +60,7 @@ export default function ForgotPasswordScreen({ navigation }) {
     } catch (error) {
       const msg = error.response?.data?.message || error.response?.data?.Message || (typeof error.response?.data === 'string' ? error.response.data : null) || 'Email này chưa được đăng ký tài khoản hoặc lỗi kết nối';
       setErrorMsg(msg);
+      setShakeKey(k => k + 1);
     } finally {
       setLoading(false);
     }
@@ -78,14 +71,17 @@ export default function ForgotPasswordScreen({ navigation }) {
     setErrorMsg('');
     if (!otp || !newPassword || !confirmNewPassword) {
       setErrorMsg('Vui lòng điền đầy đủ OTP và mật khẩu mới');
+      setShakeKey(k => k + 1);
       return;
     }
     if (newPassword.length < 6) {
       setErrorMsg('Mật khẩu mới phải có tối thiểu 6 ký tự');
+      setShakeKey(k => k + 1);
       return;
     }
     if (newPassword !== confirmNewPassword) {
       setErrorMsg('Mật khẩu xác nhận không trùng khớp');
+      setShakeKey(k => k + 1);
       return;
     }
 
@@ -102,8 +98,9 @@ export default function ForgotPasswordScreen({ navigation }) {
         { text: 'Đăng nhập ngay', onPress: () => navigation.replace('Login') }
       ]);
     } catch (error) {
-      const msg = error.response?.data?.message || error.response?.data?.Message || (typeof error.response?.data === 'string' ? error.response.data : null) || 'Mã OTP không chính xác hoặc đã hết hạn';
+      const msg = error.response?.data?.message || error.response?.data?.Message || (typeof error.response?.data === 'string' ? error.response.data : null) || 'Lỗi khi đặt lại mật khẩu. Mã OTP có thể đã hết hạn.';
       setErrorMsg(msg);
+      setShakeKey(k => k + 1);
     } finally {
       setLoading(false);
     }
@@ -165,31 +162,14 @@ export default function ForgotPasswordScreen({ navigation }) {
               </Text>
 
               {/* Email Input */}
-              <View 
-                style={[
-                  styles.inputWrapper,
-                  emailHovered && styles.inputWrapperHovered,
-                  emailFocused && styles.inputWrapperFocused
-                ]}
-                onMouseEnter={() => Platform.OS === 'web' && setEmailHovered(true)}
-                onMouseLeave={() => Platform.OS === 'web' && setEmailHovered(false)}
-              >
-                <Text style={[
-                  styles.inputIcon,
-                  (emailHovered || emailFocused) && styles.inputIconActive
-                ]}>✉</Text>
-                <TextInput
-                  placeholder="Địa chỉ Email"
-                  placeholderTextColor="#999"
-                  value={email}
-                  onChangeText={(val) => { setEmail(val); setErrorMsg(''); }}
-                  style={styles.pillInput}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  onFocus={() => setEmailFocused(true)}
-                  onBlur={() => setEmailFocused(false)}
-                />
-              </View>
+              <AnimatedInput
+                label="Địa chỉ Email"
+                icon="✉"
+                value={email}
+                onChangeText={(val) => { setEmail(val); setErrorMsg(''); }}
+                keyboardType="email-address"
+                shakeKey={shakeKey}
+              />
 
               {/* Inline Error Alert Area */}
               {errorMsg ? (
@@ -244,85 +224,35 @@ export default function ForgotPasswordScreen({ navigation }) {
               </Text>
 
               {/* OTP Code Input */}
-              <View 
-                style={[
-                  styles.inputWrapper,
-                  otpHovered && styles.inputWrapperHovered,
-                  otpFocused && styles.inputWrapperFocused
-                ]}
-                onMouseEnter={() => Platform.OS === 'web' && setOtpHovered(true)}
-                onMouseLeave={() => Platform.OS === 'web' && setOtpHovered(false)}
-              >
-                <Text style={[
-                  styles.inputIcon,
-                  (otpHovered || otpFocused) && styles.inputIconActive
-                ]}>🔑</Text>
-                <TextInput
-                  placeholder="Mã OTP"
-                  placeholderTextColor="#999"
-                  value={otp}
-                  onChangeText={(val) => { setOtp(val); setErrorMsg(''); }}
-                  style={styles.pillInput}
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  onFocus={() => setOtpFocused(true)}
-                  onBlur={() => setOtpFocused(false)}
-                />
-              </View>
+              <AnimatedInput
+                label="Mã OTP (6 số)"
+                icon="🔑"
+                value={otp}
+                onChangeText={(val) => { setOtp(val); setErrorMsg(''); }}
+                keyboardType="number-pad"
+                maxLength={6}
+                shakeKey={shakeKey}
+              />
 
               {/* Password Input */}
-              <View 
-                style={[
-                  styles.inputWrapper,
-                  newPasswordHovered && styles.inputWrapperHovered,
-                  newPasswordFocused && styles.inputWrapperFocused
-                ]}
-                onMouseEnter={() => Platform.OS === 'web' && setNewPasswordHovered(true)}
-                onMouseLeave={() => Platform.OS === 'web' && setNewPasswordHovered(false)}
-              >
-                <Text style={[
-                  styles.inputIcon,
-                  (newPasswordHovered || newPasswordFocused) && styles.inputIconActive
-                ]}>🔒</Text>
-                <TextInput
-                  placeholder="Mật khẩu mới (tối thiểu 6 ký tự)"
-                  placeholderTextColor="#999"
-                  value={newPassword}
-                  onChangeText={(val) => { setNewPassword(val); setErrorMsg(''); }}
-                  secureTextEntry
-                  style={styles.pillInput}
-                  autoCapitalize="none"
-                  onFocus={() => setNewPasswordFocused(true)}
-                  onBlur={() => setNewPasswordFocused(false)}
-                />
-              </View>
+              <AnimatedInput
+                label="Mật khẩu mới (tối thiểu 6 ký tự)"
+                icon="🔒"
+                value={newPassword}
+                onChangeText={(val) => { setNewPassword(val); setErrorMsg(''); }}
+                showToggle
+                shakeKey={shakeKey}
+              />
 
               {/* Confirm Password Input */}
-              <View 
-                style={[
-                  styles.inputWrapper,
-                  confirmNewPasswordHovered && styles.inputWrapperHovered,
-                  confirmNewPasswordFocused && styles.inputWrapperFocused
-                ]}
-                onMouseEnter={() => Platform.OS === 'web' && setConfirmNewPasswordHovered(true)}
-                onMouseLeave={() => Platform.OS === 'web' && setConfirmNewPasswordHovered(false)}
-              >
-                <Text style={[
-                  styles.inputIcon,
-                  (confirmNewPasswordHovered || confirmNewPasswordFocused) && styles.inputIconActive
-                ]}>🔒</Text>
-                <TextInput
-                  placeholder="Xác nhận mật khẩu mới"
-                  placeholderTextColor="#999"
-                  value={confirmNewPassword}
-                  onChangeText={(val) => { setConfirmNewPassword(val); setErrorMsg(''); }}
-                  secureTextEntry
-                  style={styles.pillInput}
-                  autoCapitalize="none"
-                  onFocus={() => setConfirmNewPasswordFocused(true)}
-                  onBlur={() => setConfirmNewPasswordFocused(false)}
-                />
-              </View>
+              <AnimatedInput
+                label="Xác nhận mật khẩu mới"
+                icon="🔒"
+                value={confirmNewPassword}
+                onChangeText={(val) => { setConfirmNewPassword(val); setErrorMsg(''); }}
+                showToggle
+                shakeKey={shakeKey}
+              />
 
               {/* Inline Error Alert Area */}
               {errorMsg ? (
@@ -510,46 +440,7 @@ const styles = StyleSheet.create({
   formTitle: { fontSize: 22, fontWeight: 'bold', color: '#111', marginBottom: 4 },
   formDesc: { fontSize: 13.5, color: '#666', marginBottom: 20, lineHeight: 20 },
   boldRed: { fontWeight: 'bold', color: '#e62e43' },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#e8ecef',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 25,
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    height: 50,
-    ...Platform.select({
-      web: {
-        transitionProperty: 'all',
-        transitionDuration: '150ms'
-      }
-    })
-  },
-  inputIcon: { fontSize: 18, color: '#999', marginRight: 10, transitionProperty: 'color', transitionDuration: '150ms' },
-  inputIconActive: { color: '#e62e43' },
-  inputWrapperHovered: {
-    borderColor: 'rgba(230, 46, 67, 0.35)',
-    backgroundColor: '#fff'
-  },
-  inputWrapperFocused: {
-    borderColor: '#e62e43',
-    backgroundColor: '#fff',
-    shadowColor: '#e62e43',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 1
-  },
-  pillInput: {
-    flex: 1,
-    fontSize: 15,
-    color: '#333',
-    fontWeight: '600',
-    height: '100%',
-    outlineStyle: 'none'
-  },
+  // inputWrapper, pillInput đã chuyển sang AnimatedInput component
   buttonWrapper: {
     borderRadius: 25,
     shadowColor: '#e62e43',

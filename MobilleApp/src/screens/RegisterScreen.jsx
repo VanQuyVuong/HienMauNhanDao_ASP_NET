@@ -3,9 +3,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   Pressable,
-  Alert,
   StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -15,6 +13,7 @@ import {
   Image
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import AnimatedInput from '../components/AnimatedInput';
 import { authService } from '../services/api';
 import DonationImage from '../../assets/images/donation.png';
 
@@ -29,37 +28,34 @@ export default function RegisterScreen({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // States for Input Hover and Focus
-  const [emailHovered, setEmailHovered] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordHovered, setPasswordHovered] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
-  const [confirmPasswordHovered, setConfirmPasswordHovered] = useState(false);
-  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
-
-  // State for Error Message
+  // State báo lỗi & kích hoạt hiệu ứng Shake
   const [errorMsg, setErrorMsg] = useState('');
+  const [shakeKey, setShakeKey] = useState(0);
 
   const handleSendOtp = async () => {
     setErrorMsg('');
     if (!email || !password || !confirmPassword) {
       setErrorMsg('Vui lòng điền đầy đủ các thông tin.');
+      setShakeKey(k => k + 1);
       return;
     }
 
     if (!agreed) {
       setErrorMsg('Bạn phải đồng ý với điều khoản sử dụng để tiếp tục.');
+      setShakeKey(k => k + 1);
       return;
     }
 
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
     if (!passwordRegex.test(password)) {
       setErrorMsg('Mật khẩu phải dài hơn 6 ký tự và bao gồm cả chữ cái và số.');
+      setShakeKey(k => k + 1);
       return;
     }
 
     if (password !== confirmPassword) {
       setErrorMsg('Mật khẩu xác nhận không khớp!');
+      setShakeKey(k => k + 1);
       return;
     }
 
@@ -75,6 +71,7 @@ export default function RegisterScreen({ navigation }) {
     } catch (error) {
       const msg = error.response?.data?.message || error.response?.data?.Message || (typeof error.response?.data === 'string' ? error.response.data : null) || 'Lỗi kết nối server. Vui lòng kiểm tra backend.';
       setErrorMsg(msg);
+      setShakeKey(k => k + 1);
     } finally {
       setLoading(false);
     }
@@ -134,117 +131,34 @@ export default function RegisterScreen({ navigation }) {
             </Text>
 
             {/* Email Input */}
-            <View 
-              style={[
-                styles.inputWrapper,
-                emailHovered && styles.inputWrapperHovered,
-                emailFocused && styles.inputWrapperFocused
-              ]}
-              onMouseEnter={() => Platform.OS === 'web' && setEmailHovered(true)}
-              onMouseLeave={() => Platform.OS === 'web' && setEmailHovered(false)}
-            >
-              <Text style={[
-                styles.inputIcon,
-                (emailHovered || emailFocused) && styles.inputIconActive
-              ]}>✉</Text>
-              <TextInput
-                placeholder="Địa chỉ Email"
-                placeholderTextColor="#999"
-                value={email}
-                onChangeText={(val) => { setEmail(val); setErrorMsg(''); }}
-                style={styles.pillInput}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                onFocus={() => setEmailFocused(true)}
-                onBlur={() => setEmailFocused(false)}
-              />
-            </View>
+            <AnimatedInput
+              label="Địa chỉ Email"
+              icon="✉"
+              value={email}
+              onChangeText={(val) => { setEmail(val); setErrorMsg(''); }}
+              keyboardType="email-address"
+              shakeKey={shakeKey}
+            />
 
             {/* Password Input */}
-            <View 
-              style={[
-                styles.inputWrapper,
-                passwordHovered && styles.inputWrapperHovered,
-                passwordFocused && styles.inputWrapperFocused
-              ]}
-              onMouseEnter={() => Platform.OS === 'web' && setPasswordHovered(true)}
-              onMouseLeave={() => Platform.OS === 'web' && setPasswordHovered(false)}
-            >
-              <Text style={[
-                styles.inputIcon,
-                (passwordHovered || passwordFocused) && styles.inputIconActive
-              ]}>🔒</Text>
-              <TextInput
-                placeholder="Mật khẩu"
-                placeholderTextColor="#999"
-                value={password}
-                onChangeText={(val) => { setPassword(val); setErrorMsg(''); }}
-                secureTextEntry={!showPassword}
-                style={styles.pillInput}
-                autoCapitalize="none"
-                onFocus={() => setPasswordFocused(true)}
-                onBlur={() => setPasswordFocused(false)}
-              />
-              <Pressable
-                onPress={() => setShowPassword(!showPassword)}
-                style={({ pressed }) => [
-                  styles.eyeButton,
-                  { transform: [{ scale: pressed ? 0.9 : 1 }] }
-                ]}
-              >
-                {({ hovered }) => (
-                  <Text style={[
-                    styles.eyeText,
-                    (Platform.OS === 'web' && hovered) && { textDecorationLine: 'underline', color: '#c01b30' }
-                  ]}>
-                    {showPassword ? 'Ẩn' : 'Hiện'}
-                  </Text>
-                )}
-              </Pressable>
-            </View>
+            <AnimatedInput
+              label="Mật khẩu"
+              icon="🔒"
+              value={password}
+              onChangeText={(val) => { setPassword(val); setErrorMsg(''); }}
+              showToggle
+              shakeKey={shakeKey}
+            />
 
             {/* Confirm Password Input */}
-            <View 
-              style={[
-                styles.inputWrapper,
-                confirmPasswordHovered && styles.inputWrapperHovered,
-                confirmPasswordFocused && styles.inputWrapperFocused
-              ]}
-              onMouseEnter={() => Platform.OS === 'web' && setConfirmPasswordHovered(true)}
-              onMouseLeave={() => Platform.OS === 'web' && setConfirmPasswordHovered(false)}
-            >
-              <Text style={[
-                styles.inputIcon,
-                (confirmPasswordHovered || confirmPasswordFocused) && styles.inputIconActive
-              ]}>🔒</Text>
-              <TextInput
-                placeholder="Xác nhận mật khẩu"
-                placeholderTextColor="#999"
-                value={confirmPassword}
-                onChangeText={(val) => { setConfirmPassword(val); setErrorMsg(''); }}
-                secureTextEntry={!showConfirmPassword}
-                style={styles.pillInput}
-                autoCapitalize="none"
-                onFocus={() => setConfirmPasswordFocused(true)}
-                onBlur={() => setConfirmPasswordFocused(false)}
-              />
-              <Pressable
-                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                style={({ pressed }) => [
-                  styles.eyeButton,
-                  { transform: [{ scale: pressed ? 0.9 : 1 }] }
-                ]}
-              >
-                {({ hovered }) => (
-                  <Text style={[
-                    styles.eyeText,
-                    (Platform.OS === 'web' && hovered) && { textDecorationLine: 'underline', color: '#c01b30' }
-                  ]}>
-                    {showConfirmPassword ? 'Ẩn' : 'Hiện'}
-                  </Text>
-                )}
-              </Pressable>
-            </View>
+            <AnimatedInput
+              label="Xác nhận mật khẩu"
+              icon="🔒"
+              value={confirmPassword}
+              onChangeText={(val) => { setConfirmPassword(val); setErrorMsg(''); }}
+              showToggle
+              shakeKey={shakeKey}
+            />
 
             {/* Agree to Terms Checkbox */}
             <Pressable 
@@ -430,48 +344,7 @@ const styles = StyleSheet.create({
   },
   formTitle: { fontSize: 22, fontWeight: 'bold', color: '#111', marginBottom: 4 },
   formDesc: { fontSize: 13.5, color: '#666', marginBottom: 20, lineHeight: 18 },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#e8ecef',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 25,
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    height: 50,
-    ...Platform.select({
-      web: {
-        transitionProperty: 'all',
-        transitionDuration: '150ms'
-      }
-    })
-  },
-  inputIcon: { fontSize: 18, color: '#999', marginRight: 10, transitionProperty: 'color', transitionDuration: '150ms' },
-  inputIconActive: { color: '#e62e43' },
-  inputWrapperHovered: {
-    borderColor: 'rgba(230, 46, 67, 0.35)',
-    backgroundColor: '#fff'
-  },
-  inputWrapperFocused: {
-    borderColor: '#e62e43',
-    backgroundColor: '#fff',
-    shadowColor: '#e62e43',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 1
-  },
-  pillInput: {
-    flex: 1,
-    fontSize: 15,
-    color: '#333',
-    fontWeight: '600',
-    height: '100%',
-    outlineStyle: 'none'
-  },
-  eyeButton: { padding: 4 },
-  eyeText: { color: '#e62e43', fontSize: 13, fontWeight: 'bold' },
+  // inputWrapper, pillInput, eyeButton đã chuyển sang AnimatedInput component
   checkboxContainer: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 12, marginBottom: 16 },
   checkbox: { width: 20, height: 20, borderWidth: 1.5, borderColor: '#ccc', borderRadius: 6, marginRight: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', transitionProperty: 'border-color', transitionDuration: '150ms' },
   checkboxChecked: { backgroundColor: '#e62e43', borderColor: '#e62e43' },
