@@ -114,8 +114,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 Email = req.Email,
                 MatKhau = BCrypt.Net.BCrypt.HashPassword(string.IsNullOrEmpty(req.MatKhau) ? "123456" : req.MatKhau),
                 MaVaiTro = req.MaVaiTro,
-                TrangThai = true,
-                NgayTao = DateTime.Now
+                TrangThai = true
             };
 
             var newNv = new NhanVien
