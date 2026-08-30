@@ -1,6 +1,6 @@
 // App.js
 import React from 'react';
-import { Text, StyleSheet, Platform } from 'react-native';
+import { Text, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -16,7 +16,12 @@ import HomeScreen from './src/screens/HomeScreen';
 import CampaignScreen from './src/screens/CampaignScreen';
 import RegisterDonateScreen from './src/screens/RegisterDonateScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+
+// Import các màn hình chi tiết & phụ
 import UpdateProfileScreen from './src/screens/UpdateProfileScreen';
+import DonationHistoryScreen from './src/screens/DonationHistoryScreen';
+import NewsDetailScreen from './src/screens/NewsDetailScreen';
+import CampaignDetailScreen from './src/screens/CampaignDetailScreen';
 
 // ─── 1. TẠO BOTTOM TAB NAVIGATOR ────────────────────────
 const Tab = createBottomTabNavigator();
@@ -113,6 +118,15 @@ export default function App() {
 
         {/* Màn hình Cập nhật Hồ sơ cá nhân */}
         <Stack.Screen name="UpdateProfile" component={UpdateProfileScreen} />
+
+        {/* Màn hình Lịch sử Hiến máu & Giấy chứng nhận */}
+        <Stack.Screen name="DonationHistory" component={DonationHistoryScreen} />
+
+        {/* Màn hình Chi tiết Tin tức */}
+        <Stack.Screen name="NewsDetail" component={NewsDetailScreen} />
+
+        {/* Màn hình Chi tiết Chiến dịch */}
+        <Stack.Screen name="CampaignDetail" component={CampaignDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
