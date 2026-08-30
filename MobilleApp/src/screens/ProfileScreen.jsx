@@ -110,7 +110,18 @@ export default function ProfileScreen({ navigation }) {
         {/* Danh sách thông tin cá nhân */}
         {profile ? (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Thông tin cá nhân</Text>
+            <View style={styles.cardHeaderRow}>
+              <Text style={styles.cardTitle}>Thông tin cá nhân</Text>
+              <Pressable
+                onPress={() => navigation.navigate("UpdateProfile")}
+                style={({ pressed }) => [
+                  styles.editBtn,
+                  pressed && { opacity: 0.7 },
+                ]}
+              >
+                <Text style={styles.editBtnText}>✏️ Chỉnh sửa</Text>
+              </Pressable>
+            </View>
             {infoRows.map((row, i) => (
               <View
                 key={i}
@@ -135,6 +146,15 @@ export default function ProfileScreen({ navigation }) {
               Tài khoản chưa có thông tin hồ sơ. Bạn hãy cập nhật thông tin để
               bắt đầu đăng ký hiến máu nhé!
             </Text>
+            <Pressable
+              onPress={() => navigation.navigate("UpdateProfile")}
+              style={({ pressed }) => [
+                styles.createProfileBtn,
+                pressed && { opacity: 0.85 },
+              ]}
+            >
+              <Text style={styles.createProfileBtnText}>+ Cập nhật thông tin ngay</Text>
+            </Pressable>
           </View>
         )}
 
@@ -204,12 +224,32 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
+  cardHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14,
+  },
   cardTitle: {
     fontSize: 16,
     fontWeight: "800",
     color: "#1a1a2e",
-    marginBottom: 14,
   },
+  editBtn: {
+    backgroundColor: "#ffeef0",
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  editBtnText: { fontSize: 12, fontWeight: "700", color: "#e62e43" },
+  createProfileBtn: {
+    backgroundColor: "#e62e43",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginTop: 16,
+  },
+  createProfileBtnText: { color: "#fff", fontSize: 13, fontWeight: "800" },
   row: { flexDirection: "row", alignItems: "center", paddingVertical: 12 },
   rowBorder: { borderBottomWidth: 1, borderBottomColor: "#f5f5f5" },
   rowIcon: { fontSize: 18, marginRight: 12, width: 28, textAlign: "center" },
