@@ -16,5 +16,7 @@ namespace HienMauNhanDao_DaNang.Services.Interfaces
         Task LogoutAsync(string token);
         // Kiểm tra Email tồn tại
         Task<bool> CheckEmailExistAsync(string email);
+        // Đặt lại mật khẩu mới
+        Task ResetPasswordAsync(string email, string newPassword);
     }
 }

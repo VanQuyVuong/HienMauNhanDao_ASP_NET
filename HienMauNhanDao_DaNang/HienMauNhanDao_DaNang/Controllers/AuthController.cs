@@ -205,6 +205,102 @@ namespace HienMauNhanDao_DaNang.Controllers
                 return StatusCode(500, ApiResponse<object>.Fail(ex.Message));
             }
         }
+
+        //DTO CHỨA DỮ LIỆU ĐẶT LẠI MẬT KHẨU
+        public class ResetPasswordRequest
+        {
+            public string Email { get; set; } = string.Empty;
+            public string Otp { get; set; } = string.Empty;
+            public string NewPassword { get; set; } = string.Empty;
+            public string ConfirmNewPassword { get; set; } = string.Empty;
+        }
+
+        //API YÊU CẦU GỬI OTP KHI QUÊN MẬT KHẨU
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] OtpRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.Email))
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Bắt buộc nhập Email"));
+                }
+
+                // Kiểm tra email đã đăng ký chưa
+                var emailExist = await _taiKhoanService.CheckEmailExistAsync(request.Email);
+                if (!emailExist)
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Email này chưa được đăng ký tài khoản"));
+                }
+
+                // Tạo mã OTP, in ra Console và gửi mail
+                string otp;
+                try
+                {
+                    otp = _otpService.GenerateOtp(request.Email);
+                }
+                catch (InvalidOperationException ex) when (ex.Message == "COOLDOWN")
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Vui lòng đợi 60 giây trước khi yêu cầu lại mã OTP để tránh Spam."));
+                }
+
+                try
+                {
+                    await _emailQueue.QueueEmailAsync(request.Email, otp);
+                }
+                catch (Exception emailEx)
+                {
+                    Console.WriteLine($"[WARNING QUEUE]: Không thể đẩy email tới hàng đợi {request.Email} - {emailEx.Message}");
+                }
+
+                Console.WriteLine($"\n========================================================");
+                Console.WriteLine($"🔑 [MÃ OTP QUÊN MẬT KHẨU DÀNH CHO {request.Email}]: {otp}");
+                Console.WriteLine($"========================================================\n");
+
+                return Ok(ApiResponse<object>.Ok(new { otp = otp }, $"Gửi OTP quên mật khẩu thành công! Mã OTP test trên Scalar: {otp}"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        //API ĐẶT LẠI MẬT KHẨU MỚI
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Otp) || string.IsNullOrEmpty(request.NewPassword))
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Vui lòng nhập đầy đủ Email, OTP và mật khẩu mới"));
+                }
+
+                if (request.NewPassword != request.ConfirmNewPassword)
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Mật khẩu xác nhận không khớp"));
+                }
+
+                // Xác thực mã OTP
+                var isValid = _otpService.ValidateOtp(request.Email, request.Otp);
+                if (!isValid)
+                {
+                    return BadRequest(ApiResponse<object>.Fail("Mã OTP không hợp lệ hoặc đã hết hạn"));
+                }
+
+                // Cập nhật mật khẩu mới
+                await _taiKhoanService.ResetPasswordAsync(request.Email, request.NewPassword);
+
+                // Xoá trạng thái OTP sau khi đổi mật khẩu thành công
+                _otpService.ClearVerification(request.Email);
+
+                return Ok(ApiResponse<object>.Ok("Đặt lại mật khẩu thành công"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.Fail(ex.Message));
+            }
+        }
     }
 }
 

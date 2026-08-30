@@ -32,7 +32,7 @@
                                     <Condition Property="IsMouseOver" Value="True"/>
                                     <Condition Property="Tag" Value="Active"/>
                                 </MultiTrigger.Conditions>
-                                <Setter TargetName="border" Property="Background" Value="#dc2626"/>
+                                <Setter TargetName="border" Property="Background" Value="#be123c"/>
                                 <Setter Property="Foreground" Value="White"/>
                             </MultiTrigger>
                             <MultiTrigger>
@@ -40,8 +40,8 @@
                                     <Condition Property="IsMouseOver" Value="True"/>
                                     <Condition Property="Tag" Value="Inactive"/>
                                 </MultiTrigger.Conditions>
-                                <Setter TargetName="border" Property="Background" Value="#1e293b"/>
-                                <Setter Property="Foreground" Value="#f8fafc"/>
+                                <Setter TargetName="border" Property="Background" Value="#fff1f2"/>
+                                <Setter Property="Foreground" Value="#e11d48"/>
                             </MultiTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

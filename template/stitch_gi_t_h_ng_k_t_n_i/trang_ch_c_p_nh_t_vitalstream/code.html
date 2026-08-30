@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VitalStream - Trang chủ</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#f3f4f5",
+                        "surface-container": "#edeeef",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#fffbff",
+                        "background": "#f8f9fa",
+                        "on-primary-fixed-variant": "#92001c",
+                        "on-secondary-fixed": "#2b141f",
+                        "primary": "#b7102a",
+                        "on-tertiary-fixed": "#001b3c",
+                        "secondary": "#745662",
+                        "on-tertiary-fixed-variant": "#30476a",
+                        "surface-variant": "#e1e3e4",
+                        "on-secondary-fixed-variant": "#5b3f4b",
+                        "on-surface": "#191c1d",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#ffb3b1",
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#bb152c",
+                        "secondary-container": "#fdd5e4",
+                        "surface-dim": "#d9dadb",
+                        "outline": "#8f6f6e",
+                        "surface": "#f8f9fa",
+                        "on-secondary-container": "#795a67",
+                        "tertiary-fixed-dim": "#b0c7f1",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#5b403f",
+                        "on-background": "#191c1d",
+                        "surface-container-high": "#e7e8e9",
+                        "tertiary": "#465d81",
+                        "tertiary-container": "#5f759b",
+                        "surface-bright": "#f8f9fa",
+                        "tertiary-fixed": "#d5e3ff",
+                        "secondary-fixed-dim": "#e3bccb",
+                        "primary-fixed": "#ffdad8",
+                        "outline-variant": "#e4bebc",
+                        "secondary-fixed": "#ffd8e7",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#ffb3b1",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "on-primary-fixed": "#410007",
+                        "on-tertiary-container": "#fefcff",
+                        "primary-container": "#db313f",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#f0f1f2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "gutter-mobile": "12px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; color: #191c1d; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background pb-32">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-50 bg-surface border-b border-surface-container flex justify-between items-center px-margin-mobile py-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[24px]">water_drop</span>
+<span class="font-headline-md text-primary">VitalStream</span>
+</div>
+<button class="p-2 rounded-full hover:bg-surface-container-low active:scale-95 transition-transform duration-100">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+</header>
+<!-- Emergency Alert Bar -->
+<div class="w-full bg-error text-on-error px-margin-mobile py-2 flex items-center justify-between z-40 relative shadow-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">campaign</span>
+<span class="font-label-md">2 Chiến dịch khẩn cấp đang diễn ra!</span>
+</div>
+<a class="font-label-md underline hover:opacity-80 transition-opacity" href="#">Xem chi tiết</a>
+</div>
+<main class="px-margin-mobile pt-lg space-y-xl">
+<!-- Emergency Banner -->
+<section class="bg-primary rounded-xl p-md text-on-primary shadow-sm relative overflow-hidden">
+<div class="absolute -right-4 -top-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]">water_drop</span>
+</div>
+<div class="relative z-10 flex flex-col gap-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined bg-on-primary text-primary rounded-full p-1" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-label-lg uppercase tracking-wider">Khẩn cấp</span>
+</div>
+<h2 class="font-headline-lg">Thiếu hụt nhóm máu O</h2>
+<p class="font-body-md opacity-90">Bệnh viện Chợ Rẫy đang rất cần nhóm máu O. Đóng góp của bạn có thể cứu sống nhiều người ngay lúc này.</p>
+<button class="mt-2 bg-on-primary text-primary font-label-lg py-2 px-4 rounded-lg self-start hover:bg-surface-container-low transition-colors">
+                    Hiến máu ngay
+                </button>
+</div>
+</section>
+<!-- Quick Stats Bento -->
+<section class="grid grid-cols-2 gap-3">
+<div class="bg-surface-container-lowest border border-surface-container rounded-xl p-4 flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="font-headline-md text-on-surface">3</span>
+<span class="font-caption text-on-surface-variant text-center">Lần hiến máu</span>
+</div>
+<div class="bg-secondary-container rounded-xl p-4 flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-on-secondary-container text-3xl">local_hospital</span>
+<span class="font-headline-md text-on-secondary-container">O+</span>
+<span class="font-caption text-on-secondary-container text-center">Nhóm máu</span>
+</div>
+</section>
+<!-- News & Articles -->
+<section>
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-headline-md text-on-surface">Tin tức &amp; Sức khỏe</h3>
+<span class="font-label-md text-primary cursor-pointer hover:underline">Xem thêm</span>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 snap-x">
+<div class="min-w-[240px] flex-shrink-0 bg-surface-container-lowest border border-surface-container rounded-xl overflow-hidden snap-start">
+<img class="w-full h-32 object-cover" data-alt="A bright, modern medical facility interior. Soft morning light streams through large windows, illuminating a pristine white and light grey setting. A nurse in professional scrubs is gently interacting with a patient. The aesthetic is clean, trusting, and healthcare-focused, with subtle warm red accents in the signage." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzne8gNhZEx6bwpdoTBcGRWrBHr_aNyvXkgB7UzRVpeOto0FH8JGQrzNq7SwoI8y5d3qJuGT61Pm8ZkQNAq89pKXIkt1eTZlt1QEvrZgSUtSLMPo6hG4or4Aok_mRLuPdqBUferskhmCMRjzT9AzSteoXTdHcYijWOQ5NPRLe25cbgVhwuh34nzp5U7Ds37gEH4R9znh9GGcMC6IwqYmBPm1iM_o2bk1eB_e5Oxw-aTH8iR_xw_qFTCQ"/>
+<div class="p-4">
+<span class="inline-block bg-secondary-container text-on-secondary-container font-caption px-2 py-1 rounded-full mb-2">Kiến thức</span>
+<h4 class="font-label-lg mb-1 line-clamp-2">Những điều cần biết trước khi hiến máu lần đầu</h4>
+<p class="font-caption text-on-surface-variant line-clamp-2">Chuẩn bị tâm lý và sức khỏe để quá trình hiến máu diễn ra thuận lợi nhất.</p>
+</div>
+</div>
+<div class="min-w-[240px] flex-shrink-0 bg-surface-container-lowest border border-surface-container rounded-xl overflow-hidden snap-start">
+<img class="w-full h-32 object-cover" data-alt="A close-up shot of a stylized, modern blood donation bag resting on a clean metallic medical tray. The blood is a vibrant, healthy red. The background is slightly blurred, showing a high-tech, bright healthcare environment. The lighting is crisp and professional, emphasizing safety and clinical precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfZbfwDHLwRGpC8HtjKj9ARITapoBoYyi34YyEbL6nRZ0T1RSobfQPawx8-83ljbMQONG7-B_vcxSfcS6Pzw1deoydFsMp_VQYf4aP34DmUxB6v3qOxzQqoVzMV4-UsPr32uFnThyUwP0PjKI1m0csIKZbSvzhPl1BuejuKOU63oE3dDl_v8_hpONN6-LavUtx8FPr6OOiPP02_n-8_OXi2eoSPaNLxjswqalLpdWyBP0Fyy1qKxP5DA"/>
+<div class="p-4">
+<span class="inline-block bg-secondary-container text-on-secondary-container font-caption px-2 py-1 rounded-full mb-2">Sự kiện</span>
+<h4 class="font-label-lg mb-1 line-clamp-2">Lễ hội Xuân Hồng 2024 dự kiến thu về 10,000 đơn vị</h4>
+<p class="font-caption text-on-surface-variant line-clamp-2">Sự kiện hiến máu lớn nhất năm đã chính thức khởi động tại Hà Nội và TP.HCM.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Volunteer Stories -->
+<section>
+<h3 class="font-headline-md text-on-surface mb-md">Câu chuyện tình nguyện viên</h3>
+<div class="bg-surface-container-lowest border border-surface-container rounded-xl p-md flex flex-col gap-4">
+<div class="flex gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-surface-container">
+<img class="w-full h-full object-cover" data-alt="A portrait of a young Vietnamese woman smiling warmly. She is wearing a simple white t-shirt with a small red heart pin. The background is a bright, soft-focus outdoor park setting with natural sunlight. The image conveys empathy, health, and a positive community spirit." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHwq_QgBfZ6-YQrl-NvcQzbgpKFS1s7QlUN_91uPHixlBJhckzXViDmClPKaPW_7pPIqrlzNyN1FB8Fcs9RNKKup1V02tWPJm4QkMiOv9qrQarSPJjunPaRuU--AyMmEgsJDWWgfr1AyOzEvw2jzwrBcmaLj-ebJTHOV9l2NcZQ5wRr6tIetpn-DaZmSnWOYOQkvDty509qwMLqDCFS_Yq6VD623_rXE8YMtWSzamr35q17k9qrnWMFg"/>
+</div>
+<div>
+<h4 class="font-label-lg text-on-surface">Nguyễn Thu Hà</h4>
+<span class="font-caption text-on-surface-variant">Đã hiến máu 12 lần</span>
+<p class="font-body-md text-on-surface mt-2 italic">"Mỗi lần hiến máu, tôi cảm thấy mình đang góp một phần nhỏ bé để mang lại hy vọng cho ai đó. Không đau, chỉ thấy vui thôi!"</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter-mobile pb-safe bg-surface border-t border-surface-container pt-2 pb-4">
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-md py-xs active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-md mt-1">Trang chủ</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high rounded-full active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">info</span>
+<span class="font-label-md mt-1">Giới thiệu</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high rounded-full active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">campaign</span>
+<span class="font-label-md mt-1">Sự kiện</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high rounded-full active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md mt-1">Hồ sơ</span>
+</a>
+</nav>
+</body></html>

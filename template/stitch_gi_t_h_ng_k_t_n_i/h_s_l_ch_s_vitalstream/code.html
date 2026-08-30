@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hồ sơ &amp; Lịch sử hiến máu - VitalStream</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-low": "#f3f4f5",
+                      "surface-container": "#edeeef",
+                      "on-secondary": "#ffffff",
+                      "on-primary-container": "#fffbff",
+                      "background": "#f8f9fa",
+                      "on-primary-fixed-variant": "#92001c",
+                      "on-secondary-fixed": "#2b141f",
+                      "primary": "#b7102a",
+                      "on-tertiary-fixed": "#001b3c",
+                      "secondary": "#745662",
+                      "on-tertiary-fixed-variant": "#30476a",
+                      "surface-variant": "#e1e3e4",
+                      "on-secondary-fixed-variant": "#5b3f4b",
+                      "on-surface": "#191c1d",
+                      "on-primary": "#ffffff",
+                      "primary-fixed-dim": "#ffb3b1",
+                      "on-tertiary": "#ffffff",
+                      "surface-tint": "#bb152c",
+                      "secondary-container": "#fdd5e4",
+                      "surface-dim": "#d9dadb",
+                      "outline": "#8f6f6e",
+                      "surface": "#f8f9fa",
+                      "on-secondary-container": "#795a67",
+                      "tertiary-fixed-dim": "#b0c7f1",
+                      "surface-container-lowest": "#ffffff",
+                      "on-surface-variant": "#5b403f",
+                      "on-background": "#191c1d",
+                      "surface-container-high": "#e7e8e9",
+                      "tertiary": "#465d81",
+                      "tertiary-container": "#5f759b",
+                      "surface-bright": "#f8f9fa",
+                      "tertiary-fixed": "#d5e3ff",
+                      "secondary-fixed-dim": "#e3bccb",
+                      "primary-fixed": "#ffdad8",
+                      "outline-variant": "#e4bebc",
+                      "secondary-fixed": "#ffd8e7",
+                      "surface-container-highest": "#e1e3e4",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#ffb3b1",
+                      "on-error": "#ffffff",
+                      "inverse-surface": "#2e3132",
+                      "on-primary-fixed": "#410007",
+                      "on-tertiary-container": "#fefcff",
+                      "primary-container": "#db313f",
+                      "error": "#ba1a1a",
+                      "error-container": "#ffdad6",
+                      "inverse-on-surface": "#f0f1f2"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "md": "16px",
+                      "xs": "4px",
+                      "gutter-mobile": "12px",
+                      "sm": "8px",
+                      "lg": "24px",
+                      "xl": "32px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "label-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-lg": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "caption": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md pb-24">
+<!-- Top App Bar (Mobile Nav Alternative) - Suppressed for canvas space on this detailed screen, but included structurally -->
+<header class="w-full top-0 sticky bg-surface dark:bg-on-surface border-b border-surface-container flex justify-between items-center px-margin-mobile py-sm z-40">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+<span class="font-display-lg text-display-lg-mobile text-primary dark:text-primary-fixed-dim font-bold tracking-tight">VitalStream</span>
+</div>
+<button class="p-2 hover:bg-surface-container-low dark:hover:bg-surface-variant/10 rounded-full active:scale-95 transition-transform duration-100">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">notifications</span>
+</button>
+</header>
+<main class="max-w-screen-md mx-auto px-margin-mobile pt-lg space-y-xl">
+<!-- Header Section: User Info -->
+<section class="flex flex-col items-center justify-center space-y-4">
+<div class="relative w-32 h-32">
+<img class="w-full h-full object-cover rounded-full border-4 border-surface shadow-sm" data-alt="A professional, well-lit studio portrait of a young Vietnamese woman smiling warmly. The background is a soft, pure white clinical setting. The lighting is high-key and flattering, emphasizing a healthy, trustworthy appearance fitting for a healthcare app profile picture. Blood red accents are subtly visible in her clothing." src="https://lh3.googleusercontent.com/aida-public/AB6AXuApWSwhv8vaSC29Am4--AcIq4w_Ccysuggq4xdTPfP5rrhutY4UmgE4OJRtqYFSdXhWXCQBU8wWZItUtDH6A53dGyj-6cXmsbGa0py6lJ6ydUc8OoozBSNq1T6hSGRO47rTKDD7_nX97-QpML0lBOnzs9LLTsm-DjlY0JPzSHRcbI9OE3_a17Mx4YGWRlYR_dFzs-_dE-IdAbAJPsjRHojDatMhsUBJH8IRQTVf059dMUqV4KVXAnV_Iw"/>
+<button class="absolute bottom-0 right-0 bg-primary text-on-primary p-2 rounded-full shadow-md active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+</div>
+<div class="text-center">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Nguyễn Thị Mai</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Thành viên thân thiết</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-secondary-container text-primary font-label-lg text-label-lg px-4 py-2 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">bloodtype</span>
+                    Nhóm máu: O+
+                </div>
+<div class="bg-surface-container text-on-surface-variant font-label-lg text-label-lg px-4 py-2 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">award_star</span>
+                    12 Lần hiến
+                </div>
+</div>
+</section>
+<!-- Electronic Certificates -->
+<section class="space-y-4">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">verified</span>
+                Chứng nhận điện tử
+            </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Certificate Card -->
+<div class="bg-surface border border-surface-container rounded-[16px] p-6 relative overflow-hidden flex flex-col md:flex-row items-center gap-6 shadow-sm">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10"></div>
+<div class="flex-1 space-y-2 text-center md:text-left">
+<div class="text-primary font-label-md text-label-md uppercase tracking-wider">Chứng nhận hiến máu tình nguyện</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Bệnh viện Huyết học Truyền máu Trung ương</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Cấp ngày: 15/10/2023</p>
+</div>
+<div class="w-24 h-24 bg-white p-2 rounded-lg border border-surface-container shrink-0 flex items-center justify-center">
+<img class="w-full h-full object-contain" data-alt="A clean, high-contrast, black and white QR code on a pure white background. The QR code is sharp and perfectly square, representing a digital certificate for blood donation in a modern healthcare application interface. No borders or extra elements." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk0jLp_Alo91fMtQlqZ0nEg5f_fYwDpNCWmE3kcneftwz_Y5p6A02ajR4nqIsqjrKgrhHsH4v_eWjI0yPEq-38_HWAjy-i0kQG37VkSk5pWoTVKJxG0IVFWeUt4aa0LdKxjG5c-Ti9j8sdjyicXq_Bty_ZfgZ3M-23UCbHKsFvLG9MWlBTprKRjv8Eg_Nz_OZ3Io_7qLue58qbSkgTwRjLFy0x7OkAn0QzGM4KVFhgWmmS6mPVFNLYJw"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Donation History -->
+<section class="space-y-4">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">history</span>
+                Lịch sử hiến máu
+            </h2>
+<div class="relative border-l-2 border-surface-container ml-3 space-y-8 pb-4">
+<!-- History Item 1 -->
+<div class="relative pl-8">
+<div class="absolute -left-[11px] top-1 w-5 h-5 bg-primary rounded-full border-4 border-background"></div>
+<div class="bg-surface border border-surface-container rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-label-lg text-label-lg text-on-surface">Bệnh viện Huyết học</h4>
+<span class="font-label-md text-label-md text-on-surface-variant bg-surface-container px-2 py-1 rounded-md">15/10/2023</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">350ml - Hiến máu toàn phần</p>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mt-2 text-sm">
+<span class="material-symbols-outlined text-sm">location_on</span>
+                            Viện Huyết học, Hà Nội
+                        </p>
+</div>
+</div>
+<!-- History Item 2 -->
+<div class="relative pl-8">
+<div class="absolute -left-[11px] top-1 w-5 h-5 bg-surface-container-high rounded-full border-4 border-background"></div>
+<div class="bg-surface border border-surface-container rounded-lg p-4 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-label-lg text-label-lg text-on-surface">Điểm hiến máu Chữ Thập Đỏ</h4>
+<span class="font-label-md text-label-md text-on-surface-variant bg-surface-container px-2 py-1 rounded-md">20/04/2023</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">350ml - Hiến máu toàn phần</p>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mt-2 text-sm">
+<span class="material-symbols-outlined text-sm">location_on</span>
+                            Nhà văn hóa Quận, Hà Nội
+                        </p>
+</div>
+</div>
+</div>
+<button class="w-full py-3 border border-outline-variant text-primary font-label-lg rounded-lg hover:bg-surface-container-low transition-colors">
+                Xem tất cả lịch sử
+            </button>
+</section>
+<!-- Settings & Updates -->
+<section class="space-y-4">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">settings</span>
+                Cài đặt &amp; Hồ sơ
+            </h2>
+<div class="bg-surface border border-surface-container rounded-lg divide-y divide-surface-container">
+<a class="flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+<span class="font-body-lg text-body-lg text-on-surface">Cập nhật thông tin cá nhân</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</a>
+<a class="flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<span class="font-body-lg text-body-lg text-on-surface">Cài đặt thông báo</span>
+</div>
+<div class="w-10 h-6 bg-primary rounded-full relative">
+<div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+</div>
+</a>
+<a class="flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">security</span>
+<span class="font-body-lg text-body-lg text-on-surface">Quyền riêng tư &amp; Bảo mật</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</a>
+</div>
+<button class="w-full py-4 text-error font-label-lg rounded-lg hover:bg-error-container/20 transition-colors mt-4">
+                Đăng xuất
+            </button>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter-mobile pb-safe bg-surface dark:bg-on-surface border-t border-surface-container h-20 md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined">info</span>
+<span class="font-label-md text-label-md mt-1">About</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined">campaign</span>
+<span class="font-label-md text-label-md mt-1">Events</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary-fixed-dim text-on-secondary-container dark:text-on-secondary-fixed rounded-full px-md py-xs active:scale-90 transition-all duration-200 min-w-16" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-md text-label-md mt-1 font-semibold">Profile</span>
+</a>
+</nav>
+</body></html>

@@ -73,7 +73,7 @@ namespace HienMauNhanDao_DaNang.Controllers
             // Nếu CSDL chưa có đủ 8 kho nhóm máu cho Bệnh viện, tự động khởi tạo dữ liệu chuẩn
             if (!danhSachKhoMau.Any())
             {
-                var allEnums = Enum.GetValues<NhomMauEnum>();
+                var allEnums = Enum.GetValues<NhomMau>();
                 foreach (var nm in allEnums)
                 {
                     string nmStr = nm.ToString().Replace("_positive", "+").Replace("_negative", "-");
@@ -87,9 +87,9 @@ namespace HienMauNhanDao_DaNang.Controllers
                     var newKho = new KhoMau
                     {
                         MaKho = newMa,
-                        TenKho = $"Kho Máu {nmStr} {tenBenhVien}",
+                        TenKho = $"Kho máu {nmStr} {tenBenhVien}",
                         SoLuongTon = countReal > 0 ? countReal : 15,
-                        NguongAnToan = 50,
+                        NguongAnToan = 10,
                         MoTa = $"Kho chứa nhóm máu {nmStr} tại {tenBenhVien}",
                         MaKhoa = maKhoa,
                         NhomMau = nm
@@ -106,8 +106,8 @@ namespace HienMauNhanDao_DaNang.Controllers
                 tenKho = kho.TenKho,
                 nhomMauString = kho.NhomMau != null ? kho.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ",
                 soLuongTon = kho.SoLuongTon ?? 0,
-                nguongAnToan = kho.NguongAnToan ?? 50,
-                tinhTrang = (kho.SoLuongTon ?? 0) <= (kho.NguongAnToan ?? 50) ? "CanKiet" : "AnToan",
+                nguongAnToan = kho.NguongAnToan ?? 10,
+                tinhTrang = (kho.SoLuongTon ?? 0) < (kho.NguongAnToan ?? 10) ? "CanKiet" : "AnToan",
                 maKhoa = kho.MaKhoa
             });
 
@@ -320,7 +320,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                     MaKho = newMaKho,
                     TenKho = $"Kho Máu {nhomMauString} {tenBenhVien}",
                     SoLuongTon = 1,
-                    NguongAnToan = 20,
+                    NguongAnToan = 10,
                     MoTa = $"Kho máu lưu trữ tại {tenBenhVien}",
                     MaKhoa = maKhoa,
                     NhomMau = nhomMau
