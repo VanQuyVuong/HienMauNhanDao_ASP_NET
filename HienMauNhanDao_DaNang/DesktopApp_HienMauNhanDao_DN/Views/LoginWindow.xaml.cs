@@ -75,21 +75,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                             dashboard.Show();
                         }
                         
-<<<<<<< Updated upstream
-=======
-                        string role = (result.Data.Role ?? "").Trim();
-                        if (role == "BS")
-                        {
-                            var bacSiDashboard = new DesktopApp_HienMauNhanDao_DN.Views.BacSi.BacSiDashboard();
-                            bacSiDashboard.Show();
-                        }
-                        else
-                        {
-                            var dashboard = new NVYTDashboard();
-                            dashboard.Show();
-                        }
-                        
->>>>>>> Stashed changes
+
                         this.Close();
                     }
                     else

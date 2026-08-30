@@ -19,7 +19,6 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
         {
             string role = (ApiClient.Instance.Role ?? "").Trim().ToUpper();
 
-<<<<<<< Updated upstream
             // Hide all menu buttons first
             if (btnDonDangKy != null) btnDonDangKy.Visibility = Visibility.Collapsed;
             if (btnTinhNguyenVien != null) btnTinhNguyenVien.Visibility = Visibility.Collapsed;
@@ -34,32 +33,15 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 // Role NVYT_XN / NVYT-XN: Show strictly 2 Lab & Blood Collection Menu Items
                 if (btnThuNhanMau != null) btnThuNhanMau.Visibility = Visibility.Visible;
                 if (btnCapNhatXetNghiem != null) btnCapNhatXetNghiem.Visibility = Visibility.Visible;
-
-=======
-            if (role.Contains("XN"))
-            {
-                if (btnThuNhanMau != null) btnThuNhanMau.Visibility = Visibility.Visible;
-                if (btnCapNhatXetNghiem != null) btnCapNhatXetNghiem.Visibility = Visibility.Visible;
-                
->>>>>>> Stashed changes
                 MainFrame?.Navigate(new ThuNhanMauPage());
                 SetActiveButton(btnThuNhanMau);
             }
             else
             {
-<<<<<<< Updated upstream
                 // Role NVYT_LT / NVYT-LT / General NVYT: Show strictly 3 Le Tan Reception Menu Items
                 if (btnDonDangKy != null) btnDonDangKy.Visibility = Visibility.Visible;
                 if (btnTinhNguyenVien != null) btnTinhNguyenVien.Visibility = Visibility.Visible;
                 if (btnKhaiBaoYTe != null) btnKhaiBaoYTe.Visibility = Visibility.Visible;
-
-=======
-                // Default / Lễ tân / General NVYT
-                if (btnDonDangKy != null) btnDonDangKy.Visibility = Visibility.Visible;
-                if (btnTinhNguyenVien != null) btnTinhNguyenVien.Visibility = Visibility.Visible;
-                if (btnKhaiBaoYTe != null) btnKhaiBaoYTe.Visibility = Visibility.Visible;
-                
->>>>>>> Stashed changes
                 MainFrame?.Navigate(new DonDangKyPage());
                 SetActiveButton(btnDonDangKy);
             }
