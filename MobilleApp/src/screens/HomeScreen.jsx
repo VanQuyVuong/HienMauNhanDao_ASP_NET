@@ -64,6 +64,13 @@ export default function HomeScreen({ navigation }) {
   const activeCampaigns = campaigns.filter((c) => c.trangThai === "DangDienRa");
   const displayName = profile?.hoTen || email?.split("@")[0] || "bạn";
 
+  // Lọc chiến dịch khẩn cấp đang cần máu
+  const urgentCampaigns = campaigns.filter(
+    (c) =>
+      c.mucDoUuTien === "KhanCap" &&
+      (c.trangThai === "DangDienRa" || c.trangThai === "ChuaBatDau"),
+  );
+
   // Màn hình chờ khi đang nạp dữ liệu từ Backend
   if (loading) {
     return (
@@ -129,11 +136,52 @@ export default function HomeScreen({ navigation }) {
             </View>
           </View>
         </LinearGradient>
+        {/* ── BANNER KHẨN CẤP ─────────────────────────────── */}
+        {urgentCampaigns.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.urgentBanner}>
+              <View style={styles.urgentHeader}>
+                <Text style={styles.urgentIcon}>⚡</Text>
+                <Text style={styles.urgentTitle}>KHẨN CẤP</Text>
+                <View style={styles.urgentBadge}>
+                  <Text style={styles.urgentBadgeText}>
+                    {urgentCampaigns.length} chiến dịch
+                  </Text>
+                </View>
+              </View>
+
+              <Text style={styles.urgentCampName}>
+                {urgentCampaigns[0].tenChienDich}
+              </Text>
+
+              <Text style={styles.urgentDesc}>
+                📍 {urgentCampaigns[0].diaDiem?.tenDiaDiem || "TP. Đà Nẵng"}
+              </Text>
+
+              {urgentCampaigns[0].nhomMauCanKhapCap && (
+                <Text style={styles.urgentBloodType}>
+                  🩸 Cần gấp nhóm máu: {urgentCampaigns[0].nhomMauCanKhapCap}
+                </Text>
+              )}
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.urgentBtn,
+                  pressed && { opacity: 0.85 },
+                ]}
+                onPress={() => navigation.navigate("DangKyHienMau")}
+              >
+                <Text style={styles.urgentBtnText}>
+                  Đăng ký hiến máu ngay →
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#f8f9fa" },
   scrollContent: { paddingBottom: 16 },
@@ -200,4 +248,60 @@ const styles = StyleSheet.create({
     marginTop: 2,
     lineHeight: 13,
   },
+
+  // Section chung
+  section: { marginTop: 20, paddingHorizontal: 16 },
+
+  // Style cho Banner Khẩn cấp
+  urgentBanner: {
+    backgroundColor: "#e62e43",
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: "#e62e43",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  urgentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+    gap: 8,
+  },
+  urgentIcon: { fontSize: 18 },
+  urgentTitle: {
+    fontSize: 14,
+    fontWeight: "900",
+    color: "#fff",
+    letterSpacing: 1,
+  },
+  urgentBadge: {
+    backgroundColor: "rgba(255,255,255,0.25)",
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  urgentBadgeText: { color: "#fff", fontSize: 11, fontWeight: "700" },
+  urgentCampName: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  urgentDesc: { fontSize: 13, color: "rgba(255,255,255,0.9)", marginBottom: 6 },
+  urgentBloodType: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#fff",
+    marginBottom: 14,
+  },
+  urgentBtn: {
+    backgroundColor: "#fff",
+    borderRadius: 25,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignSelf: "flex-start",
+  },
+  urgentBtnText: { color: "#e62e43", fontWeight: "900", fontSize: 13 },
 });
