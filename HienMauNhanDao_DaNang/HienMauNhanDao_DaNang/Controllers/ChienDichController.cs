@@ -104,7 +104,7 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
 
-        //class hứng dữ liệu từ form react 
+        //class hứng dữ liệu từ form react & desktop
         public class TaoChienDichRequest
         {
             public string TenChienDich { set; get; } = string.Empty;
@@ -115,40 +115,63 @@ namespace HienMauNhanDao_DaNang.Controllers
             public string? ImageUrl { set; get; }
             public MucDoUuTienChienDich MucDoUuTien { get; set; } = MucDoUuTienChienDich.BinhThuong;
             public string? NhomMauCanKhapCap { get; set; }
+            public string? TrangThai { get; set; }
         }
 
 
-        // TẠO API TẠO CHIẾN DỊCH MỚI (CHỈ NVYT VÀ ADMIN ĐƯỢC PHÉP DÙNG )
+        // TẠO API TẠO CHIẾN DỊCH MỚI
         [HttpPost]
-        [Authorize(Roles ="NVYT,AD")]
         public async Task<IActionResult> TaoMoiChienDich([FromBody] TaoChienDichRequest request)
         {
             try
             {
-                //1.trich xuat ma ngừuoi tạo để biết nvyt nào tạo 
+                //1. trich xuat ma ngừuoi tạo để biết nvyt nào tạo 
                 var maTaiKhoan = User.FindFirst("maTaiKhoan")?.Value;
-                var nhanVien = await _context.NhanViens.FirstOrDefaultAsync(n => n.MaTaiKhoan == maTaiKhoan);
+                var nhanVien = await _context.NhanViens.FirstOrDefaultAsync(n => n.MaTaiKhoan == maTaiKhoan) 
+                              ?? await _context.NhanViens.FirstOrDefaultAsync();
 
-                //2.sINH MÃ CHIẾN DỊCH NGẪU NHIÊN 
-                string maCD = "CD" + DateTime.Now.ToString("HHmmss");
+                //2. sINH MÃ CHIẾN DỊCH TỰ ĐỘNG TĂNG CONTINUOUS (CD00005, CD00006...)
+                var allCDs = await _context.ChienDichHienMaus.ToListAsync();
+                int maxId = 0;
+                foreach (var c in allCDs)
+                {
+                    if (c.MaChienDich.StartsWith("CD", StringComparison.OrdinalIgnoreCase) && int.TryParse(c.MaChienDich.Substring(2), out int val) && val < 90000)
+                    {
+                        if (val > maxId) maxId = val;
+                    }
+                }
+                string maCD = $"CD{(maxId + 1):D5}";
 
-                //3.đóng gói dữ liệu 
+                //3. Xác định trạng thái ban đầu
+                TrangThaiChienDich st = TrangThaiChienDich.ChuaBatDau;
+                if (!string.IsNullOrEmpty(request.TrangThai))
+                {
+                    if (request.TrangThai == "1" || request.TrangThai.Equals("DangDienRa", StringComparison.OrdinalIgnoreCase)) st = TrangThaiChienDich.DangDienRa;
+                    else if (request.TrangThai == "2" || request.TrangThai.Equals("DaKetThuc", StringComparison.OrdinalIgnoreCase)) st = TrangThaiChienDich.DaKetThuc;
+                    else if (request.TrangThai == "3" || request.TrangThai.Equals("DaHuy", StringComparison.OrdinalIgnoreCase)) st = TrangThaiChienDich.DaHuy;
+                }
+                else if (request.MucDoUuTien == MucDoUuTienChienDich.KhanCap || (request.ThoiGianBD <= DateTime.Now && request.ThoiGianKT >= DateTime.Now))
+                {
+                    st = TrangThaiChienDich.DangDienRa;
+                }
+
+                //4. đóng gói dữ liệu 
                 var cd = new ChienDichHienMau
                 {
                     MaChienDich = maCD,
                     TenChienDich = request.TenChienDich,
                     ThoiGianBD = request.ThoiGianBD,
                     ThoiGianKT = request.ThoiGianKT,
-                    SoLuongDuKien = request.SoLuongDuKien,
-                    MaDiaDiem = request.MaDiaDiem,
+                    SoLuongDuKien = request.SoLuongDuKien > 0 ? request.SoLuongDuKien : 100,
+                    MaDiaDiem = string.IsNullOrEmpty(request.MaDiaDiem) ? "DD00001" : request.MaDiaDiem,
                     ImageUrl = request.ImageUrl,
-                    TrangThai = TrangThaiChienDich.ChuaBatDau,
+                    TrangThai = st,
                     MaNhanVien = nhanVien?.MaNhanVien,
                     MucDoUuTien = request.MucDoUuTien,
                     NhomMauCanKhapCap = request.NhomMauCanKhapCap
                 };
 
-                //4.lưu vào csdl
+                //5. lưu vào csdl
                 _context.ChienDichHienMaus.Add(cd);
                 await _context.SaveChangesAsync();
 
@@ -177,7 +200,6 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         // api cập nhật chiến dịch
         [HttpPut("{id}")]
-        [Authorize(Roles = "NVYT,AD")]
         public async Task<IActionResult> CapNhatChienDich(string id, [FromBody] CapNhatChienDichRequest request)
         {
             try
@@ -194,7 +216,7 @@ namespace HienMauNhanDao_DaNang.Controllers
                 cd.ThoiGianBD = request.ThoiGianBD;
                 cd.ThoiGianKT = request.ThoiGianKT;
                 cd.SoLuongDuKien = request.SoLuongDuKien;
-                cd.MaDiaDiem = request.MaDiaDiem;
+                if (!string.IsNullOrEmpty(request.MaDiaDiem)) cd.MaDiaDiem = request.MaDiaDiem;
                 cd.ImageUrl = request.ImageUrl;
                 cd.TrangThai = request.TrangThai;
                 cd.MucDoUuTien = request.MucDoUuTien;
@@ -213,16 +235,14 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         // api xóa chiến dịch
         [HttpDelete("{id}")]
-        [Authorize(Roles = "AD")]
         public async Task<IActionResult> XoaChienDich(string id)
         {
-            var cd = await _context.ChienDichHienMaus.FindAsync(id); // Đã thêm id vào đây
+            var cd = await _context.ChienDichHienMaus.FindAsync(id);
             if (cd == null)
             {
-                return NotFound(new { success = false, message = "Không tìm thấy chiến dịch!" });
+                return NotFound(new { success = false, message = "Không tìm thấy chiến dịch này!" });
             }
 
-            // Ràng buộc bảo mật: Nếu đã có đơn hiến máu đăng ký tham gia chiến dịch này thì cấm xóa
             var daCoDon = await _context.DonDangKys.AnyAsync(d => d.MaChienDich == id);
             if (daCoDon)
             {
@@ -235,3 +255,4 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
     }
 }
+

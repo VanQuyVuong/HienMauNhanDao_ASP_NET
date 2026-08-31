@@ -570,21 +570,25 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                     nhomMauCanKhapCap = nhomMauCan,
                     trangThai = selectedStatus
                 };
-                var jsonStr = JsonConvert.SerializeObject(reqObj);
-                var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
-
-                await ApiClient.Instance.Client.PostAsync("/api/ChienDich", content);
-                MessageBox.Show($"✅ Đã phát hành thành công chiến dịch hiến máu: {ten}!\n📍 Địa điểm: {diaDiemDisplayStr}", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-                CreateCampaignModal.Visibility = Visibility.Collapsed;
-                await LoadData();
+                var response = await ApiClient.Instance.Client.PostAsync("/api/ChienDich", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show($"✅ Đã phát hành thành công chiến dịch hiến máu: {ten}!\n📍 Địa điểm: {diaDiemDisplayStr}", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    CreateCampaignModal.Visibility = Visibility.Collapsed;
+                    await LoadData();
+                }
+                else
+                {
+                    string errText = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"⚠️ Không thể lưu chiến dịch: {errText}", "Lỗi Backend API", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show($"✅ Đã khởi tạo thành công chiến dịch hiến máu: {ten}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-                CreateCampaignModal.Visibility = Visibility.Collapsed;
-                await LoadData();
+                MessageBox.Show($"❌ Lỗi kết nối API: {ex.Message}", "Lỗi kết nối", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
 
         private string _selectedBannerPathStr = string.Empty;
