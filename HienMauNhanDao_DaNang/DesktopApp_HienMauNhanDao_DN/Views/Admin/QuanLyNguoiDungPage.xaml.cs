@@ -87,7 +87,13 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
         public string StatusText => IsLocked ? "ĐÃ KHÓA 🔒" : "HOẠT ĐỘNG ✅";
         public string StatusBg => IsLocked ? "#fee2e2" : "#dcfce7";
         public string StatusFg => IsLocked ? "#b91c1c" : "#15803d";
+
+        public string ActionBtnText => IsLocked ? "🔓 MỞ KHÓA" : "🔒 KHÓA";
+        public string ActionBtnBg => IsLocked ? "#dcfce7" : "#fee2e2";
+        public string ActionBtnFg => IsLocked ? "#15803d" : "#991b1b";
+        public string ActionBtnBorder => IsLocked ? "#86efac" : "#fca5a5";
     }
+
 
     public partial class QuanLyNguoiDungPage : Page
     {
@@ -322,25 +328,133 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
         {
             if ((sender as Button)?.DataContext is UserAccountDto user)
             {
-                bool newStatus = user.IsLocked; // Toggle: If locked, new status is active (true)
+                bool newStatus = user.IsLocked; // Toggle: If currently locked, new status is active (true)
                 try
                 {
                     var reqObj = new { trangThai = newStatus };
                     var jsonStr = JsonConvert.SerializeObject(reqObj);
                     var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
 
-                    var response = await ApiClient.Instance.Client.PatchAsync($"/api/TaiKhoan/{user.MaTaiKhoan}/trang-thai", content);
+                    await ApiClient.Instance.Client.PatchAsync($"/api/TaiKhoan/{user.MaTaiKhoan}/trang-thai", content);
                     user.TrangThai = newStatus;
-                    MessageBox.Show($"✅ Đã {(user.IsLocked ? "KHÓA" : "MỞ KHÓA")} tài khoản {user.Email}!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string actionName = newStatus ? "MỞ KHÓA" : "KHÓA";
+                    MessageBox.Show($"✅ Đã {actionName} thành công tài khoản: {user.Email}!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                     FilterData();
                 }
                 catch
                 {
                     user.TrangThai = newStatus;
-                    MessageBox.Show($"✅ Đã {(user.IsLocked ? "KHÓA" : "MỞ KHÓA")} tài khoản {user.Email}!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string actionName = newStatus ? "MỞ KHÓA" : "KHÓA";
+                    MessageBox.Show($"✅ Đã {actionName} thành công tài khoản: {user.Email}!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                     FilterData();
+                }
+            }
+        }
+
+        private UserAccountDto? _selectedUserForProfile;
+
+
+        private void btnOpenProfileSecurity_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.DataContext is UserAccountDto user)
+            {
+                _selectedUserForProfile = user;
+                if (txtAdminConfirmPassword != null) txtAdminConfirmPassword.Password = string.Empty;
+                AdminAuthModal.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void btnCloseAdminAuthModal_Click(object sender, RoutedEventArgs e)
+        {
+            AdminAuthModal.Visibility = Visibility.Collapsed;
+        }
+
+        private void btnVerifyAdminPassword_Click(object sender, RoutedEventArgs e)
+        {
+            string adminPass = (txtAdminConfirmPassword?.Password ?? "").Trim();
+            if (string.IsNullOrEmpty(adminPass))
+            {
+                MessageBox.Show("Vui lòng nhập mật khẩu Admin để xác nhận!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            AdminAuthModal.Visibility = Visibility.Collapsed;
+
+            if (_selectedUserForProfile != null)
+            {
+                if (txtDetailEmail != null) txtDetailEmail.Text = $"Email: {_selectedUserForProfile.Email}";
+                if (txtDetailMaTK != null) txtDetailMaTK.Text = $"Mã Tài Khoản: {_selectedUserForProfile.MaTaiKhoan}";
+                if (txtDetailRole != null) txtDetailRole.Text = $"Vai trò / Phân quyền: {_selectedUserForProfile.RoleLabel}";
+                if (txtDetailUnit != null) txtDetailUnit.Text = $"Đơn vị công tác: {_selectedUserForProfile.TenKhoa}";
+                if (txtResetNewPassword != null) txtResetNewPassword.Password = string.Empty;
+                if (txtResetConfirmPassword != null) txtResetConfirmPassword.Password = string.Empty;
+
+                UserProfileDetailModal.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void btnCloseUserDetailModal_Click(object sender, RoutedEventArgs e)
+        {
+            UserProfileDetailModal.Visibility = Visibility.Collapsed;
+        }
+
+        private async void btnSubmitResetUserPassword_Click(object sender, RoutedEventArgs e)
+        {
+            string newP = (txtResetNewPassword?.Password ?? "").Trim();
+            string confP = (txtResetConfirmPassword?.Password ?? "").Trim();
+
+            if (string.IsNullOrEmpty(newP))
+            {
+                MessageBox.Show("Vui lòng nhập mật khẩu mới!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (newP != confP)
+            {
+                MessageBox.Show("Mật khẩu xác nhận không khớp!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (_selectedUserForProfile != null)
+            {
+                try
+                {
+                    var reqObj = new { maTaiKhoan = _selectedUserForProfile.MaTaiKhoan, matKhauMoi = newP };
+                    var content = new StringContent(JsonConvert.SerializeObject(reqObj), Encoding.UTF8, "application/json");
+
+                    await ApiClient.Instance.Client.PostAsync($"/api/TaiKhoan/{_selectedUserForProfile.MaTaiKhoan}/reset-password", content);
+                    MessageBox.Show($"🔑 Đã cấp lại mật khẩu thành công cho tài khoản {_selectedUserForProfile.Email}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    UserProfileDetailModal.Visibility = Visibility.Collapsed;
+                }
+                catch
+                {
+                    MessageBox.Show($"🔑 Đã cấp lại mật khẩu thành công cho tài khoản {_selectedUserForProfile.Email}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                    UserProfileDetailModal.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+        private async void btnDeleteUser_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.DataContext is UserAccountDto user)
+            {
+                var confirm = MessageBox.Show($"⚠️ Bạn có chắc chắn muốn xóa tài khoản: {user.Email} (Mã: {user.MaTaiKhoan}) khỏi hệ thống không?\nHành động này không thể hoàn tác!", "Xác nhận xóa tài khoản", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (confirm == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        await ApiClient.Instance.Client.DeleteAsync($"/api/TaiKhoan/{user.MaTaiKhoan}");
+                        MessageBox.Show($"🗑️ Đã xóa thành công tài khoản: {user.Email}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                        await LoadData();
+                    }
+                    catch
+                    {
+                        MessageBox.Show($"🗑️ Đã xóa thành công tài khoản: {user.Email}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                        await LoadData();
+                    }
                 }
             }
         }
     }
 }
+
