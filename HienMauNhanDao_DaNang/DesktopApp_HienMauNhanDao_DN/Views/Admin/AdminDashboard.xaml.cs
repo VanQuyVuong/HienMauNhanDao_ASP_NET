@@ -40,13 +40,19 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             NavigateToPage(new CapGiayChungNhanPage());
         }
 
-        private void rbBenhVien_Checked(object sender, RoutedEventArgs e)
+        private void rbDiaDiem_Checked(object sender, RoutedEventArgs e)
         {
-            NavigateToPage(new QuanLyBenhVienPage());
+            NavigateToPage(new QuanLyDiaDiemPage());
+        }
+
+        private void rbHoSoBaoMat_Checked(object sender, RoutedEventArgs e)
+        {
+            NavigateToPage(new AdminProfilePage());
         }
 
         private void btnLogout_Click(object sender, RoutedEventArgs e)
         {
+
 
             var loginWindow = new LoginWindow();
             loginWindow.Show();
