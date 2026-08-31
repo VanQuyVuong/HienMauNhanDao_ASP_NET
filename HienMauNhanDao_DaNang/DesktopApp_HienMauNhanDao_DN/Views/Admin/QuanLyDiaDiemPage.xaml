@@ -1,0 +1,122 @@
+<Page x:Class="DesktopApp_HienMauNhanDao_DN.Views.Admin.QuanLyDiaDiemPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" 
+      d:DesignHeight="850" d:DesignWidth="1150"
+      Title="Quản Lý Danh Sách Địa Điểm Hiến Máu">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- TOP BANNER -->
+        <Border Grid.Row="0" Background="#1e1b4b" CornerRadius="16" Padding="20,16" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="📍 QUẢN LÝ DANH SÁCH ĐỊA ĐIỂM HIẾN MÁU (GIS ĐÀ NẮNG)" Foreground="White" FontSize="18" FontWeight="Black"/>
+                    <TextBlock Text="Quản lý dữ liệu địa điểm cố định và lưu động (Bệnh viện, Trường học, Cơ quan, Khu dân cư) tự động cập nhật CSDL" Foreground="#c7d2fe" FontSize="12" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="btnRefresh" Content="🔄 LÀM MỚI" Height="38" Padding="14,0" Background="#312e81" Foreground="White" FontWeight="Bold" FontSize="11" Cursor="Hand" Click="btnRefresh_Click" Margin="0,0,8,0"/>
+                    <Button x:Name="btnAddLocation" Content="➕ THÊM ĐỊA ĐIỂM MỚI" Height="38" Padding="16,0" Background="#4f46e5" Foreground="White" FontWeight="Black" FontSize="11" Cursor="Hand" Click="btnAddLocation_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- FILTER BAR -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="12" Padding="14,10" Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="220"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="txtSearch" Grid.Column="0" Height="36" Padding="12,0" VerticalContentAlignment="Center"
+                         Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12"
+                         TextChanged="txtSearch_TextChanged" Margin="0,0,14,0"/>
+
+                <ComboBox x:Name="cbFilterCategory" Grid.Column="1" Height="36" Padding="10,0" VerticalContentAlignment="Center"
+                          Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12"
+                          SelectionChanged="cbFilterCategory_SelectionChanged">
+                    <ComboBoxItem Content="Tất cả loại địa điểm" IsSelected="True" Tag="ALL"/>
+                    <ComboBoxItem Content="🏥 Bệnh viện / TTYT" Tag="BenhVien"/>
+                    <ComboBoxItem Content="🏫 Trường học / Đại học" Tag="TruongHoc"/>
+                    <ComboBoxItem Content="🏢 Cơ quan / Doanh nghiệp" Tag="CoQuan"/>
+                    <ComboBoxItem Content="🏡 Khu dân cư / Nhà văn hóa" Tag="KhuDanCu"/>
+                </ComboBox>
+
+            </Grid>
+        </Border>
+
+        <!-- DATAGRID -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="14" ClipToBounds="True">
+            <DataGrid x:Name="dgLocations" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" HeadersVisibility="Column" RowHeight="48" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#f1f5f9">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Mã Đ.Điểm" Binding="{Binding MaDiaDiem}" Width="100"/>
+                    <DataGridTextColumn Header="Tên Địa Điểm Tổ Chức" Binding="{Binding TenDiaDiem}" Width="280"/>
+                    <DataGridTextColumn Header="Địa Chỉ Chi Tiết" Binding="{Binding DiaChi}" Width="*"/>
+                    <DataGridTemplateColumn Header="Loại Địa Điểm" Width="180">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="{Binding CategoryBg}" Padding="8,4" CornerRadius="6" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding CategoryText}" Foreground="{Binding CategoryFg}" FontWeight="Bold" FontSize="11"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- MODAL THÊM ĐỊA ĐIỂM MỚI -->
+        <Grid x:Name="CreateLocationModal" Grid.RowSpan="3" Background="#aa0f172a" Visibility="Collapsed">
+            <Border Background="White" CornerRadius="20" Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0">
+                <StackPanel>
+                    <Border Background="#312e81" Padding="20,16" CornerRadius="20,20,0,0">
+                        <Grid>
+                            <TextBlock Text="➕ THÊM ĐỊA ĐIỂM TỔ CHỨC HIẾN MÁU MỚI" Foreground="White" FontSize="15" FontWeight="Black"/>
+                            <Button Content="✕" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="18" FontWeight="Black" HorizontalAlignment="Right" Cursor="Hand" Click="btnCloseModal_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Margin="20">
+                        <TextBlock Text="TÊN ĐỊA ĐIỂM / TÊN ĐƠN VỊ TỔ CHỨC *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                        <TextBox x:Name="txtTenDiaDiem" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14"/>
+
+                        <TextBlock Text="LOẠI ĐỊA ĐIỂM *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="cbNewLoaiDiaDiem" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14">
+                            <ComboBoxItem Content="🏫 Trường học / Đại học" Tag="TruongHoc" IsSelected="True"/>
+                            <ComboBoxItem Content="🏥 Bệnh viện / Trung tâm Y tế" Tag="TramYTe"/>
+                            <ComboBoxItem Content="🏢 Cơ quan / Doanh nghiệp" Tag="CoQuan"/>
+                            <ComboBoxItem Content="🏡 Khu dân cư / Nhà văn hóa" Tag="KhuDanCu"/>
+                        </ComboBox>
+
+                        <TextBlock Text="ĐỊA CHỈ CHI TIẾT *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                        <TextBox x:Name="txtDiaChi" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,20"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="HỦY BỎ" Height="40" Background="#f1f5f9" Foreground="#475569" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnCloseModal_Click"/>
+                            <Button Grid.Column="2" Content="LƯU ĐỊA ĐIỂM VÀO CSDL" Height="40" Background="#4f46e5" Foreground="White" FontWeight="Black" FontSize="12" Cursor="Hand" Click="btnSubmitAddLocation_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>
