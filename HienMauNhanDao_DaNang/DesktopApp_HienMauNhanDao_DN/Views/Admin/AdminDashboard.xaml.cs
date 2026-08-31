@@ -40,8 +40,14 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             NavigateToPage(new CapGiayChungNhanPage());
         }
 
+        private void rbBenhVien_Checked(object sender, RoutedEventArgs e)
+        {
+            NavigateToPage(new QuanLyBenhVienPage());
+        }
+
         private void btnLogout_Click(object sender, RoutedEventArgs e)
         {
+
             var loginWindow = new LoginWindow();
             loginWindow.Show();
             this.Close();

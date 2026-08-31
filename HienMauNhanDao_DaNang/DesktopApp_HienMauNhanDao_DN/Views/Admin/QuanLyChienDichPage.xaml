@@ -201,53 +201,115 @@
 
         <!-- MODAL TẠO CHIẾN DỊCH MỚI -->
         <Grid x:Name="CreateCampaignModal" Grid.RowSpan="4" Background="#aa0f172a" Visibility="Collapsed">
-            <Border Background="White" CornerRadius="20" Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0">
-                <StackPanel>
-                    <Border Background="#991b1b" Padding="20,16" CornerRadius="20,20,0,0">
-                        <Grid>
-                            <TextBlock Text="➕ TẠO CHIẾN DỊCH HIẾN MÁU MỚI" Foreground="White" FontSize="15" FontWeight="Black"/>
-                            <Button Content="✕" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="18" FontWeight="Black" HorizontalAlignment="Right" Cursor="Hand" Click="btnCloseModal_Click"/>
-                        </Grid>
-                    </Border>
+            <Border Background="White" CornerRadius="20" Width="640" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0" MaxHeight="780">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Border Background="#991b1b" Padding="20,16" CornerRadius="20,20,0,0">
+                            <Grid>
+                                <TextBlock Text="➕ TẠO CHIẾN DỊCH HIẾN MÁU MỚI (ĐA ĐỊA ĐIỂM)" Foreground="White" FontSize="15" FontWeight="Black"/>
+                                <Button Content="✕" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="18" FontWeight="Black" HorizontalAlignment="Right" Cursor="Hand" Click="btnCloseModal_Click"/>
+                            </Grid>
+                        </Border>
 
-                    <StackPanel Margin="20">
-                        <TextBlock Text="TÊN CHIẾN DỊCH HIẾN MÁU *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
-                        <TextBox x:Name="txtNewTenChienDich" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14"/>
+                        <StackPanel Margin="20">
+                            <!-- Tên chiến dịch -->
+                            <TextBlock Text="TÊN CHIẾN DỊCH HIẾN MÁU *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                            <TextBox x:Name="txtNewTenChienDich" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14"/>
 
-                        <TextBlock Text="TÊN ĐỊA ĐIỂM TỔ CHỨC *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
-                        <TextBox x:Name="txtNewDiaDiem" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14"/>
+                            <!-- Loại địa điểm & Chọn điểm cố định -->
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Grid Margin="0,0,0,14">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="10"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="NGÀY BẮT ĐẦU *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
-                                <DatePicker x:Name="dpStartDate" Height="38" FontSize="12"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="NGÀY KẾT THÚC *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
-                                <DatePicker x:Name="dpEndDate" Height="38" FontSize="12"/>
-                            </StackPanel>
-                        </Grid>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="LOẠI ĐỊA ĐIỂM *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <ComboBox x:Name="cbLoaiDiaDiem" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" SelectionChanged="cbLoaiDiaDiem_SelectionChanged">
+                                        <ComboBoxItem Content="🏫 Trường học / Đại học" Tag="TruongHoc" IsSelected="True"/>
+                                        <ComboBoxItem Content="🏥 Bệnh viện / TTYT" Tag="TramYTe"/>
+                                        <ComboBoxItem Content="🏢 Cơ quan / Doanh nghiệp" Tag="CoQuan"/>
+                                        <ComboBoxItem Content="🏡 Khu dân cư / Nhà văn hóa" Tag="KhuDanCu"/>
+                                    </ComboBox>
+                                </StackPanel>
 
-                        <TextBlock Text="CHỈ TIÊU SỐ TÚI MÁU (ĐƠN VỊ) *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
-                        <TextBox x:Name="txtNewTarget" Text="100" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,20"/>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="ĐỊA ĐIỂM GIS ĐÀ NẮNG MẪU" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <ComboBox x:Name="cbMasterDiaDiem" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" SelectionChanged="cbMasterDiaDiem_SelectionChanged">
+                                        <ComboBoxItem Content="-- Tự nhập địa chỉ cụ thể --" IsSelected="True"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="10"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="HỦY BỎ" Height="40" Background="#f1f5f9" Foreground="#475569" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnCloseModal_Click"/>
-                            <Button Grid.Column="2" Content="XÁC NHẬN TẠO" Height="40" Background="#dc2626" Foreground="White" FontWeight="Black" FontSize="12" Cursor="Hand" Click="btnSubmitCreateCampaign_Click"/>
-                        </Grid>
+                            <!-- Địa chỉ chi tiết -->
+                            <TextBlock Text="ĐỊA CHỈ TỔ CHỨC CỤ THỂ *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                            <TextBox x:Name="txtNewDiaDiem" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14"/>
+
+                            <!-- Mức độ ưu tiên & Nhóm máu cần gấp -->
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="MỨC ĐỘ ƯU TIÊN *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <ComboBox x:Name="cbMucDoUuTien" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12">
+                                        <ComboBoxItem Content="🟢 Bình thường" Tag="BinhThuong" IsSelected="True"/>
+                                        <ComboBoxItem Content="⚡ Khẩn cấp (Cần máu gấp)" Tag="KhanCap"/>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="NHÓM MÁU CẦN GẤP" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <ComboBox x:Name="cbNhomMauCanKhapCap" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12">
+                                        <ComboBoxItem Content="Tất cả các nhóm máu" Tag="ALL" IsSelected="True"/>
+                                        <ComboBoxItem Content="Nhóm A+" Tag="A_positive"/>
+                                        <ComboBoxItem Content="Nhóm B+" Tag="B_positive"/>
+                                        <ComboBoxItem Content="Nhóm O+" Tag="O_positive"/>
+                                        <ComboBoxItem Content="Nhóm AB+" Tag="AB_positive"/>
+                                        <ComboBoxItem Content="Nhóm O-" Tag="O_negative"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Thời gian bắt đầu / kết thúc -->
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="NGÀY BẮT ĐẦU *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <DatePicker x:Name="dpStartDate" Height="38" FontSize="12"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="NGÀY KẾT THÚC *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <DatePicker x:Name="dpEndDate" Height="38" FontSize="12"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Chỉ tiêu dự kiến -->
+                            <TextBlock Text="CHỈ TIÊU DỰ KIẾN (ML MÁU) *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                            <TextBox x:Name="txtNewTarget" Text="350000" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,20"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="HỦY BỎ" Height="40" Background="#f1f5f9" Foreground="#475569" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnCloseModal_Click"/>
+                                <Button Grid.Column="2" Content="XÁC NHẬN TẠO CHIẾN DỊCH" Height="40" Background="#dc2626" Foreground="White" FontWeight="Black" FontSize="12" Cursor="Hand" Click="btnSubmitCreateCampaign_Click"/>
+                            </Grid>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </ScrollViewer>
             </Border>
         </Grid>
     </Grid>
 </Page>
+

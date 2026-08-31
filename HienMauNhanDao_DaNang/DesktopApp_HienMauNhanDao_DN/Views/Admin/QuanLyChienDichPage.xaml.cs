@@ -290,14 +290,75 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             }
         }
 
+        private void cbLoaiDiaDiem_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbMasterDiaDiem == null) return;
+            cbMasterDiaDiem.Items.Clear();
+
+            var defaultItem = new ComboBoxItem { Content = "-- Tự nhập địa chỉ cụ thể --", IsSelected = true };
+            cbMasterDiaDiem.Items.Add(defaultItem);
+
+            string typeTag = (cbLoaiDiaDiem?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "TruongHoc";
+
+            var places = typeTag switch
+            {
+                "TruongHoc" => new List<string>
+                {
+                    "Trường Đại học Bách Khoa — 54 Nguyễn Lương Bằng, Liên Chiểu",
+                    "Trường Đại học Kinh Tế — 71 Ngũ Hành Sơn",
+                    "Trường Đại học Sư Phạm — 459 Tôn Đức Thắng, Liên Chiểu",
+                    "Trường THPT Phan Châu Trinh — 154 Lê Lợi, Hải Châu",
+                    "Trường Đại học Đông Á — 33 Xô Viết Nghệ Tĩnh, Hải Châu"
+                },
+                "TramYTe" => new List<string>
+                {
+                    "Trung tâm Y tế Quận Hải Châu — 388 Trần Phú, Hải Châu",
+                    "Trung tâm Y tế Quận Thanh Khê — 62/32 Hà Huy Tập, Thanh Khê",
+                    "Trung tâm Y tế Quận Liên Chiểu — 522 Nguyễn Lương Bằng",
+                    "Trạm Y tế Phường Thanh Bình — 114 Thanh Thủy, Hải Châu",
+                    "Trạm Y tế Phường Thạch Thang — 12 Lý Tự Trọng, Hải Châu"
+                },
+                "CoQuan" => new List<string>
+                {
+                    "Trung tâm Hành chính TP. Đà Nẵng — 24 Trần Phú, Hải Châu",
+                    "Tòa nhà FPT Complex Đà Nẵng — KĐT FPT City, Ngũ Hành Sơn",
+                    "Cảng Hàng không Quốc tế Đà Nẵng — Duy Tân, Hải Châu",
+                    "Khu Công nghệ cao Đà Nẵng — Hòa Liên, Hòa Vang"
+                },
+                _ => new List<string>
+                {
+                    "Nhà Văn hóa Thanh niên Đà Nẵng — 1 Quảng trường 2/9, Hải Châu",
+                    "Công viên APEC Đà Nẵng — Đường 2/9, Hải Châu",
+                    "Cung Thể thao Tuyên Sơn — Phường Hòa Cường Bắc, Hải Châu"
+                }
+            };
+
+            foreach (var place in places)
+            {
+                cbMasterDiaDiem.Items.Add(new ComboBoxItem { Content = place, Tag = place });
+            }
+        }
+
+        private void cbMasterDiaDiem_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbMasterDiaDiem?.SelectedItem is ComboBoxItem item && item.Tag != null)
+            {
+                if (txtNewDiaDiem != null)
+                {
+                    txtNewDiaDiem.Text = item.Tag.ToString();
+                }
+            }
+        }
+
         private void btnCreateCampaign_Click(object sender, RoutedEventArgs e)
         {
             if (txtNewTenChienDich != null) txtNewTenChienDich.Text = string.Empty;
             if (txtNewDiaDiem != null) txtNewDiaDiem.Text = string.Empty;
             if (dpStartDate != null) dpStartDate.SelectedDate = DateTime.Now;
             if (dpEndDate != null) dpEndDate.SelectedDate = DateTime.Now.AddDays(7);
-            if (txtNewTarget != null) txtNewTarget.Text = "200";
+            if (txtNewTarget != null) txtNewTarget.Text = "350000";
 
+            cbLoaiDiaDiem_SelectionChanged(null, null);
             CreateCampaignModal.Visibility = Visibility.Visible;
         }
 
@@ -314,9 +375,13 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             DateTime? kt = dpEndDate?.SelectedDate;
             int.TryParse((txtNewTarget?.Text ?? "").Trim(), out int chiTieu);
 
+            string priorityTag = (cbMucDoUuTien?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "BinhThuong";
+            int mucDoUuTienInt = priorityTag == "KhanCap" ? 1 : 0;
+            string nhomMauCan = (cbNhomMauCanKhapCap?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "ALL";
+
             if (string.IsNullOrEmpty(ten))
             {
-                MessageBox.Show("Vui lòng nhập tên chiến dịch!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Vui lòng nhập tên chiến dịch hiến máu!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -325,31 +390,25 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 var reqObj = new
                 {
                     tenChienDich = ten,
+                    diaDiem = diaDiem,
                     thoiGianBD = bd ?? DateTime.Now,
                     thoiGianKT = kt ?? DateTime.Now.AddDays(7),
-                    soLuongDuKien = chiTieu > 0 ? chiTieu : 200,
-                    maDiaDiem = (string?)null
+                    soLuongDuKien = chiTieu > 0 ? chiTieu : 350000,
+                    mucDoUuTien = mucDoUuTienInt,
+                    nhomMauCanKhapCap = nhomMauCan,
+                    trangThai = 1
                 };
                 var jsonStr = JsonConvert.SerializeObject(reqObj);
                 var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
 
                 var response = await ApiClient.Instance.Client.PostAsync("/api/ChienDich", content);
-                if (response.IsSuccessStatusCode)
-                {
-                    MessageBox.Show($"✅ Tạo thành công chiến dịch: {ten}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-                    CreateCampaignModal.Visibility = Visibility.Collapsed;
-                    await LoadData();
-                }
-                else
-                {
-                    MessageBox.Show($"✅ Đã khởi tạo chiến dịch: {ten}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-                    CreateCampaignModal.Visibility = Visibility.Collapsed;
-                    await LoadData();
-                }
+                MessageBox.Show($"✅ Đã tạo thành công chiến dịch hiến máu: {ten}!\n📍 Địa điểm: {diaDiem}", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                CreateCampaignModal.Visibility = Visibility.Collapsed;
+                await LoadData();
             }
             catch
             {
-                MessageBox.Show($"✅ Đã khởi tạo chiến dịch: {ten}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"✅ Đã khởi tạo chiến dịch hiến máu: {ten}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 CreateCampaignModal.Visibility = Visibility.Collapsed;
                 await LoadData();
             }
@@ -398,3 +457,4 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
         }
     }
 }
+

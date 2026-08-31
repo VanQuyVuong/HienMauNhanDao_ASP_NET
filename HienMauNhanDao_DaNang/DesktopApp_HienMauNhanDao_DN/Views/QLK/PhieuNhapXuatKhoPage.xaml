@@ -1,0 +1,117 @@
+<Page x:Class="DesktopApp_HienMauNhanDao_DN.Views.QLK.PhieuNhapXuatKhoPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" 
+      d:DesignHeight="850" d:DesignWidth="1150"
+      Title="Quản Lý Phiếu Nhập Xuất Kho Máu">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- TOP BANNER -->
+        <Border Grid.Row="0" Background="#065f46" CornerRadius="16" Padding="20,16" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="📋 QUẢN LÝ PHIẾU NHẬP - XUẤT KHO MÁU" Foreground="White" FontSize="18" FontWeight="Black"/>
+                    <TextBlock Text="Lập và theo dõi các chứng từ nhập kho từ chiến dịch hiến máu hoặc xuất kho cấp cứu bệnh viện" Foreground="#a7f3d0" FontSize="12" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="btnRefresh" Content="🔄 LÀM MỚI" Height="38" Padding="14,0" Background="#047857" Foreground="White" FontWeight="Bold" FontSize="11" Cursor="Hand" Click="btnRefresh_Click" Margin="0,0,8,0"/>
+                    <Button x:Name="btnCreateImport" Content="📥 PHIẾU NHẬP KHO" Height="38" Padding="14,0" Background="#059669" Foreground="White" FontWeight="Black" FontSize="11" Cursor="Hand" Click="btnCreateImport_Click" Margin="0,0,8,0"/>
+                    <Button x:Name="btnCreateExport" Content="📤 PHIẾU XUẤT KHO" Height="38" Padding="14,0" Background="#dc2626" Foreground="White" FontWeight="Black" FontSize="11" Cursor="Hand" Click="btnCreateExport_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- FILTER BAR -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="12" Padding="14,10" Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="txtSearch" Grid.Column="0" Height="36" Padding="12,0" VerticalContentAlignment="Center"
+                         Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12"
+                         TextChanged="txtSearch_TextChanged" Margin="0,0,14,0"/>
+
+                <ComboBox x:Name="cbFilterType" Grid.Column="1" Height="36" Padding="10,0" VerticalContentAlignment="Center"
+                          Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12"
+                          SelectionChanged="cbFilterType_SelectionChanged">
+                    <ComboBoxItem Content="Tất cả chứng từ" IsSelected="True" Tag="ALL"/>
+                    <ComboBoxItem Content="📥 Phiếu Nhập Kho" Tag="NHAP"/>
+                    <ComboBoxItem Content="📤 Phiếu Xuất Kho" Tag="XUAT"/>
+                </ComboBox>
+            </Grid>
+        </Border>
+
+        <!-- DATAGRID -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="14" ClipToBounds="True">
+            <DataGrid x:Name="dgReceipts" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" HeadersVisibility="Column" RowHeight="48" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#f1f5f9">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Mã Phiếu" Binding="{Binding MaPhieu}" Width="110"/>
+                    <DataGridTemplateColumn Header="Loại Chứng Từ" Width="140">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="{Binding TypeBg}" Padding="8,4" CornerRadius="6" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding TypeText}" Foreground="{Binding TypeFg}" FontWeight="Bold" FontSize="11"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Nguồn / Đơn Vị Nhận" Binding="{Binding DonViString}" Width="*"/>
+                    <DataGridTextColumn Header="Ngày Lập Phiếu" Binding="{Binding NgayLap}" Width="150"/>
+                    <DataGridTextColumn Header="Số Lượng Túi Máu" Binding="{Binding SoLuongTui}" Width="130"/>
+                    <DataGridTextColumn Header="Người Lập Phiếu" Binding="{Binding NguoiLap}" Width="160"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- MODAL LẬP PHIẾU NHẬP / XUẤT KHO -->
+        <Grid x:Name="CreateReceiptModal" Grid.RowSpan="3" Background="#aa0f172a" Visibility="Collapsed">
+            <Border Background="White" CornerRadius="20" Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0">
+                <StackPanel>
+                    <Border x:Name="ModalHeaderBorder" Background="#065f46" Padding="20,16" CornerRadius="20,20,0,0">
+                        <Grid>
+                            <TextBlock x:Name="txtModalTitle" Text="📥 LẬP PHIẾU NHẬP KHO MÁU" Foreground="White" FontSize="15" FontWeight="Black"/>
+                            <Button Content="✕" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="18" FontWeight="Black" HorizontalAlignment="Right" Cursor="Hand" Click="btnCloseModal_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Margin="20">
+                        <TextBlock Text="ĐƠN VỊ CUNG CẤP / TIẾP NHẬN *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                        <TextBox x:Name="txtDonVi" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14"/>
+
+                        <TextBlock Text="SỐ LƯỢNG TÚI MÁU (ĐƠN VỊ) *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                        <TextBox x:Name="txtSoLuong" Text="50" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14"/>
+
+                        <TextBlock Text="GHI CHÚ / LÝ DO XUẤT NHẬP KHO" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                        <TextBox x:Name="txtGhiChu" Height="60" Padding="10,6" TextWrapping="Wrap" AcceptsReturn="True" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,20"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="HỦY BỎ" Height="40" Background="#f1f5f9" Foreground="#475569" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnCloseModal_Click"/>
+                            <Button x:Name="btnSubmitModal" Grid.Column="2" Content="XÁC NHẬN TẠO PHIẾU" Height="40" Background="#059669" Foreground="White" FontWeight="Black" FontSize="12" Cursor="Hand" Click="btnSubmitReceipt_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>
