@@ -1,11 +1,14 @@
 using HienMauNhanDao_DaNang.Common;
+using HienMauNhanDao_DaNang.Data;
 using HienMauNhanDao_DaNang.Models.DTOs.Requests;
 using HienMauNhanDao_DaNang.Models.DTOs.Responses;
+using HienMauNhanDao_DaNang.Security;
+using HienMauNhanDao_DaNang.Services;
 using HienMauNhanDao_DaNang.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using HienMauNhanDao_DaNang.Services;
-using Org.BouncyCastle.Asn1.UA;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace HienMauNhanDao_DaNang.Controllers
 {
@@ -20,16 +23,19 @@ namespace HienMauNhanDao_DaNang.Controllers
 
     public class AuthController : ControllerBase
     {
-        
         private readonly ITaiKhoanService _taiKhoanService;
         private readonly IOtpService _otpService;
         private readonly EmailQueueService _emailQueue;
+        private readonly JwtHelper _jwtHelper;
+        private readonly AppDbContext _context;
 
-        public AuthController(ITaiKhoanService taiKhoanService, IOtpService otpService, EmailQueueService emailQueue)
+        public AuthController(ITaiKhoanService taiKhoanService, IOtpService otpService, EmailQueueService emailQueue, JwtHelper jwtHelper, AppDbContext context)
         {
             _taiKhoanService = taiKhoanService;
             _otpService = otpService;
             _emailQueue = emailQueue;
+            _jwtHelper = jwtHelper;
+            _context = context;
         }
 
 
@@ -58,6 +64,54 @@ namespace HienMauNhanDao_DaNang.Controllers
                 return StatusCode(500, ApiResponse<object>.Fail(ex.Message));
             }
         }
+
+        public class RefreshTokenRequest
+        {
+            public string RefreshToken { get; set; } = string.Empty;
+        }
+
+        // API REFRESH TOKEN TỰ ĐỘNG NGẦM (SILENT REFRESH)
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            if (string.IsNullOrEmpty(request.RefreshToken))
+            {
+                return BadRequest(ApiResponse<object>.Fail("Refresh token không hợp lệ."));
+            }
+
+            try
+            {
+                var email = _jwtHelper.GetEmailFromToken(request.RefreshToken);
+                if (string.IsNullOrEmpty(email) || !_jwtHelper.ValidateToken(request.RefreshToken))
+                {
+                    return Unauthorized(ApiResponse<object>.Fail("Refresh token đã hết hạn hoặc không hợp lệ."));
+                }
+
+                var taiKhoan = await _context.TaiKhoans.Include(t => t.VaiTro).FirstOrDefaultAsync(t => t.Email == email);
+                if (taiKhoan == null || !taiKhoan.TrangThai)
+                {
+                    return Unauthorized(ApiResponse<object>.Fail("Tài khoản không tồn tại hoặc đã bị khóa."));
+                }
+
+                var maVaiTro = (taiKhoan.VaiTro?.maVaiTro ?? taiKhoan.MaVaiTro ?? "TNV").Trim();
+                var newAccessToken = _jwtHelper.GenerateAccessToken(taiKhoan.Email, maVaiTro, taiKhoan.MaTaiKhoan);
+                var newRefreshToken = _jwtHelper.GenerateRefreshToken(taiKhoan.Email);
+
+                var resData = new
+                {
+                    token = newAccessToken,
+                    accessToken = newAccessToken,
+                    refreshToken = newRefreshToken,
+                    expiresIn = 2592000
+                };
+                return Ok(ApiResponse<object>.Ok(resData, "Cấp lại Token ngầm thành công."));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.Fail("Lỗi xử lý refresh token: " + ex.Message));
+            }
+        }
+
 
 
         //API ĐĂNG KÝ
