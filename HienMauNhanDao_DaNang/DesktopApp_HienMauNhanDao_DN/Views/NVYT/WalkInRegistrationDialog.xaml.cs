@@ -30,18 +30,13 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    
                     try
                     {
-                        var paginated = JsonConvert.DeserializeObject<PaginatedResponse<ChienDich>>(json);
-                        if (paginated != null && paginated.Content != null)
-                        {
-                            _chienDichs = paginated.Content;
-                        }
+                        var JObj = Newtonsoft.Json.Linq.JObject.Parse(json);
+                        var dataToken = JObj["data"] ?? JObj;
+                        _chienDichs = JsonConvert.DeserializeObject<List<ChienDich>>(dataToken.ToString()) ?? new List<ChienDich>();
                     }
-                    catch { }
-
-                    if (_chienDichs.Count == 0)
+                    catch
                     {
                         _chienDichs = JsonConvert.DeserializeObject<List<ChienDich>>(json) ?? new List<ChienDich>();
                     }
@@ -50,6 +45,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                     cbChienDich.DisplayMemberPath = "TenChienDich";
                     cbChienDich.SelectedValuePath = "MaChienDich";
                 }
+
             }
             catch { }
         }
