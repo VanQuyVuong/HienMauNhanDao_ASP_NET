@@ -104,7 +104,7 @@
                 </Border>
 
                 <!-- Fast CCCD Check Button -->
-                <Button x:Name="btnCheckCCCD" Grid.Column="5" Content="🔍 KIỂM TRA CCCD TẠI ĐIỂM NÀY" Height="38" Padding="12,0" HorizontalAlignment="Left"
+                <Button x:Name="btnCheckCCCD" Grid.Column="5" Content="🔍 KIỂM TRA" Height="38" Padding="16,0" HorizontalAlignment="Left"
                         Background="#0284c7" BorderThickness="0" Foreground="White" FontWeight="Bold" Cursor="Hand" Click="btnCheckCCCD_Click">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
@@ -114,6 +114,7 @@
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
+
 
                 <!-- Refresh Button -->
                 <Button x:Name="btnRefresh" Grid.Column="7" Content="🔄 LÀM MỚI" Height="38" Width="95" 
@@ -157,9 +158,11 @@
         <Border Grid.Row="2" CornerRadius="10" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" ClipToBounds="True">
             <DataGrid x:Name="dgDonDangKy" Margin="-1">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mã Đơn" Binding="{Binding MaDon}" Width="100"/>
-                    <DataGridTextColumn Header="Người Hiến Máu" Binding="{Binding HoTenTNV}" Width="*"/>
-                    <DataGridTextColumn Header="Chiến Dịch" Binding="{Binding TenChienDich}" Width="*"/>
+                    <DataGridTextColumn Header="Mã Đơn" Binding="{Binding MaDon}" Width="95"/>
+                    <DataGridTextColumn Header="Người Hiến Máu" Binding="{Binding HoTenTNV}" Width="150"/>
+                    <DataGridTextColumn Header="Số CCCD" Binding="{Binding CccdTNV}" Width="125"/>
+                    <DataGridTextColumn Header="Chiến Dịch / Địa Điểm" Binding="{Binding TenChienDich}" Width="*"/>
+
                     <DataGridTextColumn Header="Thể Tích" Binding="{Binding TheTich, StringFormat={}{0} ml}" Width="100"/>
                     <DataGridTextColumn Header="Ngày Đăng Ký" Binding="{Binding ThoiGianDangKy, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
                     

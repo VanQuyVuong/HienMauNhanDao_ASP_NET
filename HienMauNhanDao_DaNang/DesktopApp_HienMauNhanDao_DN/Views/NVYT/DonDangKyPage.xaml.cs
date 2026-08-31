@@ -161,16 +161,18 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 filtered = filtered.Where(d => string.Equals(d.MaChienDich, selectedMaCD, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            // 2. Filter by Keyword
+            // 2. Filter by Keyword (Họ tên, CCCD, Mã đơn, Tên chiến dịch)
             var keyword = txtSearch?.Text?.Trim()?.ToLower() ?? "";
             if (!string.IsNullOrEmpty(keyword))
             {
                 filtered = filtered.Where(d =>
                     (d.MaDon != null && d.MaDon.ToLower().Contains(keyword)) ||
                     (d.HoTenTNV != null && d.HoTenTNV.ToLower().Contains(keyword)) ||
+                    (d.CccdTNV != null && d.CccdTNV.ToLower().Contains(keyword)) ||
                     (d.TenChienDich != null && d.TenChienDich.ToLower().Contains(keyword))
                 ).ToList();
             }
+
 
             var sortedList = filtered.OrderByDescending(d => d.ThoiGianDangKy).ToList();
             dgDonDangKy.ItemsSource = sortedList;
@@ -219,12 +221,14 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
             var selectedCampaign = cbChienDichFilter.SelectedItem as CampaignFilterDto;
             string currentMaCD = selectedCampaign?.MaChienDich ?? "ALL";
 
-            // Tìm đơn đăng ký phù hợp trong toàn bộ CSDL
+            // Tìm đơn đăng ký phù hợp trong toàn bộ CSDL theo CCCD / Mã đơn / Họ tên
             var matches = _allDons.Where(d => d != null &&
                 ((d.MaDon != null && d.MaDon.Equals(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                 (d.CccdTNV != null && d.CccdTNV.Equals(keyword, StringComparison.OrdinalIgnoreCase)) ||
                  (d.HoTenTNV != null && d.HoTenTNV.ToLower().Contains(keyword.ToLower())) ||
                  (d.MaTNV != null && d.MaTNV.Equals(keyword, StringComparison.OrdinalIgnoreCase)))
             ).ToList();
+
 
             if (!matches.Any())
             {
