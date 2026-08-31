@@ -16,8 +16,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import api from "../services/api";
 import { ENDPOINTS } from "../constants/api";
+import NotificationModal from "../components/NotificationModal";
 
-// ─── 1. HÀM HELPER HỖ TRỢ ──────────────────────────────
+const DEFAULT_NEWS_IMAGE =
+  "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=600&q=80";
+
 // Helper: format ngày dd/mm/yyyy
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
@@ -25,6 +28,21 @@ const formatDate = (dateStr) => {
   return `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1)
     .toString()
     .padStart(2, "0")}/${d.getFullYear()}`;
+};
+
+// Helper: format nhóm máu đẹp
+const formatNhomMau = (nhomMauRaw) => {
+  if (!nhomMauRaw) return "--";
+  const str = String(nhomMauRaw).trim();
+  if (str === "B_positive" || str === "B_CO_RH") return "B+";
+  if (str === "A_positive" || str === "A_CO_RH") return "A+";
+  if (str === "O_positive" || str === "O_CO_RH") return "O+";
+  if (str === "AB_positive" || str === "AB_CO_RH") return "AB+";
+  if (str === "O_negative" || str === "O_KHONG_RH") return "O-";
+  if (str === "A_negative" || str === "A_KHONG_RH") return "A-";
+  if (str === "B_negative" || str === "B_KHONG_RH") return "B-";
+  if (str === "AB_negative" || str === "AB_KHONG_RH") return "AB-";
+  return str.replace("_positive", "+").replace("_negative", "-");
 };
 
 // Helper: nhãn và màu trạng thái
@@ -52,21 +70,19 @@ const getMucDoColor = (mucDo) => {
 };
 
 export default function HomeScreen({ navigation }) {
-  // ─── 2. QUẢN LÝ TRẠNG THÁI (STATE) ───────────────────
   const [profile, setProfile] = useState(null);
   const [campaigns, setCampaigns] = useState([]);
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [email, setEmail] = useState("");
+  const [notifVisible, setNotifVisible] = useState(false);
 
-  // ─── 3. HÀM GỌI API TỪ BACKEND C# ────────────────────
   const fetchHomeData = useCallback(async () => {
     try {
       const storedEmail = await AsyncStorage.getItem("email");
       if (storedEmail) setEmail(storedEmail);
 
-      // Gọi đồng thời 3 API: Chiến dịch, Hồ sơ, Tin tức
       const [campRes, profileRes, newsRes] = await Promise.allSettled([
         api.get(ENDPOINTS.CHIEN_DICH.GET_ALL),
         api.get(ENDPOINTS.TNV.ME),
@@ -103,7 +119,6 @@ export default function HomeScreen({ navigation }) {
     fetchHomeData();
   };
 
-  // ─── 4. TÍNH TOÁN DỮ LIỆU HIỂN THỊ ───────────────────
   const activeCampaigns = campaigns.filter((c) => c.trangThai === "DangDienRa");
   const urgentCampaigns = campaigns.filter(
     (c) =>
@@ -112,7 +127,6 @@ export default function HomeScreen({ navigation }) {
   );
   const displayName = profile?.hoTen || email?.split("@")[0] || "bạn";
 
-  // Màn hình chờ khi đang nạp dữ liệu từ Backend
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -124,6 +138,12 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.root}>
+      {/* Modal Thông báo */}
+      <NotificationModal
+        visible={notifVisible}
+        onClose={() => setNotifVisible(false)}
+      />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -135,7 +155,7 @@ export default function HomeScreen({ navigation }) {
         }
         contentContainerStyle={styles.scrollContent}
       >
-        {/* ── PHẦN 2: HEADER ĐỎ & 3 THẺ THỐNG KÊ KÍNH MỜ ──── */}
+        {/* ── HEADER ĐỎ & THẺ THỐNG KÊ ──── */}
         <LinearGradient colors={["#e62e43", "#c01b30"]} style={styles.header}>
           <View style={styles.headerInner}>
             <View>
@@ -145,15 +165,18 @@ export default function HomeScreen({ navigation }) {
               </Text>
             </View>
 
+            {/* Nút Chuông Thông Báo */}
             <Pressable
-              style={({ hovered, pressed }) => [
+              style={({ pressed }) => [
                 styles.notifBtn,
                 pressed && { transform: [{ scale: 0.9 }] },
-                Platform.OS === "web" &&
-                  hovered && { backgroundColor: "rgba(255,255,255,0.25)" },
               ]}
+              onPress={() => setNotifVisible(true)}
             >
               <Text style={styles.notifIcon}>🔔</Text>
+              <View style={styles.notifBadge}>
+                <Text style={styles.notifBadgeText}>2</Text>
+              </View>
             </Pressable>
           </View>
 
@@ -166,19 +189,59 @@ export default function HomeScreen({ navigation }) {
 
             <View style={[styles.quickCard, styles.quickCardMid]}>
               <Text style={styles.quickNum}>
-                {profile?.nhomMau || (profile ? "--" : "?")}
+                {formatNhomMau(profile?.nhomMau)}
               </Text>
               <Text style={styles.quickLabel}>Nhóm{"\n"}máu của bạn</Text>
             </View>
 
-            <View style={styles.quickCard}>
-              <Text style={styles.quickNum}>{profile?.soLanHienMau ?? 0}</Text>
-              <Text style={styles.quickLabel}>Lần hiến{"\n"}máu</Text>
-            </View>
           </View>
         </LinearGradient>
 
-        {/* ── PHẦN 3: BANNER CHIẾN DỊCH KHẨN CẤP ───────────── */}
+        {/* ── THANH PHÍM TẮT TRUY CẬP NHANH (QUICK ACTIONS) ───── */}
+        <View style={styles.quickGrid}>
+          <Pressable
+            onPress={() => navigation.navigate("DangKyHienMau")}
+            style={({ pressed }) => [styles.gridItem, pressed && { transform: [{ scale: 0.95 }] }]}
+          >
+            <View style={[styles.gridIconBox, { backgroundColor: "#fee2e2" }]}>
+              <Text style={styles.gridIcon}>🩸</Text>
+            </View>
+            <Text style={styles.gridText}>Đăng ký{"\n"}hiến máu</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => navigation.navigate("DonationHistory")}
+            style={({ pressed }) => [styles.gridItem, pressed && { transform: [{ scale: 0.95 }] }]}
+          >
+            <View style={[styles.gridIconBox, { backgroundColor: "#fef3c7" }]}>
+              <Text style={styles.gridIcon}>📜</Text>
+            </View>
+            <Text style={styles.gridText}>Lịch sử &{"\n"}Chứng nhận</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => navigation.navigate("TinTuc")}
+            style={({ pressed }) => [styles.gridItem, pressed && { transform: [{ scale: 0.95 }] }]}
+          >
+            <View style={[styles.gridIconBox, { backgroundColor: "#dbeafe" }]}>
+              <Text style={styles.gridIcon}>📰</Text>
+            </View>
+            <Text style={styles.gridText}>Tin tức &{"\n"}Sức khỏe</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => navigation.navigate("ChienDich")}
+            style={({ pressed }) => [styles.gridItem, pressed && { transform: [{ scale: 0.95 }] }]}
+          >
+            <View style={[styles.gridIconBox, { backgroundColor: "#dcfce7" }]}>
+              <Text style={styles.gridIcon}>📋</Text>
+            </View>
+            <Text style={styles.gridText}>Danh sách{"\n"}chiến dịch</Text>
+          </Pressable>
+        </View>
+
+
+        {/* ── BANNER CHIẾN DỊCH KHẨN CẤP ───────────── */}
         {urgentCampaigns.length > 0 && (
           <View style={styles.section}>
             <View style={styles.urgentBanner}>
@@ -221,22 +284,12 @@ export default function HomeScreen({ navigation }) {
           </View>
         )}
 
-        {/* ── PHẦN 4: CHIẾN DỊCH ĐANG DIỄN RA (CAROUSEL) ───── */}
+        {/* ── CHIẾN DỊCH ĐANG DIỄN RA (CAROUSEL) ───── */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Chiến dịch đang diễn ra</Text>
             <Pressable onPress={() => navigation.navigate("ChienDich")}>
-              {({ hovered }) => (
-                <Text
-                  style={[
-                    styles.seeAll,
-                    Platform.OS === "web" &&
-                      hovered && { textDecorationLine: "underline" },
-                  ]}
-                >
-                  Xem tất cả
-                </Text>
-              )}
+              <Text style={styles.seeAll}>Xem tất cả</Text>
             </Pressable>
           </View>
 
@@ -244,7 +297,7 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.emptyCard}>
               <Text style={styles.emptyEmoji}>📋</Text>
               <Text style={styles.emptyText}>
-                Hiện tại không có chiến dịch nào đang diễn ra.
+                Hiện tại chưa có chiến dịch mới.
               </Text>
             </View>
           ) : (
@@ -264,16 +317,12 @@ export default function HomeScreen({ navigation }) {
                 return (
                   <Pressable
                     key={c.maChienDich}
-                    style={({ pressed, hovered }) => [
+                    style={({ pressed }) => [
                       styles.campCard,
                       pressed && { transform: [{ scale: 0.97 }] },
-                      Platform.OS === "web" &&
-                        hovered &&
-                        styles.campCardHovered,
                     ]}
-                    onPress={() => navigation.navigate("ChienDich")}
+                    onPress={() => navigation.navigate("CampaignDetail", { campaignItem: c })}
                   >
-                    {/* Dải vạch màu độ ưu tiên */}
                     <View
                       style={[styles.campStripe, { backgroundColor: dotColor }]}
                     />
@@ -288,17 +337,12 @@ export default function HomeScreen({ navigation }) {
                         {c.tenChienDich}
                       </Text>
                       <Text style={styles.campInfo}>
-                        📍{" "}
-                        {c.diaDiem?.tenDiaDiem ||
-                          c.diaDiem?.diaChi ||
-                          "Đà Nẵng"}
+                        📍 {c.diaDiem?.tenDiaDiem || "Đà Nẵng"}
                       </Text>
                       <Text style={styles.campInfo}>
-                        📅 {formatDate(c.thoiGianBD)} -{" "}
-                        {formatDate(c.thoiGianKT)}
+                        📅 {formatDate(c.thoiGianBD)} - {formatDate(c.thoiGianKT)}
                       </Text>
 
-                      {/* Thanh tiến trình % thu nhận máu */}
                       {c.soLuongDuKien > 0 && (
                         <View style={styles.progressWrap}>
                           <View style={styles.progressTrack}>
@@ -325,37 +369,33 @@ export default function HomeScreen({ navigation }) {
           )}
         </View>
 
-        {/* ── PHẦN 5: TIN TỨC & SỨC KHỎE ───────────────────── */}
+        {/* ── TIN TỨC & SỨC KHỎE ───────────────────── */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Tin tức & Sức khoẻ</Text>
+            <Pressable onPress={() => navigation.navigate("TinTuc")}>
+              <Text style={styles.seeAll}>Xem tất cả</Text>
+            </Pressable>
           </View>
 
           {news.length === 0 ? (
             <View style={styles.emptyCard}>
               <Text style={styles.emptyEmoji}>📰</Text>
-              <Text style={styles.emptyText}>Chưa có tin tức nào.</Text>
+              <Text style={styles.emptyText}>Chưa có tin tức mới.</Text>
             </View>
           ) : (
             news.slice(0, 3).map((item, idx) => (
               <Pressable
                 key={item.maTinTuc || idx}
-                style={({ pressed, hovered }) => [
+                style={({ pressed }) => [
                   styles.newsCard,
                   pressed && { transform: [{ scale: 0.98 }] },
-                  Platform.OS === "web" && hovered && styles.newsCardHovered,
                 ]}
+                onPress={() => navigation.navigate("NewsDetail", { newsItem: item })}
               >
                 <View style={styles.newsContent}>
-                  <View
-                    style={[
-                      styles.newsCategoryBadge,
-                      { backgroundColor: "#ffeef0" },
-                    ]}
-                  >
-                    <Text
-                      style={[styles.newsCategoryText, { color: "#e62e43" }]}
-                    >
+                  <View style={styles.newsCategoryBadge}>
+                    <Text style={styles.newsCategoryText}>
                       {item.loaiTin === "KienThuc"
                         ? "📖 Kiến thức"
                         : item.loaiTin === "SuKien"
@@ -371,46 +411,29 @@ export default function HomeScreen({ navigation }) {
                   </Text>
                 </View>
 
-                {item.hinhAnh ? (
-                  <Image
-                    source={{ uri: item.hinhAnh }}
-                    style={styles.newsImage}
-                  />
-                ) : (
-                  <View style={[styles.newsImage, styles.newsImagePlaceholder]}>
-                    <Text style={{ fontSize: 24 }}>🩸</Text>
-                  </View>
-                )}
+                {/* Thumbnail hình ảnh có Fallback đẹp */}
+                <Image
+                  source={{
+                    uri: item.hinhAnh && item.hinhAnh.startsWith("http")
+                      ? item.hinhAnh
+                      : DEFAULT_NEWS_IMAGE,
+                  }}
+                  style={styles.newsImage}
+                />
               </Pressable>
             ))
           )}
         </View>
 
-        {/* ── PHẦN 5: CẨM NANG HIẾN MÁU ────────────────────── */}
+        {/* ── CẨM NANG HIẾN MÁU ────────────────────── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Cẩm nang hiến máu</Text>
           <View style={styles.tipsGrid}>
             {[
-              {
-                icon: "💧",
-                title: "Uống nhiều nước",
-                desc: "Uống 2-3 ly nước trước khi hiến máu",
-              },
-              {
-                icon: "🍽",
-                title: "Ăn no trước",
-                desc: "Không nên nhịn ăn trước khi hiến máu",
-              },
-              {
-                icon: "😴",
-                title: "Ngủ đủ giấc",
-                desc: "Đảm bảo ngủ đủ 7-8 tiếng tối hôm trước",
-              },
-              {
-                icon: "🏃",
-                title: "Không vận động mạnh",
-                desc: "Tránh tập thể thao nặng trong 24h trước",
-              },
+              { icon: "💧", title: "Uống nhiều nước", desc: "Uống 2-3 ly nước trước khi hiến máu" },
+              { icon: "🍽", title: "Ăn no trước", desc: "Không nên nhịn ăn trước khi hiến máu" },
+              { icon: "😴", title: "Ngủ đủ giấc", desc: "Đảm bảo ngủ đủ 7-8 tiếng tối hôm trước" },
+              { icon: "🏃", title: "Không vận động mạnh", desc: "Tránh tập thể thao nặng trong 24h trước" },
             ].map((tip, i) => (
               <View key={i} style={styles.tipCard}>
                 <Text style={styles.tipIcon}>{tip.icon}</Text>
@@ -421,34 +444,25 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        {/* ── PHẦN 5: SLOGAN CẢM ƠN ────────────────────────── */}
+        {/* ── SLOGAN CẢM ƠN ────────────────────────── */}
         <View style={styles.sloganSection}>
           <Text style={styles.sloganEmoji}>💖</Text>
           <Text style={styles.sloganText}>
-            "Mỗi giọt máu cho đi, một cuộc đời ở lại.{"\n"}Cảm ơn bạn đã luôn
-            đồng hành cùng chúng tôi."
+            "Mỗi giọt máu cho đi, một cuộc đời ở lại.{"\n"}Cảm ơn bạn đã luôn đồng hành cùng chúng tôi."
           </Text>
         </View>
 
-        <View style={{ height: 30 }} />
+        <View style={{ height: 90 }} />
       </ScrollView>
     </View>
   );
 }
 
-// ─── 5. STYLES ─────────────────────────────────────────
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#f8f9fa" },
   scrollContent: { paddingBottom: 16 },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f8f9fa",
-  },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f8f9fa" },
   loadingText: { marginTop: 12, color: "#888", fontSize: 14 },
-
-  // Header Style
   header: {
     paddingTop: Platform.OS === "ios" ? 54 : Platform.OS === "web" ? 20 : 40,
     paddingHorizontal: 20,
@@ -456,299 +470,121 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
-  headerInner: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 20,
-  },
+  headerInner: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 },
   greeting: { fontSize: 22, fontWeight: "900", color: "#fff" },
-  headerSub: { fontSize: 12, color: "rgba(255,255,255,0.8)", marginTop: 2 },
+  headerSub: { fontSize: 12, color: "rgba(255,255,255,0.85)", marginTop: 2 },
   notifBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
-    ...Platform.select({
-      web: {
-        transitionProperty: "background-color",
-        transitionDuration: "150ms",
-        cursor: "pointer",
-      },
-    }),
+    position: "relative",
   },
   notifIcon: { fontSize: 18 },
-
-  // Thẻ thống kê kính mờ bên trong Header
-  quickRow: {
-    flexDirection: "row",
-    backgroundColor: "rgba(255,255,255,0.18)",
-    borderRadius: 16,
-    padding: 14,
-    gap: 8,
-  },
-  quickCard: { flex: 1, alignItems: "center" },
-  quickCardMid: {
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
-  },
-  quickNum: { fontSize: 24, fontWeight: "900", color: "#fff" },
-  quickLabel: {
-    fontSize: 10,
-    color: "rgba(255,255,255,0.85)",
-    textAlign: "center",
-    marginTop: 2,
-    lineHeight: 13,
-  },
-
-  // Section chung
-  section: { marginTop: 20, paddingHorizontal: 16 },
-
-  // Style cho Banner Khẩn cấp
-  urgentBanner: {
-    backgroundColor: "#e62e43",
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: "#e62e43",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  urgentHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-    gap: 8,
-  },
-  urgentIcon: { fontSize: 18 },
-  urgentTitle: {
-    fontSize: 14,
-    fontWeight: "900",
-    color: "#fff",
-    letterSpacing: 1,
-  },
-  urgentBadge: {
-    backgroundColor: "rgba(255,255,255,0.25)",
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  urgentBadgeText: { color: "#fff", fontSize: 11, fontWeight: "700" },
-  urgentCampName: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  urgentDesc: { fontSize: 13, color: "rgba(255,255,255,0.9)", marginBottom: 6 },
-  urgentBloodType: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#fff",
-    marginBottom: 14,
-  },
-  urgentBtn: {
-    backgroundColor: "#fff",
-    borderRadius: 25,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignSelf: "flex-start",
-  },
-  urgentBtnText: { color: "#e62e43", fontWeight: "900", fontSize: 13 },
-
-  // Style cho Carousel Chiến dịch
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  sectionTitle: { fontSize: 16, fontWeight: "800", color: "#1a1a2e" },
-  seeAll: {
-    fontSize: 13,
-    color: "#e62e43",
-    fontWeight: "600",
-    ...Platform.select({
-      web: {
-        transitionProperty: "color, text-decoration",
-        transitionDuration: "150ms",
-        cursor: "pointer",
-      },
-    }),
-  },
-  horizontalScroll: { marginHorizontal: -16, paddingHorizontal: 16 },
-  campCard: {
-    width: 260,
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    marginRight: 14,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-    flexDirection: "row",
-    ...Platform.select({
-      web: {
-        transitionProperty: "transform, box-shadow",
-        transitionDuration: "200ms",
-        cursor: "pointer",
-      },
-    }),
-  },
-  campCardHovered: {
-    transform: [{ translateY: -2 }],
-    shadowOpacity: 0.14,
-    elevation: 5,
-  },
-  campStripe: { width: 5 },
-  campBody: { flex: 1, padding: 14 },
-  chip: {
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    alignSelf: "flex-start",
-    marginBottom: 8,
-  },
-  chipText: { fontSize: 10, fontWeight: "700" },
-  campName: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#1a1a2e",
-    marginBottom: 6,
-    lineHeight: 19,
-  },
-  campInfo: { fontSize: 12, color: "#666", marginBottom: 3 },
-  progressWrap: { marginTop: 10 },
-  progressTrack: {
-    height: 6,
-    backgroundColor: "#f1f5f9",
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  progressFill: { height: 6, borderRadius: 3 },
-  progressLabel: {
-    fontSize: 10,
-    color: "#888",
-    marginTop: 4,
-    textAlign: "right",
-  },
-
-  // Style cho Tin tức & Sức khỏe
-  newsCard: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-    ...Platform.select({
-      web: {
-        transitionProperty: "transform, box-shadow",
-        transitionDuration: "200ms",
-        cursor: "pointer",
-      },
-    }),
-  },
-  newsCardHovered: {
-    transform: [{ translateY: -2 }],
-    shadowOpacity: 0.12,
-    elevation: 3,
-  },
-  newsContent: { flex: 1, marginRight: 12 },
-  newsCategoryBadge: {
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    alignSelf: "flex-start",
-    marginBottom: 6,
-  },
-  newsCategoryText: { fontSize: 10, fontWeight: "700" },
-  newsTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#1a1a2e",
-    lineHeight: 19,
-    marginBottom: 4,
-  },
-  newsDate: { fontSize: 11, color: "#aaa" },
-  newsImage: {
-    width: 72,
-    height: 72,
-    borderRadius: 12,
-    backgroundColor: "#f5f5f5",
-  },
-  newsImagePlaceholder: {
+  notifBadge: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: "#ff4d4f",
+    borderRadius: 9,
+    width: 18,
+    height: 18,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fef3f4",
+    borderWidth: 1.5,
+    borderColor: "#fff",
   },
-
-  // Style cho Cẩm nang hiến máu
-  tipsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 10 },
-  tipCard: {
-    width: "48%",
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  tipIcon: { fontSize: 26, marginBottom: 6 },
-  tipTitle: {
-    fontSize: 13,
-    fontWeight: "800",
-    color: "#1a1a2e",
+  notifBadgeText: { color: "#fff", fontSize: 9.5, fontWeight: "900" },
+  quickRow: { flexDirection: "row", backgroundColor: "rgba(255,255,255,0.18)", borderRadius: 16, padding: 14, gap: 8 },
+  quickCard: { flex: 1, alignItems: "center" },
+  quickCardMid: { borderLeftWidth: 1, borderRightWidth: 1, borderColor: "rgba(255,255,255,0.3)" },
+  quickNum: { fontSize: 22, fontWeight: "900", color: "#fff" },
+  quickLabel: { fontSize: 10, color: "rgba(255,255,255,0.85)", textAlign: "center", marginTop: 2, lineHeight: 13 },
+  quickGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    marginTop: 16,
     marginBottom: 4,
   },
-  tipDesc: { fontSize: 11, color: "#888", lineHeight: 15 },
-
-  // Style cho Slogan cảm ơn
-  sloganSection: {
-    marginTop: 24,
-    marginHorizontal: 16,
-    padding: 24,
-    backgroundColor: "#fff",
-    borderRadius: 18,
+  gridItem: {
+    flex: 1,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#fde2e4",
-  },
-  sloganEmoji: { fontSize: 30, marginBottom: 8 },
-  sloganText: {
-    fontSize: 13.5,
-    fontStyle: "italic",
-    color: "#888",
-    textAlign: "center",
-    lineHeight: 22,
-  },
-  emptyCard: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 20,
-    alignItems: "center",
+    backgroundColor: "#ffffff",
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    borderRadius: 16,
+    marginHorizontal: 4,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowRadius: 6,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "#f0f0f0",
-    borderStyle: "dashed",
+    borderColor: "#f1f5f9",
   },
+  gridIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  gridIcon: { fontSize: 20 },
+  gridText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#334155",
+    textAlign: "center",
+    lineHeight: 14,
+  },
+  section: { marginTop: 20, paddingHorizontal: 16 },
+
+  urgentBanner: { backgroundColor: "#e62e43", borderRadius: 20, padding: 20 },
+  urgentHeader: { flexDirection: "row", alignItems: "center", marginBottom: 8, gap: 8 },
+  urgentIcon: { fontSize: 18 },
+  urgentTitle: { fontSize: 14, fontWeight: "900", color: "#fff", letterSpacing: 1 },
+  urgentBadge: { backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
+  urgentBadgeText: { color: "#fff", fontSize: 11, fontWeight: "700" },
+  urgentCampName: { fontSize: 18, fontWeight: "800", color: "#fff", marginBottom: 4 },
+  urgentDesc: { fontSize: 13, color: "rgba(255,255,255,0.9)", marginBottom: 6 },
+  urgentBloodType: { fontSize: 14, fontWeight: "800", color: "#fff", marginBottom: 14 },
+  urgentBtn: { backgroundColor: "#fff", borderRadius: 25, paddingVertical: 10, paddingHorizontal: 20, alignSelf: "flex-start" },
+  urgentBtnText: { color: "#e62e43", fontWeight: "900", fontSize: 13 },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontWeight: "800", color: "#1a1a2e" },
+  seeAll: { fontSize: 13, color: "#e62e43", fontWeight: "700" },
+  horizontalScroll: { marginHorizontal: -16, paddingHorizontal: 16 },
+  campCard: { width: 260, backgroundColor: "#fff", borderRadius: 18, marginRight: 14, overflow: "hidden", flexDirection: "row" },
+  campStripe: { width: 5 },
+  campBody: { flex: 1, padding: 14 },
+  chip: { borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3, alignSelf: "flex-start", marginBottom: 8 },
+  chipText: { fontSize: 10, fontWeight: "700" },
+  campName: { fontSize: 14, fontWeight: "800", color: "#1a1a2e", marginBottom: 6, lineHeight: 19 },
+  campInfo: { fontSize: 12, color: "#666", marginBottom: 3 },
+  progressWrap: { marginTop: 10 },
+  progressTrack: { height: 6, backgroundColor: "#f1f5f9", borderRadius: 3, overflow: "hidden" },
+  progressFill: { height: 6, borderRadius: 3 },
+  progressLabel: { fontSize: 10, color: "#888", marginTop: 4, textAlign: "right" },
+  newsCard: { backgroundColor: "#fff", borderRadius: 14, padding: 14, marginBottom: 10, flexDirection: "row", alignItems: "center" },
+  newsContent: { flex: 1, marginRight: 12 },
+  newsCategoryBadge: { backgroundColor: "#ffeef0", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, alignSelf: "flex-start", marginBottom: 6 },
+  newsCategoryText: { fontSize: 10, fontWeight: "700", color: "#e62e43" },
+  newsTitle: { fontSize: 14, fontWeight: "700", color: "#1a1a2e", lineHeight: 19, marginBottom: 4 },
+  newsDate: { fontSize: 11, color: "#aaa" },
+  newsImage: { width: 72, height: 72, borderRadius: 12, backgroundColor: "#fee" },
+  tipsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 10 },
+  tipCard: { width: "48%", backgroundColor: "#fff", borderRadius: 14, padding: 14 },
+  tipIcon: { fontSize: 26, marginBottom: 6 },
+  tipTitle: { fontSize: 13, fontWeight: "800", color: "#1a1a2e", marginBottom: 4 },
+  tipDesc: { fontSize: 11, color: "#888", lineHeight: 15 },
+  sloganSection: { marginTop: 24, marginHorizontal: 16, padding: 24, backgroundColor: "#fff", borderRadius: 18, alignItems: "center", borderWidth: 1, borderColor: "#fde2e4" },
+  sloganEmoji: { fontSize: 30, marginBottom: 8 },
+  sloganText: { fontSize: 13.5, fontStyle: "italic", color: "#888", textAlign: "center", lineHeight: 22 },
+  emptyCard: { backgroundColor: "#fff", borderRadius: 14, padding: 20, alignItems: "center" },
   emptyEmoji: { fontSize: 28, marginBottom: 6 },
-  emptyText: { color: "#aaa", fontSize: 13, textAlign: "center" },
+  emptyText: { color: "#aaa", fontSize: 13 },
 });

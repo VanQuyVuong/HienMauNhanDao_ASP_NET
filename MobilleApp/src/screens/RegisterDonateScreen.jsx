@@ -78,11 +78,16 @@ export default function RegisterDonateScreen({ navigation }) {
       });
 
       if (response.data?.success || response.status === 200) {
-        Alert.alert(
-          "🎉 Đăng ký thành công!",
-          "Đơn đăng ký hiến máu của bạn đã được ghi nhận vào hệ thống.",
-          [{ text: "Đã hiểu", onPress: () => fetchData() }],
-        );
+        if (Platform.OS === 'web') {
+          alert("🎉 Đăng ký thành công!\nĐơn đăng ký hiến máu của bạn đã được ghi nhận vào hệ thống.");
+          fetchData();
+        } else {
+          Alert.alert(
+            "🎉 Đăng ký thành công!",
+            "Đơn đăng ký hiến máu của bạn đã được ghi nhận vào hệ thống.",
+            [{ text: "Đã hiểu", onPress: () => fetchData() }],
+          );
+        }
       } else {
         setErrorMsg(
           response.data?.message || "Đăng ký thất bại. Vui lòng thử lại.",

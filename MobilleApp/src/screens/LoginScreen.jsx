@@ -64,9 +64,13 @@ export default function LoginScreen({ navigation }) {
       if (token) {
         await AsyncStorage.setItem('token', token);
         await AsyncStorage.setItem('email', resData.email || email);
-        Alert.alert('Thành công', 'Đăng nhập thành công', [
-          { text: 'OK', onPress: () => navigation.replace('Home') }
-        ]);
+        if (Platform.OS === 'web') {
+          navigation.replace('Home');
+        } else {
+          Alert.alert('Thành công', 'Đăng nhập thành công', [
+            { text: 'OK', onPress: () => navigation.replace('Home') }
+          ]);
+        }
       } else {
         setErrorMsg('Không tìm thấy token trong phản hồi từ server');
       }

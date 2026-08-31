@@ -94,9 +94,14 @@ export default function OtpVerificationScreen({ route, navigation }) {
       };
       await authService.register(registerPayload);
 
-      Alert.alert('Thành công', 'Tài khoản của bạn đã được khởi tạo thành công.', [
-        { text: 'Đăng nhập ngay', onPress: () => navigation.replace('Login') }
-      ]);
+      if (Platform.OS === 'web') {
+        alert('🎉 Tài khoản của bạn đã được khởi tạo thành công.');
+        navigation.replace('Login');
+      } else {
+        Alert.alert('Thành công', 'Tài khoản của bạn đã được khởi tạo thành công.', [
+          { text: 'Đăng nhập ngay', onPress: () => navigation.replace('Login') }
+        ]);
+      }
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data?.Message || (typeof err.response?.data === 'string' ? err.response.data : null) || 'Có lỗi xảy ra khi tạo tài khoản.';
       setErrorMsg(msg);

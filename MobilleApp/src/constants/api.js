@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'https://localhost:7004/api'; // Or use your local IP address for physical device, e.g., 'http://192.168.1.xxx:5000/api'
+export const API_BASE_URL = 'http://localhost:5236/api'; // Hoặc IP local khi chạy trên thiết bị di động thực
 
 export const ENDPOINTS = {
   AUTH: {
@@ -9,5 +9,16 @@ export const ENDPOINTS = {
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password'
   },
-  // Add more endpoints as needed for MobileApp
+  CHIEN_DICH: {
+    GET_ALL: '/ChienDich',
+  },
+  TIN_TUC: {
+    GET_ALL: '/TinTuc',
+  },
+  TNV: {
+    ME: '/TinhNguyenVien/me',
+  },
+  DON_DANG_KY: {
+    GET_ALL: '/DonDangKy',
+  },
 };
