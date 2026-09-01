@@ -157,11 +157,17 @@ function App() {
           <Route path="/nvyt" element={<NvytGuard><NVYTLayout /></NvytGuard>}>
             <Route index element={<Navigate to="don-dang-ky" replace />} />
             <Route path="don-dang-ky" element={<DonDangKy />} />
+            <Route path="don_dang_ky" element={<DonDangKy />} />
             <Route path="tinh-nguyen-vien" element={<TinhNguyenVien />} />
+            <Route path="tinh_nguyen_vien" element={<TinhNguyenVien />} />
             <Route path="khai-bao-y-te" element={<KhaiBaoYTeNVYT />} />
+            <Route path="khai_bao_y_te" element={<KhaiBaoYTeNVYT />} />
             <Route path="cap-nhat-xet-nghiem" element={<CapNhatXetNghiem />} />
+            <Route path="cap_nhat_xet_nghiem" element={<CapNhatXetNghiem />} />
             <Route path="thu-nhan-mau" element={<ThuNhanMau />} />
+            <Route path="thu_nhan_mau" element={<ThuNhanMau />} />
           </Route>
+
         </Routes>
       </Router>
     </QueryClientProvider>
