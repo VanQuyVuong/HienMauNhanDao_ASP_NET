@@ -640,11 +640,16 @@ export default function HomePage() {
                                             {/* Phần Ảnh Thẻ Dọc */}
                                             <div className="w-full h-36 rounded-2xl overflow-hidden relative shrink-0 border border-slate-100 shadow-sm">
                                                 <img
-                                                    src={c.imageUrl ? `/images/${c.imageUrl}` : "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=600"}
+                                                    src={c.imageUrl || c.hinhAnh ? (String(c.imageUrl || c.hinhAnh).startsWith('http') ? (c.imageUrl || c.hinhAnh) : `/images/${c.imageUrl || c.hinhAnh}`) : "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=600"}
                                                     alt="Campaign Banner"
                                                     className="w-full h-full object-cover"
                                                     draggable="false"
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=600";
+                                                    }}
                                                 />
+
                                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent"></div>
                                                 {isKhanCap && (
                                                     <div className="absolute top-2 left-2 bg-red-600 text-white font-black text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full animate-bounce shadow-md">

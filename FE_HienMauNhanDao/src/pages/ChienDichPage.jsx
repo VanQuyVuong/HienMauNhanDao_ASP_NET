@@ -25,7 +25,8 @@ export default function ChienDichPage() {
         "Sắp diễn ra": 2,
         "Đã kết thúc": 3
     };
-    const uniqueLocations = [...new Set(allCampaigns.map(item => item.diaDiem.tenDiaDiem))];
+    const uniqueLocations = [...new Set(allCampaigns.map(item => item.diaDiem?.tenDiaDiem).filter(Boolean))];
+
 
     // Get campaign status badge
     const getCampaignStatus = (campaign) => {
@@ -344,8 +345,13 @@ export default function ChienDichPage() {
                                 <img
                                     alt={campaign.tenChienDich}
                                     className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ${isUpcoming ? 'opacity-80' : ''}`}
-                                    src={campaign.imageUrl ? `/images/${campaign.imageUrl}` : "https://via.placeholder.com/400x300"}
+                                    src={campaign.imageUrl || campaign.hinhAnh ? (String(campaign.imageUrl || campaign.hinhAnh).startsWith('http') ? (campaign.imageUrl || campaign.hinhAnh) : `/images/${campaign.imageUrl || campaign.hinhAnh}`) : "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=800"}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=800";
+                                    }}
                                 />
+
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
                                 <div className="absolute top-4 left-4 flex gap-2">
                                     {(status.status === "Đang mở" || status.status === "Đã phê duyệt") && (
