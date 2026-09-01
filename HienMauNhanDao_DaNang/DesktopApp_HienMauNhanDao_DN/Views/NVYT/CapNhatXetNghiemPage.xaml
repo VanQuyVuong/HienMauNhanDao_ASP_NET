@@ -271,8 +271,16 @@
                                 </Grid>
                                 <Grid>
                                     <TextBlock Text="Nhóm Máu Xác Định:" FontSize="12" FontWeight="Bold" Foreground="#94a3b8" VerticalAlignment="Center"/>
-                                    <ComboBox x:Name="cbModalBloodType" Width="120" Height="36" HorizontalAlignment="Right" VerticalContentAlignment="Center" 
-                                              FontSize="13" FontWeight="Black" Foreground="White" Background="#020617">
+                                    <ComboBox x:Name="cbModalBloodType" Width="130" Height="36" HorizontalAlignment="Right" VerticalContentAlignment="Center" 
+                                              FontSize="13" FontWeight="Bold" Background="White" Foreground="#0f172a" BorderBrush="#334155" BorderThickness="1">
+                                        <ComboBox.ItemContainerStyle>
+                                            <Style TargetType="ComboBoxItem">
+                                                <Setter Property="Foreground" Value="#0f172a"/>
+                                                <Setter Property="Background" Value="White"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                <Setter Property="Padding" Value="10,6"/>
+                                            </Style>
+                                        </ComboBox.ItemContainerStyle>
                                         <ComboBoxItem Content="O+" IsSelected="True"/>
                                         <ComboBoxItem Content="O-"/>
                                         <ComboBoxItem Content="A+"/>
@@ -282,6 +290,7 @@
                                         <ComboBoxItem Content="AB+"/>
                                         <ComboBoxItem Content="AB-"/>
                                     </ComboBox>
+
                                 </Grid>
                             </StackPanel>
                         </Border>
