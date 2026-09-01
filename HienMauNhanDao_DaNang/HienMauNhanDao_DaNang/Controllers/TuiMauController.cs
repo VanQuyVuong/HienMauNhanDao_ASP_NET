@@ -284,25 +284,22 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
 
-        // API 5: Lấy danh sách túi máu đã có kết quả xét nghiệm (Phê duyệt, Không đạt, Re-test) cho Tab 2 & QLK (Sắp xếp mới nhất lên đầu)
+        // API 5: Lấy danh sách túi máu đã thu nhận cho Tab 2 & QLK (Sắp xếp mới nhất lên đầu)
         [HttpGet]
         public async Task<IActionResult> GetDanhSachTuiMauChoQLK()
         {
-            // Chỉ lấy các túi máu đã kết thúc quy trình: 1 là Đã Nhập Kho (DaLuuKho), 2 là Đã Hủy (DaHuy)
             var danhSach = await _context.TuiMaus
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
-                .Where(t => t.TrangThai == TrangThaiTuiMau.DaLuuKho || t.TrangThai == TrangThaiTuiMau.DaHuy)
                 .OrderByDescending(t => t.ThoiGianLayMau)
                 .ThenByDescending(t => t.MaTuiMau)
                 .ToListAsync();
 
             var ketQua = danhSach.Select(t =>
             {
-                string trangThaiString = t.TrangThai == TrangThaiTuiMau.DaLuuKho ? "Nhập kho" : "Đã hủy";
-
+                string trangThaiString = t.TrangThai.ToString();
 
                 return new
                 {
@@ -310,8 +307,9 @@ namespace HienMauNhanDao_DaNang.Controllers
                     maDon = t.MaDon,
                     tenTinhNguyenVien = t.DonDangKy?.TinhNguyenVien?.HoTen ?? "Ẩn danh",
                     tenChienDich = t.DonDangKy?.ChienDich?.TenChienDich ?? "N/A",
-                    theTich = t.TheTich ?? 0,
+                    theTich = t.TheTich ?? 350,
                     thoiGianLayMau = t.ThoiGianLayMau,
+                    nhietDoVanChuyen = t.NhietDoVanChuyen ?? 4.0,
                     trangThai = trangThaiString,
                     nhomMau = t.DonDangKy?.TinhNguyenVien?.NhomMau != null
                         ? t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-")
@@ -321,6 +319,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
             return Ok(ketQua);
         }
+
         // API 6: Thay đổi trạng thái túi máu (QLK trả túi máu về để kiểm tra lại)
         // PUT /api/tuimau/{id}/status?status=Chờ xét nghiệm
         [HttpPut("{id}/status")]
