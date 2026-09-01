@@ -37,7 +37,23 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
 
         [JsonProperty("tenChienDich")]
         public string TenChienDich { get; set; } = string.Empty;
+
+        public string TrangThaiHienThi
+        {
+            get
+            {
+                var tt = (TrangThai ?? "").ToLower().Trim();
+                if (tt.Contains("daxetnghiem") || tt.Contains("chonhapkho") || tt.Contains("yêu cầu nhập kho") || tt.Contains("nhập kho"))
+                    return "✅ Chờ nhập kho (Đã XN)";
+                if (tt.Contains("daluukho") || tt.Contains("đã lưu kho") || tt.Contains("đã nhập kho"))
+                    return "🏦 Đã lưu kho";
+                if (tt.Contains("dahuy") || tt.Contains("hủy") || tt.Contains("không đạt"))
+                    return "❌ Đã hủy (Bệnh)";
+                return "⏳ Chờ xét nghiệm";
+            }
+        }
     }
+
 
     public class CreateTuiMauRequest
     {

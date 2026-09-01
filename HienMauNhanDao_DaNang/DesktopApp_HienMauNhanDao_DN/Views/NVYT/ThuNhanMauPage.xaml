@@ -212,15 +212,75 @@
                             <DataGridTextColumn Header="Thời Gian Lấy" Binding="{Binding ThoiGianLayMau, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
                             <DataGridTextColumn Header="Nhiệt Độ" Binding="{Binding NhietDoVanChuyen, StringFormat={}{0} °C}" Width="100"/>
                             
-                            <DataGridTemplateColumn Header="Trạng Thái" Width="150">
+                            <DataGridTemplateColumn Header="Trạng Thái" Width="180">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Background="#fef3c7" BorderBrush="#fde68a" BorderThickness="1" Padding="10,4" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                            <TextBlock Text="⏳ Chờ xét nghiệm" Foreground="#b45309" FontWeight="Black" FontSize="12"/>
+                                        <Border Padding="10,4" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#fef3c7"/>
+                                                    <Setter Property="BorderBrush" Value="#fde68a"/>
+                                                    <Setter Property="BorderThickness" Value="1"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="DaXetNghiem">
+                                                            <Setter Property="Background" Value="#dcfce7"/>
+                                                            <Setter Property="BorderBrush" Value="#86efac"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Yêu cầu nhập kho">
+                                                            <Setter Property="Background" Value="#dcfce7"/>
+                                                            <Setter Property="BorderBrush" Value="#86efac"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="DaLuuKho">
+                                                            <Setter Property="Background" Value="#e0f2fe"/>
+                                                            <Setter Property="BorderBrush" Value="#7dd3fc"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Nhập kho">
+                                                            <Setter Property="Background" Value="#e0f2fe"/>
+                                                            <Setter Property="BorderBrush" Value="#7dd3fc"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="DaHuy">
+                                                            <Setter Property="Background" Value="#ffe4e6"/>
+                                                            <Setter Property="BorderBrush" Value="#fecdd3"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Đã hủy">
+                                                            <Setter Property="Background" Value="#ffe4e6"/>
+                                                            <Setter Property="BorderBrush" Value="#fecdd3"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding TrangThaiHienThi}" FontWeight="Black" FontSize="12">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="#b45309"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding TrangThai}" Value="DaXetNghiem">
+                                                                <Setter Property="Foreground" Value="#15803d"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding TrangThai}" Value="Yêu cầu nhập kho">
+                                                                <Setter Property="Foreground" Value="#15803d"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding TrangThai}" Value="DaLuuKho">
+                                                                <Setter Property="Foreground" Value="#0369a1"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding TrangThai}" Value="Nhập kho">
+                                                                <Setter Property="Foreground" Value="#0369a1"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding TrangThai}" Value="DaHuy">
+                                                                <Setter Property="Foreground" Value="#be123c"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding TrangThai}" Value="Đã hủy">
+                                                                <Setter Property="Foreground" Value="#be123c"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
+
 
                             <DataGridTemplateColumn Header="Thao Tác" Width="160">
                                 <DataGridTemplateColumn.CellTemplate>
