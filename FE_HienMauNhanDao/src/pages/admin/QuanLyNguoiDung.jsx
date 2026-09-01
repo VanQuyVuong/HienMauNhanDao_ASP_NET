@@ -13,6 +13,8 @@ const ROLE_STYLES = {
   AD: "bg-gradient-to-r from-red-500/15 to-rose-500/10 text-[#e62e43] border border-[#e62e43]/30 shadow-sm shadow-red-500/10",
   BS: "bg-gradient-to-r from-emerald-500/15 to-teal-500/10 text-emerald-700 border border-emerald-500/30 shadow-sm shadow-emerald-500/10",
   NVYT: "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-700 border border-cyan-500/30 shadow-sm shadow-cyan-500/10",
+  NVYT_XN: "bg-gradient-to-r from-indigo-500/15 to-purple-500/10 text-indigo-700 border border-indigo-500/30 shadow-sm shadow-indigo-500/10",
+  NVYT_LT: "bg-gradient-to-r from-teal-500/15 to-emerald-500/10 text-teal-700 border border-teal-500/30 shadow-sm shadow-teal-500/10",
   QLK: "bg-gradient-to-r from-amber-500/15 to-orange-500/10 text-amber-700 border border-amber-500/30 shadow-sm shadow-amber-500/10",
   TNV: "bg-gradient-to-r from-slate-500/15 to-gray-500/10 text-slate-700 border border-slate-400/30 shadow-sm",
 };
@@ -20,17 +22,20 @@ const ROLE_STYLES = {
 const ROLE_LABELS = {
   AD: "Quản trị viên",
   BS: "Bác sĩ lâm sàng",
-  NVYT: "Nhân viên y tế",
+  NVYT: "Cán bộ y tế",
+  NVYT_XN: "Nhân viên xét nghiệm (NVXN)",
+  NVYT_LT: "Nhân viên lễ tân (NVLT)",
   QLK: "Quản lý kho máu",
   TNV: "Tình nguyện viên",
 };
 
-const emptyForm = { email: "", matKhau: "", maVaiTro: "" };
+const emptyForm = { email: "", matKhau: "", maVaiTro: "", hoTen: "", soDienThoai: "", cccd: "", maKhoa: "" };
 
 export default function QuanLyNguoiDung() {
   const { searchQuery: headerSearch = "" } = useOutletContext() || {};
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [khoaList, setKhoaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("");
@@ -42,10 +47,10 @@ export default function QuanLyNguoiDung() {
   const [activeTab, setActiveTab] = useState("INTERNAL");
 
   // 🔐 State bảo mật xác thực Admin & Xem thông tin chi tiết
-  const [authModalUser, setAuthModalUser] = useState(null); // Tài khoản đang yêu cầu xác thực
+  const [authModalUser, setAuthModalUser] = useState(null);
   const [adminPasswordInput, setAdminPasswordInput] = useState("");
   const [verifyingAdmin, setVerifyingAdmin] = useState(false);
-  const [detailModalUser, setDetailModalUser] = useState(null); // Hiển thị hồ sơ sau khi xác thực xong
+  const [detailModalUser, setDetailModalUser] = useState(null);
   const [showUserPassword, setShowUserPassword] = useState(false);
   const [userProfileDetails, setUserProfileDetails] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
@@ -57,12 +62,14 @@ export default function QuanLyNguoiDung() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [userList, roleList] = await Promise.all([
+      const [userList, roleList, khoas] = await Promise.all([
         userService.getAll(),
         userService.getVaiTroList(),
+        userService.getKhoaList().catch(() => []),
       ]);
       setUsers(Array.isArray(userList) ? userList : []);
       setRoles(Array.isArray(roleList) ? roleList : []);
+      setKhoaList(Array.isArray(khoas) ? khoas : []);
     } catch (err) {
       Swal.fire(
         "Lỗi hệ thống",
@@ -73,6 +80,7 @@ export default function QuanLyNguoiDung() {
       setLoading(false);
     }
   }, []);
+
 
   useEffect(() => {
     loadData();
@@ -114,10 +122,10 @@ export default function QuanLyNguoiDung() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!form.email || !form.matKhau || !form.maVaiTro) {
+    if (!form.email || !form.matKhau || !form.maVaiTro || !form.hoTen) {
       Swal.fire(
         "Thiếu dữ liệu",
-        "Vui lòng điền đầy đủ email, mật khẩu và chọn vai trò",
+        "Vui lòng điền đầy đủ Họ tên, Email, Mật khẩu và chọn Vai trò",
         "warning",
       );
       return;
@@ -128,12 +136,16 @@ export default function QuanLyNguoiDung() {
         email: form.email.trim(),
         matKhau: form.matKhau,
         maVaiTro: form.maVaiTro,
+        hoTen: form.hoTen?.trim(),
+        soDienThoai: form.soDienThoai?.trim(),
+        cccd: form.cccd?.trim(),
+        maKhoa: form.maKhoa || null,
         trangThai: true,
       });
       Swal.fire({
         icon: "success",
         title: "Cấp quyền thành công!",
-        text: `Đã tạo tài khoản cho ${form.email}`,
+        text: `Đã tạo tài khoản cán bộ cho ${form.hoTen} (${form.email})`,
         timer: 2000,
         showConfirmButton: false,
       });
@@ -150,6 +162,7 @@ export default function QuanLyNguoiDung() {
       setSubmitting(false);
     }
   };
+
 
   const handleToggleStatus = async (user) => {
     const isActive = user.trangThai !== false;
@@ -624,11 +637,71 @@ export default function QuanLyNguoiDung() {
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="p-6 space-y-4">
+            <form onSubmit={handleCreate} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
               <div>
                 <label className="block text-[11px] font-black text-slate-700 mb-1.5 uppercase tracking-wider">
-                  Email cán bộ / Bác sĩ{" "}
-                  <span className="text-[#e62e43]">*</span>
+                  Họ và tên cán bộ <span className="text-[#e62e43]">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={form.hoTen}
+                  onChange={(e) => setForm({ ...form, hoTen: e.target.value })}
+                  placeholder="ví dụ: BS. Nguyễn Văn Quý"
+                  className="w-full h-11 px-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-black text-slate-700 mb-1.5 uppercase tracking-wider">
+                    Số điện thoại
+                  </label>
+                  <input
+                    type="text"
+                    value={form.soDienThoai}
+                    onChange={(e) => setForm({ ...form, soDienThoai: e.target.value })}
+                    placeholder="ví dụ: 0905123456"
+                    className="w-full h-11 px-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-black text-slate-700 mb-1.5 uppercase tracking-wider">
+                    Số CCCD (12 số)
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={12}
+                    value={form.cccd}
+                    onChange={(e) => setForm({ ...form, cccd: e.target.value })}
+                    placeholder="ví dụ: 048200112233"
+                    className="w-full h-11 px-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black text-slate-700 mb-1.5 uppercase tracking-wider">
+                  Khoa công tác / Bệnh viện (CSDL)
+                </label>
+                <select
+                  value={form.maKhoa}
+                  onChange={(e) => setForm({ ...form, maKhoa: e.target.value })}
+                  className="w-full h-11 px-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all cursor-pointer"
+                >
+                  <option value="">-- Chọn Khoa công tác (bảng KHOACONGTAC) --</option>
+                  {khoaList.map((k) => (
+                    <option key={k.maKhoa} value={k.maKhoa}>
+                      🏥 {k.tenKhoa} ({k.maKhoa})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black text-slate-700 mb-1.5 uppercase tracking-wider">
+                  Email cán bộ / Đăng nhập <span className="text-[#e62e43]">*</span>
                 </label>
                 <input
                   type="email"
@@ -670,6 +743,7 @@ export default function QuanLyNguoiDung() {
                   className="w-full h-11 px-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-[#e62e43] focus:ring-4 focus:ring-[#e62e43]/10 transition-all cursor-pointer"
                 >
                   <option value="">-- Chọn quyền hạn y tế --</option>
+
                   {roles.map((r) => (
                     <option key={r.maVaiTro} value={r.maVaiTro}>
                       👑 {ROLE_LABELS[r.maVaiTro] || r.tenVaiTro}
