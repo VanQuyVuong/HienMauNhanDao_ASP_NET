@@ -127,9 +127,10 @@ export default function NVYTLayout() {
     navigate('/login');
   };
 
-  const initials = nhanVien
-    ? (nhanVien.hoVaTen || '').split(' ').slice(-2).map((w) => w[0]).join('').toUpperCase()
+  const initials = nhanVien && nhanVien.hoVaTen
+    ? String(nhanVien.hoVaTen).trim().split(/\s+/).filter(Boolean).slice(-2).map((w) => (w[0] || '').toUpperCase()).join('') || 'NV'
     : 'NV';
+
 
   const role = (localStorage.getItem('role') || '').trim();
   const isXn = role === 'NVYT_XN' || role === 'NVYT-XN';
