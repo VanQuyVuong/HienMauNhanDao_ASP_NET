@@ -421,38 +421,55 @@ export default function CapNhatXetNghiem() {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      {isPending ? (
+                      {item.isReTest || isReTestReq ? (
+                        <span className="px-3 py-1 bg-purple-50 text-purple-700 font-black text-xs rounded-full border border-purple-200 flex items-center gap-1.5 w-fit animate-pulse">
+                          <span className="w-2 h-2 rounded-full bg-purple-600 animate-ping"></span>
+                          🚨 Yêu cầu Re-test từ QLK
+                        </span>
+                      ) : isPending ? (
                         <span className="px-3 py-1 bg-amber-50 text-amber-700 font-black text-xs rounded-full border border-amber-200 flex items-center gap-1.5 w-fit">
                           <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                           ⏳ Chờ XN vi sinh
                         </span>
                       ) : isPassed ? (
-                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 font-black text-xs rounded-full border border-emerald-200">✅ Đạt Tiêu Chuẩn</span>
+                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 font-black text-xs rounded-full border border-emerald-200 font-extrabold flex items-center gap-1 w-fit">
+                          <span className="material-symbols-outlined text-sm">verified</span>
+                          ✅ Đã XN (Chờ QLK duyệt)
+                        </span>
                       ) : (
-                        <span className="px-3 py-1 bg-rose-50 text-rose-700 font-black text-xs rounded-full border border-rose-200">❌ Không Đạt (Hủy)</span>
+                        <span className="px-3 py-1 bg-rose-50 text-rose-700 font-black text-xs rounded-full border border-rose-200 flex items-center gap-1 w-fit">
+                          <span className="material-symbols-outlined text-sm">cancel</span>
+                          ❌ Không Đạt (Hủy)
+                        </span>
                       )}
                     </td>
                     <td className="px-5 py-4 text-xs font-medium text-slate-600 max-w-xs truncate">
-                      {isReTestReq ? (
-                        <span className="px-2.5 py-1 bg-purple-100 text-purple-800 font-black text-xs rounded-xl border border-purple-200 flex items-center gap-1 w-fit animate-pulse">
-                          <span className="material-symbols-outlined text-sm">replay</span>
-                          Yêu cầu Re-test lần 2
-                        </span>
-                      ) : (
-                        item.moTa || 'Đang chờ xét nghiệm'
-                      )}
+                      {item.moTa || 'Đang chờ xét nghiệm vi sinh'}
                     </td>
                     <td className="px-5 py-4">
                       <button
-                        onClick={() => setModalItem({ item, isReTest: isReTestReq })}
+                        onClick={() => setModalItem({ item, isReTest: item.isReTest || isReTestReq })}
                         className={`h-9 px-4 rounded-xl text-white font-black text-xs flex items-center gap-1.5 shadow-md transition-all active:scale-95 whitespace-nowrap ${
-                          isReTestReq ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-200' : 'bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 hover:from-red-700 hover:to-pink-700 shadow-rose-500/25'
+                          item.isReTest || isReTestReq 
+                            ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-200' 
+                            : !isPending 
+                              ? 'bg-cyan-600 hover:bg-cyan-700 shadow-cyan-200' 
+                              : 'bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 hover:from-red-700 hover:to-pink-700 shadow-rose-500/25'
                         }`}
                       >
-                        <span className="material-symbols-outlined text-base">{isReTestReq ? 'replay' : 'biotech'}</span>
-                        <span>{isReTestReq ? 'Xét Nghiệm Lại Lần 2' : '🧪 Nhập Kết Quả XN'}</span>
+                        <span className="material-symbols-outlined text-base">
+                          {item.isReTest || isReTestReq ? 'replay' : !isPending ? 'edit_note' : 'biotech'}
+                        </span>
+                        <span>
+                          {item.isReTest || isReTestReq 
+                            ? `🔄 Re-test Lần ${item.soLanXetNghiem || 2}` 
+                            : !isPending 
+                              ? '✏️ Cập Nhật Kết Quả' 
+                              : '🧪 Nhập Kết Quả XN'}
+                        </span>
                       </button>
                     </td>
+
                   </tr>
                 );
               })}
