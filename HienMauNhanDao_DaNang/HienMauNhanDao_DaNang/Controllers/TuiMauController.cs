@@ -293,7 +293,8 @@ namespace HienMauNhanDao_DaNang.Controllers
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
-                .Where(t => t.TrangThai == TrangThaiTuiMau.DaLuuKho || t.TrangThai == TrangThaiTuiMau.DaHuy)
+                .Where(t => t.TrangThai == TrangThaiTuiMau.DaLuuKho || t.TrangThai == TrangThaiTuiMau.DaHuy || t.TrangThai == TrangThaiTuiMau.DaSuDung || t.TrangThai == TrangThaiTuiMau.HetHan)
+
                 .OrderByDescending(t => t.ThoiGianLayMau)
                 .ThenByDescending(t => t.MaTuiMau)
                 .ToListAsync();
