@@ -699,6 +699,9 @@ export default function DonDangKy() {
   const { nhanVien } = useOutletContext();
   const navigate = useNavigate();
   const [dons, setDons] = useState([]);
+  const [allDonsRaw, setAllDonsRaw] = useState([]);
+  const [chienDichList, setChienDichList] = useState([]);
+  const [selectedCampaignMa, setSelectedCampaignMa] = useState('ALL');
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -713,16 +716,34 @@ export default function DonDangKy() {
     setTimeout(() => setToast(null), 3500);
   };
 
+  useEffect(() => {
+    const fetchChienDichs = async () => {
+      try {
+        const response = await chienDichService.getChienDichs();
+        let list = Array.isArray(response) ? response : (response?.data || response?.content || []);
+        setChienDichList(list);
+      } catch (e) { console.error('Error fetching chiến dịch list:', e); }
+    };
+    fetchChienDichs();
+  }, []);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await donDangKyNvytService.getAll(page, PAGE_SIZE, keyword);
+      const res = await donDangKyNvytService.getAll(0, 1000, '');
       const allContent = Array.isArray(res) ? res : (res.content || res.data || []);
+      setAllDonsRaw(allContent);
       
       let filtered = allContent;
+
+      // Lọc theo Chiến dịch & Địa điểm được chọn trên ComboBox
+      if (selectedCampaignMa !== 'ALL') {
+        filtered = filtered.filter(item => item.maChienDich === selectedCampaignMa || item.chienDich?.maChienDich === selectedCampaignMa);
+      }
+
       if (keyword.trim()) {
         const kw = keyword.toLowerCase().trim();
-        filtered = allContent.filter(item => {
+        filtered = filtered.filter(item => {
           const maDon = String(item.maDon || '').toLowerCase();
           const hoTen = String(item.tinhNguyenVien?.hoTen || item.tinhNguyenVien?.hoVaTen || item.tinhNguyenVien?.HoTen || item.maTNV || '').toLowerCase();
           const cccd = String(item.tinhNguyenVien?.cccd || item.tinhNguyenVien?.soCCCD || item.tinhNguyenVien?.Cccd || '').toLowerCase();
@@ -739,11 +760,76 @@ export default function DonDangKy() {
       setDons(paginatedDons);
     } catch { showToast('Lỗi khi tải danh sách đơn đăng ký', 'error'); }
     finally { setLoading(false); }
-  }, [page, keyword]);
+  }, [page, keyword, selectedCampaignMa]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const handleSearch = () => { setKeyword(searchInput); setPage(0); };
+  const selectedCampaignObj = useMemo(() => {
+    return chienDichList.find(c => c.maChienDich === selectedCampaignMa) || null;
+  }, [chienDichList, selectedCampaignMa]);
+
+  const campaignStats = useMemo(() => {
+    let list = allDonsRaw;
+    if (selectedCampaignMa !== 'ALL') {
+      list = list.filter(d => d.maChienDich === selectedCampaignMa || d.chienDich?.maChienDich === selectedCampaignMa);
+    }
+    const tong = list.length;
+    const cho = list.filter(d => d.trangThai === 'DaDangKy' || !d.trangThai).length;
+    const da = list.filter(d => d.trangThai === 'ChoDuyet' || d.trangThai === 'DaDuyet' || d.trangThai === 'DaHoanThanh').length;
+    return { tong, cho, da };
+  }, [allDonsRaw, selectedCampaignMa]);
+
+
+
+  const handleSearch = async () => {
+    const kw = searchInput.trim();
+    setKeyword(kw);
+    setPage(0);
+
+    if (!kw) return;
+
+    // Kiểm tra xem TNV có đăng ký nhầm chiến dịch / địa điểm khác không
+    const match = allDonsRaw.find(d => {
+      const maDon = String(d.maDon || '').toLowerCase();
+      const hoTen = String(d.tinhNguyenVien?.hoTen || d.tinhNguyenVien?.hoVaTen || d.tinhNguyenVien?.HoTen || d.maTNV || '').toLowerCase();
+      const cccd = String(d.tinhNguyenVien?.cccd || d.tinhNguyenVien?.soCCCD || d.tinhNguyenVien?.Cccd || '').toLowerCase();
+      return maDon === kw.toLowerCase() || hoTen.includes(kw.toLowerCase()) || cccd === kw.toLowerCase();
+    });
+
+    if (match) {
+      const matchCD = match.maChienDich || match.chienDich?.maChienDich || '';
+      const matchTenCD = match.chienDich?.tenChienDich || matchCD;
+      const matchDiaDiem = match.chienDich?.diaDiem?.tenDiaDiem || 'Địa điểm đăng ký ban đầu';
+
+      if (selectedCampaignMa !== 'ALL' && matchCD && selectedCampaignMa !== matchCD) {
+        const currentCampaignObj = chienDichList.find(c => c.maChienDich === selectedCampaignMa);
+        const res = await Swal.fire({
+          title: '⚠️ CẢNH BÁO TÌNH NGUYỆN VIÊN ĐI NHẦM ĐỊA ĐIỂM!',
+          html: `
+            <div style="text-align: left; font-size: 13px; line-height: 1.6; color: #334155;">
+              <p style="margin-bottom: 6px;">👤 <b>TNV:</b> <span style="color: #0f172a; font-weight: 800;">${match.tinhNguyenVien?.hoTen || match.tinhNguyenVien?.hoVaTen || 'Người hiến máu'}</span></p>
+              <p style="margin-bottom: 6px;">📄 <b>Đã đăng ký online cho:</b> <span style="color: #e62e43; font-weight: 800;">[${matchTenCD}]</span></p>
+              <p style="margin-bottom: 6px;">📍 <b>Địa điểm ban đầu:</b> ${matchDiaDiem}</p>
+              <hr style="margin: 10px 0; border-color: #e2e8f0;" />
+              <p style="color: #64748b;">TNV này đang đi nhầm sang địa điểm quầy hiện tại của bạn: <b style="color: #0f172a;">[${currentCampaignObj?.tenChienDich || 'Địa điểm quầy hiện tại'}]</b>.</p>
+              <p style="color: #059669; font-weight: 800; margin-top: 8px;">Bạn có muốn chuyển sang Tiếp Nhận Trực Tiếp (Walk-in) tại quầy hiện tại luôn không?</p>
+            </div>
+          `,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#e62e43',
+          cancelButtonColor: '#64748b',
+          confirmButtonText: 'Chuyển Tiếp Nhận (Walk-in)',
+          cancelButtonText: 'Hủy / Nhắc TNV đi đúng nơi'
+        });
+
+        if (res.isConfirmed) {
+          setModal({ mode: 'create', don: null });
+        }
+      }
+    }
+  };
+
 
   const handleDelete = async (don) => {
     if (!don) return;
@@ -854,6 +940,63 @@ export default function DonDangKy() {
         </div>
       </div>
 
+      {/* Campaign & Location Selector & Realtime Stats Banner */}
+      <div className="bg-white border border-rose-100 rounded-2xl p-5 shadow-sm space-y-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <span className="material-symbols-outlined text-2xl text-[#e62e43]">location_city</span>
+            <div>
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Khu vực địa điểm tiếp nhận</p>
+              <h3 className="font-extrabold text-slate-800 text-sm">
+                {selectedCampaignObj ? `${selectedCampaignObj.tenChienDich} (${selectedCampaignObj.diaDiem?.tenDiaDiem || 'Bệnh viện / Cơ sở tổ chức'})` : 'Tất cả địa điểm chiến dịch trên toàn thành phố'}
+              </h3>
+            </div>
+          </div>
+
+          <div className="w-full md:w-80">
+            <select
+              value={selectedCampaignMa}
+              onChange={e => { setSelectedCampaignMa(e.target.value); setPage(0); }}
+              className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-rose-500 cursor-pointer shadow-xs"
+            >
+              <option value="ALL">🏢 Tất cả chiến dịch & địa điểm</option>
+              {chienDichList.map(c => (
+                <option key={c.maChienDich} value={c.maChienDich}>
+                  📍 [{c.maChienDich}] {c.tenChienDich} - {c.diaDiem?.tenDiaDiem || c.tenDiaDiem || 'BV/Quận'}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Realtime Campaign Stats */}
+        <div className="grid grid-cols-3 gap-3 pt-3 border-t border-slate-100">
+          <div className="p-3 bg-rose-50/60 border border-rose-100 rounded-xl flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black text-slate-500 uppercase">TỔNG ĐƠN TẠI ĐIỂM</p>
+              <p className="text-lg font-black text-[#e62e43] mt-0.5">{campaignStats.tong}</p>
+            </div>
+            <span className="material-symbols-outlined text-rose-400 text-xl">description</span>
+          </div>
+
+          <div className="p-3 bg-amber-50/60 border border-amber-100 rounded-xl flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black text-slate-500 uppercase">CHỜ TIẾP NHẬN</p>
+              <p className="text-lg font-black text-amber-600 mt-0.5">{campaignStats.cho}</p>
+            </div>
+            <span className="material-symbols-outlined text-amber-400 text-xl">pending_actions</span>
+          </div>
+
+          <div className="p-3 bg-emerald-50/60 border border-emerald-100 rounded-xl flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black text-slate-500 uppercase">ĐÃ TIẾP NHẬN</p>
+              <p className="text-lg font-black text-emerald-600 mt-0.5">{campaignStats.da}</p>
+            </div>
+            <span className="material-symbols-outlined text-emerald-400 text-xl">task_alt</span>
+          </div>
+        </div>
+      </div>
+
       {/* Toolbar & Search Bar */}
       <div className="bg-white border border-rose-100 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
@@ -867,9 +1010,9 @@ export default function DonDangKy() {
         </div>
         <div className="flex gap-2">
           <button onClick={handleSearch}
-            className="h-11 px-5 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-700 hover:to-red-700 text-white rounded-xl font-black text-xs transition-all shadow-md shadow-rose-500/20 active:scale-95 flex items-center gap-1.5">
+            className="h-11 px-6 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-700 hover:to-red-700 text-white rounded-xl font-black text-xs transition-all shadow-md shadow-rose-500/20 active:scale-95 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-base">search</span>
-            <span>Tìm kiếm</span>
+            <span>🔍 KIỂM TRA</span>
           </button>
           {keyword && (
             <button onClick={() => { setKeyword(''); setSearchInput(''); setPage(0); }}
@@ -879,6 +1022,7 @@ export default function DonDangKy() {
           )}
         </div>
       </div>
+
 
       {/* Table */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
