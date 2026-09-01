@@ -424,24 +424,20 @@ export default function CapNhatXetNghiem() {
                       {item.isReTest || isReTestReq ? (
                         <span className="px-3 py-1 bg-purple-50 text-purple-700 font-black text-xs rounded-full border border-purple-200 flex items-center gap-1.5 w-fit animate-pulse">
                           <span className="w-2 h-2 rounded-full bg-purple-600 animate-ping"></span>
-                          🚨 Yêu cầu Re-test từ QLK
+                          🚨 Đang chờ kiểm tra lại
                         </span>
                       ) : isPending ? (
                         <span className="px-3 py-1 bg-amber-50 text-amber-700 font-black text-xs rounded-full border border-amber-200 flex items-center gap-1.5 w-fit">
                           <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                          ⏳ Chờ XN vi sinh
-                        </span>
-                      ) : isPassed ? (
-                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 font-black text-xs rounded-full border border-emerald-200 font-extrabold flex items-center gap-1 w-fit">
-                          <span className="material-symbols-outlined text-sm">verified</span>
-                          ✅ Đã XN (Chờ QLK duyệt)
+                          ⏳ Chờ kết quả xét nghiệm
                         </span>
                       ) : (
-                        <span className="px-3 py-1 bg-rose-50 text-rose-700 font-black text-xs rounded-full border border-rose-200 flex items-center gap-1 w-fit">
-                          <span className="material-symbols-outlined text-sm">cancel</span>
-                          ❌ Không Đạt (Hủy)
+                        <span className="px-3 py-1 bg-cyan-50 text-cyan-700 font-black text-xs rounded-full border border-cyan-200 font-extrabold flex items-center gap-1 w-fit">
+                          <span className="material-symbols-outlined text-sm">inventory_2</span>
+                          ⌛ Chờ nhập kho
                         </span>
                       )}
+
                     </td>
                     <td className="px-5 py-4 text-xs font-medium text-slate-600 max-w-xs truncate">
                       {item.moTa || 'Đang chờ xét nghiệm vi sinh'}

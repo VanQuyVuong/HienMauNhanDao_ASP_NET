@@ -47,8 +47,9 @@ namespace HienMauNhanDao_DaNang.Controllers
 
                 bool isReTest = false;
                 string moTa = "Chờ xét nghiệm lần đầu";
-                string trangThaiText = "Chờ xét nghiệm";
+                string trangThaiText = "⏳ Chờ kết quả xét nghiệm";
                 bool? ketQuaVal = null;
+
                 int soLanXn = 1;
                 string maKQ = "CHUA_TEST_" + item.MaTuiMau;
                 string maNV = "";
