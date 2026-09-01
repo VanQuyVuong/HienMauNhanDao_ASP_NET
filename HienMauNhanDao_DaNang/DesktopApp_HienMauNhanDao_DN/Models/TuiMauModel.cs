@@ -93,6 +93,12 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
         [JsonProperty("ketQua")]
         public bool? KetQua { get; set; }
 
+        [JsonProperty("isReTest")]
+        public bool IsReTest { get; set; }
+
+        [JsonProperty("trangThaiText")]
+        public string? TrangThaiText { get; set; }
+
         [JsonProperty("moTa")]
         public string MoTa { get; set; } = string.Empty;
 
@@ -108,11 +114,24 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
         {
             get
             {
+                if (!string.IsNullOrEmpty(TrangThaiText)) return TrangThaiText;
+                if (IsReTest) return "🚨 Yêu cầu Re-test từ QLK";
                 if (KetQua == null) return "⏳ Chờ XN vi sinh";
-                return KetQua == true ? "✅ Đạt Tiêu Chuẩn" : "❌ Không Đạt (Hủy)";
+                return KetQua == true ? "✅ Đã XN (Chờ QLK duyệt)" : "❌ Không Đạt (Hủy)";
+            }
+        }
+
+        public string ButtonText
+        {
+            get
+            {
+                if (IsReTest || (MoTa ?? "").ToLower().Contains("re-test")) return $"🔄 Re-test Lần {SoLanXetNghiem}";
+                if (KetQua != null) return "✏️ Cập Nhật Kết Quả";
+                return "🧪 Nhập Kết Quả XN";
             }
         }
     }
+
 
     public class SaveXetNghiemRequest
     {
