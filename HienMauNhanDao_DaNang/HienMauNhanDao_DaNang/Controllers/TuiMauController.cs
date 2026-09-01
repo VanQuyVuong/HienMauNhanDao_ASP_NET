@@ -284,7 +284,7 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
 
-        // API 5: Lấy danh sách túi máu đã thu nhận cho Tab 2 & QLK (Sắp xếp mới nhất lên đầu)
+        // API 5: Nơi lưu trữ túi máu đã thu nhận (Chỉ hiển thị các túi máu đã nhập kho hoặc đã bị hủy)
         [HttpGet]
         public async Task<IActionResult> GetDanhSachTuiMauChoQLK()
         {
@@ -293,9 +293,11 @@ namespace HienMauNhanDao_DaNang.Controllers
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
+                .Where(t => t.TrangThai == TrangThaiTuiMau.DaLuuKho || t.TrangThai == TrangThaiTuiMau.DaHuy)
                 .OrderByDescending(t => t.ThoiGianLayMau)
                 .ThenByDescending(t => t.MaTuiMau)
                 .ToListAsync();
+
 
             var ketQua = danhSach.Select(t =>
             {

@@ -80,7 +80,8 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-                        <Button x:Name="btnTabCompleted" Content="🩸 2. Túi Máu Đã Lấy (Chờ XN)" Height="40" Padding="16,0" Margin="6,0,0,0"
+                        <Button x:Name="btnTabCompleted" Content="🩸 2. Nơi Lưu Trữ Túi Máu Đã Thu" Height="40" Padding="16,0" Margin="6,0,0,0"
+
                                 Background="Transparent" Foreground="White" FontWeight="Bold" FontSize="12" 
                                 Cursor="Hand" BorderThickness="0" Click="btnTabCompleted_Click">
                             <Button.Template>
