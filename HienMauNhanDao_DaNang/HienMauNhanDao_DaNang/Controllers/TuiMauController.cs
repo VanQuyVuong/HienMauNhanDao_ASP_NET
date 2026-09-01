@@ -345,16 +345,20 @@ namespace HienMauNhanDao_DaNang.Controllers
                 // Reset trạng thái về Chưa xử lý và rút khỏi kho tạm thời
                 tuiMau.TrangThai = TrangThaiTuiMau.ChuaXuLy;
                 tuiMau.MaKho = null;
-                // Xóa kết quả xét nghiệm cũ trong DB để bác sĩ làm lại từ đầu
+                
+                // Đánh dấu Re-test trong KetQuaXetNghiems thay vì xóa bỏ hoàn toàn
                 var xetNghiem = await _context.KetQuaXetNghiems.FirstOrDefaultAsync(k => k.MaTuiMau == id);
                 if (xetNghiem != null)
                 {
-                    _context.KetQuaXetNghiems.Remove(xetNghiem);
+                    xetNghiem.MoTa = "🚨 QLK Yêu cầu Re-test (Kiểm tra lại vi sinh)";
+                    xetNghiem.KetQua = null;
+                    xetNghiem.SoLanXetNghiem = (xetNghiem.SoLanXetNghiem ?? 1) + 1;
                 }
             }
             await _context.SaveChangesAsync();
-            return Ok(new { success = true, message = "Cập nhật trạng thái túi máu thành công." });
+            return Ok(new { success = true, message = "Đã gửi yêu cầu xét nghiệm lại (Re-test) tới NVXN." });
         }
+
 
         //api get lấy danh sách các túi máu theo chiến dịch phục vụ thống kê (Danh cho QLK)
         // API 8: Lấy danh sách túi máu trong kho (phục vụ quản lý kho)
