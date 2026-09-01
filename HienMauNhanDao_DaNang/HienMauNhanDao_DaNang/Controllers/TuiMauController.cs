@@ -288,30 +288,21 @@ namespace HienMauNhanDao_DaNang.Controllers
         [HttpGet]
         public async Task<IActionResult> GetDanhSachTuiMauChoQLK()
         {
-            var testedMaTuiMaus = await _context.KetQuaXetNghiems
-                .Select(k => k.MaTuiMau)
-                .Distinct()
-                .ToListAsync();
-
+            // Chỉ lấy các túi máu đã kết thúc quy trình: 1 là Đã Nhập Kho (DaLuuKho), 2 là Đã Hủy (DaHuy)
             var danhSach = await _context.TuiMaus
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
-                .Where(t => testedMaTuiMaus.Contains(t.MaTuiMau) || t.TrangThai == TrangThaiTuiMau.DaXetNghiem || t.TrangThai == TrangThaiTuiMau.DaLuuKho || t.TrangThai == TrangThaiTuiMau.DaHuy)
+                .Where(t => t.TrangThai == TrangThaiTuiMau.DaLuuKho || t.TrangThai == TrangThaiTuiMau.DaHuy)
                 .OrderByDescending(t => t.ThoiGianLayMau)
                 .ThenByDescending(t => t.MaTuiMau)
                 .ToListAsync();
 
             var ketQua = danhSach.Select(t =>
             {
-                string trangThaiString = "Chờ xét nghiệm";
-                if (t.TrangThai == TrangThaiTuiMau.DaXetNghiem)
-                    trangThaiString = "Yêu cầu nhập kho";
-                else if (t.TrangThai == TrangThaiTuiMau.DaLuuKho)
-                    trangThaiString = "Nhập kho";
-                else if (t.TrangThai == TrangThaiTuiMau.DaHuy)
-                    trangThaiString = "Đã hủy";
+                string trangThaiString = t.TrangThai == TrangThaiTuiMau.DaLuuKho ? "Nhập kho" : "Đã hủy";
+
 
                 return new
                 {

@@ -24,16 +24,17 @@ namespace HienMauNhanDao_DaNang.Controllers
         [HttpGet("danh-sach")]
         public async Task<IActionResult> GetDanhSachXetNghiem()
         {
-            // Lấy tất cả túi máu trong CSDL mà CHƯA nhập kho hoàn toàn (DaLuuKho) và CHƯA bị tiêu hủy chính thức (DaHuy)
+            // Chỉ lấy túi máu có trạng thái Chưa xử lý (Chờ XN / Re-test) hoặc Đã xét nghiệm (Chờ nhập kho)
             var activeTuiMaus = await _context.TuiMaus
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
-                .Where(t => t.TrangThai != TrangThaiTuiMau.DaLuuKho && t.TrangThai != TrangThaiTuiMau.DaHuy)
+                .Where(t => t.TrangThai == TrangThaiTuiMau.ChuaXuLy || t.TrangThai == TrangThaiTuiMau.DaXetNghiem)
                 .OrderByDescending(t => t.ThoiGianLayMau)
                 .ThenByDescending(t => t.MaTuiMau)
                 .ToListAsync();
+
 
             var allKqDict = await _context.KetQuaXetNghiems
                 .ToDictionaryAsync(k => k.MaTuiMau, k => k);
