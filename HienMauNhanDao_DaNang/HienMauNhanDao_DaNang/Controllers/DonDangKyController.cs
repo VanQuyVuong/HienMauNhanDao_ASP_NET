@@ -47,7 +47,27 @@ namespace HienMauNhanDao_DaNang.Controllers
                 await _context.SaveChangesAsync();
             }
 
+            // 0. Kiểm tra khoảng cách thời gian giữa 2 lần hiến máu (Tối thiểu 84 ngày / 3 tháng theo quy định Bộ Y Tế)
+            var lanHienGanNhat = await _context.DonDangKys
+                .Where(d => d.MaTNV == tnv.maTNV && d.TrangThai == TrangThaiDonDangKy.DaHoanThanh)
+                .OrderByDescending(d => d.ThoiGianDangKy)
+                .FirstOrDefaultAsync();
+
+            if (lanHienGanNhat != null && lanHienGanNhat.ThoiGianDangKy.HasValue)
+            {
+                var khoangCach = (DateTime.Now - lanHienGanNhat.ThoiGianDangKy.Value).TotalDays;
+                if (khoangCach < 84)
+                {
+                    int soNgayConLai = 84 - (int)Math.Floor(khoangCach);
+                    return BadRequest(new { 
+                        success = false, 
+                        message = $"⚠️ BẠN CHƯA ĐỦ THỜI GIAN GIÃN CÁCH HIẾN MÁU!\n\nLần hiến máu hoàn thành gần nhất của bạn là ngày [{lanHienGanNhat.ThoiGianDangKy.Value:dd/MM/yyyy}] (cách đây {(int)Math.Floor(khoangCach)} ngày).\n\nTheo quy định Bộ Y Tế, khoảng cách tối thiểu giữa 2 lần hiến máu là 84 ngày (3 tháng).\nBạn vui lòng đợi thêm {soNgayConLai} ngày nữa để đảm bảo sức khỏe nhé!" 
+                    });
+                }
+            }
+
             var chienDich = string.IsNullOrEmpty(request.MaChienDich) ? null : await _context.ChienDichHienMaus.FindAsync(request.MaChienDich);
+
             if (chienDich == null)
             {
                 var defaultRoutine = await _context.ChienDichHienMaus
