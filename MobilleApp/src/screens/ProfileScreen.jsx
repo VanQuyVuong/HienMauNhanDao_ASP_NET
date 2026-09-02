@@ -1,5 +1,4 @@
 // src/screens/ProfileScreen.jsx
-// Màn hình Hồ sơ cá nhân & Đăng xuất — Đà Nẵng
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -22,7 +21,6 @@ export default function ProfileScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Hàm gọi API lấy hồ sơ Tình nguyện viên
   const fetchProfile = useCallback(async () => {
     try {
       const storedEmail = await AsyncStorage.getItem("email");
@@ -48,7 +46,6 @@ export default function ProfileScreen({ navigation }) {
     fetchProfile();
   };
 
-  // Hàm xử lý Đăng xuất
   const handleLogout = async () => {
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("email");
@@ -64,26 +61,21 @@ export default function ProfileScreen({ navigation }) {
     );
   }
 
-  // Danh sách các dòng thông tin cá nhân
   const infoRows = profile
     ? [
-        { label: "Họ tên", value: profile.hoTen, icon: "👤" },
+        { label: "Họ và tên", value: profile.hoTen, icon: "👤" },
         { label: "Ngày sinh", value: profile.ngaySinh || "—", icon: "🎂" },
         { label: "Giới tính", value: profile.gioiTinh || "—", icon: "⚧" },
-        { label: "CCCD", value: profile.cccd || "—", icon: "🪪" },
-        {
-          label: "Số điện thoại",
-          value: profile.soDienThoai || "—",
-          icon: "📱",
-        },
-        { label: "Nhóm máu", value: profile.nhomMau || "—", icon: "🩸" },
+        { label: "CCCD / CMND", value: profile.cccd || "—", icon: "🪪" },
+        { label: "Số điện thoại", value: profile.soDienThoai || "—", icon: "📱" },
+        { label: "Nhóm máu", value: profile.nhomMau ? profile.nhomMau.replace('_positive', '+').replace('_negative', '-') : "—", icon: "🩸" },
         { label: "Địa chỉ", value: profile.diaChi || "—", icon: "📍" },
       ]
     : [];
 
   return (
     <View style={styles.root}>
-      {/* Header Avatar & Tên */}
+      {/* Avatar & Header */}
       <LinearGradient colors={["#e62e43", "#c01b30"]} style={styles.header}>
         <View style={styles.avatarCircle}>
           <Text style={styles.avatarText}>
@@ -100,36 +92,49 @@ export default function ProfileScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#e62e43"
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#e62e43" />
         }
       >
-        {/* Danh sách thông tin cá nhân */}
+        {/* Quick Access Menu Cards */}
+        <View style={styles.quickMenuRow}>
+          <Pressable
+            onPress={() => navigation.navigate("DonationHistory")}
+            style={({ pressed }) => [styles.quickCard, pressed && { transform: [{ scale: 0.96 }] }]}
+          >
+            <LinearGradient colors={["#ef4444", "#dc2626"]} style={styles.quickCardGradient}>
+              <Text style={styles.quickIcon}>📜</Text>
+              <Text style={styles.quickTitle}>Lịch sử Hiến máu</Text>
+              <Text style={styles.quickSub}>& Giấy chứng nhận 🏅</Text>
+            </LinearGradient>
+          </Pressable>
+
+          <Pressable
+            onPress={() => navigation.navigate("UpdateProfile")}
+            style={({ pressed }) => [styles.quickCard, pressed && { transform: [{ scale: 0.96 }] }]}
+          >
+            <LinearGradient colors={["#3b82f6", "#2563eb"]} style={styles.quickCardGradient}>
+              <Text style={styles.quickIcon}>✏️</Text>
+              <Text style={styles.quickTitle}>Cập nhật Hồ sơ</Text>
+              <Text style={styles.quickSub}>Thông tin cá nhân 🪪</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
+
+        {/* Thông tin chi tiết */}
         {profile ? (
           <View style={styles.card}>
             <View style={styles.cardHeaderRow}>
               <Text style={styles.cardTitle}>Thông tin cá nhân</Text>
               <Pressable
                 onPress={() => navigation.navigate("UpdateProfile")}
-                style={({ pressed }) => [
-                  styles.editBtn,
-                  pressed && { opacity: 0.7 },
-                ]}
+                style={({ pressed }) => [styles.editBtn, pressed && { opacity: 0.7 }]}
               >
-                <Text style={styles.editBtnText}>✏️ Chỉnh sửa</Text>
+                <Text style={styles.editBtnText}>Chỉnh sửa</Text>
               </Pressable>
             </View>
+
             {infoRows.map((row, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.row,
-                  i < infoRows.length - 1 && styles.rowBorder,
-                ]}
-              >
+              <View key={i} style={[styles.row, i < infoRows.length - 1 && styles.rowBorder]}>
                 <Text style={styles.rowIcon}>{row.icon}</Text>
                 <View style={styles.rowContent}>
                   <Text style={styles.rowLabel}>{row.label}</Text>
@@ -141,19 +146,15 @@ export default function ProfileScreen({ navigation }) {
         ) : (
           <View style={styles.emptyCard}>
             <Text style={{ fontSize: 44, marginBottom: 12 }}>📝</Text>
-            <Text style={styles.emptyTitle}>Chưa có hồ sơ</Text>
+            <Text style={styles.emptyTitle}>Chưa có hồ sơ cá nhân</Text>
             <Text style={styles.emptyDesc}>
-              Tài khoản chưa có thông tin hồ sơ. Bạn hãy cập nhật thông tin để
-              bắt đầu đăng ký hiến máu nhé!
+              Hãy cập nhật thông tin để đủ điều kiện đăng ký tham gia các chiến dịch hiến máu nhân đạo nhé!
             </Text>
             <Pressable
               onPress={() => navigation.navigate("UpdateProfile")}
-              style={({ pressed }) => [
-                styles.createProfileBtn,
-                pressed && { opacity: 0.85 },
-              ]}
+              style={({ pressed }) => [styles.createProfileBtn, pressed && { opacity: 0.85 }]}
             >
-              <Text style={styles.createProfileBtnText}>+ Cập nhật thông tin ngay</Text>
+              <Text style={styles.createProfileBtnText}>+ Cập nhật hồ sơ ngay</Text>
             </Pressable>
           </View>
         )}
@@ -170,23 +171,18 @@ export default function ProfileScreen({ navigation }) {
           <Text style={styles.logoutText}>🚪 Đăng xuất tài khoản</Text>
         </Pressable>
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#f8f9fa" },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f8f9fa",
-  },
-  loadingText: { marginTop: 12, color: "#888", fontSize: 14 },
+  root: { flex: 1, backgroundColor: "#f8fafc" },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f8fafc" },
+  loadingText: { marginTop: 12, color: "#64748b", fontSize: 14, fontWeight: "600" },
   header: {
-    paddingTop: Platform.OS === "ios" ? 54 : Platform.OS === "web" ? 20 : 40,
+    paddingTop: Platform.OS === "ios" ? 54 : Platform.OS === "web" ? 24 : 44,
     paddingBottom: 28,
     paddingHorizontal: 20,
     alignItems: "center",
@@ -194,108 +190,62 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 28,
   },
   avatarCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     backgroundColor: "rgba(255,255,255,0.25)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
     borderWidth: 3,
-    borderColor: "rgba(255,255,255,0.4)",
+    borderColor: "rgba(255,255,255,0.5)",
   },
-  avatarText: { fontSize: 28, fontWeight: "900", color: "#fff" },
-  headerName: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: "#fff",
-    marginBottom: 2,
-  },
-  headerEmail: { fontSize: 13, color: "rgba(255,255,255,0.8)" },
+  avatarText: { fontSize: 30, fontWeight: "900", color: "#ffffff" },
+  headerName: { fontSize: 20, fontWeight: "900", color: "#ffffff", marginBottom: 2 },
+  headerEmail: { fontSize: 13, color: "rgba(255,255,255,0.85)" },
   scrollContent: { padding: 16 },
+  quickMenuRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
+  quickCard: { flex: 1, borderRadius: 18, overflow: "hidden" },
+  quickCardGradient: { padding: 16, borderRadius: 18 },
+  quickIcon: { fontSize: 26, marginBottom: 6 },
+  quickTitle: { fontSize: 14, fontWeight: "800", color: "#ffffff" },
+  quickSub: { fontSize: 11, color: "rgba(255,255,255,0.85)", marginTop: 2 },
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 18,
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
     padding: 18,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: "#e62e43",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
   },
-  cardHeaderRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 14,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#1a1a2e",
-  },
-  editBtn: {
-    backgroundColor: "#ffeef0",
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
+  cardHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14 },
+  cardTitle: { fontSize: 16, fontWeight: "800", color: "#0f172a" },
+  editBtn: { backgroundColor: "#fee2e2", paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
   editBtnText: { fontSize: 12, fontWeight: "700", color: "#e62e43" },
-  createProfileBtn: {
-    backgroundColor: "#e62e43",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    marginTop: 16,
-  },
-  createProfileBtnText: { color: "#fff", fontSize: 13, fontWeight: "800" },
   row: { flexDirection: "row", alignItems: "center", paddingVertical: 12 },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: "#f5f5f5" },
-  rowIcon: { fontSize: 18, marginRight: 12, width: 28, textAlign: "center" },
+  rowBorder: { borderBottomWidth: 1, borderBottomColor: "#f1f5f9" },
+  rowIcon: { fontSize: 20, marginRight: 14 },
   rowContent: { flex: 1 },
-  rowLabel: { fontSize: 12, color: "#aaa", marginBottom: 2 },
-  rowValue: { fontSize: 15, fontWeight: "600", color: "#1a1a2e" },
-  emptyCard: {
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    padding: 32,
+  rowLabel: { fontSize: 12, color: "#64748b", fontWeight: "600" },
+  rowValue: { fontSize: 14, color: "#0f172a", fontWeight: "700", marginTop: 2 },
+  emptyCard: { backgroundColor: "#ffffff", borderRadius: 20, padding: 24, alignItems: "center", marginBottom: 16 },
+  emptyTitle: { fontSize: 18, fontWeight: "800", color: "#0f172a", marginBottom: 6 },
+  emptyDesc: { fontSize: 13, color: "#64748b", textAlign: "center", lineHeight: 20 },
+  createProfileBtn: { backgroundColor: "#e62e43", paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14, marginTop: 16 },
+  createProfileBtnText: { color: "#ffffff", fontWeight: "800", fontSize: 14 },
+  logoutBtn: {
+    backgroundColor: "#fee2e2",
+    borderRadius: 16,
+    paddingVertical: 14,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#fde2e4",
-    borderStyle: "dashed",
+    borderColor: "#fecaca",
   },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#1a1a2e",
-    marginBottom: 6,
-  },
-  emptyDesc: {
-    fontSize: 13,
-    color: "#888",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  logoutBtn: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 8,
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#fde2e4",
-    ...Platform.select({
-      web: {
-        transitionProperty: "transform, background-color, border-color",
-        transitionDuration: "200ms",
-        cursor: "pointer",
-      },
-    }),
-  },
-  logoutBtnHovered: {
-    backgroundColor: "#ffeef0",
-    borderColor: "#e62e43",
-  },
-  logoutText: { fontSize: 15, fontWeight: "700", color: "#e62e43" },
+  logoutBtnHovered: { backgroundColor: "#fca5a5" },
+  logoutText: { color: "#dc2626", fontWeight: "800", fontSize: 15 },
 });

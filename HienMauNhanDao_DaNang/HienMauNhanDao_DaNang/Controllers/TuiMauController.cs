@@ -284,34 +284,25 @@ namespace HienMauNhanDao_DaNang.Controllers
         }
 
 
-        // API 5: Lấy danh sách túi máu đã có kết quả xét nghiệm (Phê duyệt, Không đạt, Re-test) cho Tab 2 & QLK (Sắp xếp mới nhất lên đầu)
+        // API 5: Nơi lưu trữ túi máu đã thu nhận (Chỉ hiển thị các túi máu đã nhập kho hoặc đã bị hủy)
         [HttpGet]
         public async Task<IActionResult> GetDanhSachTuiMauChoQLK()
         {
-            var testedMaTuiMaus = await _context.KetQuaXetNghiems
-                .Select(k => k.MaTuiMau)
-                .Distinct()
-                .ToListAsync();
-
             var danhSach = await _context.TuiMaus
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
-                .Where(t => testedMaTuiMaus.Contains(t.MaTuiMau) || t.TrangThai == TrangThaiTuiMau.DaXetNghiem || t.TrangThai == TrangThaiTuiMau.DaLuuKho || t.TrangThai == TrangThaiTuiMau.DaHuy)
+                .Where(t => t.TrangThai == TrangThaiTuiMau.DaLuuKho || t.TrangThai == TrangThaiTuiMau.DaHuy || t.TrangThai == TrangThaiTuiMau.DaSuDung || t.TrangThai == TrangThaiTuiMau.HetHan)
+
                 .OrderByDescending(t => t.ThoiGianLayMau)
                 .ThenByDescending(t => t.MaTuiMau)
                 .ToListAsync();
 
+
             var ketQua = danhSach.Select(t =>
             {
-                string trangThaiString = "Chờ xét nghiệm";
-                if (t.TrangThai == TrangThaiTuiMau.DaXetNghiem)
-                    trangThaiString = "Yêu cầu nhập kho";
-                else if (t.TrangThai == TrangThaiTuiMau.DaLuuKho)
-                    trangThaiString = "Nhập kho";
-                else if (t.TrangThai == TrangThaiTuiMau.DaHuy)
-                    trangThaiString = "Đã hủy";
+                string trangThaiString = t.TrangThai.ToString();
 
                 return new
                 {
@@ -319,8 +310,9 @@ namespace HienMauNhanDao_DaNang.Controllers
                     maDon = t.MaDon,
                     tenTinhNguyenVien = t.DonDangKy?.TinhNguyenVien?.HoTen ?? "Ẩn danh",
                     tenChienDich = t.DonDangKy?.ChienDich?.TenChienDich ?? "N/A",
-                    theTich = t.TheTich ?? 0,
+                    theTich = t.TheTich ?? 350,
                     thoiGianLayMau = t.ThoiGianLayMau,
+                    nhietDoVanChuyen = t.NhietDoVanChuyen ?? 4.0,
                     trangThai = trangThaiString,
                     nhomMau = t.DonDangKy?.TinhNguyenVien?.NhomMau != null
                         ? t.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-")
@@ -330,6 +322,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
             return Ok(ketQua);
         }
+
         // API 6: Thay đổi trạng thái túi máu (QLK trả túi máu về để kiểm tra lại)
         // PUT /api/tuimau/{id}/status?status=Chờ xét nghiệm
         [HttpPut("{id}/status")]
@@ -345,16 +338,20 @@ namespace HienMauNhanDao_DaNang.Controllers
                 // Reset trạng thái về Chưa xử lý và rút khỏi kho tạm thời
                 tuiMau.TrangThai = TrangThaiTuiMau.ChuaXuLy;
                 tuiMau.MaKho = null;
-                // Xóa kết quả xét nghiệm cũ trong DB để bác sĩ làm lại từ đầu
+                
+                // Đánh dấu Re-test trong KetQuaXetNghiems thay vì xóa bỏ hoàn toàn
                 var xetNghiem = await _context.KetQuaXetNghiems.FirstOrDefaultAsync(k => k.MaTuiMau == id);
                 if (xetNghiem != null)
                 {
-                    _context.KetQuaXetNghiems.Remove(xetNghiem);
+                    xetNghiem.MoTa = "🚨 QLK Yêu cầu Re-test (Kiểm tra lại vi sinh)";
+                    xetNghiem.KetQua = null;
+                    xetNghiem.SoLanXetNghiem = (xetNghiem.SoLanXetNghiem ?? 1) + 1;
                 }
             }
             await _context.SaveChangesAsync();
-            return Ok(new { success = true, message = "Cập nhật trạng thái túi máu thành công." });
+            return Ok(new { success = true, message = "Đã gửi yêu cầu xét nghiệm lại (Re-test) tới NVXN." });
         }
+
 
         //api get lấy danh sách các túi máu theo chiến dịch phục vụ thống kê (Danh cho QLK)
         // API 8: Lấy danh sách túi máu trong kho (phục vụ quản lý kho)

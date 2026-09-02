@@ -121,10 +121,15 @@
                         </DataGridTemplateColumn>
 
                         <!-- ACTIONS -->
-                        <DataGridTemplateColumn Header="Thao Tác" Width="130">
+                        <DataGridTemplateColumn Header="Thao Tác" Width="300">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="🔒 ĐỔI THÁI" Background="#f1f5f9" Foreground="#334155" BorderBrush="#cbd5e1" BorderThickness="1" Padding="8,4" FontSize="11" FontWeight="Bold" Cursor="Hand" Click="btnToggleLock_Click"/>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Content="✏️ SỬA" Background="#fef3c7" Foreground="#b45309" BorderBrush="#fde68a" BorderThickness="1" Padding="6,3" FontSize="10" FontWeight="Black" Cursor="Hand" Click="btnEditUser_Click" Margin="0,0,4,0"/>
+                                        <Button Content="{Binding ActionBtnText}" Background="{Binding ActionBtnBg}" Foreground="{Binding ActionBtnFg}" BorderBrush="{Binding ActionBtnBorder}" BorderThickness="1" Padding="6,3" FontSize="10" FontWeight="Black" Cursor="Hand" Click="btnToggleLock_Click" Margin="0,0,4,0"/>
+                                        <Button Content="👤 BẢO MẬT" Background="#e0f2fe" Foreground="#0369a1" BorderBrush="#7dd3fc" BorderThickness="1" Padding="6,3" FontSize="10" FontWeight="Black" Cursor="Hand" Click="btnOpenProfileSecurity_Click" Margin="0,0,4,0"/>
+                                        <Button Content="🗑️ XÓA" Background="#fff1f2" Foreground="#e11d48" BorderBrush="#fca5a5" BorderThickness="1" Padding="6,3" FontSize="10" FontWeight="Black" Cursor="Hand" Click="btnDeleteUser_Click"/>
+                                    </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -141,14 +146,15 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="Hiển thị: " Foreground="#64748b" FontSize="11" FontWeight="Medium" VerticalAlignment="Center"/>
-                            <ComboBox x:Name="cbPageSize" Width="90" Height="28" FontSize="11" FontWeight="Bold" SelectionChanged="cbPageSize_SelectionChanged" Margin="4,0,12,0">
-                                <ComboBoxItem Content="5 dòng" Tag="5"/>
+                            <TextBlock Text="Hiển thị: " FontSize="11" Foreground="#64748b" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="cbPageSize" Height="28" Padding="6,0" FontSize="11" FontWeight="Bold" SelectionChanged="cbPageSize_SelectionChanged">
                                 <ComboBoxItem Content="10 dòng" IsSelected="True" Tag="10"/>
                                 <ComboBoxItem Content="20 dòng" Tag="20"/>
+                                <ComboBoxItem Content="50 dòng" Tag="50"/>
                             </ComboBox>
-                            <TextBlock x:Name="txtPaginationInfo" Text="Đang tải..." Foreground="#0f172a" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
                         </StackPanel>
+
+                        <TextBlock x:Name="txtPaginationInfo" Grid.Column="1" Text="Hiển thị 1 - 10 trong tổng số 0 tài khoản" FontSize="11" Foreground="#64748b" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                             <Button x:Name="btnPrevPage" Content="◀ Trang trước" Height="28" Padding="10,0" Background="White" Foreground="#dc2626" BorderBrush="#fca5a5" BorderThickness="1" FontSize="11" FontWeight="Bold" Cursor="Hand" Click="btnPrevPage_Click" Margin="0,0,6,0"/>
@@ -162,31 +168,182 @@
             </Grid>
         </Border>
 
-        <!-- MODAL TẠO TÀI KHOẢN MỚI -->
+        <!-- MODAL TẠO TÀI KHOẢN CÁN BỘ MỚI (ĐẦY ĐỦ THÔNG TIN HỒ SƠ) -->
         <Grid x:Name="CreateUserModal" Grid.RowSpan="4" Background="#aa0f172a" Visibility="Collapsed">
-            <Border Background="White" CornerRadius="20" Width="480" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0">
+            <Border Background="White" CornerRadius="20" Width="560" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0" MaxHeight="780">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Border Background="#991b1b" Padding="20,16" CornerRadius="20,20,0,0">
+                            <Grid>
+                                <TextBlock Text="➕ TẠO TÀI KHOẢN CÁN BỘ MỚI" Foreground="White" FontSize="15" FontWeight="Black"/>
+                                <Button Content="✕" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="18" FontWeight="Black" HorizontalAlignment="Right" Cursor="Hand" Click="btnCloseModal_Click"/>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel Margin="20">
+                            <!-- Họ và tên -->
+                            <TextBlock Text="HỌ VÀ TÊN CÁN BỘ *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                            <TextBox x:Name="txtNewHoTen" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,12"/>
+
+                            <!-- SĐT & CCCD -->
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="SỐ ĐIỆN THOẠI *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <TextBox x:Name="txtNewSoDienThoai" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="SỐ CCCD / CMND *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <TextBox x:Name="txtNewCccd" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Khoa / Đơn vị công tác -->
+                            <TextBlock Text="KHOA / ĐƠN VỊ CÔNG TÁC *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                            <ComboBox x:Name="cbNewKhoa" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,12"/>
+
+                            <!-- Email đăng nhập -->
+                            <TextBlock Text="EMAIL ĐĂNG NHẬP *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                            <TextBox x:Name="txtNewEmail" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,12"/>
+
+                            <!-- Mật khẩu khởi tạo -->
+                            <TextBlock Text="MẬT KHẨU KHỞI TẠO *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                            <PasswordBox x:Name="txtNewPassword" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,12"/>
+
+                            <!-- Vai trò / Phân quyền -->
+                            <TextBlock Text="VAI TRÒ / PHÂN QUYỀN *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                            <ComboBox x:Name="cbNewRole" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,20">
+                                <ComboBoxItem Content="👑 Quản trị viên hệ thống (AD)" Tag="AD"/>
+                                <ComboBoxItem Content="🏥 Admin Bệnh viện / Trung tâm (ADMIN_BV)" Tag="ADMIN_BV"/>
+                                <ComboBoxItem Content="🩺 Bác sĩ khám lâm sàng (BS)" IsSelected="True" Tag="BS"/>
+                                <ComboBoxItem Content="💉 Nhân viên y tế lấy máu (NVYT)" Tag="NVYT"/>
+                                <ComboBoxItem Content="🔬 Nhân viên xét nghiệm (NVXN)" Tag="NVYT_XN"/>
+                                <ComboBoxItem Content="📋 Nhân viên lễ tân / tiếp nhận (NVLT)" Tag="NVYT_LT"/>
+                                <ComboBoxItem Content="📦 Quản lý kho máu (QLK)" Tag="QLK"/>
+                            </ComboBox>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="HỦY BỎ" Height="40" Background="#f1f5f9" Foreground="#475569" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnCloseModal_Click"/>
+                                <Button Grid.Column="2" Content="🚀 XÁC NHẬN TẠO CÁN BỘ" Height="40" Background="#dc2626" Foreground="White" FontWeight="Black" FontSize="12" Cursor="Hand" Click="btnSubmitCreateUser_Click"/>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- MODAL CẬP NHẬT THÔNG TIN TÀI KHOẢN CÁN BỘ (KHI ĐỔI NHÂN VIÊN / CHUYỂN CÔNG TÁC) -->
+        <Grid x:Name="EditUserModal" Grid.RowSpan="4" Background="#aa0f172a" Visibility="Collapsed">
+            <Border Background="White" CornerRadius="20" Width="560" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0" MaxHeight="780">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Border Background="#d97706" Padding="20,16" CornerRadius="20,20,0,0">
+                            <Grid>
+                                <TextBlock Text="✏️ CẬP NHẬT THÔNG TIN CÁN BỘ" Foreground="White" FontSize="15" FontWeight="Black"/>
+                                <Button Content="✕" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="18" FontWeight="Black" HorizontalAlignment="Right" Cursor="Hand" Click="btnCloseEditUserModal_Click"/>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel Margin="20">
+                            <Border Background="#fef3c7" BorderBrush="#fde68a" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,14">
+                                <TextBlock x:Name="txtEditUserAccountHeader" Text="Tài khoản: admin@danang.gov.vn (TK00034)" FontSize="12" FontWeight="Bold" Foreground="#92400e"/>
+                            </Border>
+
+                            <!-- Họ và tên -->
+                            <TextBlock Text="HỌ VÀ TÊN CÁN BỘ THAY THẾ *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                            <TextBox x:Name="txtEditHoTen" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,12"/>
+
+                            <!-- SĐT & CCCD -->
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="SỐ ĐIỆN THOẠI *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <TextBox x:Name="txtEditSoDienThoai" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="SỐ CCCD / CMND *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <TextBox x:Name="txtEditCccd" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Khoa / Đơn vị công tác -->
+                            <TextBlock Text="KHOA / ĐƠN VỊ CÔNG TÁC MỚI *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                            <ComboBox x:Name="cbEditKhoa" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,12"/>
+
+
+                            <!-- Vai trò & Trạng thái -->
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="VAI TRỜ / PHÂN QUYỀN *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <ComboBox x:Name="cbEditRole" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12">
+                                        <ComboBoxItem Content="👑 Quản trị viên (AD)" Tag="AD"/>
+                                        <ComboBoxItem Content="🏥 Admin Bệnh viện (ADMIN_BV)" Tag="ADMIN_BV"/>
+                                        <ComboBoxItem Content="🩺 Bác sĩ khám lâm sàng (BS)" Tag="BS"/>
+                                        <ComboBoxItem Content="💉 Nhân viên y tế lấy máu (NVYT)" Tag="NVYT"/>
+                                        <ComboBoxItem Content="🔬 Nhân viên xét nghiệm (NVXN)" Tag="NVYT_XN"/>
+                                        <ComboBoxItem Content="📋 Nhân viên lễ tân (NVLT)" Tag="NVYT_LT"/>
+                                        <ComboBoxItem Content="📦 Quản lý kho máu (QLK)" Tag="QLK"/>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="TRẠNG THÁI TÀI KHOẢN *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                                    <ComboBox x:Name="cbEditTrangThai" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12">
+                                        <ComboBoxItem Content="🟢 HOẠT ĐỘNG" Tag="TRUE" IsSelected="True"/>
+                                        <ComboBoxItem Content="🔴 VÔ HIỆU / KHÓA" Tag="FALSE"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="HỦY BỎ" Height="40" Background="#f1f5f9" Foreground="#475569" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnCloseEditUserModal_Click"/>
+                                <Button Grid.Column="2" Content="💾 LƯU CẬP NHẬT" Height="40" Background="#d97706" Foreground="White" FontWeight="Black" FontSize="12" Cursor="Hand" Click="btnSubmitEditUser_Click"/>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- MODAL 1: XÁC NHẬN MẬT KHẨU ADMIN -->
+        <Grid x:Name="AdminAuthModal" Grid.RowSpan="4" Background="#aa0f172a" Visibility="Collapsed">
+            <Border Background="White" CornerRadius="20" Width="440" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0">
                 <StackPanel>
-                    <Border Background="#991b1b" Padding="20,16" CornerRadius="20,20,0,0">
+                    <Border Background="#1e293b" Padding="20,16" CornerRadius="20,20,0,0">
                         <Grid>
-                            <TextBlock Text="➕ TẠO TÀI KHOẢN CÁN BỘ MỚI" Foreground="White" FontSize="15" FontWeight="Black"/>
-                            <Button Content="✕" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="18" FontWeight="Black" HorizontalAlignment="Right" Cursor="Hand" Click="btnCloseModal_Click"/>
+                            <TextBlock Text="🔐 XÁC NHẬN MẬT KHẨU ADMIN" Foreground="White" FontSize="15" FontWeight="Black"/>
+                            <Button Content="✕" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="18" FontWeight="Black" HorizontalAlignment="Right" Cursor="Hand" Click="btnCloseAdminAuthModal_Click"/>
                         </Grid>
                     </Border>
 
                     <StackPanel Margin="20">
-                        <TextBlock Text="EMAIL ĐĂNG NHẬP *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
-                        <TextBox x:Name="txtNewEmail" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14"/>
+                        <TextBlock Text="Vui lòng nhập mật khẩu Admin để truy cập thông tin Hồ sơ &amp; Bảo mật tài khoản này:" FontSize="12" Foreground="#475569" TextWrapping="Wrap" Margin="0,0,0,16"/>
 
-                        <TextBlock Text="MẬT KHẨU KHỞI TẠO *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
-                        <PasswordBox x:Name="txtNewPassword" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14"/>
-
-                        <TextBlock Text="VAI TRÒ / PHÂN QUYỀN *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
-                        <ComboBox x:Name="cbNewRole" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,20">
-                            <ComboBoxItem Content="Quản trị viên (AD)" Tag="AD"/>
-                            <ComboBoxItem Content="Bác sĩ khám lâm sàng (BS)" IsSelected="True" Tag="BS"/>
-                            <ComboBoxItem Content="Nhân viên y tế (NVYT)" Tag="NVYT"/>
-                            <ComboBoxItem Content="Quản lý kho máu (QLK)" Tag="QLK"/>
-                        </ComboBox>
+                        <TextBlock Text="MẬT KHẨU ADMIN *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                        <PasswordBox x:Name="txtAdminConfirmPassword" Height="40" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="13" Margin="0,0,0,20"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -194,8 +351,49 @@
                                 <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="HỦY BỎ" Height="40" Background="#f1f5f9" Foreground="#475569" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnCloseModal_Click"/>
-                            <Button Grid.Column="2" Content="XÁC NHẬN TẠO" Height="40" Background="#dc2626" Foreground="White" FontWeight="Black" FontSize="12" Cursor="Hand" Click="btnSubmitCreateUser_Click"/>
+                            <Button Grid.Column="0" Content="HỦY BỎ" Height="40" Background="#f1f5f9" Foreground="#475569" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnCloseAdminAuthModal_Click"/>
+                            <Button Grid.Column="2" Content="XÁC NHẬN" Height="40" Background="#0f172a" Foreground="White" FontWeight="Black" FontSize="12" Cursor="Hand" Click="btnVerifyAdminPassword_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- MODAL 2: HỒ SƠ CHI TIẾT & CẤP LẠI MẬT KHẨU MỚI -->
+        <Grid x:Name="UserProfileDetailModal" Grid.RowSpan="4" Background="#aa0f172a" Visibility="Collapsed">
+            <Border Background="White" CornerRadius="20" Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0">
+                <StackPanel>
+                    <Border Background="#0284c7" Padding="20,16" CornerRadius="20,20,0,0">
+                        <Grid>
+                            <TextBlock Text="👤 HỒ SƠ BẢO MẬT &amp; CẤP LẠI MẬT KHẨU" Foreground="White" FontSize="15" FontWeight="Black"/>
+                            <Button Content="✕" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="18" FontWeight="Black" HorizontalAlignment="Right" Cursor="Hand" Click="btnCloseUserDetailModal_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Margin="20">
+                        <Border Background="#f0f9ff" BorderBrush="#bae6fd" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock x:Name="txtDetailEmail" Text="Email: nvxn1@gmail.com" FontSize="13" FontWeight="Black" Foreground="#0369a1"/>
+                                <TextBlock x:Name="txtDetailMaTK" Text="Mã TK: TK00007" FontSize="11" Foreground="#0284c7" Margin="0,2,0,0"/>
+                                <TextBlock x:Name="txtDetailRole" Text="Vai trò: Nhân viên xét nghiệm" FontSize="11" Foreground="#0f172a" FontWeight="Bold" Margin="0,4,0,0"/>
+                                <TextBlock x:Name="txtDetailUnit" Text="Đơn vị: Sở Y Tế TP. Đà Nẵng" FontSize="11" Foreground="#475569" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="CẤP LẠI MẬT KHẨU MỚI CHO TÀI KHOẢN NÀY *" FontSize="11" FontWeight="Black" Foreground="#0369a1" Margin="0,0,0,6"/>
+                        <PasswordBox x:Name="txtResetNewPassword" Height="40" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="13" Margin="0,0,0,14"/>
+
+                        <TextBlock Text="XÁC NHẬN MẬT KHẨU MỚI *" FontSize="11" FontWeight="Black" Foreground="#0369a1" Margin="0,0,0,6"/>
+                        <PasswordBox x:Name="txtResetConfirmPassword" Height="40" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="13" Margin="0,0,0,20"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="ĐÓNG" Height="40" Background="#f1f5f9" Foreground="#475569" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnCloseUserDetailModal_Click"/>
+                            <Button Grid.Column="2" Content="🔑 CẬP NHẬT MẬT KHẨU MỚI" Height="40" Background="#0284c7" Foreground="White" FontWeight="Black" FontSize="12" Cursor="Hand" Click="btnSubmitResetUserPassword_Click"/>
                         </Grid>
                     </StackPanel>
                 </StackPanel>
@@ -203,3 +401,4 @@
         </Grid>
     </Grid>
 </Page>
+

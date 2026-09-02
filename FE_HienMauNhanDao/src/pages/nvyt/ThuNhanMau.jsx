@@ -192,7 +192,8 @@ function TuiMauModal({ don, item, nhanVien, onClose, onSaved }) {
 
 // ─── Trang Chính Thu Nhận Máu (Futuristic Cyber-Clinical Redesign) ────────────────
 export default function ThuNhanMau() {
-  const { nhanVien } = useOutletContext();
+  const { nhanVien } = useOutletContext() || {};
+
   const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'collected'
 
   // Search & Filter state
@@ -438,7 +439,8 @@ export default function ThuNhanMau() {
             }`}
           >
             <span className="material-symbols-outlined text-xl">fact_check</span>
-            <span>🩸 Túi Máu Đã Hoàn Tất Xét Nghiệm</span>
+            <span>🩸 Nơi Lưu Trữ Túi Máu Đã Thu</span>
+
             {collectionList.length > 0 && (
               <span className={`px-2.5 py-0.5 text-xs font-mono font-black rounded-full shadow-sm border transition-all ${
                 activeTab === 'collected'

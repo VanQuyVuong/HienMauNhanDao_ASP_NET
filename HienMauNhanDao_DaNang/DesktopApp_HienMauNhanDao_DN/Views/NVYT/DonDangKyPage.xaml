@@ -61,64 +61,108 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <TextBlock Grid.Row="0" Text="QUẢN LÝ ĐƠN ĐĂNG KÝ" FontSize="24" FontWeight="Black" Foreground="#1e293b" Margin="0,0,0,10"/>
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="QUẢN LÝ ĐƠN ĐĂNG KÝ THEO CHIẾN DỊCH &amp; KHU VỰC" FontSize="22" FontWeight="Black" Foreground="#1e293b"/>
+            <TextBlock Text="Phân loại đơn đăng ký theo từng đợt hiến máu &amp; phát hiện TNV đi nhầm địa điểm tiếp nhận" FontSize="12" Foreground="#64748b" Margin="0,2,0,0"/>
+        </StackPanel>
         
-        <!-- Controls -->
-        <Grid Grid.Row="1" Margin="0,0,0,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <!-- Controls & Filters -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,15">
+            <!-- Row 1: Filter Bar -->
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="280"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <!-- Search -->
-            <Border Grid.Column="0" CornerRadius="8" BorderBrush="#cbd5e1" BorderThickness="1" Width="300" HorizontalAlignment="Left" Background="White">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="🔍" Margin="10,0" VerticalAlignment="Center" Foreground="#94a3b8"/>
-                    <TextBox x:Name="txtSearch" Grid.Column="1" Height="35" BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center"
-                             Padding="0,0,10,0" FontSize="14" Foreground="#334155" KeyUp="txtSearch_KeyDown"/>
-                </Grid>
+                <TextBlock Grid.Column="0" Text="📍 Chọn Chiến Dịch:" VerticalAlignment="Center" FontWeight="Bold" Foreground="#334155" Margin="0,0,10,0"/>
+                
+                <!-- Campaign Dropdown with Location Info -->
+                <ComboBox x:Name="cbChienDichFilter" Grid.Column="1" Height="38" VerticalContentAlignment="Center"
+                          DisplayMemberPath="TenChienDich" SelectedValuePath="MaChienDich"
+                          SelectionChanged="cbChienDichFilter_SelectionChanged"/>
+
+                <!-- Search Box -->
+                <Border Grid.Column="3" CornerRadius="8" BorderBrush="#cbd5e1" BorderThickness="1" Height="38" Background="White">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🔍" Margin="10,0,5,0" VerticalAlignment="Center" Foreground="#94a3b8"/>
+                        <TextBox x:Name="txtSearch" Grid.Column="1" BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center"
+                                 Padding="0,0,10,0" FontSize="13" Foreground="#334155" KeyUp="txtSearch_KeyDown" Tag="Nhập Họ tên, CCCD, Mã đơn..."/>
+                    </Grid>
+                </Border>
+
+                <!-- Fast CCCD Check Button -->
+                <Button x:Name="btnCheckCCCD" Grid.Column="5" Content="🔍 KIỂM TRA" Height="38" Padding="16,0" HorizontalAlignment="Left"
+                        Background="#0284c7" BorderThickness="0" Foreground="White" FontWeight="Bold" Cursor="Hand" Click="btnCheckCCCD_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+
+                <!-- Refresh Button -->
+                <Button x:Name="btnRefresh" Grid.Column="7" Content="🔄 LÀM MỚI" Height="38" Width="95" 
+                        Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" Foreground="#475569"
+                        FontWeight="Bold" Cursor="Hand" Click="btnRefresh_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="6" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <!-- Walk-in Button -->
+                <Button x:Name="btnWalkIn" Grid.Column="9" Content="+ TIẾP NHẬN TRỰC TIẾP (WALK-IN)" Height="38" Padding="14,0" 
+                        Background="#dc2626" BorderThickness="0" Foreground="White"
+                        FontWeight="Bold" Cursor="Hand" Click="btnWalkIn_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+
+            <!-- Row 2: Selected Campaign Location Banner -->
+            <Border x:Name="pnlCampaignInfo" Background="#f0f9ff" BorderBrush="#bae6fd" BorderThickness="1" CornerRadius="8" Padding="12,8">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="🏥 KHU VỰC TỔ CHỨC HIỆN TẠI: " FontWeight="Black" Foreground="#0369a1" FontSize="13"/>
+                    <TextBlock x:Name="txtCampaignLocation" Text="Tất cả các chiến dịch trên địa bàn TP. Đà Nẵng" FontWeight="Bold" Foreground="#0284c7" FontSize="13" Margin="5,0,20,0"/>
+                    <TextBlock x:Name="txtCampaignStats" Text="📊 Tổng đơn: 0 | ⚡ Đã đăng ký: 0 | ✅ Đã tiếp nhận: 0" FontWeight="SemiBold" Foreground="#475569" FontSize="12"/>
+                </StackPanel>
             </Border>
+        </StackPanel>
 
-            <!-- Refresh Button -->
-            <Button x:Name="btnRefresh" Grid.Column="1" Content="LÀM MỚI" Height="35" Width="100" 
-                    Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" Foreground="#475569"
-                    FontWeight="Bold" Cursor="Hand" Click="btnRefresh_Click">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-
-            <!-- Walk-in Button -->
-            <Button x:Name="btnWalkIn" Grid.Column="3" Content="+ TẠO ĐƠN TRỰC TIẾP (WALK-IN)" Height="35" Padding="15,0" 
-                    Background="#dc2626" BorderThickness="0" Foreground="White"
-                    FontWeight="Bold" Cursor="Hand" Click="btnWalkIn_Click">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-        </Grid>
 
         <!-- DataGrid -->
         <Border Grid.Row="2" CornerRadius="10" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" ClipToBounds="True">
             <DataGrid x:Name="dgDonDangKy" Margin="-1">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mã Đơn" Binding="{Binding MaDon}" Width="100"/>
-                    <DataGridTextColumn Header="Người Hiến Máu" Binding="{Binding HoTenTNV}" Width="*"/>
-                    <DataGridTextColumn Header="Chiến Dịch" Binding="{Binding TenChienDich}" Width="*"/>
+                    <DataGridTextColumn Header="Mã Đơn" Binding="{Binding MaDon}" Width="95"/>
+                    <DataGridTextColumn Header="Người Hiến Máu" Binding="{Binding HoTenTNV}" Width="150"/>
+                    <DataGridTextColumn Header="Số CCCD" Binding="{Binding CccdTNV}" Width="125"/>
+                    <DataGridTextColumn Header="Chiến Dịch / Địa Điểm" Binding="{Binding TenChienDich}" Width="*"/>
+
                     <DataGridTextColumn Header="Thể Tích" Binding="{Binding TheTich, StringFormat={}{0} ml}" Width="100"/>
                     <DataGridTextColumn Header="Ngày Đăng Ký" Binding="{Binding ThoiGianDangKy, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
                     

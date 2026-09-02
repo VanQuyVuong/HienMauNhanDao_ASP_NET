@@ -94,9 +94,14 @@ export default function ForgotPasswordScreen({ navigation }) {
         confirmNewPassword: confirmNewPassword
       });
 
-      Alert.alert('Thành công', 'Mật khẩu của bạn đã được đặt lại thành công.', [
-        { text: 'Đăng nhập ngay', onPress: () => navigation.replace('Login') }
-      ]);
+      if (Platform.OS === 'web') {
+        alert('🎉 Mật khẩu của bạn đã được đặt lại thành công.');
+        navigation.replace('Login');
+      } else {
+        Alert.alert('Thành công', 'Mật khẩu của bạn đã được đặt lại thành công.', [
+          { text: 'Đăng nhập ngay', onPress: () => navigation.replace('Login') }
+        ]);
+      }
     } catch (error) {
       const msg = error.response?.data?.message || error.response?.data?.Message || (typeof error.response?.data === 'string' ? error.response.data : null) || 'Lỗi khi đặt lại mật khẩu. Mã OTP có thể đã hết hạn.';
       setErrorMsg(msg);

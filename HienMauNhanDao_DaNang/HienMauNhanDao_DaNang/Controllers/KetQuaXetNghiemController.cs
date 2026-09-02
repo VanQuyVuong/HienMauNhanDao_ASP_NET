@@ -19,79 +19,96 @@ namespace HienMauNhanDao_DaNang.Controllers
             _context = context;
         }
 
-        //API 1. Lấy danh sách túi máu cần xét nghiệm ở Trang 2 (chưa xét nghiệm hoặc có yêu cầu Re-test từ Quản lý kho)
+        //API 1. Lấy danh sách tất cả túi máu cần xét nghiệm / đã xét nghiệm chờ nhập kho / có yêu cầu Re-test từ QLK
         [HttpGet]
         [HttpGet("danh-sach")]
         public async Task<IActionResult> GetDanhSachXetNghiem()
         {
-            // A. Lấy các ca yêu cầu Re-test từ Quản lý kho (moTa chứa 're-test' hoặc 'kiểm tra lại')
-            var reTestList = await _context.KetQuaXetNghiems
-                .Include(k => k.TuiMau)
-                .ThenInclude(t => t.DonDangKy)
-                .ThenInclude(d => d.TinhNguyenVien)
-                .Include(k => k.TuiMau)
-                .ThenInclude(t => t.DonDangKy)
-                .ThenInclude(d => d.ChienDich)
-                .Where(k => k.MoTa != null && (k.MoTa.ToLower().Contains("re-test") || k.MoTa.ToLower().Contains("kiểm tra lại")))
-                .OrderByDescending(k => k.MaKQ)
-                .ToListAsync();
-
-            // B. Lấy tất cả các túi máu trong CSDL
-            var allTuiMaus = await _context.TuiMaus
+            // Chỉ lấy túi máu có trạng thái Chưa xử lý (Chờ XN / Re-test) hoặc Đã xét nghiệm (Chờ nhập kho)
+            var activeTuiMaus = await _context.TuiMaus
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.TinhNguyenVien)
                 .Include(t => t.DonDangKy)
                     .ThenInclude(d => d.ChienDich)
+                .Where(t => t.TrangThai == TrangThaiTuiMau.ChuaXuLy || t.TrangThai == TrangThaiTuiMau.DaXetNghiem)
                 .OrderByDescending(t => t.ThoiGianLayMau)
+                .ThenByDescending(t => t.MaTuiMau)
                 .ToListAsync();
 
-            var daCoKQIds = await _context.KetQuaXetNghiems
-                .Select(k => k.MaTuiMau)
-                .ToListAsync();
 
-            // Lọc ra các túi máu chưa có kết quả xét nghiệm (và chưa bị nhập kho/hủy)
-            var tuiChuaTest = allTuiMaus
-                .Where(t => !daCoKQIds.Contains(t.MaTuiMau))
-                .Where(t => t.TrangThai != TrangThaiTuiMau.DaLuuKho && t.TrangThai != TrangThaiTuiMau.DaHuy)
-                .ToList();
+            var allKqDict = await _context.KetQuaXetNghiems
+                .ToDictionaryAsync(k => k.MaTuiMau, k => k);
 
             var ketQuaTraVe = new List<object>();
 
-            // Gom nhóm các ca Re-test
-            foreach(var item in reTestList)
+            foreach (var item in activeTuiMaus)
             {
-                ketQuaTraVe.Add(new
-                {
-                    maKQ = item.MaKQ,
-                    maTuiMau = item.MaTuiMau,
-                    maNhanVien = item.MaNhanVien,
-                    nhomMau = item.NhomMau != null ? item.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ",
-                    soLanXetNghiem = item.SoLanXetNghiem ?? 2,
-                    ketQua = (bool?)null, // Để FE bấm phê duyệt / không đạt
-                    moTa = item.MoTa,
-                    tenTinhNguyenVien = item.TuiMau?.DonDangKy?.TinhNguyenVien?.HoTen ?? "Ẩn danh",
-                    tenChienDich = item.TuiMau?.DonDangKy?.ChienDich?.TenChienDich ?? "N/A"
-                });
-            }
+                allKqDict.TryGetValue(item.MaTuiMau, out var kqExist);
 
-            // Gom nhóm các túi máu mới chờ xét nghiệm lần đầu
-            foreach(var item in tuiChuaTest)
-            {
+                bool isReTest = false;
+                string moTa = "Chờ xét nghiệm lần đầu";
+                string trangThaiText = "⏳ Chờ kết quả xét nghiệm";
+                bool? ketQuaVal = null;
+
+                int soLanXn = 1;
+                string maKQ = "CHUA_TEST_" + item.MaTuiMau;
+                string maNV = "";
+
+                if (kqExist != null)
+                {
+                    maKQ = kqExist.MaKQ;
+                    maNV = kqExist.MaNhanVien ?? "";
+                    soLanXn = kqExist.SoLanXetNghiem ?? 1;
+                    ketQuaVal = kqExist.KetQua;
+                    
+                    bool isReTestMoTa = (kqExist.MoTa != null) && 
+                        (kqExist.MoTa.ToLower().Contains("re-test") || kqExist.MoTa.ToLower().Contains("kiểm tra lại"));
+
+                    if (item.TrangThai == TrangThaiTuiMau.ChuaXuLy || isReTestMoTa)
+                    {
+                        isReTest = true;
+                        soLanXn = Math.Max(2, soLanXn + 1);
+                        trangThaiText = "🚨 Đang chờ kiểm tra lại";
+                        moTa = string.IsNullOrEmpty(kqExist.MoTa) ? "Quản lý kho yêu cầu kiểm tra lại" : kqExist.MoTa;
+                        ketQuaVal = null; // Reset để NVXN nhập lại kết quả mới
+                    }
+                    else if (kqExist.KetQua == true)
+                    {
+                        trangThaiText = "⌛ Chờ nhập kho";
+                        moTa = string.IsNullOrEmpty(kqExist.MoTa) ? "Đạt tiêu chuẩn vi sinh (Đang chờ QLK duyệt nhập kho)" : kqExist.MoTa;
+                    }
+                    else if (kqExist.KetQua == false)
+                    {
+                        trangThaiText = "❌ Không đạt (Chờ xử lý hủy)";
+                        moTa = string.IsNullOrEmpty(kqExist.MoTa) ? "Không đạt tiêu chuẩn vi sinh (Chờ QLK duyệt hủy)" : kqExist.MoTa;
+                    }
+                }
+
+
+                string nhomMauStr = item.DonDangKy?.TinhNguyenVien?.NhomMau != null 
+                    ? item.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") 
+                    : "Chưa rõ";
+
                 ketQuaTraVe.Add(new
                 {
-                    maKQ = "CHUA_TEST_" + item.MaTuiMau,
+                    maKQ = maKQ,
                     maTuiMau = item.MaTuiMau,
-                    maNhanVien = "",
-                    nhomMau = item.DonDangKy?.TinhNguyenVien?.NhomMau != null ? item.DonDangKy.TinhNguyenVien.NhomMau.ToString().Replace("_positive", "+").Replace("_negative", "-") : "Chưa rõ",
-                    soLanXetNghiem = 1,
-                    ketQua = (bool?)null,
-                    moTa = "Chờ xét nghiệm lần đầu",
+                    maNhanVien = maNV,
+                    nhomMau = nhomMauStr,
+                    soLanXetNghiem = soLanXn,
+                    ketQua = ketQuaVal,
+                    isReTest = isReTest,
+                    trangThaiText = trangThaiText,
+                    moTa = moTa,
+                    theTich = item.TheTich ?? 350,
+                    thoiGianLayMau = item.ThoiGianLayMau,
                     tenTinhNguyenVien = item.DonDangKy?.TinhNguyenVien?.HoTen ?? "Ẩn danh",
-                    tenChienDich = item.DonDangKy?.ChienDich?.TenChienDich ?? "N/A",
+                    tenChienDich = item.DonDangKy?.ChienDich?.TenChienDich ?? "N/A"
                 });
             }
             return Ok(ketQuaTraVe);
         }
+
         //API 2. LẤY SỐ LIỆU THỐNG KÊ XÉT NGHIỆM PHỤC VỤ CHO DASHBOARD
         [HttpGet("stats")]
         [HttpGet("thong-ke")]

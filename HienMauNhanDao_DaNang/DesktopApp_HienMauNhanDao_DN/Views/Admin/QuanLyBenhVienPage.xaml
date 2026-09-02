@@ -1,0 +1,116 @@
+<Page x:Class="DesktopApp_HienMauNhanDao_DN.Views.Admin.QuanLyBenhVienPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" 
+      d:DesignHeight="850" d:DesignWidth="1150"
+      Title="Quản Lý Bệnh Viện &amp; Cán Bộ Liên Kết">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- TOP BANNER -->
+        <Border Grid.Row="0" Background="#1e1b4b" CornerRadius="16" Padding="20,16" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="🏥 QUẢN LÝ BỆNH VIỆN LIÊN KẾT &amp; CÁN BỘ HỆ THỐNG" Foreground="White" FontSize="18" FontWeight="Black"/>
+                    <TextBlock Text="Quản lý danh sách các bệnh viện trên địa bàn TP. Đà Nẵng, phân quyền tài khoản Admin Bệnh viện" Foreground="#c7d2fe" FontSize="12" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="btnRefresh" Content="🔄 LÀM MỚI" Height="38" Padding="14,0" Background="#312e81" Foreground="White" FontWeight="Bold" FontSize="11" Cursor="Hand" Click="btnRefresh_Click" Margin="0,0,8,0"/>
+                    <Button x:Name="btnAddHospital" Content="➕ THÊM BỆNH VIỆN MỚI" Height="38" Padding="16,0" Background="#4f46e5" Foreground="White" FontWeight="Black" FontSize="11" Cursor="Hand" Click="btnAddHospital_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- FILTER BAR -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="12" Padding="14,10" Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="txtSearch" Grid.Column="0" Height="36" Padding="12,0" VerticalContentAlignment="Center"
+                         Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12"
+                         TextChanged="txtSearch_TextChanged" Margin="0,0,14,0"/>
+
+                <ComboBox x:Name="cbFilterStatus" Grid.Column="1" Height="36" Padding="10,0" VerticalContentAlignment="Center"
+                          Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12"
+                          SelectionChanged="cbFilterStatus_SelectionChanged">
+                    <ComboBoxItem Content="Tất cả trạng thái" IsSelected="True" Tag="ALL"/>
+                    <ComboBoxItem Content="Đang hoạt động" Tag="ACTIVE"/>
+                    <ComboBoxItem Content="Tạm dừng" Tag="INACTIVE"/>
+                </ComboBox>
+            </Grid>
+        </Border>
+
+        <!-- DATAGRID -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="14" ClipToBounds="True">
+            <DataGrid x:Name="dgHospitals" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" HeadersVisibility="Column" RowHeight="48" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#f1f5f9">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Mã BV" Binding="{Binding MaBenhVien}" Width="90"/>
+                    <DataGridTextColumn Header="Tên Bệnh Viện" Binding="{Binding TenBenhVien}" Width="260"/>
+                    <DataGridTextColumn Header="Địa Chỉ" Binding="{Binding DiaChi}" Width="*"/>
+                    <DataGridTextColumn Header="Số Điện Thoại" Binding="{Binding SoDienThoai}" Width="130"/>
+                    <DataGridTextColumn Header="Admin Quản Lý" Binding="{Binding TenAdminBV}" Width="160"/>
+                    <DataGridTemplateColumn Header="Trạng Thái" Width="130">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="#dcfce7" Padding="8,4" CornerRadius="6" HorizontalAlignment="Left">
+                                    <TextBlock Text="🟢 ĐANG HOẠT ĐỘNG" Foreground="#166534" FontWeight="Bold" FontSize="11"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- MODAL THÊM BỆNH VIỆN MỚI -->
+        <Grid x:Name="CreateHospitalModal" Grid.RowSpan="3" Background="#aa0f172a" Visibility="Collapsed">
+            <Border Background="White" CornerRadius="20" Width="500" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0">
+                <StackPanel>
+                    <Border Background="#312e81" Padding="20,16" CornerRadius="20,20,0,0">
+                        <Grid>
+                            <TextBlock Text="➕ THÊM BỆNH VIỆN MỚI" Foreground="White" FontSize="15" FontWeight="Black"/>
+                            <Button Content="✕" Foreground="White" Background="Transparent" BorderThickness="0" FontSize="18" FontWeight="Black" HorizontalAlignment="Right" Cursor="Hand" Click="btnCloseModal_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Margin="20">
+                        <TextBlock Text="TÊN BỆNH VIỆN *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                        <TextBox x:Name="txtTenBV" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14"/>
+
+                        <TextBlock Text="ĐỊA CHỈ *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                        <TextBox x:Name="txtDiaChiBV" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,14"/>
+
+                        <TextBlock Text="SỐ ĐIỆN THOẠI HÀNH CHÍNH *" FontSize="11" FontWeight="Black" Foreground="#64748b" Margin="0,0,0,6"/>
+                        <TextBox x:Name="txtSdtBV" Height="38" Padding="10,0" VerticalContentAlignment="Center" Background="#f8fafc" BorderBrush="#cbd5e1" BorderThickness="1" FontSize="12" Margin="0,0,0,20"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="HỦY BỎ" Height="40" Background="#f1f5f9" Foreground="#475569" FontWeight="Bold" FontSize="12" Cursor="Hand" Click="btnCloseModal_Click"/>
+                            <Button Grid.Column="2" Content="XÁC NHẬN THÊM" Height="40" Background="#4f46e5" Foreground="White" FontWeight="Black" FontSize="12" Cursor="Hand" Click="btnSubmitAddHospital_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

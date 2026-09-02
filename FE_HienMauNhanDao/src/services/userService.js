@@ -8,6 +8,8 @@ const userService = {
   setTrangThai: async (id, trangThai) => unwrapData(await http.patch(`/TaiKhoan/${id}/trang-thai`, { trangThai })),
   delete: async (id) => http.delete(`/TaiKhoan/${id}`),
   getVaiTroList: async () => unwrapList(await http.get('/TaiKhoan/vaitro')),
+  getKhoaList: async () => unwrapList(await http.get('/TaiKhoan/khoa-cong-tac')),
+
 };
 
 export default userService;

@@ -88,11 +88,11 @@ export default function NVYTLayout() {
 
   // Auth & Personnel Info Fetch
   useEffect(() => {
-    const role = localStorage.getItem('role');
+    const role = (localStorage.getItem('role') || '').trim().toUpperCase();
     const userId = (localStorage.getItem('userId') || '').trim();
     const email = (localStorage.getItem('email') || '').trim();
 
-    const isNvytRole = ['NVYT', 'NVYT_LT', 'NVYT-LT', 'NVYT_XN', 'NVYT-XN'].includes(role);
+    const isNvytRole = role.includes('NVYT') || role.includes('YTE') || role.includes('LETAN');
     if (!isNvytRole) {
       navigate('/login', { replace: true });
       return;
@@ -122,17 +122,20 @@ export default function NVYTLayout() {
     loadNhanVien();
   }, [navigate]);
 
+
   const handleLogout = () => {
     localStorage.clear();
     navigate('/login');
   };
 
-  const initials = nhanVien
-    ? (nhanVien.hoVaTen || '').split(' ').slice(-2).map((w) => w[0]).join('').toUpperCase()
+  const initials = nhanVien && nhanVien.hoVaTen
+    ? String(nhanVien.hoVaTen).trim().split(/\s+/).filter(Boolean).slice(-2).map((w) => (w[0] || '').toUpperCase()).join('') || 'NV'
     : 'NV';
 
-  const role = (localStorage.getItem('role') || '').trim();
-  const isXn = role === 'NVYT_XN' || role === 'NVYT-XN';
+
+  const role = (localStorage.getItem('role') || '').trim().toUpperCase();
+  const isXn = role.includes('XN') || role.includes('XETNGHIEM');
+
 
   return (
     <div className="w-full min-h-screen flex bg-rose-50/40 font-sans antialiased">

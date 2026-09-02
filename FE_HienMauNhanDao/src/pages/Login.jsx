@@ -28,41 +28,45 @@ export default function Login() {
       const res = await authService.login({ email, matKhau });
       const loginData = res.data?.success ? res.data.data : (res.data ?? res);
 
-      const token = loginData.accessToken || loginData.access_token;
-      const role = loginData.maVaiTro;
-      const userId = loginData.userId || loginData.user_id;
-      const maNV = loginData.maNhanVien || loginData.maNV;
+      const token = loginData.accessToken || loginData.access_token || '';
+      const rawRole = loginData.maVaiTro || loginData.role || loginData.Role || '';
+      const role = String(rawRole).trim();
+      const roleUpper = role.toUpperCase();
+
+      const userId = loginData.userId || loginData.user_id || '';
+      const maNV = loginData.maNhanVien || loginData.maNV || '';
 
       // Kiểm tra vai trò đăng nhập đối với Mobile App (MAUI WebView)
       const isMobileApp = localStorage.getItem('isMobileApp') === 'true';
-      if (isMobileApp && role !== 'TNV') {
+      if (isMobileApp && roleUpper !== 'TNV') {
         setError('Tài khoản nội bộ không được phép đăng nhập trên ứng dụng di động!');
         setLoading(false);
         return;
       }
 
       localStorage.setItem('token', token);
-      localStorage.setItem('email', loginData.email);
+      localStorage.setItem('email', loginData.email || email);
       localStorage.setItem('userId', userId);
       if (maNV) localStorage.setItem('maNV', maNV);
       localStorage.setItem('role', role);
 
       // Redirect ngay theo vai trò
-      if (role === 'BS') {
+      if (roleUpper === 'BS' || roleUpper.includes('BACSI')) {
         window.location.href = '/bac-si/danh-sach-cho-kham';
-      } else if (role === 'NVYT_XN' || role === 'NVYT-XN') {
+      } else if (roleUpper.includes('NVYT_XN') || roleUpper.includes('NVYT-XN') || roleUpper.includes('XETNGHIEM')) {
         window.location.href = '/nvyt/thu-nhan-mau';
-      } else if (role === 'NVYT' || role === 'NVYT_LT' || role === 'NVYT-LT') {
+      } else if (roleUpper.includes('NVYT') || roleUpper.includes('YTE') || roleUpper.includes('LETAN')) {
         window.location.href = '/nvyt/don-dang-ky';
-      } else if (role === 'QLK') {
+      } else if (roleUpper === 'QLK' || roleUpper.includes('KHO')) {
         window.location.href = '/quan-ly-kho/thong-ke';
-      } else if (role === 'AD') {
+      } else if (roleUpper === 'AD' || roleUpper === 'ADMIN') {
         window.location.href = '/admin/nguoi-dung';
-      } else if (role === 'ADMIN_BV') {
+      } else if (roleUpper === 'ADMIN_BV' || roleUpper.includes('ADMIN_BV')) {
         window.location.href = '/admin-bv/dashboard';
       } else {
         window.location.href = '/';
       }
+
     } catch (err) {
       console.error("Login error:", err);
       const errorMsg = err?.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại Email và Mật khẩu.';

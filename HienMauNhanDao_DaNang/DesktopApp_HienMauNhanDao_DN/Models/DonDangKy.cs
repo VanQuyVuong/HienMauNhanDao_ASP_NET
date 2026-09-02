@@ -31,7 +31,9 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
 
         // Properties hỗ trợ hiển thị trên DataGrid
         public string HoTenTNV => TinhNguyenVien?.HoTen ?? "N/A";
+        public string CccdTNV => TinhNguyenVien?.Cccd ?? "N/A";
         public string TenChienDich => ChienDich?.TenChienDich ?? "N/A";
+
         
         public string TrangThaiHienThi
         {

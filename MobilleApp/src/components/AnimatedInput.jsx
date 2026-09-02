@@ -1,9 +1,4 @@
-﻿// src/components/AnimatedInput.jsx
-// Component o nhap lieu tai su dung voi 3 hieu ung:
-//   1. Floating Label  - nhan noi truot len khi focus hoac co gia tri
-//   2. Shake on Error  - lac trai phai moi khi shakeKey tang (sau submit sai)
-//   3. Icon Animation  - icon pulse + doi mau do khi focus
-
+// src/components/AnimatedInput.jsx
 import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
@@ -27,32 +22,21 @@ export default function AnimatedInput({
   maxLength,
   shakeKey = 0,
   style,
+  autoComplete = 'off',
   ...rest
 }) {
   const [isFocused, setIsFocused]       = useState(false);
   const [isHovered, setIsHovered]       = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const isFloating = isFocused || !!value;
-
-  const labelProgress = useRef(new Animated.Value(isFloating ? 1 : 0)).current;
-  const shakeX        = useRef(new Animated.Value(0)).current;
-  const iconScale     = useRef(new Animated.Value(1)).current;
-
-  // Floating label animation
-  useEffect(() => {
-    Animated.timing(labelProgress, {
-      toValue: isFloating ? 1 : 0,
-      duration: 180,
-      useNativeDriver: false,
-    }).start();
-  }, [isFloating]);
+  const shakeX    = useRef(new Animated.Value(0)).current;
+  const iconScale = useRef(new Animated.Value(1)).current;
 
   // Icon pulse on focus
   useEffect(() => {
     if (isFocused) {
       Animated.sequence([
-        Animated.timing(iconScale, { toValue: 1.3,  duration: 110, useNativeDriver: true }),
+        Animated.timing(iconScale, { toValue: 1.25, duration: 110, useNativeDriver: true }),
         Animated.timing(iconScale, { toValue: 1.0,  duration: 110, useNativeDriver: true }),
       ]).start();
     }
@@ -72,69 +56,62 @@ export default function AnimatedInput({
     ]).start();
   }, [shakeKey]);
 
-  const labelTop      = labelProgress.interpolate({ inputRange: [0, 1], outputRange: [17, -10] });
-  const labelFontSize = labelProgress.interpolate({ inputRange: [0, 1], outputRange: [15, 11]  });
-
   const borderColor = isFocused
     ? '#e62e43'
     : isHovered
     ? 'rgba(230, 46, 67, 0.4)'
-    : '#e8ecef';
+    : '#cbd5e1';
 
-  const iconColor  = isFocused ? '#e62e43' : isHovered ? 'rgba(230, 46, 67, 0.6)' : '#bbb';
-  const labelColor = isFloating ? '#e62e43' : '#aaa';
+  const iconColor  = isFocused ? '#e62e43' : isHovered ? '#e62e43' : '#64748b';
+  const labelColor = isFocused ? '#e62e43' : '#475569';
 
   return (
-    <Animated.View style={[{ transform: [{ translateX: shakeX }] }, style]}>
+    <Animated.View style={[{ transform: [{ translateX: shakeX }] }, styles.wrapper, style]}>
+      {/* Top Label */}
+      {label ? (
+        <Text style={[styles.outerLabel, { color: labelColor }]}>
+          {label}
+        </Text>
+      ) : null}
+
       <View
         style={[
           styles.container,
           {
             borderColor,
-            backgroundColor: (isFocused || isHovered) ? '#fff' : '#f8f9fa',
+            backgroundColor: (isFocused || isHovered) ? '#ffffff' : '#f8fafc',
             shadowOpacity: isFocused ? 0.15 : 0,
           }
         ]}
         onMouseEnter={() => Platform.OS === 'web' && setIsHovered(true)}
         onMouseLeave={() => Platform.OS === 'web' && setIsHovered(false)}
       >
-        <Animated.Text style={[styles.icon, { color: iconColor, transform: [{ scale: iconScale }] }]}>
-          {icon}
-        </Animated.Text>
-
-        <View style={styles.inputArea}>
-          <Animated.Text
-            style={[
-              styles.label,
-              {
-                top: labelTop,
-                fontSize: labelFontSize,
-                color: labelColor,
-                backgroundColor: isFloating ? '#fff' : 'transparent',
-                paddingHorizontal: isFloating ? 3 : 0,
-              }
-            ]}
-            pointerEvents="none"
-          >
-            {label}
+        {/* Left Icon */}
+        {icon ? (
+          <Animated.Text style={[styles.icon, { color: iconColor, transform: [{ scale: iconScale }] }]}>
+            {icon}
           </Animated.Text>
+        ) : null}
 
-          <TextInput
-            value={value}
-            onChangeText={onChangeText}
-            secureTextEntry={showToggle ? !showPassword : secureTextEntry}
-            keyboardType={keyboardType}
-            autoCapitalize={autoCapitalize}
-            maxLength={maxLength}
-            style={styles.input}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            placeholder=""
-            placeholderTextColor="transparent"
-            {...rest}
-          />
-        </View>
+        {/* Input Text Element */}
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          secureTextEntry={showToggle ? !showPassword : secureTextEntry}
+          keyboardType={keyboardType}
+          autoCapitalize={autoCapitalize}
+          autoCorrect={false}
+          autoComplete={Platform.OS === 'web' ? 'off' : autoComplete}
+          maxLength={maxLength}
+          style={styles.input}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholder={`Nhập ${label ? label.toLowerCase() : ''}...`}
+          placeholderTextColor="#94a3b8"
+          {...rest}
+        />
 
+        {/* Password Eye Toggle */}
         {showToggle && (
           <Pressable
             onPress={() => setShowPassword(p => !p)}
@@ -145,7 +122,7 @@ export default function AnimatedInput({
                 styles.eyeText,
                 (Platform.OS === 'web' && hovered) && { color: '#c01b30', textDecorationLine: 'underline' }
               ]}>
-                {showPassword ? 'An' : 'Hien'}
+                {showPassword ? 'Ẩn' : 'Hiện'}
               </Text>
             )}
           </Pressable>
@@ -156,24 +133,30 @@ export default function AnimatedInput({
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 16,
+  },
+  outerLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 6,
+    letterSpacing: 0.2,
+  },
   container: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1.5,
     borderRadius: 14,
-    marginBottom: 20,
-    marginTop: 10,
-    paddingHorizontal: 16,
-    height: 58,
+    paddingHorizontal: 14,
+    height: 52,
     shadowColor: '#e62e43',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 3 },
     shadowRadius: 8,
     elevation: 0,
     ...Platform.select({
       web: {
         transitionProperty: 'border-color, background-color, box-shadow',
         transitionDuration: '180ms',
-        overflow: 'visible',
       }
     })
   },
@@ -184,31 +167,13 @@ const styles = StyleSheet.create({
       web: { transitionProperty: 'color', transitionDuration: '180ms' }
     })
   },
-  inputArea: {
-    flex: 1,
-    position: 'relative',
-    height: '100%',
-    justifyContent: 'center',
-    ...Platform.select({ web: { overflow: 'visible' } })
-  },
-  label: {
-    position: 'absolute',
-    left: 0,
-    fontWeight: '500',
-    zIndex: 5,
-    ...Platform.select({
-      web: {
-        pointerEvents: 'none',
-        userSelect: 'none',
-      }
-    })
-  },
   input: {
     flex: 1,
     fontSize: 15,
-    color: '#1a1a2e',
+    color: '#0f172a',
     fontWeight: '600',
-    paddingTop: 6,
+    paddingVertical: 0,
+    height: '100%',
     ...Platform.select({ web: { outlineStyle: 'none' } })
   },
   eyeButton: { paddingLeft: 8, paddingVertical: 4 },

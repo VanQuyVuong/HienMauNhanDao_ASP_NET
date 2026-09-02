@@ -100,10 +100,11 @@ namespace HienMauNhanDao_DaNang.Data
                      (v == "Nhập kho" || v == "DaLuuKho" || v == "Da_Luu_Kho") ? TrangThaiTuiMau.DaLuuKho :
                      (v == "Chờ xét nghiệm" || v == "ChuaXuLy" || v == "Chua_Xu_Ly") ? TrangThaiTuiMau.ChuaXuLy :
                      (v == "Đã xét nghiệm" || v == "Yêu cầu nhập kho" || v == "DaXetNghiem") ? TrangThaiTuiMau.DaXetNghiem :
-                     (v == "Đã sử dụng" || v == "DaSuDung") ? TrangThaiTuiMau.DaSuDung :
+                     (v == "Đã sử dụng" || v == "DaSuDung" || v == "Đã xuất") ? TrangThaiTuiMau.DaSuDung :
                      (v == "Hết hạn" || v == "HetHan") ? TrangThaiTuiMau.HetHan :
                      (v == "Đã hủy" || v == "DaHuy" || v == "Hủy") ? TrangThaiTuiMau.DaHuy : TrangThaiTuiMau.ChuaXuLy
             );
+
 
             modelBuilder.Entity<TuiMau>().Property(t => t.TrangThai).HasConversion(trangThaiTuiMauConverter);
 

@@ -154,10 +154,25 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 _hiv = false;
                 _giangMai = false;
 
+                // Pre-select donor's blood type in modal dropdown
+                if (!string.IsNullOrEmpty(item.NhomMau))
+                {
+                    string targetBlood = item.NhomMau.Trim().Replace("_positive", "+").Replace("_negative", "-");
+                    foreach (ComboBoxItem cbi in cbModalBloodType.Items)
+                    {
+                        if (cbi.Content?.ToString()?.Trim() == targetBlood || cbi.Content?.ToString()?.Trim() == item.NhomMau.Trim())
+                        {
+                            cbModalBloodType.SelectedItem = cbi;
+                            break;
+                        }
+                    }
+                }
+
                 UpdatePathogenSwitches();
                 DiagnosticModal.Visibility = Visibility.Visible;
             }
         }
+
 
         private void btnCloseModal_Click(object sender, RoutedEventArgs e)
         {

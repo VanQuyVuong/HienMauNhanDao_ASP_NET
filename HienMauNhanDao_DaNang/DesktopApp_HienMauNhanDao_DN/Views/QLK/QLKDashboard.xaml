@@ -92,9 +92,11 @@
                     <TextBlock Text="CHỨC NĂNG THỦ KHO" FontSize="10" FontWeight="Black" Foreground="#94a3b8" Margin="8,0,0,12"/>
 
                     <Button x:Name="btnThongKe" Content="📊  Thống Kê Tồn Kho" Style="{StaticResource SidebarNavButtonStyle}" Click="btnThongKe_Click"/>
+                    <Button x:Name="btnPhieuNhapXuat" Content="📜  Phiếu Nhập - Xuất Kho" Style="{StaticResource SidebarNavButtonStyle}" Click="btnPhieuNhapXuat_Click"/>
                     <Button x:Name="btnKhoBenhVien" Content="📦  Kho Bệnh Viện &amp; Quét Mã" Style="{StaticResource SidebarNavButtonStyle}" Click="btnKhoBenhVien_Click"/>
                     <Button x:Name="btnNhapKhoChienDich" Content="📋  Nhập Kho Chiến Dịch" Style="{StaticResource SidebarNavButtonStyle}" Click="btnNhapKhoChienDich_Click"/>
                     <Button x:Name="btnQuanLyHanDung" Content="⏳  Quản Lý Hạn Dùng" Style="{StaticResource SidebarNavButtonStyle}" Click="btnQuanLyHanDung_Click"/>
+
                 </StackPanel>
 
                 <!-- Logout Button -->

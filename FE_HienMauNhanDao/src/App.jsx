@@ -55,36 +55,37 @@ const queryClient = new QueryClient();
 
 // Guard: cho phép các vai trò NVYT (Lễ Tân & Xét Nghiệm) truy cập
 function NvytGuard({ children }) {
-  const role = (localStorage.getItem("role") || "").trim();
-  const isNvytRole = ["NVYT", "NVYT_LT", "NVYT-LT", "NVYT_XN", "NVYT-XN"].includes(role);
+  const role = (localStorage.getItem("role") || "").trim().toUpperCase();
+  const isNvytRole = role.includes("NVYT") || role.includes("YTE");
   if (!isNvytRole) return <Navigate to="/login" replace />;
   return children;
 }
 
 function BacSiGuard({ children }) {
-  const role = localStorage.getItem("role");
-  if (role !== "BS") return <Navigate to="/login" replace />;
+  const role = (localStorage.getItem("role") || "").trim().toUpperCase();
+  if (role !== "BS" && !role.includes("BACSI")) return <Navigate to="/login" replace />;
   return children;
 }
 
 // Guard: chỉ cho phép role QLK (Quản lý kho) truy cập
 function QlkGuard({ children }) {
-  const role = localStorage.getItem("role");
-  if (role !== "QLK") return <Navigate to="/login" replace />;
+  const role = (localStorage.getItem("role") || "").trim().toUpperCase();
+  if (role !== "QLK" && !role.includes("KHO")) return <Navigate to="/login" replace />;
   return children;
 }
 
 function AdminGuard({ children }) {
-  const role = localStorage.getItem("role");
-  if (role !== "AD") return <Navigate to="/login" replace />;
+  const role = (localStorage.getItem("role") || "").trim().toUpperCase();
+  if (role !== "AD" && role !== "ADMIN") return <Navigate to="/login" replace />;
   return children;
 }
 
 function AdminHospitalGuard({ children }) {
-  const role = localStorage.getItem("role");
-  if (role !== "ADMIN_BV") return <Navigate to="/login" replace />;
+  const role = (localStorage.getItem("role") || "").trim().toUpperCase();
+  if (role !== "ADMIN_BV" && !role.includes("BV")) return <Navigate to="/login" replace />;
   return children;
 }
+
 
 function App() {
   useEffect(() => {
@@ -157,11 +158,17 @@ function App() {
           <Route path="/nvyt" element={<NvytGuard><NVYTLayout /></NvytGuard>}>
             <Route index element={<Navigate to="don-dang-ky" replace />} />
             <Route path="don-dang-ky" element={<DonDangKy />} />
+            <Route path="don_dang_ky" element={<DonDangKy />} />
             <Route path="tinh-nguyen-vien" element={<TinhNguyenVien />} />
+            <Route path="tinh_nguyen_vien" element={<TinhNguyenVien />} />
             <Route path="khai-bao-y-te" element={<KhaiBaoYTeNVYT />} />
+            <Route path="khai_bao_y_te" element={<KhaiBaoYTeNVYT />} />
             <Route path="cap-nhat-xet-nghiem" element={<CapNhatXetNghiem />} />
+            <Route path="cap_nhat_xet_nghiem" element={<CapNhatXetNghiem />} />
             <Route path="thu-nhan-mau" element={<ThuNhanMau />} />
+            <Route path="thu_nhan_mau" element={<ThuNhanMau />} />
           </Route>
+
         </Routes>
       </Router>
     </QueryClientProvider>

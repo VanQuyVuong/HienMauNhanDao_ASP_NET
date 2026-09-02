@@ -37,7 +37,23 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
 
         [JsonProperty("tenChienDich")]
         public string TenChienDich { get; set; } = string.Empty;
+
+        public string TrangThaiHienThi
+        {
+            get
+            {
+                var tt = (TrangThai ?? "").ToLower().Trim();
+                if (tt.Contains("daxetnghiem") || tt.Contains("chonhapkho") || tt.Contains("yêu cầu nhập kho") || tt.Contains("nhập kho"))
+                    return "✅ Chờ nhập kho (Đã XN)";
+                if (tt.Contains("daluukho") || tt.Contains("đã lưu kho") || tt.Contains("đã nhập kho"))
+                    return "🏦 Đã lưu kho";
+                if (tt.Contains("dahuy") || tt.Contains("hủy") || tt.Contains("không đạt"))
+                    return "❌ Đã hủy (Bệnh)";
+                return "⏳ Chờ xét nghiệm";
+            }
+        }
     }
+
 
     public class CreateTuiMauRequest
     {
@@ -77,6 +93,12 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
         [JsonProperty("ketQua")]
         public bool? KetQua { get; set; }
 
+        [JsonProperty("isReTest")]
+        public bool IsReTest { get; set; }
+
+        [JsonProperty("trangThaiText")]
+        public string? TrangThaiText { get; set; }
+
         [JsonProperty("moTa")]
         public string MoTa { get; set; } = string.Empty;
 
@@ -92,11 +114,36 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
         {
             get
             {
+                if (!string.IsNullOrEmpty(TrangThaiText)) return TrangThaiText;
+                if (IsReTest) return "🚨 Yêu cầu Re-test từ QLK";
                 if (KetQua == null) return "⏳ Chờ XN vi sinh";
-                return KetQua == true ? "✅ Đạt Tiêu Chuẩn" : "❌ Không Đạt (Hủy)";
+                return KetQua == true ? "✅ Đã XN (Chờ QLK duyệt)" : "❌ Không Đạt (Hủy)";
+            }
+        }
+
+        public string ButtonText
+        {
+            get
+            {
+                if (IsReTest || (MoTa ?? "").ToLower().Contains("re-test")) return $"🔄 Re-test Lần {SoLanXetNghiem}";
+                if (KetQua != null) return "✏️ Cập Nhật Kết Quả";
+                return "🧪 Nhập Kết Quả XN";
+            }
+        }
+
+        public string ButtonVisibility
+        {
+            get
+            {
+                bool isReTest = IsReTest || (MoTa ?? "").ToLower().Contains("re-test");
+                bool isPending = KetQua == null;
+                
+                if (isReTest || isPending) return "Visible";
+                return "Collapsed";
             }
         }
     }
+
 
     public class SaveXetNghiemRequest
     {

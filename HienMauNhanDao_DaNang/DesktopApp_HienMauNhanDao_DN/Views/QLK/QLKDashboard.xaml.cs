@@ -22,7 +22,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
 
         private void SetActiveButton(Button activeBtn)
         {
-            Button[] allButtons = { btnThongKe, btnKhoBenhVien, btnNhapKhoChienDich, btnQuanLyHanDung };
+            Button[] allButtons = { btnThongKe, btnPhieuNhapXuat, btnKhoBenhVien, btnNhapKhoChienDich, btnQuanLyHanDung };
             foreach (var btn in allButtons)
             {
                 if (btn == null) continue;
@@ -47,8 +47,15 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
             MainFrame.Navigate(new ThongKeTonKhoPage());
         }
 
+        private void btnPhieuNhapXuat_Click(object sender, RoutedEventArgs e)
+        {
+            SetActiveButton(btnPhieuNhapXuat);
+            MainFrame.Navigate(new PhieuNhapXuatKhoPage());
+        }
+
         private void btnKhoBenhVien_Click(object sender, RoutedEventArgs e)
         {
+
             SetActiveButton(btnKhoBenhVien);
             MainFrame.Navigate(new KhoMauBenhVienPage());
         }

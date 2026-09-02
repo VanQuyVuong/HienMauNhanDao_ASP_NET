@@ -1,6 +1,5 @@
 export const API_BASE_URL = 'http://localhost:5236/api';
 export const AUTH_URL = 'http://localhost:5236/api/auth';
-<<<<<<< Updated upstream
 
 export const ENDPOINTS = {
   AUTH: {
@@ -28,5 +27,3 @@ export const ENDPOINTS = {
     HOME: '/public/trang-chu'
   }
 };
-=======
->>>>>>> Stashed changes

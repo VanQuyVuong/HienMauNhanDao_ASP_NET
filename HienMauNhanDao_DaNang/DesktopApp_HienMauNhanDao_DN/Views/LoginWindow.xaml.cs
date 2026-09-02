@@ -24,7 +24,8 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                txtError.Text = "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!";
+                txtError.Visibility = Visibility.Visible;
                 return;
             }
 
@@ -75,26 +76,13 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                             dashboard.Show();
                         }
                         
-<<<<<<< Updated upstream
-=======
-                        string role = (result.Data.Role ?? "").Trim();
-                        if (role == "BS")
-                        {
-                            var bacSiDashboard = new DesktopApp_HienMauNhanDao_DN.Views.BacSi.BacSiDashboard();
-                            bacSiDashboard.Show();
-                        }
-                        else
-                        {
-                            var dashboard = new NVYTDashboard();
-                            dashboard.Show();
-                        }
-                        
->>>>>>> Stashed changes
+
                         this.Close();
                     }
                     else
                     {
-                        MessageBox.Show("Đăng nhập thất bại: Không nhận được token hợp lệ.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                        txtError.Text = "Không nhận được token hợp lệ từ máy chủ!";
+                        txtError.Visibility = Visibility.Visible;
                     }
                 }
                 else
@@ -110,12 +98,14 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
                     }
                     catch { }
 
-                    MessageBox.Show($"Đăng nhập thất bại ({response.StatusCode}):\n{errStr}", "Lỗi đăng nhập", MessageBoxButton.OK, MessageBoxImage.Error);
+                    txtError.Text = "Sai tài khoản hoặc mật khẩu!";
+                    txtError.Visibility = Visibility.Visible;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi chi tiết: {ex.Message}\n\nNguồn phát sinh lỗi:\n{ex.StackTrace}", "Lỗi hệ thống", MessageBoxButton.OK, MessageBoxImage.Error);
+                txtError.Text = "Lỗi kết nối máy chủ. Vui lòng thử lại!";
+                txtError.Visibility = Visibility.Visible;
             }
             finally
             {
@@ -127,6 +117,44 @@ namespace DesktopApp_HienMauNhanDao_DN.Views
         private void btnClose_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
+        }
+
+        private bool isPasswordVisible = false;
+
+        private void btnTogglePassword_Click(object sender, RoutedEventArgs e)
+        {
+            isPasswordVisible = !isPasswordVisible;
+            if (isPasswordVisible)
+            {
+                txtPasswordVisible.Text = txtPassword.Password;
+                txtPasswordVisible.Visibility = Visibility.Visible;
+                txtPassword.Visibility = Visibility.Collapsed;
+                btnTogglePassword.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(225, 29, 72));
+            }
+            else
+            {
+                txtPassword.Password = txtPasswordVisible.Text;
+                txtPassword.Visibility = Visibility.Visible;
+                txtPasswordVisible.Visibility = Visibility.Collapsed;
+                btnTogglePassword.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(153, 153, 153));
+            }
+        }
+
+        private void txtPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isPasswordVisible) txtPasswordVisible.Text = txtPassword.Password;
+            if (txtError != null) txtError.Visibility = Visibility.Collapsed;
+        }
+
+        private void txtPasswordVisible_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (isPasswordVisible) txtPassword.Password = txtPasswordVisible.Text;
+            if (txtError != null) txtError.Visibility = Visibility.Collapsed;
+        }
+        
+        private void txtUsername_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (txtError != null) txtError.Visibility = Visibility.Collapsed;
         }
     }
 }
