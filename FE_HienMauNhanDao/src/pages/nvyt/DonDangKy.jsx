@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { donDangKyNvytService, tnvNvytService, khaiBaoYTeNvytService } from '../../services/nvytService';
 import { phuongXaService } from '../../services/phuongXaService';
@@ -696,7 +696,8 @@ function TiepNhanModal({ don, nhanVien, onClose, onConfirmed }) {
 
 // ─── Trang chính ──────────────────────────────────────────────────────────────
 export default function DonDangKy() {
-  const { nhanVien } = useOutletContext();
+  const { nhanVien } = useOutletContext() || {};
+
   const navigate = useNavigate();
   const [dons, setDons] = useState([]);
   const [allDonsRaw, setAllDonsRaw] = useState([]);
