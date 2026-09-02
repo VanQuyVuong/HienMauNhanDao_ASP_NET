@@ -14,6 +14,8 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
+import Animated, { FadeInRight, FadeInDown, ZoomIn } from 'react-native-reanimated';
+import AnimatedBackground from "../components/AnimatedBackground";
 import api from "../services/api";
 import { ENDPOINTS } from "../constants/api";
 import NotificationModal from "../components/NotificationModal";
@@ -140,6 +142,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.root}>
+      <AnimatedBackground />
       {/* Modal Thông báo */}
       <NotificationModal
         visible={notifVisible}
@@ -308,7 +311,7 @@ export default function HomeScreen({ navigation }) {
               showsHorizontalScrollIndicator={false}
               style={styles.horizontalScroll}
             >
-              {activeCampaigns.slice(0, 5).map((c) => {
+              {activeCampaigns.slice(0, 5).map((c, idx) => {
                 const ts = getTrangThaiStyle(c.trangThai);
                 const dotColor = getMucDoColor(c.mucDoUuTien);
                 const progress =
@@ -317,14 +320,14 @@ export default function HomeScreen({ navigation }) {
                     : 0;
 
                 return (
-                  <Pressable
-                    key={c.maChienDich}
-                    style={({ pressed }) => [
-                      styles.campCard,
-                      pressed && { transform: [{ scale: 0.97 }] },
-                    ]}
-                    onPress={() => navigation.navigate("CampaignDetail", { campaignItem: c })}
-                  >
+                  <Animated.View key={c.maChienDich} entering={FadeInRight.delay(idx * 150).springify()}>
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.campCard,
+                        pressed && { transform: [{ scale: 0.93 }, { rotateX: '5deg' }, { rotateY: '5deg' }] },
+                      ]}
+                      onPress={() => navigation.navigate("CampaignDetail", { campaignItem: c })}
+                    >
                     <View
                       style={[styles.campStripe, { backgroundColor: dotColor }]}
                     />
@@ -364,7 +367,8 @@ export default function HomeScreen({ navigation }) {
                         </View>
                       )}
                     </View>
-                  </Pressable>
+                    </Pressable>
+                  </Animated.View>
                 );
               })}
             </ScrollView>
@@ -387,14 +391,14 @@ export default function HomeScreen({ navigation }) {
             </View>
           ) : (
             news.slice(0, 3).map((item, idx) => (
-              <Pressable
-                key={item.maTinTuc || idx}
-                style={({ pressed }) => [
-                  styles.newsCard,
-                  pressed && { transform: [{ scale: 0.98 }] },
-                ]}
-                onPress={() => navigation.navigate("NewsDetail", { newsItem: item })}
-              >
+              <Animated.View key={item.maTinTuc || idx} entering={FadeInDown.delay(idx * 150).springify()}>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.newsCard,
+                    pressed && { transform: [{ scale: 0.95 }, { rotateX: '2deg' }] },
+                  ]}
+                  onPress={() => navigation.navigate("NewsDetail", { newsItem: item })}
+                >
                 <View style={styles.newsContent}>
                   <View style={styles.newsCategoryBadge}>
                     <Text style={styles.newsCategoryText}>
@@ -422,7 +426,8 @@ export default function HomeScreen({ navigation }) {
                   }}
                   style={styles.newsImage}
                 />
-              </Pressable>
+                </Pressable>
+              </Animated.View>
             ))
           )}
         </View>
@@ -461,7 +466,7 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#f8f9fa" },
+  root: { flex: 1, backgroundColor: "transparent" },
   scrollContent: { paddingBottom: 16 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f8f9fa" },
   loadingText: { marginTop: 12, color: "#888", fontSize: 14 },
@@ -560,18 +565,47 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 16, fontWeight: "800", color: "#1a1a2e" },
   seeAll: { fontSize: 13, color: "#e62e43", fontWeight: "700" },
   horizontalScroll: { marginHorizontal: -16, paddingHorizontal: 16 },
-  campCard: { width: 260, backgroundColor: "#fff", borderRadius: 18, marginRight: 14, overflow: "hidden", flexDirection: "row" },
-  campStripe: { width: 5 },
-  campBody: { flex: 1, padding: 14 },
-  chip: { borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3, alignSelf: "flex-start", marginBottom: 8 },
-  chipText: { fontSize: 10, fontWeight: "700" },
-  campName: { fontSize: 14, fontWeight: "800", color: "#1a1a2e", marginBottom: 6, lineHeight: 19 },
-  campInfo: { fontSize: 12, color: "#666", marginBottom: 3 },
-  progressWrap: { marginTop: 10 },
-  progressTrack: { height: 6, backgroundColor: "#f1f5f9", borderRadius: 3, overflow: "hidden" },
-  progressFill: { height: 6, borderRadius: 3 },
-  progressLabel: { fontSize: 10, color: "#888", marginTop: 4, textAlign: "right" },
-  newsCard: { backgroundColor: "#fff", borderRadius: 14, padding: 14, marginBottom: 10, flexDirection: "row", alignItems: "center" },
+  campCard: { 
+    width: 275, 
+    backgroundColor: "rgba(255, 255, 255, 0.75)", 
+    borderRadius: 22, 
+    marginRight: 16, 
+    flexDirection: "row",
+    shadowColor: "#0f172a",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.05,
+    shadowRadius: 15,
+    elevation: 5,
+    marginBottom: 20,
+    marginTop: 4,
+    borderWidth: 1.5,
+    borderColor: "#f8fafc"
+  },
+  campStripe: { width: 6, borderTopLeftRadius: 22, borderBottomLeftRadius: 22 },
+  campBody: { flex: 1, padding: 18 },
+  chip: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, alignSelf: "flex-start", marginBottom: 10 },
+  chipText: { fontSize: 10, fontWeight: "800", textTransform: "uppercase" },
+  campName: { fontSize: 15, fontWeight: "900", color: "#0f172a", marginBottom: 6, lineHeight: 20 },
+  campInfo: { fontSize: 12, fontWeight: "500", color: "#64748b", marginBottom: 4 },
+  progressWrap: { marginTop: 12 },
+  progressTrack: { height: 8, backgroundColor: "#f1f5f9", borderRadius: 4, overflow: "hidden" },
+  progressFill: { height: 8, borderRadius: 4 },
+  progressLabel: { fontSize: 11, fontWeight: "700", color: "#94a3b8", marginTop: 6, textAlign: "right" },
+  newsCard: { 
+    backgroundColor: "rgba(255, 255, 255, 0.8)", 
+    borderRadius: 18, 
+    padding: 14, 
+    marginBottom: 12, 
+    flexDirection: "row", 
+    alignItems: "center",
+    shadowColor: "#0f172a",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 3,
+    borderWidth: 1.5,
+    borderColor: "#f8fafc"
+  },
   newsContent: { flex: 1, marginRight: 12 },
   newsCategoryBadge: { backgroundColor: "#ffeef0", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, alignSelf: "flex-start", marginBottom: 6 },
   newsCategoryText: { fontSize: 10, fontWeight: "700", color: "#e62e43" },
