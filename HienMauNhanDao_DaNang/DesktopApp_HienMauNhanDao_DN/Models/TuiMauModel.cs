@@ -130,6 +130,18 @@ namespace DesktopApp_HienMauNhanDao_DN.Models
                 return "🧪 Nhập Kết Quả XN";
             }
         }
+
+        public string ButtonVisibility
+        {
+            get
+            {
+                bool isReTest = IsReTest || (MoTa ?? "").ToLower().Contains("re-test");
+                bool isPending = KetQua == null;
+                
+                if (isReTest || isPending) return "Visible";
+                return "Collapsed";
+            }
+        }
     }
 
 

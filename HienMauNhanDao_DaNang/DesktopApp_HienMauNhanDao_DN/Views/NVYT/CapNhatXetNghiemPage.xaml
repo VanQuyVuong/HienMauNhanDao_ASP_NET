@@ -230,7 +230,8 @@
                                     <DataTemplate>
                                         <Button Content="{Binding ButtonText}" Height="36" Padding="14,0" 
                                                 Background="#e11d48" Foreground="White" FontWeight="Black" FontSize="12" 
-                                                Cursor="Hand" BorderThickness="0" Click="btnOpenModal_Click">
+                                                Cursor="Hand" BorderThickness="0" Click="btnOpenModal_Click"
+                                                Visibility="{Binding ButtonVisibility}">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
                                                     <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
