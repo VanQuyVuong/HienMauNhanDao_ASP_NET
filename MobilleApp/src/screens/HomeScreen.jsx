@@ -119,7 +119,9 @@ export default function HomeScreen({ navigation }) {
     fetchHomeData();
   };
 
-  const activeCampaigns = campaigns.filter((c) => c.trangThai === "DangDienRa");
+  const activeCampaigns = campaigns.filter(
+    (c) => c.trangThai === "DangDienRa" || c.trangThai === "ChuaBatDau"
+  );
   const urgentCampaigns = campaigns.filter(
     (c) =>
       c.mucDoUuTien === "KhanCap" &&
