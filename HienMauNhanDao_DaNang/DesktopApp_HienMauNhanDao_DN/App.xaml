@@ -4,8 +4,7 @@
              xmlns:local="clr-namespace:DesktopApp_HienMauNhanDao_DN"
              StartupUri="Views/LoginWindow.xaml">
     <Application.Resources>
-
-        <!-- GLOBAL BUTTON HOVER & PRESS EFFECT STYLE -->
+        <!-- GLOBAL BUTTON HOVER & PRESS EFFECT STYLE WITH SMOOTH ANIMATION -->
         <Style TargetType="Button">
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -15,29 +14,46 @@
                                 Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}" 
                                 BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="8" 
+                                CornerRadius="12" 
                                 Padding="{TemplateBinding Padding}"
                                 SnapsToDevicePixels="True">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <!-- Mouse Over / Hover State -->
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.88"/>
-                                <Setter TargetName="border" Property="Effect">
+                            <!-- Mouse Over / Hover State (Smooth Opacity Transition) -->
+                            <EventTrigger RoutedEvent="MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="border" 
+                                                         Storyboard.TargetProperty="Opacity" 
+                                                         To="0.88" Duration="0:0:0.15" 
+                                                         DecelerationRatio="0.8"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="border" 
+                                                         Storyboard.TargetProperty="Opacity" 
+                                                         To="1.0" Duration="0:0:0.2" 
+                                                         AccelerationRatio="0.8"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <!-- Mouse Pressed State (Scale down effect) -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.75"/>
+                                <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="border" Property="RenderTransform">
                                     <Setter.Value>
-                                        <DropShadowEffect BlurRadius="8" ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.15"/>
+                                        <ScaleTransform ScaleX="0.96" ScaleY="0.96"/>
                                     </Setter.Value>
                                 </Setter>
                             </Trigger>
-                            <!-- Mouse Pressed State -->
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.75"/>
-                                <Setter TargetName="border" Property="Margin" Value="1,1,0,0"/>
-                            </Trigger>
                             <!-- Disabled State -->
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.45"/>
                                 <Setter Property="Cursor" Value="No"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -50,26 +66,30 @@
         <Style TargetType="DataGridRow">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Margin" Value="0,1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
             <Style.Triggers>
-                <!-- Mouse Hover Row Effect -->
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#f1f5f9"/>
+                    <Setter Property="Background" Value="#f8fafc"/>
+                    <Setter Property="BorderBrush" Value="#f1f5f9"/>
                 </Trigger>
-                <!-- Selected Row Effect -->
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#fee2e2"/>
-                    <Setter Property="Foreground" Value="#991b1b"/>
+                    <Setter Property="Background" Value="#fff1f2"/>
+                    <Setter Property="Foreground" Value="#be123c"/>
+                    <Setter Property="BorderBrush" Value="#fecdd3"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <!-- DATAGRID CELL STYLE -->
         <Style TargetType="DataGridCell">
-            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="DataGridCell">
-                        <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                        <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" CornerRadius="6" SnapsToDevicePixels="True">
                             <ContentPresenter VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
@@ -78,7 +98,7 @@
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="Foreground" Value="#991b1b"/>
+                    <Setter Property="Foreground" Value="#be123c"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -86,32 +106,73 @@
         <!-- TEXTBOX FOCUS GLOW EFFECT -->
         <Style TargetType="TextBox">
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#cbd5e1"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="BorderBrush" Value="#e2e8f0"/>
             <Setter Property="Background" Value="#f8fafc"/>
-            <Style.Triggers>
-                <Trigger Property="IsKeyboardFocused" Value="True">
-                    <Setter Property="BorderBrush" Value="#dc2626"/>
-                    <Setter Property="Background" Value="#ffffff"/>
-                </Trigger>
-            </Style.Triggers>
+            <Setter Property="Foreground" Value="#1e293b"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="10" SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#cbd5e1"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#f43f5e"/>
+                                <Setter TargetName="border" Property="Background" Value="#ffffff"/>
+                                <Setter TargetName="border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Color="#f43f5e" Opacity="0.2"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- PASSWORD BOX FOCUS GLOW EFFECT -->
         <Style TargetType="PasswordBox">
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#cbd5e1"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="BorderBrush" Value="#e2e8f0"/>
             <Setter Property="Background" Value="#f8fafc"/>
-            <Style.Triggers>
-                <Trigger Property="IsKeyboardFocused" Value="True">
-                    <Setter Property="BorderBrush" Value="#dc2626"/>
-                    <Setter Property="Background" Value="#ffffff"/>
-                </Trigger>
-            </Style.Triggers>
+            <Setter Property="Foreground" Value="#1e293b"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="10" SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#cbd5e1"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#f43f5e"/>
+                                <Setter TargetName="border" Property="Background" Value="#ffffff"/>
+                                <Setter TargetName="border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Color="#f43f5e" Opacity="0.2"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
-
     </Application.Resources>
 </Application>
