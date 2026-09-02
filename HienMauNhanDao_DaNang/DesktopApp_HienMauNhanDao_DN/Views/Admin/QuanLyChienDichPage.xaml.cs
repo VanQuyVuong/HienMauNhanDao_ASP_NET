@@ -146,35 +146,50 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                     {
                         foreach (var token in jarr)
                         {
-                            string ma = token["maChienDich"]?.ToString() ?? "";
-                            string ten = token["tenChienDich"]?.ToString() ?? "";
-                            string diaDiem = token["diaDiem"]?["tenDiaDiem"]?.ToString() ?? token["diaDiem"]?.ToString() ?? "Đà Nẵng";
-                            string bd = token["thoiGianBD"]?.ToString() ?? "";
-                            string kt = token["thoiGianKT"]?.ToString() ?? "";
-                            string status = token["trangThai"]?.ToString() ?? "0";
-
-                            int duKien = token["soLuongDuKien"]?.ToObject<int>() ?? 100;
-                            int luongThu = token["luongMauDaThu"]?.ToObject<int>() ?? 0;
-                            int uuTien = token["mucDoUuTien"]?.ToObject<int>() ?? 0;
-
-                            if (DateTime.TryParse(bd, out DateTime dtBD)) bd = dtBD.ToString("dd/MM/yyyy");
-                            if (DateTime.TryParse(kt, out DateTime dtKT)) kt = dtKT.ToString("dd/MM/yyyy");
-
-                            list.Add(new CampaignAdminDto
+                            try
                             {
-                                MaChienDich = ma,
-                                TenChienDich = ten,
-                                DiaDiemString = diaDiem,
-                                ThoiGianBD = bd,
-                                ThoiGianKT = kt,
-                                ChiTieu = duKien,
-                                DaThu = luongThu,
-                                TrangThaiRaw = status,
-                                MucDoUuTien = uuTien
-                            });
+                                string ma = token["maChienDich"]?.ToString() ?? "";
+                                string ten = token["tenChienDich"]?.ToString() ?? "";
+                                string diaDiem = token["diaDiem"]?["tenDiaDiem"]?.ToString() ?? token["diaDiem"]?.ToString() ?? "Đà Nẵng";
+                                string bd = token["thoiGianBD"]?.ToString() ?? "";
+                                string kt = token["thoiGianKT"]?.ToString() ?? "";
+                                string status = token["trangThai"]?.ToString() ?? "0";
+
+                                int duKien = 100;
+                                if (int.TryParse(token["soLuongDuKien"]?.ToString(), out int parsedDK)) duKien = parsedDK;
+
+                                int luongThu = 0;
+                                if (int.TryParse(token["luongMauDaThu"]?.ToString(), out int parsedLT)) luongThu = parsedLT;
+
+                                int uuTien = 0;
+                                var uuTienTok = token["mucDoUuTien"]?.ToString() ?? "";
+                                if (uuTienTok == "1" || uuTienTok.Equals("KhanCap", StringComparison.OrdinalIgnoreCase) || uuTienTok.Contains("khẩn cấp"))
+                                {
+                                    uuTien = 1;
+                                }
+
+                                if (DateTime.TryParse(bd, out DateTime dtBD)) bd = dtBD.ToString("dd/MM/yyyy");
+                                if (DateTime.TryParse(kt, out DateTime dtKT)) kt = dtKT.ToString("dd/MM/yyyy");
+
+                                list.Add(new CampaignAdminDto
+                                {
+                                    MaChienDich = ma,
+                                    TenChienDich = ten,
+                                    DiaDiemString = diaDiem,
+                                    ThoiGianBD = bd,
+                                    ThoiGianKT = kt,
+                                    ChiTieu = duKien,
+                                    DaThu = luongThu,
+                                    TrangThaiRaw = status,
+                                    MucDoUuTien = uuTien
+                                });
+                            }
+                            catch
+                            {
+                            }
                         }
                     }
-                    _allCampaigns = list.Any() ? list : GetMockCampaigns();
+                    _allCampaigns = list;
                 }
                 else
                 {
@@ -185,6 +200,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             {
                 _allCampaigns = GetMockCampaigns();
             }
+
             finally
             {
                 btnRefresh.IsEnabled = true;
@@ -570,7 +586,10 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                     nhomMauCanKhapCap = nhomMauCan,
                     trangThai = selectedStatus
                 };
+                var jsonStr = JsonConvert.SerializeObject(reqObj);
+                var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
                 var response = await ApiClient.Instance.Client.PostAsync("/api/ChienDich", content);
+
                 if (response.IsSuccessStatusCode)
                 {
                     MessageBox.Show($"✅ Đã phát hành thành công chiến dịch hiến máu: {ten}!\n📍 Địa điểm: {diaDiemDisplayStr}", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);

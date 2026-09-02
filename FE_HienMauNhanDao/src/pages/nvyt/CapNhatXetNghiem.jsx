@@ -238,7 +238,8 @@ function XetNghiemModal({ item, nhanVien, isReTest, onClose, onSaved }) {
 
 // ─── Trang Chính Cập Nhật Xét Nghiệm (Cyber-Clinical Redesign) ──────────────────────
 export default function CapNhatXetNghiem() {
-  const { nhanVien } = useOutletContext();
+  const { nhanVien } = useOutletContext() || {};
+
   const [list, setList] = useState([]);
   const [stats, setStats] = useState({ tongSo: 0, datYeuCau: 0, khongDat: 0, reTestCount: 0 });
   const [loading, setLoading] = useState(true);
@@ -443,27 +444,25 @@ export default function CapNhatXetNghiem() {
                       {item.moTa || 'Đang chờ xét nghiệm vi sinh'}
                     </td>
                     <td className="px-5 py-4">
-                      <button
-                        onClick={() => setModalItem({ item, isReTest: item.isReTest || isReTestReq })}
-                        className={`h-9 px-4 rounded-xl text-white font-black text-xs flex items-center gap-1.5 shadow-md transition-all active:scale-95 whitespace-nowrap ${
-                          item.isReTest || isReTestReq 
-                            ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-200' 
-                            : !isPending 
-                              ? 'bg-cyan-600 hover:bg-cyan-700 shadow-cyan-200' 
+                      {(item.isReTest || isReTestReq || isPending) && (
+                        <button
+                          onClick={() => setModalItem({ item, isReTest: item.isReTest || isReTestReq })}
+                          className={`h-9 px-4 rounded-xl text-white font-black text-xs flex items-center gap-1.5 shadow-md transition-all active:scale-95 whitespace-nowrap ${
+                            item.isReTest || isReTestReq 
+                              ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-200' 
                               : 'bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 hover:from-red-700 hover:to-pink-700 shadow-rose-500/25'
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-base">
-                          {item.isReTest || isReTestReq ? 'replay' : !isPending ? 'edit_note' : 'biotech'}
-                        </span>
-                        <span>
-                          {item.isReTest || isReTestReq 
-                            ? `🔄 Re-test Lần ${item.soLanXetNghiem || 2}` 
-                            : !isPending 
-                              ? '✏️ Cập Nhật Kết Quả' 
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            {item.isReTest || isReTestReq ? 'replay' : 'biotech'}
+                          </span>
+                          <span>
+                            {item.isReTest || isReTestReq 
+                              ? `🔄 Re-test Lần ${item.soLanXetNghiem || 2}` 
                               : '🧪 Nhập Kết Quả XN'}
-                        </span>
-                      </button>
+                          </span>
+                        </button>
+                      )}
                     </td>
 
                   </tr>

@@ -192,7 +192,8 @@ function TuiMauModal({ don, item, nhanVien, onClose, onSaved }) {
 
 // ─── Trang Chính Thu Nhận Máu (Futuristic Cyber-Clinical Redesign) ────────────────
 export default function ThuNhanMau() {
-  const { nhanVien } = useOutletContext();
+  const { nhanVien } = useOutletContext() || {};
+
   const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'collected'
 
   // Search & Filter state
