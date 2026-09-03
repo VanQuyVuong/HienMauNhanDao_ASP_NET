@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     overflow: 'hidden',
     backgroundColor: '#fff',
-    zIndex: -1,
   },
   baseBg: {
     ...StyleSheet.absoluteFillObject,
