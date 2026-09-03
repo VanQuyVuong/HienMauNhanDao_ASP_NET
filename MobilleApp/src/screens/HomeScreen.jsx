@@ -15,9 +15,8 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInRight, FadeInDown, ZoomIn } from 'react-native-reanimated';
-import AnimatedBackground from "../components/AnimatedBackground";
 import api from "../services/api";
-import { ENDPOINTS } from "../constants/api";
+import { ENDPOINTS, getImageUrl } from "../constants/api";
 import NotificationModal from "../components/NotificationModal";
 
 const DEFAULT_NEWS_IMAGE =
@@ -142,7 +141,6 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.root}>
-      <AnimatedBackground />
       {/* Modal Thông báo */}
       <NotificationModal
         visible={notifVisible}
@@ -155,218 +153,110 @@ export default function HomeScreen({ navigation }) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#e62e43"
+            tintColor="#ef4444"
           />
         }
         contentContainerStyle={styles.scrollContent}
       >
-        {/* ── HEADER ĐỎ & THẺ THỐNG KÊ ──── */}
-        <LinearGradient colors={["#e62e43", "#c01b30"]} style={styles.header}>
-          <View style={styles.headerInner}>
-            <View>
-              <Text style={styles.greeting}>Xin chào, {displayName}! 👋</Text>
-              <Text style={styles.headerSub}>
-                Hệ thống Hiến máu Nhân đạo Đà Nẵng
-              </Text>
-            </View>
-
-            {/* Nút Chuông Thông Báo */}
-            <Pressable
-              style={({ pressed }) => [
-                styles.notifBtn,
-                pressed && { transform: [{ scale: 0.9 }] },
-              ]}
-              onPress={() => setNotifVisible(true)}
-            >
-              <Text style={styles.notifIcon}>🔔</Text>
-              <View style={styles.notifBadge}>
-                <Text style={styles.notifBadgeText}>2</Text>
-              </View>
-            </Pressable>
+        {/* ── HEADER MỚI (TỐI GIẢN) ──── */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Xin chào, {displayName}! 👋</Text>
+            <Text style={styles.headerSub}>Sẵn sàng trao đi giọt máu đào?</Text>
           </View>
-
-          {/* 3 Thẻ thống kê kính mờ */}
-          <View style={styles.quickRow}>
-            <View style={styles.quickCard}>
-              <Text style={styles.quickNum}>{activeCampaigns.length}</Text>
-              <Text style={styles.quickLabel}>Chiến dịch{"\n"}đang mở</Text>
-            </View>
-
-            <View style={[styles.quickCard, styles.quickCardMid]}>
-              <Text style={styles.quickNum}>
-                {formatNhomMau(profile?.nhomMau)}
-              </Text>
-              <Text style={styles.quickLabel}>Nhóm{"\n"}máu của bạn</Text>
-            </View>
-
-          </View>
-        </LinearGradient>
-
-        {/* ── THANH PHÍM TẮT TRUY CẬP NHANH (QUICK ACTIONS) ───── */}
-        <View style={styles.quickGrid}>
           <Pressable
-            onPress={() => navigation.navigate("DangKyHienMau")}
-            style={({ pressed }) => [styles.gridItem, pressed && { transform: [{ scale: 0.95 }] }]}
+            style={({ pressed }) => [styles.avatarBtn, pressed && { opacity: 0.8 }]}
+            onPress={() => setNotifVisible(true)}
           >
-            <View style={[styles.gridIconBox, { backgroundColor: "#fee2e2" }]}>
-              <Text style={styles.gridIcon}>🩸</Text>
-            </View>
-            <Text style={styles.gridText}>Đăng ký{"\n"}hiến máu</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => navigation.navigate("DonationHistory")}
-            style={({ pressed }) => [styles.gridItem, pressed && { transform: [{ scale: 0.95 }] }]}
-          >
-            <View style={[styles.gridIconBox, { backgroundColor: "#fef3c7" }]}>
-              <Text style={styles.gridIcon}>📜</Text>
-            </View>
-            <Text style={styles.gridText}>Lịch sử &{"\n"}Chứng nhận</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => navigation.navigate("TinTuc")}
-            style={({ pressed }) => [styles.gridItem, pressed && { transform: [{ scale: 0.95 }] }]}
-          >
-            <View style={[styles.gridIconBox, { backgroundColor: "#dbeafe" }]}>
-              <Text style={styles.gridIcon}>📰</Text>
-            </View>
-            <Text style={styles.gridText}>Tin tức &{"\n"}Sức khỏe</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => navigation.navigate("ChienDich")}
-            style={({ pressed }) => [styles.gridItem, pressed && { transform: [{ scale: 0.95 }] }]}
-          >
-            <View style={[styles.gridIconBox, { backgroundColor: "#dcfce7" }]}>
-              <Text style={styles.gridIcon}>📋</Text>
-            </View>
-            <Text style={styles.gridText}>Danh sách{"\n"}chiến dịch</Text>
+            <Image source={{ uri: "https://ui-avatars.com/api/?name=" + displayName + "&background=fee2e2&color=e62e43" }} style={styles.avatarImg} />
+            <View style={styles.notifDot} />
           </Pressable>
         </View>
 
-
-        {/* ── BANNER CHIẾN DỊCH KHẨN CẤP ───────────── */}
-        {urgentCampaigns.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.urgentBanner}>
-              <View style={styles.urgentHeader}>
-                <Text style={styles.urgentIcon}>⚡</Text>
-                <Text style={styles.urgentTitle}>KHẨN CẤP</Text>
-                <View style={styles.urgentBadge}>
-                  <Text style={styles.urgentBadgeText}>
-                    {urgentCampaigns.length} chiến dịch
-                  </Text>
-                </View>
-              </View>
-
-              <Text style={styles.urgentCampName}>
-                {urgentCampaigns[0].tenChienDich}
-              </Text>
-
-              <Text style={styles.urgentDesc}>
-                📍 {urgentCampaigns[0].diaDiem?.tenDiaDiem || "TP. Đà Nẵng"}
-              </Text>
-
-              {urgentCampaigns[0].nhomMauCanKhapCap && (
-                <Text style={styles.urgentBloodType}>
-                  🩸 Cần gấp nhóm máu: {urgentCampaigns[0].nhomMauCanKhapCap}
-                </Text>
-              )}
-
-              <Pressable
-                style={({ pressed }) => [
-                  styles.urgentBtn,
-                  pressed && { opacity: 0.85 },
-                ]}
-                onPress={() => navigation.navigate("DangKyHienMau")}
-              >
-                <Text style={styles.urgentBtnText}>
-                  Đăng ký hiến máu ngay →
-                </Text>
-              </Pressable>
+        {/* ── THẺ THÀNH TÍCH (HERO CARD) ──── */}
+        <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.heroWrapper}>
+          <LinearGradient colors={["#ff4d4f", "#e62e43"]} start={{x:0, y:0}} end={{x:1, y:1}} style={styles.heroCard}>
+            <View style={styles.heroStatBox}>
+              <Text style={styles.heroStatValue}>{activeCampaigns.length}</Text>
+              <Text style={styles.heroStatLabel}>Chiến dịch{"\n"}đang mở</Text>
             </View>
-          </View>
-        )}
+            <View style={styles.heroDivider} />
+            <View style={styles.heroStatBox}>
+              <Text style={styles.heroStatValue}>{formatNhomMau(profile?.nhomMau)}</Text>
+              <Text style={styles.heroStatLabel}>Nhóm máu{"\n"}của bạn</Text>
+            </View>
+          </LinearGradient>
+        </Animated.View>
 
-        {/* ── CHIẾN DỊCH ĐANG DIỄN RA (CAROUSEL) ───── */}
+        {/* ── THANH PHÍM TẮT TRUY CẬP NHANH ───── */}
+        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.quickGrid}>
+          {[
+            { icon: "🩸", title: "Đăng ký\nhiến máu", bg: "#ffe4e6", nav: "DangKyHienMau" },
+            { icon: "📜", title: "Lịch sử\nchứng nhận", bg: "#fef3c7", nav: "DonationHistory" },
+            { icon: "📰", title: "Tin tức\nsức khỏe", bg: "#e0e7ff", nav: "TinTuc" },
+            { icon: "📋", title: "Danh sách\nchiến dịch", bg: "#dcfce7", nav: "ChienDich" },
+          ].map((item, idx) => (
+            <Pressable
+              key={idx}
+              onPress={() => navigation.navigate(item.nav)}
+              style={({ pressed }) => [styles.gridItem, pressed && { transform: [{ scale: 0.92 }] }]}
+            >
+              <View style={[styles.gridIconBox, { backgroundColor: item.bg }]}>
+                <Text style={styles.gridIcon}>{item.icon}</Text>
+              </View>
+              <Text style={styles.gridText}>{item.title}</Text>
+            </Pressable>
+          ))}
+        </Animated.View>
+
+        {/* ── CHIẾN DỊCH ĐANG DIỄN RA ───── */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Chiến dịch đang diễn ra</Text>
+            <Text style={styles.sectionTitle}>Chiến dịch nổi bật</Text>
             <Pressable onPress={() => navigation.navigate("ChienDich")}>
-              <Text style={styles.seeAll}>Xem tất cả</Text>
+              <Text style={styles.seeAll}>Tất cả</Text>
             </Pressable>
           </View>
 
           {activeCampaigns.length === 0 ? (
             <View style={styles.emptyCard}>
               <Text style={styles.emptyEmoji}>📋</Text>
-              <Text style={styles.emptyText}>
-                Hiện tại chưa có chiến dịch mới.
-              </Text>
+              <Text style={styles.emptyText}>Hiện tại chưa có chiến dịch mới.</Text>
             </View>
           ) : (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.horizontalScroll}
-            >
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
               {activeCampaigns.slice(0, 5).map((c, idx) => {
                 const ts = getTrangThaiStyle(c.trangThai);
-                const dotColor = getMucDoColor(c.mucDoUuTien);
-                const progress =
-                  c.soLuongDuKien > 0
-                    ? Math.min((c.luongMauDaThu || 0) / c.soLuongDuKien, 1)
-                    : 0;
-
+                const progress = c.soLuongDuKien > 0 ? Math.min((c.luongMauDaThu || 0) / c.soLuongDuKien, 1) : 0;
                 return (
-                  <Animated.View key={c.maChienDich} entering={FadeInRight.delay(idx * 150).springify()}>
+                  <Animated.View key={c.maChienDich} entering={FadeInRight.delay(300 + idx * 100).springify()}>
                     <Pressable
-                      style={({ pressed }) => [
-                        styles.campCard,
-                        pressed && { transform: [{ scale: 0.93 }, { rotateX: '5deg' }, { rotateY: '5deg' }] },
-                      ]}
+                      style={({ pressed }) => [styles.campCard, pressed && { transform: [{ scale: 0.96 }] }]}
                       onPress={() => navigation.navigate("CampaignDetail", { campaignItem: c })}
                     >
-                    <View
-                      style={[styles.campStripe, { backgroundColor: dotColor }]}
-                    />
-
-                    <View style={styles.campBody}>
-                      <View style={[styles.chip, { backgroundColor: ts.bg }]}>
-                        <Text style={[styles.chipText, { color: ts.text }]}>
-                          {ts.label}
-                        </Text>
-                      </View>
-                      <Text style={styles.campName} numberOfLines={2}>
-                        {c.tenChienDich}
-                      </Text>
-                      <Text style={styles.campInfo}>
-                        📍 {c.diaDiem?.tenDiaDiem || "Đà Nẵng"}
-                      </Text>
-                      <Text style={styles.campInfo}>
-                        📅 {formatDate(c.thoiGianBD)} - {formatDate(c.thoiGianKT)}
-                      </Text>
-
-                      {c.soLuongDuKien > 0 && (
-                        <View style={styles.progressWrap}>
-                          <View style={styles.progressTrack}>
-                            <View
-                              style={[
-                                styles.progressFill,
-                                {
-                                  width: `${progress * 100}%`,
-                                  backgroundColor: dotColor,
-                                },
-                              ]}
-                            />
-                          </View>
-                          <Text style={styles.progressLabel}>
-                            {c.luongMauDaThu || 0}/{c.soLuongDuKien} ml
-                          </Text>
+                      <View style={styles.campImageWrapper}>
+                        <Image 
+                          source={{ uri: (c.imageUrl || c.ImageUrl) ? getImageUrl(c.imageUrl || c.ImageUrl) : DEFAULT_NEWS_IMAGE }} 
+                          style={styles.campImage} 
+                          resizeMode="cover" 
+                        />
+                        <View style={[styles.chip, { backgroundColor: ts.bg }]}>
+                          <Text style={[styles.chipText, { color: ts.text }]}>{ts.label}</Text>
                         </View>
-                      )}
-                    </View>
+                      </View>
+                      <View style={styles.campBody}>
+                        <Text style={styles.campName} numberOfLines={2}>{c.tenChienDich}</Text>
+                        <Text style={styles.campInfo}>📍 {c.diaDiem?.tenDiaDiem || "Đà Nẵng"}</Text>
+                        <Text style={styles.campInfo}>📅 {formatDate(c.thoiGianBD)}</Text>
+                        {c.soLuongDuKien > 0 && (
+                          <View style={styles.progressWrap}>
+                            <View style={styles.progressTrack}>
+                              <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+                            </View>
+                            <Text style={styles.progressLabel}>{c.luongMauDaThu || 0}/{c.soLuongDuKien} ml</Text>
+                          </View>
+                        )}
+                      </View>
                     </Pressable>
                   </Animated.View>
                 );
@@ -379,84 +269,21 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Tin tức & Sức khoẻ</Text>
-            <Pressable onPress={() => navigation.navigate("TinTuc")}>
-              <Text style={styles.seeAll}>Xem tất cả</Text>
-            </Pressable>
           </View>
-
-          {news.length === 0 ? (
-            <View style={styles.emptyCard}>
-              <Text style={styles.emptyEmoji}>📰</Text>
-              <Text style={styles.emptyText}>Chưa có tin tức mới.</Text>
-            </View>
-          ) : (
-            news.slice(0, 3).map((item, idx) => (
-              <Animated.View key={item.maTinTuc || idx} entering={FadeInDown.delay(idx * 150).springify()}>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.newsCard,
-                    pressed && { transform: [{ scale: 0.95 }, { rotateX: '2deg' }] },
-                  ]}
-                  onPress={() => navigation.navigate("NewsDetail", { newsItem: item })}
-                >
+          {news.slice(0, 3).map((item, idx) => (
+            <Animated.View key={item.maTinTuc || idx} entering={FadeInDown.delay(400 + idx * 100).springify()}>
+              <Pressable
+                style={({ pressed }) => [styles.newsCard, pressed && { transform: [{ scale: 0.97 }] }]}
+                onPress={() => navigation.navigate("NewsDetail", { newsItem: item })}
+              >
+                <Image source={{ uri: item.hinhAnh && item.hinhAnh.startsWith("http") ? item.hinhAnh : DEFAULT_NEWS_IMAGE }} style={styles.newsImage} />
                 <View style={styles.newsContent}>
-                  <View style={styles.newsCategoryBadge}>
-                    <Text style={styles.newsCategoryText}>
-                      {item.loaiTin === "KienThuc"
-                        ? "📖 Kiến thức"
-                        : item.loaiTin === "SuKien"
-                          ? "🎪 Sự kiện"
-                          : "📰 Tin tức"}
-                    </Text>
-                  </View>
-                  <Text style={styles.newsTitle} numberOfLines={2}>
-                    {item.tieuDe}
-                  </Text>
-                  <Text style={styles.newsDate}>
-                    🗓 {formatDate(item.ngayDang)}
-                  </Text>
+                  <Text style={styles.newsTitle} numberOfLines={2}>{item.tieuDe}</Text>
+                  <Text style={styles.newsDate}>🗓 {formatDate(item.ngayDang)}</Text>
                 </View>
-
-                {/* Thumbnail hình ảnh có Fallback đẹp */}
-                <Image
-                  source={{
-                    uri: item.hinhAnh && item.hinhAnh.startsWith("http")
-                      ? item.hinhAnh
-                      : DEFAULT_NEWS_IMAGE,
-                  }}
-                  style={styles.newsImage}
-                />
-                </Pressable>
-              </Animated.View>
-            ))
-          )}
-        </View>
-
-        {/* ── CẨM NANG HIẾN MÁU ────────────────────── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cẩm nang hiến máu</Text>
-          <View style={styles.tipsGrid}>
-            {[
-              { icon: "💧", title: "Uống nhiều nước", desc: "Uống 2-3 ly nước trước khi hiến máu" },
-              { icon: "🍽", title: "Ăn no trước", desc: "Không nên nhịn ăn trước khi hiến máu" },
-              { icon: "😴", title: "Ngủ đủ giấc", desc: "Đảm bảo ngủ đủ 7-8 tiếng tối hôm trước" },
-              { icon: "🏃", title: "Không vận động mạnh", desc: "Tránh tập thể thao nặng trong 24h trước" },
-            ].map((tip, i) => (
-              <View key={i} style={styles.tipCard}>
-                <Text style={styles.tipIcon}>{tip.icon}</Text>
-                <Text style={styles.tipTitle}>{tip.title}</Text>
-                <Text style={styles.tipDesc}>{tip.desc}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* ── SLOGAN CẢM ƠN ────────────────────────── */}
-        <View style={styles.sloganSection}>
-          <Text style={styles.sloganEmoji}>💖</Text>
-          <Text style={styles.sloganText}>
-            "Mỗi giọt máu cho đi, một cuộc đời ở lại.{"\n"}Cảm ơn bạn đã luôn đồng hành cùng chúng tôi."
-          </Text>
+              </Pressable>
+            </Animated.View>
+          ))}
         </View>
 
         <View style={{ height: 90 }} />
@@ -466,161 +293,103 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "transparent" },
+  root: { flex: 1, backgroundColor: "#f8f9fa" },
   scrollContent: { paddingBottom: 16 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f8f9fa" },
   loadingText: { marginTop: 12, color: "#888", fontSize: 14 },
+  
   header: {
-    paddingTop: Platform.OS === "ios" ? 54 : Platform.OS === "web" ? 20 : 40,
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-  },
-  headerInner: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 },
-  greeting: { fontSize: 22, fontWeight: "900", color: "#fff" },
-  headerSub: { fontSize: 12, color: "rgba(255,255,255,0.85)", marginTop: 2 },
-  notifBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
-  },
-  notifIcon: { fontSize: 18 },
-  notifBadge: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    backgroundColor: "#ff4d4f",
-    borderRadius: 9,
-    width: 18,
-    height: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#fff",
-  },
-  notifBadgeText: { color: "#fff", fontSize: 9.5, fontWeight: "900" },
-  quickRow: { flexDirection: "row", backgroundColor: "rgba(255,255,255,0.18)", borderRadius: 16, padding: 14, gap: 8 },
-  quickCard: { flex: 1, alignItems: "center" },
-  quickCardMid: { borderLeftWidth: 1, borderRightWidth: 1, borderColor: "rgba(255,255,255,0.3)" },
-  quickNum: { fontSize: 22, fontWeight: "900", color: "#fff" },
-  quickLabel: { fontSize: 10, color: "rgba(255,255,255,0.85)", textAlign: "center", marginTop: 2, lineHeight: 13 },
-  quickGrid: {
+    paddingTop: Platform.OS === "ios" ? 54 : 40,
+    paddingHorizontal: 24,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 4,
-  },
-  gridItem: {
-    flex: 1,
     alignItems: "center",
-    backgroundColor: "#ffffff",
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    borderRadius: 16,
-    marginHorizontal: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: "#f1f5f9",
+    marginBottom: 16,
   },
-  gridIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 6,
-  },
-  gridIcon: { fontSize: 20 },
-  gridText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#334155",
-    textAlign: "center",
-    lineHeight: 14,
-  },
-  section: { marginTop: 20, paddingHorizontal: 16 },
+  greeting: { fontSize: 20, fontWeight: "900", color: "#111827" },
+  headerSub: { fontSize: 13, color: "#6b7280", marginTop: 4 },
+  avatarBtn: { position: "relative" },
+  avatarImg: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#fee2e2" },
+  notifDot: { position: "absolute", top: 0, right: 0, width: 12, height: 12, backgroundColor: "#ef4444", borderRadius: 6, borderWidth: 2, borderColor: "#f8f9fa" },
 
-  urgentBanner: { backgroundColor: "#e62e43", borderRadius: 20, padding: 20 },
-  urgentHeader: { flexDirection: "row", alignItems: "center", marginBottom: 8, gap: 8 },
-  urgentIcon: { fontSize: 18 },
-  urgentTitle: { fontSize: 14, fontWeight: "900", color: "#fff", letterSpacing: 1 },
-  urgentBadge: { backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
-  urgentBadgeText: { color: "#fff", fontSize: 11, fontWeight: "700" },
-  urgentCampName: { fontSize: 18, fontWeight: "800", color: "#fff", marginBottom: 4 },
-  urgentDesc: { fontSize: 13, color: "rgba(255,255,255,0.9)", marginBottom: 6 },
-  urgentBloodType: { fontSize: 14, fontWeight: "800", color: "#fff", marginBottom: 14 },
-  urgentBtn: { backgroundColor: "#fff", borderRadius: 25, paddingVertical: 10, paddingHorizontal: 20, alignSelf: "flex-start" },
-  urgentBtnText: { color: "#e62e43", fontWeight: "900", fontSize: 13 },
-  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
-  sectionTitle: { fontSize: 16, fontWeight: "800", color: "#1a1a2e" },
-  seeAll: { fontSize: 13, color: "#e62e43", fontWeight: "700" },
-  horizontalScroll: { marginHorizontal: -16, paddingHorizontal: 16 },
-  campCard: { 
-    width: 275, 
-    backgroundColor: "rgba(255, 255, 255, 0.75)", 
-    borderRadius: 22, 
-    marginRight: 16, 
+  heroWrapper: { paddingHorizontal: 20, marginBottom: 24 },
+  heroCard: {
+    borderRadius: 24,
+    padding: 24,
     flexDirection: "row",
-    shadowColor: "#0f172a",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.05,
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#e62e43",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
     shadowRadius: 15,
-    elevation: 5,
-    marginBottom: 20,
-    marginTop: 4,
-    borderWidth: 1.5,
-    borderColor: "#f8fafc"
+    elevation: 6,
   },
-  campStripe: { width: 6, borderTopLeftRadius: 22, borderBottomLeftRadius: 22 },
-  campBody: { flex: 1, padding: 18 },
-  chip: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, alignSelf: "flex-start", marginBottom: 10 },
+  heroStatBox: { flex: 1, alignItems: "center" },
+  heroDivider: { width: 1, height: "80%", backgroundColor: "rgba(255,255,255,0.3)" },
+  heroStatValue: { fontSize: 28, fontWeight: "900", color: "#fff", marginBottom: 4 },
+  heroStatLabel: { fontSize: 12, color: "rgba(255,255,255,0.95)", textAlign: "center", fontWeight: "600", lineHeight: 16 },
+
+  quickGrid: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 20, marginBottom: 32 },
+  gridItem: { alignItems: "center", width: "23%" },
+  gridIconBox: { width: 56, height: 56, borderRadius: 20, justifyContent: "center", alignItems: "center", marginBottom: 8 },
+  gridIcon: { fontSize: 24 },
+  gridText: { fontSize: 11, fontWeight: "600", color: "#374151", textAlign: "center", lineHeight: 16 },
+
+  section: { paddingHorizontal: 20, marginBottom: 32 },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: "900", color: "#111827" },
+  seeAll: { fontSize: 13, fontWeight: "700", color: "#ef4444" },
+  horizontalScroll: { marginHorizontal: -20, paddingHorizontal: 20 },
+
+  campCard: { 
+    width: 260,
+    backgroundColor: "#ffffff", 
+    borderRadius: 24, 
+    marginRight: 16, 
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+    paddingBottom: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#f1f5f9"
+  },
+  campImageWrapper: { width: "100%", height: 100, position: "relative" },
+  campImage: { width: "100%", height: "100%" },
+  chip: { position: "absolute", top: 12, left: 12, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
   chipText: { fontSize: 10, fontWeight: "800", textTransform: "uppercase" },
-  campName: { fontSize: 15, fontWeight: "900", color: "#0f172a", marginBottom: 6, lineHeight: 20 },
-  campInfo: { fontSize: 12, fontWeight: "500", color: "#64748b", marginBottom: 4 },
+  campBody: { paddingHorizontal: 16, paddingTop: 14 },
+  campName: { fontSize: 15, fontWeight: "800", color: "#111827", marginBottom: 6, lineHeight: 22 },
+  campInfo: { fontSize: 12, fontWeight: "500", color: "#6b7280", marginBottom: 4 },
   progressWrap: { marginTop: 12 },
-  progressTrack: { height: 8, backgroundColor: "#f1f5f9", borderRadius: 4, overflow: "hidden" },
-  progressFill: { height: 8, borderRadius: 4 },
-  progressLabel: { fontSize: 11, fontWeight: "700", color: "#94a3b8", marginTop: 6, textAlign: "right" },
+  progressTrack: { height: 6, backgroundColor: "#f3f4f6", borderRadius: 3, overflow: "hidden" },
+  progressFill: { height: 6, borderRadius: 3, backgroundColor: "#ef4444" },
+  progressLabel: { fontSize: 11, fontWeight: "700", color: "#9ca3af", marginTop: 6, textAlign: "right" },
+
   newsCard: { 
-    backgroundColor: "rgba(255, 255, 255, 0.8)", 
-    borderRadius: 18, 
-    padding: 14, 
+    backgroundColor: "#ffffff", 
+    borderRadius: 20, 
+    padding: 12, 
     marginBottom: 12, 
     flexDirection: "row", 
     alignItems: "center",
-    shadowColor: "#0f172a",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 3,
-    borderWidth: 1.5,
-    borderColor: "#f8fafc"
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#f1f5f9"
   },
-  newsContent: { flex: 1, marginRight: 12 },
-  newsCategoryBadge: { backgroundColor: "#ffeef0", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, alignSelf: "flex-start", marginBottom: 6 },
-  newsCategoryText: { fontSize: 10, fontWeight: "700", color: "#e62e43" },
-  newsTitle: { fontSize: 14, fontWeight: "700", color: "#1a1a2e", lineHeight: 19, marginBottom: 4 },
-  newsDate: { fontSize: 11, color: "#aaa" },
-  newsImage: { width: 72, height: 72, borderRadius: 12, backgroundColor: "#fee" },
-  tipsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 10 },
-  tipCard: { width: "48%", backgroundColor: "#fff", borderRadius: 14, padding: 14 },
-  tipIcon: { fontSize: 26, marginBottom: 6 },
-  tipTitle: { fontSize: 13, fontWeight: "800", color: "#1a1a2e", marginBottom: 4 },
-  tipDesc: { fontSize: 11, color: "#888", lineHeight: 15 },
-  sloganSection: { marginTop: 24, marginHorizontal: 16, padding: 24, backgroundColor: "#fff", borderRadius: 18, alignItems: "center", borderWidth: 1, borderColor: "#fde2e4" },
-  sloganEmoji: { fontSize: 30, marginBottom: 8 },
-  sloganText: { fontSize: 13.5, fontStyle: "italic", color: "#888", textAlign: "center", lineHeight: 22 },
-  emptyCard: { backgroundColor: "#fff", borderRadius: 14, padding: 20, alignItems: "center" },
-  emptyEmoji: { fontSize: 28, marginBottom: 6 },
-  emptyText: { color: "#aaa", fontSize: 13 },
+  newsImage: { width: 80, height: 80, borderRadius: 14, backgroundColor: "#f3f4f6" },
+  newsContent: { flex: 1, marginLeft: 16, justifyContent: "center" },
+  newsTitle: { fontSize: 14, fontWeight: "700", color: "#111827", lineHeight: 20, marginBottom: 8 },
+  newsDate: { fontSize: 12, color: "#9ca3af", fontWeight: "500" },
+
+  emptyCard: { backgroundColor: "#fff", borderRadius: 20, padding: 24, alignItems: "center" },
+  emptyEmoji: { fontSize: 32, marginBottom: 8 },
+  emptyText: { color: "#9ca3af", fontSize: 13 },
 });
