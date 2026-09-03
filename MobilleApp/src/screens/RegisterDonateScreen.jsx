@@ -24,7 +24,6 @@ export default function RegisterDonateScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [existingRegistration, setExistingRegistration] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Step 1
@@ -107,7 +106,7 @@ export default function RegisterDonateScreen({ route, navigation }) {
                d.trangThai === 0 || d.trangThai === 1 || d.trangThai === 2
              );
              if (activeReg) {
-               setExistingRegistration(activeReg);
+               navigation.replace("RegistrationTicket", { maDon: activeReg.maDon || activeReg.MaDon, registrationData: activeReg });
              }
            }
         } catch (e) {
@@ -196,7 +195,7 @@ export default function RegisterDonateScreen({ route, navigation }) {
         moTaKhac: moTaKhac || null
       });
 
-      setShowSuccessModal(true);
+      navigation.replace("RegistrationTicket", { maDon: maDon });
     } catch (e) {
       setErrorMsg(e.response?.data?.message || e.message || "Đăng ký thất bại.");
     } finally {
@@ -230,33 +229,6 @@ export default function RegisterDonateScreen({ route, navigation }) {
       </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {existingRegistration ? (
-          <View style={styles.ticketCard}>
-            <View style={styles.ticketHeader}>
-                <Text style={styles.ticketEmoji}>🩸</Text>
-                <Text style={styles.ticketTitle}>ĐƠN ĐĂNG KÝ HIẾN MÁU</Text>
-                <View style={styles.ticketStatus}><Text style={styles.ticketStatusText}>Đang chờ tiếp nhận</Text></View>
-            </View>
-            <View style={styles.ticketBody}>
-                <Text style={styles.ticketLabel}>Mã đơn</Text>
-                <Text style={styles.ticketValue}>{existingRegistration.maDon || existingRegistration.MaDon}</Text>
-                
-                <Text style={styles.ticketLabel}>Chiến dịch</Text>
-                <Text style={styles.ticketValue}>{existingRegistration.chienDich?.tenChienDich || existingRegistration.ChienDich?.TenChienDich || "Hiến máu tình nguyện"}</Text>
-                
-                <Text style={styles.ticketLabel}>Thể tích đăng ký</Text>
-                <Text style={styles.ticketValue}>{existingRegistration.theTich || existingRegistration.TheTich} ml</Text>
-                
-                <Text style={styles.ticketLabel}>Thời gian đăng ký</Text>
-                <Text style={styles.ticketValue}>
-                  {existingRegistration.thoiGianDangKy || existingRegistration.ThoiGianDangKy ? new Date(existingRegistration.thoiGianDangKy || existingRegistration.ThoiGianDangKy).toLocaleString('vi-VN') : "---"}
-                </Text>
-            </View>
-            <View style={styles.ticketFooter}>
-                <Text style={styles.ticketFooterText}>Vui lòng đưa mã đơn này cho nhân viên y tế tại quầy tiếp nhận để làm thủ tục hiến máu. Xin cảm ơn!</Text>
-            </View>
-          </View>
-        ) : (
           <View>
             {/* Thanh tiến trình */}
             <View style={styles.progressBar}>
@@ -419,34 +391,7 @@ export default function RegisterDonateScreen({ route, navigation }) {
         <View style={{ height: 40 }} />
       </ScrollView>
 
-      {/* Success Modal */}
-      <Modal
-        visible={showSuccessModal}
-        transparent={true}
-        animationType="fade"
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.successModalContent}>
-            <View style={styles.successModalIconWrap}>
-              <Text style={styles.successModalIcon}>🎉</Text>
-            </View>
-            <Text style={styles.successModalTitle}>Đăng ký thành công!</Text>
-            <Text style={styles.successModalText}>
-              Đơn đăng ký hiến máu của bạn đã được ghi nhận. Cảm ơn bạn đã chung tay cùng cộng đồng!
-            </Text>
-            <Pressable
-              style={styles.successModalBtn}
-              onPress={() => {
-                setShowSuccessModal(false);
-                fetchData();
-                setStep(1);
-              }}
-            >
-              <Text style={styles.successModalBtnText}>Đã hiểu</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+
 
     </View>
   );
@@ -523,65 +468,6 @@ const styles = StyleSheet.create({
   errorContainer: { backgroundColor: "#ffeef0", borderColor: "#fdbdc3", borderWidth: 1, borderRadius: 12, padding: 12, marginTop: 16 },
   errorText: { color: "#ef4444", fontSize: 13, marginLeft: 6, fontWeight: "500" },
   
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-  successModalContent: {
-    backgroundColor: "#fff",
-    borderRadius: 24,
-    padding: 32,
-    alignItems: "center",
-    width: "100%",
-    maxWidth: 340,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  successModalIconWrap: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#dcfce7",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  successModalIcon: {
-    fontSize: 40,
-  },
-  successModalTitle: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: "#166534",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  successModalText: {
-    fontSize: 14,
-    color: "#4b5563",
-    textAlign: "center",
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-  successModalBtn: {
-    backgroundColor: "#e62e43",
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 100,
-    width: "100%",
-    alignItems: "center",
-  },
-  successModalBtnText: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: "800",
-  },
   ticketCard: { backgroundColor: "#fff", borderRadius: 16, overflow: "hidden", marginHorizontal: 0, marginTop: 10, elevation: 5, shadowColor: "#000", shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.1, shadowRadius: 15, borderWidth: 1, borderColor: "#e5e7eb" },
   ticketHeader: { backgroundColor: "#fff1f2", padding: 24, alignItems: "center", borderBottomWidth: 2, borderBottomColor: "#ffe4e6", borderStyle: "dashed" },
   ticketEmoji: { fontSize: 40, marginBottom: 12 },
