@@ -8,8 +8,12 @@ import {
   Pressable,
   StyleSheet,
   Platform,
+  Image
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { getImageUrl } from "../constants/api";
+
+const DEFAULT_BANNER = "https://images.unsplash.com/photo-1615461066841-6116e61058f4?q=80&w=800&auto=format&fit=crop";
 
 // Helper: format ngày dd/mm/yyyy
 const formatDate = (dateStr) => {
@@ -69,6 +73,12 @@ export default function CampaignDetailScreen({ route, navigation }) {
       >
         {/* Card Thống tin chính */}
         <View style={styles.mainCard}>
+          <Image 
+            source={{ uri: campaignItem.hinhAnh ? getImageUrl(campaignItem.hinhAnh) : DEFAULT_BANNER }} 
+            style={styles.heroImage} 
+            resizeMode="cover"
+          />
+          
           <View style={styles.badgeRow}>
             <View style={[styles.badge, { backgroundColor: info.bg }]}>
               <Text style={[styles.badgeText, { color: info.text }]}>
@@ -149,7 +159,7 @@ export default function CampaignDetailScreen({ route, navigation }) {
         {/* Nút Đăng ký hiến máu */}
         {campaignItem.trangThai !== "DaKetThuc" && (
           <Pressable
-            onPress={() => navigation.navigate("DangKyHienMau")}
+            onPress={() => navigation.navigate("DangKyHienMau", { campaignId: campaignItem.maChienDich })}
             style={({ pressed }) => [
               styles.submitWrap,
               pressed && { transform: [{ scale: 0.96 }] },
@@ -194,13 +204,22 @@ const styles = StyleSheet.create({
   mainCard: {
     backgroundColor: "#fff",
     borderRadius: 20,
-    padding: 20,
-    marginBottom: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  heroImage: {
+    width: "100%",
+    height: 180,
+    borderRadius: 14,
+    marginBottom: 16,
+    backgroundColor: "#f1f5f9"
   },
   badgeRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },
   badge: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 },

@@ -13,6 +13,7 @@ import {
   Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { ENDPOINTS, getImageUrl } from "../constants/api";
 import { chienDichService } from "../services/api";
 
 const DEFAULT_BANNER = "https://images.unsplash.com/photo-1615461066841-6116e61058f4?q=80&w=800&auto=format&fit=crop";
@@ -206,7 +207,7 @@ export default function CampaignScreen({ navigation }) {
               <View key={item.maChienDich || index} style={styles.card}>
                 {/* Banner & Badges Header */}
                 <View style={styles.cardHeader}>
-                  <Image source={{ uri: DEFAULT_BANNER }} style={styles.cardBanner} />
+                  <Image source={{ uri: (item.imageUrl || item.ImageUrl) ? getImageUrl(item.imageUrl || item.ImageUrl) : DEFAULT_BANNER }} style={styles.cardBanner} />
                   <LinearGradient colors={["transparent", "rgba(0,0,0,0.6)"]} style={styles.cardGradientOverlay} />
                   
                   <View style={styles.badgeRow}>
