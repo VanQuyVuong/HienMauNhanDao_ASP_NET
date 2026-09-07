@@ -25,6 +25,7 @@ import UpdateProfileScreen from "./src/screens/UpdateProfileScreen";
 import DonationHistoryScreen from "./src/screens/DonationHistoryScreen";
 import NewsDetailScreen from "./src/screens/NewsDetailScreen";
 import CampaignDetailScreen from "./src/screens/CampaignDetailScreen";
+import RegistrationTicketScreen from "./src/screens/RegistrationTicketScreen";
 
 // ─── 1. BOTTOM TAB NAVIGATOR VỚI LIQUID TAB BAR ──────────
 const Tab = createBottomTabNavigator();
@@ -70,6 +71,7 @@ export default function App() {
         <Stack.Screen name="DonationHistory" component={DonationHistoryScreen} />
         <Stack.Screen name="NewsDetail" component={NewsDetailScreen} />
         <Stack.Screen name="CampaignDetail" component={CampaignDetailScreen} />
+        <Stack.Screen name="RegistrationTicket" component={RegistrationTicketScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

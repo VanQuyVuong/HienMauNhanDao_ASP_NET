@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # 1. Database MySQL
+  mysql_db:
+    image: mysql:8.0
+    container_name: hienmau_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_DATABASE: SPCN_HienMauNhanDao_DaNang
+    ports:
+      - "3307:3306" # Tránh xung đột với XAMPP ở ngoài, ánh xạ port 3307 trên host vào 3306 trong container
+    volumes:
+      # Ánh xạ file SQL của bạn vào thư mục khởi tạo của MySQL để nó tự chạy tạo bảng
+      - ./SPCN_HienMauNhanDao_DaNang.sql:/docker-entrypoint-initdb.d/init.sql
+      # Lưu trữ dữ liệu để không bị mất khi tắt Docker
+      - db_data:/var/lib/mysql
+
+  # 2. Backend ASP.NET Core
+  backend:
+    build: 
+      context: ./HienMauNhanDao_DaNang/HienMauNhanDao_DaNang
+      dockerfile: Dockerfile
+    container_name: hienmau_backend
+    restart: always
+    environment:
+      # Ghi đè cấu hình kết nối DB để trỏ vào container mysql_db thay vì localhost
+      ConnectionStrings__DefaultConnection: "Server=mysql_db;Port=3306;Database=SPCN_HienMauNhanDao_DaNang;User=root;Password=12345;"
+    ports:
+      - "5236:8080" # Ánh xạ cổng 5236 của host vào cổng 8080 của container (giữ nguyên API URL cho Frontend)
+    depends_on:
+      - mysql_db
+
+  # 3. Frontend Web React
+  frontend:
+    build:
+      context: ./FE_HienMauNhanDao
+      dockerfile: Dockerfile
+    container_name: hienmau_frontend
+    restart: always
+    ports:
+      - "8080:80" # Bạn gõ localhost:8080 để vào Web
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

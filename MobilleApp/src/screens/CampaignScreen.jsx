@@ -13,6 +13,7 @@ import {
   Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { ENDPOINTS, getImageUrl } from "../constants/api";
 import { chienDichService } from "../services/api";
 
 const DEFAULT_BANNER = "https://images.unsplash.com/photo-1615461066841-6116e61058f4?q=80&w=800&auto=format&fit=crop";
@@ -206,7 +207,7 @@ export default function CampaignScreen({ navigation }) {
               <View key={item.maChienDich || index} style={styles.card}>
                 {/* Banner & Badges Header */}
                 <View style={styles.cardHeader}>
-                  <Image source={{ uri: DEFAULT_BANNER }} style={styles.cardBanner} />
+                  <Image source={{ uri: (item.imageUrl || item.ImageUrl) ? getImageUrl(item.imageUrl || item.ImageUrl) : DEFAULT_BANNER }} style={styles.cardBanner} resizeMode="cover" />
                   <LinearGradient colors={["transparent", "rgba(0,0,0,0.6)"]} style={styles.cardGradientOverlay} />
                   
                   <View style={styles.badgeRow}>
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
     borderColor: "#f1f5f9",
   },
   cardHeader: { height: 130, position: "relative" },
-  cardBanner: { width: "100%", height: "100%", resizeMode: "cover" },
+  cardBanner: { width: "100%", height: "100%" },
   cardGradientOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
   badgeRow: { position: "absolute", top: 12, left: 12, right: 12, flexDirection: "row", justifyContent: "space-between" },
   badge: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5 },

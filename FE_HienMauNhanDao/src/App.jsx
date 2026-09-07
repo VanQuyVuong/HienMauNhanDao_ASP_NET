@@ -87,6 +87,8 @@ function AdminHospitalGuard({ children }) {
 }
 
 
+import AnimatedBackground from "./components/AnimatedBackground";
+
 function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -97,6 +99,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AnimatedBackground />
       <Router>
         <ToastContainer />
         <Routes>

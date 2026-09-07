@@ -63,4 +63,13 @@ export const authService = {
   },
 };
 
+export const chienDichService = {
+  getAll: async () => {
+    return await api.get(ENDPOINTS.CHIEN_DICH.GET_ALL);
+  },
+  getById: async (id) => {
+    return await api.get(`${ENDPOINTS.CHIEN_DICH.GET_ALL}/${id}`);
+  }
+};
+
 export default api;

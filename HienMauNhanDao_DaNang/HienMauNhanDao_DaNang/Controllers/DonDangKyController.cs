@@ -316,12 +316,16 @@ namespace HienMauNhanDao_DaNang.Controllers
         public async Task<IActionResult> LayTatCaDon()
         {
             // Lấy tất cả mọi tờ đơn trong cơ sở dữ liệu 
-            var danhSach = await _context.DonDangKys
-                .Include(d => d.ChienDich) // LẤY TÊN CHIẾN DỊCH
-                .Include(D => D.TinhNguyenVien)   // lấy thông tin Tình nguyện viên nộp đơn
-                .OrderByDescending(d => d.TrangThai == TrangThaiDonDangKy.DaDangKy) // Ưu tiên Đơn đăng ký từ Web chưa tiếp nhận lên đầu
-                .ThenByDescending(d => d.ThoiGianDangKy) // Sau đó mới sắp xếp theo thời gian mới nhất
+            var danhSachRaw = await _context.DonDangKys
+                .Include(d => d.ChienDich) 
+                .Include(D => D.TinhNguyenVien)   
                 .ToListAsync();
+
+            // Sắp xếp trên RAM để tránh lỗi parse SQL của EF Core với biến bool
+            var danhSach = danhSachRaw
+                .OrderByDescending(d => d.TrangThai == TrangThaiDonDangKy.DaDangKy)
+                .ThenByDescending(d => d.ThoiGianDangKy)
+                .ToList();
 
             return Ok(new { success = true, data = danhSach });
         }

@@ -57,7 +57,7 @@ export default function DangKyChienDich() {
       return;
     }
     localStorage.setItem('selectedCampaign', JSON.stringify(selectedCampaign));
-    navigate('/khai-bao-y-te');
+    navigate('/khai-bao-thong-tin-ca-nhan');
   };
 
   const handleNextThuongXuyen = () => {
@@ -80,7 +80,7 @@ export default function DangKyChienDich() {
     };
 
     localStorage.setItem('selectedCampaign', JSON.stringify(thuongXuyenCampaign));
-    navigate('/khai-bao-y-te');
+    navigate('/khai-bao-thong-tin-ca-nhan');
   };
 
   return (

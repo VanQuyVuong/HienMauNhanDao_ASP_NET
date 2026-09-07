@@ -135,7 +135,11 @@ export default function DonationHistoryScreen({ navigation }) {
           historyList.map((item, index) => {
             const isDone = item.trangThai === "DaHoanThanh";
             return (
-              <View key={item.maDon || index} style={styles.certCard}>
+              <Pressable 
+                key={item.maDon || index} 
+                style={styles.certCard}
+                onPress={() => navigation.navigate("RegistrationTicket", { maDon: item.maDon, registrationData: item })}
+              >
                 <View style={styles.certHeader}>
                   <View
                     style={[
@@ -149,7 +153,7 @@ export default function DonationHistoryScreen({ navigation }) {
                         isDone ? styles.textDone : styles.textPending,
                       ]}
                     >
-                      {isDone ? "🏆 ĐÃ HOÀN THÀNH" : "⏳ ĐANG XỬ LÝ"}
+                      {isDone ? "🏆 ĐÃ HOÀN THÀNH" : (item.trangThai === "DaDangKy" || item.trangThai === 0 || item.trangThai === "ChoDuyet" || item.trangThai === 1 || item.trangThai === "DaDuyet" || item.trangThai === 2) ? "⏳ ĐANG XỬ LÝ" : "🚫 ĐÃ HỦY/TỪ CHỐI"}
                     </Text>
                   </View>
                   <Text style={styles.certCode}>Mã: {item.maDon}</Text>
@@ -179,7 +183,7 @@ export default function DonationHistoryScreen({ navigation }) {
                     </Text>
                   )}
                 </View>
-              </View>
+              </Pressable>
             );
           })
         )}
