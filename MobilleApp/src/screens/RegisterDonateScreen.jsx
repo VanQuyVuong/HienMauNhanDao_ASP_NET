@@ -11,7 +11,8 @@ import {
   Platform,
   TextInput,
   Modal,
-  Switch
+  Switch,
+  KeyboardAvoidingView
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import api from "../services/api";
@@ -228,7 +229,8 @@ export default function RegisterDonateScreen({ route, navigation }) {
         </View>
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View>
             {/* Thanh tiến trình */}
             <View style={styles.progressBar}>
@@ -252,7 +254,20 @@ export default function RegisterDonateScreen({ route, navigation }) {
                 <TextInput style={styles.input} value={formData.soCCCD} onChangeText={(t) => setFormData({...formData, soCCCD: t})} placeholder="Nhập 12 số CCCD" keyboardType="numeric" maxLength={12} />
 
                 <Text style={styles.label}>Ngày sinh (DD/MM/YYYY)</Text>
-                <TextInput style={styles.input} value={formData.ngaySinh} onChangeText={(t) => setFormData({...formData, ngaySinh: t})} placeholder="VD: 31/12/1990" />
+                <TextInput 
+                  style={styles.input} 
+                  value={formData.ngaySinh} 
+                  onChangeText={(t) => {
+                    let cleaned = t.replace(/[^0-9]/g, '');
+                    let formatted = cleaned;
+                    if (cleaned.length > 2) formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2);
+                    if (cleaned.length > 4) formatted = formatted.slice(0, 5) + '/' + cleaned.slice(4, 8);
+                    setFormData({...formData, ngaySinh: formatted});
+                  }} 
+                  placeholder="VD: 31/12/1990" 
+                  keyboardType="numeric"
+                  maxLength={10}
+                />
 
                 <Text style={styles.label}>Giới tính</Text>
                 <View style={styles.genderRow}>
@@ -390,8 +405,7 @@ export default function RegisterDonateScreen({ route, navigation }) {
         )}
         <View style={{ height: 40 }} />
       </ScrollView>
-
-
+      </KeyboardAvoidingView>
 
     </View>
   );

@@ -1,5 +1,5 @@
-export const API_BASE_URL = 'http://localhost:5236/api';
-export const AUTH_URL = 'http://localhost:5236/api/auth';
+export const API_BASE_URL = '/api';
+export const AUTH_URL = '/api/auth';
 
 export const ENDPOINTS = {
   AUTH: {
