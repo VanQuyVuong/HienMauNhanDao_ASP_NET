@@ -315,17 +315,14 @@ namespace HienMauNhanDao_DaNang.Controllers
         [Authorize(Roles = "NVYT, NVYT_LT, NVYT-LT, NVYT_XN, NVYT-XN, BS, AD")]  // Khóa kép đầy đủ: NVYT Lễ Tân, NVYT Xét Nghiệm, Bác Sĩ và Admin
         public async Task<IActionResult> LayTatCaDon()
         {
-            // Lấy tất cả mọi tờ đơn trong cơ sở dữ liệu 
-            var danhSachRaw = await _context.DonDangKys
+            // Tối ưu hóa: Sắp xếp trực tiếp dưới Database thay vì kéo toàn bộ dữ liệu lên RAM
+            var danhSach = await _context.DonDangKys
                 .Include(d => d.ChienDich) 
-                .Include(D => D.TinhNguyenVien)   
-                .ToListAsync();
-
-            // Sắp xếp trên RAM để tránh lỗi parse SQL của EF Core với biến bool
-            var danhSach = danhSachRaw
-                .OrderByDescending(d => d.TrangThai == TrangThaiDonDangKy.DaDangKy)
+                .Include(D => D.TinhNguyenVien)
+                // Sử dụng toán tử 3 ngôi (ternary) để EF Core dịch sang SQL CASE WHEN thành công
+                .OrderByDescending(d => d.TrangThai == TrangThaiDonDangKy.DaDangKy ? 1 : 0)
                 .ThenByDescending(d => d.ThoiGianDangKy)
-                .ToList();
+                .ToListAsync();
 
             return Ok(new { success = true, data = danhSach });
         }

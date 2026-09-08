@@ -42,6 +42,7 @@ namespace HienMauNhanDao_DaNang.Controllers
         //APU ĐĂNG NHẬP
         //[HTTP POST] Nhận vào đường dẫn: POST /api/auth/login
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             try
@@ -72,6 +73,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         // API REFRESH TOKEN TỰ ĐỘNG NGẦM (SILENT REFRESH)
         [HttpPost("refresh-token")]
+        [AllowAnonymous]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
             if (string.IsNullOrEmpty(request.RefreshToken))
@@ -116,6 +118,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         //API ĐĂNG KÝ
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             try
@@ -182,6 +185,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         //API GỬI OTP QUA EMAIL     
         [HttpPost("send-otp")]
+        [AllowAnonymous]
         public async Task<IActionResult> SendOtp([FromBody] OtpRequest request)
         {
             try
@@ -234,6 +238,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         //API XÁC THỰC MÃ OTP
         [HttpPost("verify-otp")]
+        [AllowAnonymous]
         public IActionResult VerifyOtp([FromBody] VerifyOtpRequest request)
         {
             try
@@ -271,6 +276,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         //API YÊU CẦU GỬI OTP KHI QUÊN MẬT KHẨU
         [HttpPost("forgot-password")]
+        [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([FromBody] OtpRequest request)
         {
             try
@@ -321,6 +327,7 @@ namespace HienMauNhanDao_DaNang.Controllers
 
         //API ĐẶT LẠI MẬT KHẨU MỚI
         [HttpPost("reset-password")]
+        [AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
             try
