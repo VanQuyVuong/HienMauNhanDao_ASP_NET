@@ -82,7 +82,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/ChungNhan/candidates");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.ChungNhan.GetCandidates);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -296,7 +296,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
             {
                 try
                 {
-                    var response = await ApiClient.Instance.Client.PostAsync($"/api/ChungNhan/issue/{cert.MaDon}", null);
+                    var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.ChungNhan.Issue(cert.MaDon), null);
                     cert.TrangThaiCap = "issued";
                     cert.MaChungNhan = $"CN-{DateTime.Now.Year}-" + Guid.NewGuid().ToString().Substring(0, 4).ToUpper();
                     MessageBox.Show($"✅ Đã phát hành thành công Giấy chứng nhận hiến máu cho {cert.HoVaTen}!\n\nĐơn này đã được chuyển sang Lịch Sử Chứng Nhận Đã Phát Hành.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -329,7 +329,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
 
             try
             {
-                await ApiClient.Instance.Client.PostAsync("/api/ChungNhan/issue-all", null);
+                await ApiClient.Instance.Client.PostAsync(ApiEndpoints.ChungNhan.IssueAll, null);
                 foreach (var c in _allCandidates.Where(x => x.TrangThaiCap == "pending"))
                 {
                     c.TrangThaiCap = "issued";

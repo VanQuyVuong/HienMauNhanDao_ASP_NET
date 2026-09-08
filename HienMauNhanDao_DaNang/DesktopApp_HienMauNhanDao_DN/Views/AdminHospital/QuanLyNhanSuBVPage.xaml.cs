@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -94,7 +95,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.AdminHospital
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/AdminHospital/staff");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.AdminHospital.GetStaff);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -237,7 +238,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.AdminHospital
                 var jsonStr = JsonConvert.SerializeObject(reqObj);
                 var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
 
-                await ApiClient.Instance.Client.PostAsync("/api/AdminHospital/staff", content);
+                await ApiClient.Instance.Client.PostAsync(ApiEndpoints.AdminHospital.GetStaff, content);
                 MessageBox.Show($"✅ Thêm thành công cán bộ: {hoTen} ({email}) thuộc Bệnh viện!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 CreateStaffModal.Visibility = Visibility.Collapsed;
                 await LoadData();

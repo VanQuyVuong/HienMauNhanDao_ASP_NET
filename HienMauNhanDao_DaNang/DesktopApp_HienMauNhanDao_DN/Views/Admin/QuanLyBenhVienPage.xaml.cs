@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -47,7 +48,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/AdminHospital/benh-vien");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.AdminHospital.GetBenhVien);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -153,7 +154,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 var reqObj = new { tenBenhVien = ten, diaChi = diaChi, soDienThoai = sdt };
                 var content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(reqObj), Encoding.UTF8, "application/json");
 
-                await ApiClient.Instance.Client.PostAsync("/api/AdminHospital/benh-vien", content);
+                await ApiClient.Instance.Client.PostAsync(ApiEndpoints.AdminHospital.GetBenhVien, content);
                 MessageBox.Show($"✅ Thêm thành công bệnh viện: {ten}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 CreateHospitalModal.Visibility = Visibility.Collapsed;
                 await LoadData();

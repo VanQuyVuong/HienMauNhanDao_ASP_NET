@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -55,7 +56,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.AdminHospital
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/AdminHospital/stock");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.AdminHospital.GetStock);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();

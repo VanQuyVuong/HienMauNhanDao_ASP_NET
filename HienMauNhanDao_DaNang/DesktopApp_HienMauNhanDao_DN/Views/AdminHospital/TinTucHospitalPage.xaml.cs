@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -129,7 +130,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.AdminHospital
                 var jsonStr = JsonConvert.SerializeObject(reqObj);
                 var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
 
-                await ApiClient.Instance.Client.PostAsync("/api/AdminHospital/notification", content);
+                await ApiClient.Instance.Client.PostAsync(ApiEndpoints.AdminHospital.PostNotification, content);
                 MessageBox.Show($"✅ Đã phát hành thông báo thành công: {title}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 CreateNewsModal.Visibility = Visibility.Collapsed;
                 

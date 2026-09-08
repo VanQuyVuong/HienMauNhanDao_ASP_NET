@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -134,7 +135,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/ChienDich");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.ChienDich.GetAll);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -433,7 +434,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
 
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/DiaDiem");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.DiaDiem.GetAll);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -566,7 +567,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                         maPhuongXa = selectedPhuongXa
                     };
                     var locContent = new StringContent(JsonConvert.SerializeObject(locReqObj), Encoding.UTF8, "application/json");
-                    await ApiClient.Instance.Client.PostAsync("/api/DiaDiem", locContent);
+                    await ApiClient.Instance.Client.PostAsync(ApiEndpoints.DiaDiem.GetAll, locContent);
                 }
                 catch
                 {
@@ -588,7 +589,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 };
                 var jsonStr = JsonConvert.SerializeObject(reqObj);
                 var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
-                var response = await ApiClient.Instance.Client.PostAsync("/api/ChienDich", content);
+                var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.ChienDich.GetAll, content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -644,7 +645,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
 
                 try
                 {
-                    var response = await ApiClient.Instance.Client.GetAsync($"/api/DonDangKy/chien-dich/{item.MaChienDich}");
+                    var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.DonDangKy.ByChienDich(item.MaChienDich));
                     if (response.IsSuccessStatusCode)
                     {
                         var json = await response.Content.ReadAsStringAsync();
@@ -723,7 +724,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 var jsonStr = JsonConvert.SerializeObject(reqObj);
                 var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
 
-                await ApiClient.Instance.Client.PutAsync($"/api/ChienDich/{_selectedCampaignForEdit.MaChienDich}", content);
+                await ApiClient.Instance.Client.PutAsync(ApiEndpoints.ChienDich.ById(_selectedCampaignForEdit.MaChienDich), content);
                 MessageBox.Show($"💾 Đã cập nhật thành công thông tin chiến dịch: {newTen}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 EditCampaignModal.Visibility = Visibility.Collapsed;
                 await LoadData();
@@ -745,7 +746,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 {
                     try
                     {
-                        await ApiClient.Instance.Client.DeleteAsync($"/api/ChienDich/{item.MaChienDich}");
+                        await ApiClient.Instance.Client.DeleteAsync(ApiEndpoints.ChienDich.ById(item.MaChienDich));
                         MessageBox.Show($"🗑️ Đã xóa thành công chiến dịch hiến máu: {item.TenChienDich}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                         await LoadData();
                     }
@@ -785,7 +786,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                     var jsonStr = JsonConvert.SerializeObject(reqObj);
                     var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
 
-                    await ApiClient.Instance.Client.PutAsync($"/api/ChienDich/{item.MaChienDich}", content);
+                    await ApiClient.Instance.Client.PutAsync(ApiEndpoints.ChienDich.ById(item.MaChienDich), content);
                     item.TrangThaiRaw = nextStatusInt.ToString();
                     MessageBox.Show($"✅ Đã chuyển trạng thái chiến dịch thành: {item.StatusText}!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                     UpdateStatCards();

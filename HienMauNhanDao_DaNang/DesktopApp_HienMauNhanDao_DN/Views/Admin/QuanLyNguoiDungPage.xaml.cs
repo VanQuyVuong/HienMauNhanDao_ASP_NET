@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -129,7 +130,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/TaiKhoan");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.TaiKhoan.GetAll);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -290,7 +291,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
 
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/TaiKhoan/khoa-cong-tac");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.TaiKhoan.GetKhoaCongTac);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -394,7 +395,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 var jsonStr = JsonConvert.SerializeObject(reqObj);
                 var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
 
-                var response = await ApiClient.Instance.Client.PostAsync("/api/TaiKhoan", content);
+                var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.TaiKhoan.GetAll, content);
                 if (response.IsSuccessStatusCode)
                 {
                     MessageBox.Show($"✅ Đã khởi tạo thành công tài khoản cán bộ cho: {hoTen} ({email})!\n🏥 Đơn vị: {tenKhoa}", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -500,7 +501,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 var jsonStr = JsonConvert.SerializeObject(reqObj);
                 var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
 
-                await ApiClient.Instance.Client.PutAsync($"/api/TaiKhoan/{_editingUser.MaTaiKhoan}", content);
+                await ApiClient.Instance.Client.PutAsync(ApiEndpoints.TaiKhoan.ById(_editingUser.MaTaiKhoan), content);
                 MessageBox.Show($"✅ Cập nhật thông tin cán bộ thành công cho tài khoản {_editingUser.Email}!\n🏥 Đơn vị: {tenKhoa}", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 EditUserModal.Visibility = Visibility.Collapsed;
                 await LoadData();
@@ -526,7 +527,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                     var jsonStr = JsonConvert.SerializeObject(reqObj);
                     var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
 
-                    await ApiClient.Instance.Client.PatchAsync($"/api/TaiKhoan/{user.MaTaiKhoan}/trang-thai", content);
+                    await ApiClient.Instance.Client.PatchAsync(ApiEndpoints.TaiKhoan.UpdateStatus(user.MaTaiKhoan), content);
                     user.TrangThai = newStatus;
                     string actionName = newStatus ? "MỞ KHÓA" : "KHÓA";
                     MessageBox.Show($"✅ Đã {actionName} thành công tài khoản: {user.Email}!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -613,7 +614,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                     var reqObj = new { maTaiKhoan = _selectedUserForProfile.MaTaiKhoan, matKhauMoi = newP };
                     var content = new StringContent(JsonConvert.SerializeObject(reqObj), Encoding.UTF8, "application/json");
 
-                    await ApiClient.Instance.Client.PostAsync($"/api/TaiKhoan/{_selectedUserForProfile.MaTaiKhoan}/reset-password", content);
+                    await ApiClient.Instance.Client.PostAsync(ApiEndpoints.TaiKhoan.ResetPassword(_selectedUserForProfile.MaTaiKhoan), content);
                     MessageBox.Show($"🔑 Đã cấp lại mật khẩu thành công cho tài khoản {_selectedUserForProfile.Email}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                     UserProfileDetailModal.Visibility = Visibility.Collapsed;
                 }
@@ -634,7 +635,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 {
                     try
                     {
-                        await ApiClient.Instance.Client.DeleteAsync($"/api/TaiKhoan/{user.MaTaiKhoan}");
+                        await ApiClient.Instance.Client.DeleteAsync(ApiEndpoints.TaiKhoan.ById(user.MaTaiKhoan));
                         MessageBox.Show($"🗑️ Đã xóa thành công tài khoản: {user.Email}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                         await LoadData();
                     }

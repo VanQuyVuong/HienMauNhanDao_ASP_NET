@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -57,7 +58,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.AdminHospital
                 btnRefresh.Content = "Đang tải...";
 
                 // Load Staff Count
-                var staffRes = await ApiClient.Instance.Client.GetAsync("/api/AdminHospital/staff");
+                var staffRes = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.AdminHospital.GetStaff);
                 if (staffRes.IsSuccessStatusCode)
                 {
                     var json = await staffRes.Content.ReadAsStringAsync();
@@ -70,7 +71,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.AdminHospital
                 }
 
                 // Load Stock Summary
-                var stockRes = await ApiClient.Instance.Client.GetAsync("/api/AdminHospital/stock");
+                var stockRes = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.AdminHospital.GetStock);
                 if (stockRes.IsSuccessStatusCode)
                 {
                     var json = await stockRes.Content.ReadAsStringAsync();

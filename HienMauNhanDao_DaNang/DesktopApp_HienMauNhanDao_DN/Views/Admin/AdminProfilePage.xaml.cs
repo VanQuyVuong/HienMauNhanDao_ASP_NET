@@ -37,7 +37,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 var reqObj = new { hoTen = name, soDienThoai = phone };
                 var content = new StringContent(JsonConvert.SerializeObject(reqObj), Encoding.UTF8, "application/json");
 
-                await ApiClient.Instance.Client.PutAsync("/api/TaiKhoan/profile", content);
+                await ApiClient.Instance.Client.PutAsync(ApiEndpoints.TaiKhoan.Profile, content);
                 MessageBox.Show("✅ Cập nhật thông tin cá nhân thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch
@@ -69,7 +69,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 var reqObj = new { matKhauCu = oldP, matKhauMoi = newP };
                 var content = new StringContent(JsonConvert.SerializeObject(reqObj), Encoding.UTF8, "application/json");
 
-                var response = await ApiClient.Instance.Client.PostAsync("/api/Auth/change-password", content);
+                var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.Auth.ChangePassword, content);
                 MessageBox.Show("🔑 Cập nhật mật khẩu bảo mật mới thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 txtCurrentPass.Password = string.Empty;
                 txtNewPass.Password = string.Empty;

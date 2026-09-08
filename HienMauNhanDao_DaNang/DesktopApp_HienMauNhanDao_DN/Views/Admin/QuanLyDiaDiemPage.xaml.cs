@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -92,7 +93,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/DiaDiem");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.DiaDiem.GetAll);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -235,7 +236,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.Admin
 
                 var content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(reqObj), Encoding.UTF8, "application/json");
 
-                await ApiClient.Instance.Client.PostAsync("/api/DiaDiem", content);
+                await ApiClient.Instance.Client.PostAsync(ApiEndpoints.DiaDiem.GetAll, content);
                 MessageBox.Show($"✅ Đã lưu thành công địa điểm mới (Mã: {newMa}) vào CSDL: {ten}!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 CreateLocationModal.Visibility = Visibility.Collapsed;
                 await LoadData();
