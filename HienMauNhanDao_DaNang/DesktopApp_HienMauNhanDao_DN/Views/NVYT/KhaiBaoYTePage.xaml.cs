@@ -46,7 +46,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
             try
             {
                 // GET /hososuckhoe/don/{maDon}
-                var response = await ApiClient.Instance.Client.GetAsync($"/api/hososuckhoe/don/{maDon}");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.HoSoSucKhoe.ByDon(maDon));
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadAsStringAsync();
@@ -105,7 +105,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 var json = JsonConvert.SerializeObject(payload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await ApiClient.Instance.Client.PostAsync("/api/hososuckhoe", content);
+                var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.HoSoSucKhoe.Base, content);
                 if (response.IsSuccessStatusCode)
                 {
                     MessageBox.Show("Đã lưu khai báo y tế thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -154,7 +154,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/hososuckhoe/tat-ca");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.HoSoSucKhoe.GetAll);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -223,7 +223,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 {
                     try
                     {
-                        var response = await ApiClient.Instance.Client.DeleteAsync($"/api/hososuckhoe/{hs.MaHoSo}");
+                        var response = await ApiClient.Instance.Client.DeleteAsync(ApiEndpoints.HoSoSucKhoe.ById(hs.MaHoSo));
                         if (response.IsSuccessStatusCode)
                         {
                             MessageBox.Show("Xóa thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);

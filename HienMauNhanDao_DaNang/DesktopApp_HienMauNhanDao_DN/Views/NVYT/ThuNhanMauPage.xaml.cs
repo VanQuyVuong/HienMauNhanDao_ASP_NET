@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -112,10 +113,10 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/dondangky/cho-thu-nhan");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.DonDangKy.GetChoThuNhan);
                 if (!response.IsSuccessStatusCode)
                 {
-                    response = await ApiClient.Instance.Client.GetAsync("/api/DonDangKy/tat-ca");
+                    response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.DonDangKy.GetAll);
                 }
 
                 if (response.IsSuccessStatusCode)
@@ -158,7 +159,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/tuimau");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.TuiMau.Base);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -273,7 +274,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 {
                     try
                     {
-                        var response = await ApiClient.Instance.Client.DeleteAsync($"/api/tuimau/{bag.MaTuiMau}");
+                        var response = await ApiClient.Instance.Client.DeleteAsync(ApiEndpoints.TuiMau.ById(bag.MaTuiMau));
                         if (response.IsSuccessStatusCode)
                         {
                             MessageBox.Show($"Đã xóa túi máu [{bag.MaTuiMau}] thành công.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -339,12 +340,12 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 if (_editingBag != null)
                 {
                     var content = new System.Net.Http.StringContent(JsonConvert.SerializeObject(req), System.Text.Encoding.UTF8, "application/json");
-                    response = await ApiClient.Instance.Client.PutAsync($"/api/tuimau/{_editingBag.MaTuiMau}", content);
+                    response = await ApiClient.Instance.Client.PutAsync(ApiEndpoints.TuiMau.ById(_editingBag.MaTuiMau), content);
                 }
                 else
                 {
                     var content = new System.Net.Http.StringContent(JsonConvert.SerializeObject(req), System.Text.Encoding.UTF8, "application/json");
-                    response = await ApiClient.Instance.Client.PostAsync("/api/tuimau", content);
+                    response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.TuiMau.Base, content);
                 }
 
                 if (response.IsSuccessStatusCode)

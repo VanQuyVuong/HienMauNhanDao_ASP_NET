@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/ketquaxetnghiem/danh-sach");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.KetQuaXetNghiem.GetDanhSach);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -79,7 +80,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/ketquaxetnghiem/thong-ke");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.KetQuaXetNghiem.GetThongKe);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -272,7 +273,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 };
 
                 var content = new System.Net.Http.StringContent(JsonConvert.SerializeObject(req), System.Text.Encoding.UTF8, "application/json");
-                var response = await ApiClient.Instance.Client.PostAsync("/api/ketquaxetnghiem/luu", content);
+                var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.KetQuaXetNghiem.Luu, content);
 
                 if (response.IsSuccessStatusCode)
                 {

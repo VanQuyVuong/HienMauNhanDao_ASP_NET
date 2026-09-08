@@ -46,7 +46,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/chiendich");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.ChienDich.GetAll);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -90,7 +90,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/dondangky/tat-ca");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.DonDangKy.GetAll);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();

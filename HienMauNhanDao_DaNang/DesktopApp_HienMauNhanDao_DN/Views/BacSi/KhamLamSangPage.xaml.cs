@@ -185,7 +185,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.BacSi
 
                 try
                 {
-                    var response = await ApiClient.Instance.Client.GetAsync("/api/khamlamsang/cho-kham");
+                    var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.KhamLamSang.GetChoKham);
                     if (response.IsSuccessStatusCode)
                     {
                         var json = await response.Content.ReadAsStringAsync();
@@ -211,7 +211,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.BacSi
                 {
                     try
                     {
-                        var fbResponse = await ApiClient.Instance.Client.GetAsync("/api/DonDangKy/tat-ca");
+                        var fbResponse = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.DonDangKy.GetAll);
                         if (fbResponse.IsSuccessStatusCode)
                         {
                             var fbJson = await fbResponse.Content.ReadAsStringAsync();
@@ -347,7 +347,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.BacSi
                 var json = JsonConvert.SerializeObject(dto);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await ApiClient.Instance.Client.PostAsync("/api/khamlamsang", content);
+                var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.KhamLamSang.Base, content);
                 if (response.IsSuccessStatusCode)
                 {
                     string msgTitle = isApproved ? "✅ ĐÃ PHÊ DUYỆT ĐỦ ĐIỀU KIỆN HIẾN MÁU!" : "❌ ĐÃ TỪ CHỐI HIẾN MÁU!";
@@ -418,7 +418,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.BacSi
                 btnRefreshHistory.IsEnabled = false;
                 btnRefreshHistory.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/khamlamsang/lich-su");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.KhamLamSang.GetLichSu);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();

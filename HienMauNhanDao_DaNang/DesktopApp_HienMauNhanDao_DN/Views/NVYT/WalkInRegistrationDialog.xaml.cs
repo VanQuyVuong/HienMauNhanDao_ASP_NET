@@ -26,7 +26,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/chiendich");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.ChienDich.GetAll);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -71,7 +71,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
 
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync($"/api/tinhnguyenvien/cccd/{cccd}");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.TinhNguyenVien.ByCccd(cccd));
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -200,7 +200,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 // 1. Tạo đơn (Walk-in)
-                var response = await ApiClient.Instance.Client.PostAsync("/api/dondangky/tiep-nhan", content);
+                var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.DonDangKy.TiepNhan, content);
                 if (response.IsSuccessStatusCode)
                 {
                     var resJson = await response.Content.ReadAsStringAsync();
@@ -222,7 +222,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                             };
                             var healthJson = JsonConvert.SerializeObject(healthPayload);
                             var healthContent = new StringContent(healthJson, Encoding.UTF8, "application/json");
-                            await ApiClient.Instance.Client.PostAsync("/api/hososuckhoe", healthContent);
+                            await ApiClient.Instance.Client.PostAsync(ApiEndpoints.HoSoSucKhoe.Base, healthContent);
                         }
                         catch { }
                     }

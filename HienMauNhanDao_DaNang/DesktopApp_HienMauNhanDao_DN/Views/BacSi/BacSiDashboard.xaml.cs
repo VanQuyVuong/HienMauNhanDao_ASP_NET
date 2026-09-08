@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -37,7 +38,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.BacSi
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/khamlamsang/cho-kham");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.KhamLamSang.GetChoKham);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();

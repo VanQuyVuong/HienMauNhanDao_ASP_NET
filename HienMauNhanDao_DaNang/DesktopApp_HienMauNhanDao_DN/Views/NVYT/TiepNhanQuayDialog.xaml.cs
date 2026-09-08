@@ -76,7 +76,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 // 1. Cập nhật Đơn (Tiếp Nhận)
-                var response = await ApiClient.Instance.Client.PostAsync("/api/dondangky/tiep-nhan", content);
+                var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.DonDangKy.TiepNhan, content);
                 if (response.IsSuccessStatusCode)
                 {
                     // 2. Tạo Hồ sơ sức khỏe sơ lược
@@ -93,7 +93,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                         };
                         var healthJson = JsonConvert.SerializeObject(healthPayload);
                         var healthContent = new StringContent(healthJson, Encoding.UTF8, "application/json");
-                        await ApiClient.Instance.Client.PostAsync("/api/hososuckhoe", healthContent);
+                        await ApiClient.Instance.Client.PostAsync(ApiEndpoints.HoSoSucKhoe.Base, healthContent);
                     }
                     catch { }
 

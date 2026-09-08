@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Net.Http;
 using System.Text;
 using System.Windows;
@@ -58,7 +59,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.NVYT
                 var json = JsonConvert.SerializeObject(payload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await ApiClient.Instance.Client.PutAsync($"/api/hososuckhoe/{_hs.MaHoSo}", content);
+                var response = await ApiClient.Instance.Client.PutAsync(ApiEndpoints.HoSoSucKhoe.ById(_hs.MaHoSo), content);
                 if (response.IsSuccessStatusCode)
                 {
                     MessageBox.Show("Cập nhật khai báo y tế thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);

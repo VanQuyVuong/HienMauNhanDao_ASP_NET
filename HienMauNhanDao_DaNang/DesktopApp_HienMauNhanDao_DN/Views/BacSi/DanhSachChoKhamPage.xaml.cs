@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -43,7 +44,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.BacSi
 
                 try
                 {
-                    var response = await ApiClient.Instance.Client.GetAsync("/api/khamlamsang/cho-kham");
+                    var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.KhamLamSang.GetChoKham);
                     if (response.IsSuccessStatusCode)
                     {
                         var json = await response.Content.ReadAsStringAsync();
@@ -67,7 +68,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.BacSi
                 {
                     try
                     {
-                        var fbResponse = await ApiClient.Instance.Client.GetAsync("/api/DonDangKy/tat-ca");
+                        var fbResponse = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.DonDangKy.GetAll);
                         if (fbResponse.IsSuccessStatusCode)
                         {
                             var fbJson = await fbResponse.Content.ReadAsStringAsync();
