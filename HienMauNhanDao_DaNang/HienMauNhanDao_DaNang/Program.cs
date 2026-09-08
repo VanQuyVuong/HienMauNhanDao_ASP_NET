@@ -27,9 +27,18 @@ namespace HienMauNhanDao_DaNang
             {
                 option.AddPolicy("AllowReactApp", policy =>
                 {
-                    policy.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
+                    // Chỉ cho phép các domain được chỉ định (Bảo mật hơn so với AllowAnyOrigin)
+                    // Nếu sau này deploy lên tên miền thật, hãy thêm vào mảng này
+                    policy.WithOrigins(
+                            "http://localhost:5173", 
+                            "http://localhost:8080", 
+                            "http://localhost:3000",
+                            "http://localhost:8081",
+                            "http://localhost:19006"
+                        )
+                        .SetIsOriginAllowed(origin => origin.Contains("ngrok") || origin.Contains("10.0.2.2") || origin.Contains("192.168.")) // Cho phép ngrok, Android Emulator (10.0.2.2) và điện thoại test chung mạng LAN (192.168.x.x)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
                 });
             });
 
