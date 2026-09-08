@@ -1,4 +1,15 @@
-export const API_BASE_URL = 'http://localhost:5236/api'; // Hoặc IP local khi chạy trên thiết bị di động thực
+import { Platform } from 'react-native';
+
+const getBaseUrl = () => {
+  // Máy ảo Android không hiểu 'localhost' là máy tính Windows của bạn, nó hiểu localhost là chính nó!
+  // Vì vậy phải dùng 10.0.2.2 để gọi ngược về máy chủ ảo của Windows.
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:5236/api';
+  }
+  return 'http://localhost:5236/api';
+};
+
+export const API_BASE_URL = getBaseUrl(); // Hoặc IP local khi chạy trên thiết bị di động thực
 
 // Hàm lấy URL ảnh thực tế từ Backend
 export const getImageUrl = (imageName) => {
