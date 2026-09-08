@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -54,7 +55,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/PhieuNhapXuat");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.PhieuNhapXuat.Base);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -194,7 +195,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 };
                 var content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(reqObj), Encoding.UTF8, "application/json");
 
-                await ApiClient.Instance.Client.PostAsync("/api/PhieuNhapXuat", content);
+                await ApiClient.Instance.Client.PostAsync(ApiEndpoints.PhieuNhapXuat.Base, content);
                 MessageBox.Show($"✅ Lập thành công {(_activeModalType == "NHAP" ? "Phiếu Nhập" : "Phiếu Xuất")} Kho Máu!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 CreateReceiptModal.Visibility = Visibility.Collapsed;
                 await LoadData();

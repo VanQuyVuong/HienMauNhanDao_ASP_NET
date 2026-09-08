@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -56,7 +57,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/tuimau/expiry-stats");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.TuiMau.GetExpiryStats);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -80,7 +81,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 string viewMode = selectedItem?.Tag?.ToString() ?? "all";
                 string search = (txtSearch.Text ?? "").Trim();
 
-                var response = await ApiClient.Instance.Client.GetAsync($"/api/tuimau/expiry-management?viewMode={viewMode}&search={search}");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.TuiMau.GetExpiryManagement(viewMode, search));
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();

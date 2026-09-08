@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -25,7 +26,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.TNV
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/ChienDich");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.ChienDich.GetAll);
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonStr = await response.Content.ReadAsStringAsync();
@@ -76,7 +77,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.TNV
                 };
 
                 var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-                var response = await ApiClient.Instance.Client.PostAsync("/api/DonDangKy", content);
+                var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.DonDangKy.Base, content);
 
                 if (response.IsSuccessStatusCode)
                 {

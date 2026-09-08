@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -59,7 +60,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
             // 1. Fetch Bar Chart 12 Months
             try
             {
-                var barRes = await ApiClient.Instance.Client.GetAsync("/api/tuimau/charts/bar?year=2026");
+                var barRes = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.TuiMau.GetBarChart2026);
                 if (barRes.IsSuccessStatusCode)
                 {
                     var json = await barRes.Content.ReadAsStringAsync();
@@ -140,7 +141,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
             // 2. Fetch Pie Chart Blood Group Allocation
             try
             {
-                var pieRes = await ApiClient.Instance.Client.GetAsync("/api/khomau/charts/pie");
+                var pieRes = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.KhoMau.GetPieChart);
                 if (pieRes.IsSuccessStatusCode && spPieChart != null)
                 {
                     var json = await pieRes.Content.ReadAsStringAsync();
@@ -255,7 +256,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/KhoMauBenhVien/my-hospital-inventory");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.KhoMauBenhVien.GetInventory);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -280,7 +281,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
         {
             try
             {
-                var response = await ApiClient.Instance.Client.GetAsync("/api/tuimau/dashboard/stats");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.TuiMau.GetDashboardStats);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();

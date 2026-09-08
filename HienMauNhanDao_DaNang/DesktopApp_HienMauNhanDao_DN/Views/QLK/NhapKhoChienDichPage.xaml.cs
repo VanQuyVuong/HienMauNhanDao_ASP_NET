@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -38,7 +39,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/ChienDich");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.ChienDich.GetAll);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -93,7 +94,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
 
                 try
                 {
-                    var response = await ApiClient.Instance.Client.GetAsync($"/api/tuimau/blood-units?maChienDich={camp.MaChienDich}&size=100");
+                    var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.TuiMau.GetBloodUnits(camp.MaChienDich, 100));
                     if (response.IsSuccessStatusCode)
                     {
                         var json = await response.Content.ReadAsStringAsync();

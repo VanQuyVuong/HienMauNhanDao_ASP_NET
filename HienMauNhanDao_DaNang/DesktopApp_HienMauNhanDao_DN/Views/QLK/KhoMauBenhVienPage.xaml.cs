@@ -1,4 +1,5 @@
 using System;
+using DesktopApp_HienMauNhanDao_DN.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -43,7 +44,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 btnRefresh.IsEnabled = false;
                 btnRefresh.Content = "Đang tải...";
 
-                var response = await ApiClient.Instance.Client.GetAsync("/api/KhoMauBenhVien/my-hospital");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.KhoMauBenhVien.GetMyHospital);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -63,7 +64,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 // Fetch 8 blood types inventory cards
                 try
                 {
-                    var invRes = await ApiClient.Instance.Client.GetAsync("/api/KhoMauBenhVien/my-hospital-inventory");
+                    var invRes = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.KhoMauBenhVien.GetInventory);
                     if (invRes.IsSuccessStatusCode)
                     {
                         var invJson = await invRes.Content.ReadAsStringAsync();
@@ -117,7 +118,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 btnScan.IsEnabled = false;
                 btnScan.Content = "Đang quét...";
 
-                var response = await ApiClient.Instance.Client.GetAsync($"/api/KhoMauBenhVien/scan-blood-unit/{code}");
+                var response = await ApiClient.Instance.Client.GetAsync(ApiEndpoints.KhoMauBenhVien.Scan(code));
                 var json = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -181,7 +182,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 var jsonReq = JsonConvert.SerializeObject(req);
                 var content = new StringContent(jsonReq, Encoding.UTF8, "application/json");
 
-                var response = await ApiClient.Instance.Client.PostAsync("/api/KhoMauBenhVien/import", content);
+                var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.KhoMauBenhVien.Import, content);
                 var jsonRes = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -248,7 +249,7 @@ namespace DesktopApp_HienMauNhanDao_DN.Views.QLK
                 var jsonReq = JsonConvert.SerializeObject(req);
                 var content = new StringContent(jsonReq, Encoding.UTF8, "application/json");
 
-                var response = await ApiClient.Instance.Client.PostAsync("/api/KhoMauBenhVien/report-issue", content);
+                var response = await ApiClient.Instance.Client.PostAsync(ApiEndpoints.KhoMauBenhVien.ReportIssue, content);
                 if (response.IsSuccessStatusCode)
                 {
                     string msg = action == "HUY" ? "Đã hủy túi máu thành công!" : "Đã chuyển túi máu sang diện Re-Test kiểm tra lại!";
