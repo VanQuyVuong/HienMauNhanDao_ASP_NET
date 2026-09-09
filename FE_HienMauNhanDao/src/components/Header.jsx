@@ -362,9 +362,9 @@ export default function Header() {
                 </div>
               </>
             ) : (
-              <div className="flex gap-3">
-                <Link to="/login" className="px-5 py-2 text-[#e62e43] font-black border-2 border-[#e62e43] rounded-xl hover:bg-rose-50 transition-all shadow-sm">Đăng nhập</Link>
-                <Link to="/register" className="px-5 py-2 bg-[#e62e43] text-white font-black rounded-xl hover:bg-[#c01b30] transition-all shadow-sm">Đăng ký</Link>
+              <div className="flex gap-2">
+                <Link to="/login" className="px-3 py-1.5 sm:px-5 sm:py-2 text-sm sm:text-base text-[#e62e43] font-black border-2 border-[#e62e43] rounded-xl hover:bg-rose-50 transition-all shadow-sm whitespace-nowrap">Đăng nhập</Link>
+                <Link to="/register" className="px-3 py-1.5 sm:px-5 sm:py-2 text-sm sm:text-base bg-[#e62e43] text-white font-black rounded-xl hover:bg-[#c01b30] transition-all shadow-sm whitespace-nowrap">Đăng ký</Link>
               </div>
             )}
             <button
