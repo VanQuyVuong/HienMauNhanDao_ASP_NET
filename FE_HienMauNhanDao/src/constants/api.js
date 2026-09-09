@@ -1,5 +1,6 @@
-export const API_BASE_URL = '/api';
-export const AUTH_URL = '/api/auth';
+// Bắt buộc dùng link Render để tránh lỗi 405 trên Vercel do chưa load biến môi trường
+export const API_BASE_URL = 'https://hienmaunhandao-asp-net.onrender.com/api';
+export const AUTH_URL = `${API_BASE_URL}/auth`;
 
 export const ENDPOINTS = {
   AUTH: {
