@@ -36,7 +36,7 @@ namespace HienMauNhanDao_DaNang
                             "http://localhost:8081",
                             "http://localhost:19006"
                         )
-                        .SetIsOriginAllowed(origin => origin.Contains("ngrok") || origin.Contains("10.0.2.2") || origin.Contains("192.168.")) // Cho phép ngrok, Android Emulator (10.0.2.2) và điện thoại test chung mạng LAN (192.168.x.x)
+                        .SetIsOriginAllowed(origin => origin.Contains("ngrok") || origin.Contains("10.0.2.2") || origin.Contains("192.168.") || origin.Contains("vercel.app")) // Cho phép ngrok, Android, LAN và Vercel
                         .AllowAnyMethod()
                         .AllowAnyHeader();
                 });
